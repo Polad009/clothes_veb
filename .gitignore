@@ -39,3 +39,7 @@ test_*.png
 hoodie_modal_*.png
 spiderman_modal_*.png
 thumb-front-test.png
+
+# AI Model Files (large binaries downloaded via script)
+public/models/*.onnx
+public/models/*.bin

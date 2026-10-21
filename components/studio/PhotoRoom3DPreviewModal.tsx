@@ -107,15 +107,23 @@ export function PhotoRoom3DPreviewModal({
   const isLimitedView = shapeConfig.view3d === "limited" || true;
   const hasSideImages = garmentCategory === "tshirt" || garmentCategory === "oversize";
 
+  type ViewMode = "front" | "back" | "leftSleeve" | "rightSleeve";
+  const availableViews: ViewMode[] = hasSideImages
+    ? ["front", "back", "rightSleeve", "leftSleeve"]
+    : ["front", "back"];
+
   // UI state
+  const [activeView, setActiveView] = useState<ViewMode>("front");
   const [autoRotate, setAutoRotate] = useState(true);
   const [lighting, setLighting] = useState<LightingPreset>("studio");
   const [currentViewTarget, setCurrentViewTarget] = useState<"front" | "back">("front");
-  const [activeSideView2D, setActiveSideView2D] = useState<"left" | "right" | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isExportingHd, setIsExportingHd] = useState(false);
   const [transparentBgExport, setTransparentBgExport] = useState(true);
   const [hasWebGl, setHasWebGl] = useState(true);
+
+  // Swipe gesture tracking
+  const touchStartXRef = useRef<number | null>(null);
 
   // Three.js object references
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -727,7 +735,6 @@ export function PhotoRoom3DPreviewModal({
 
   // Smooth Camera Orbit to Specific Target Angle (~600ms) with Azimuth Constraints
   const rotateCameraToAngle = (targetDeg: number, targetKey: "front" | "back") => {
-    setActiveSideView2D(null);
     const camera = cameraRef.current;
     if (!camera) return;
 
@@ -765,8 +772,78 @@ export function PhotoRoom3DPreviewModal({
     };
   };
 
+  // Unified View Selector across 3D and 2D
+  const handleViewSelect = (view: ViewMode) => {
+    setActiveView(view);
+    if (view === "front") {
+      rotateCameraToAngle(0, "front");
+    } else if (view === "back") {
+      rotateCameraToAngle(180, "back");
+    } else {
+      setAutoRotate(false);
+    }
+  };
+
+  // 1. Initial Opening Sync: Open in the active editor tab's view
+  useEffect(() => {
+    if (isOpen) {
+      if ((currentSide === "leftSleeve" || currentSide === "rightSleeve") && hasSideImages) {
+        handleViewSelect(currentSide);
+      } else if (currentSide === "back") {
+        handleViewSelect("back");
+      } else {
+        handleViewSelect("front");
+      }
+    }
+  }, [isOpen, currentSide, hasSideImages]);
+
+  // 2. Keyboard Navigation: ArrowLeft / ArrowRight to cycle through available views
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        const idx = availableViews.indexOf(activeView);
+        const prevIdx = (idx - 1 + availableViews.length) % availableViews.length;
+        handleViewSelect(availableViews[prevIdx]);
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        const idx = availableViews.indexOf(activeView);
+        const nextIdx = (idx + 1) % availableViews.length;
+        handleViewSelect(availableViews[nextIdx]);
+      } else if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, activeView, availableViews, onClose]);
+
+  // 3. Mobile Touch Swipe Handlers (Swipe left/right)
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartXRef.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartXRef.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartXRef.current;
+    touchStartXRef.current = null;
+    if (Math.abs(deltaX) > 45) {
+      const idx = availableViews.indexOf(activeView);
+      if (deltaX > 45) {
+        // Swipe Right -> Previous view
+        const prevIdx = (idx - 1 + availableViews.length) % availableViews.length;
+        handleViewSelect(availableViews[prevIdx]);
+      } else {
+        // Swipe Left -> Next view
+        const nextIdx = (idx + 1) % availableViews.length;
+        handleViewSelect(availableViews[nextIdx]);
+      }
+    }
+  };
+
   const handleDoubleClick = () => {
-    rotateCameraToAngle(0, "front");
+    handleViewSelect("front");
   };
 
   // Dedicated Offscreen 3x (2800px) Ultra-HD Image Export
@@ -856,13 +933,13 @@ export function PhotoRoom3DPreviewModal({
               <p className="text-xs text-[#c4b5a3] mt-0.5">
                 {garmentName} ·{" "}
                 <span className="text-[#e8c98a] font-medium">
-                  {activeSideView2D === "left"
-                    ? "Sol qol (Yan baxış)"
-                    : activeSideView2D === "right"
-                    ? "Sağ qol (Yan baxış)"
-                    : currentViewTarget === "front"
-                    ? "Ön baxış (±40° bucaq)"
-                    : "Arxa baxış (±40° bucaq)"}
+                  {activeView === "leftSleeve"
+                    ? "Sol qol (2D yan baxış)"
+                    : activeView === "rightSleeve"
+                    ? "Sağ qol (2D yan baxış)"
+                    : activeView === "front"
+                    ? "Ön baxış (3D fəza)"
+                    : "Arxa baxış (3D fəza)"}
                 </span>
               </p>
             </div>
@@ -871,51 +948,31 @@ export function PhotoRoom3DPreviewModal({
             <button
               type="button"
               onClick={onClose}
-              className="w-9 h-9 rounded-full bg-[#2a241e] hover:bg-[#3d3228] text-[#e8c98a] border border-[#4a3d31] flex items-center justify-center transition active:scale-95 shadow-md"
-              title="Bağla"
+              className="w-9 h-9 rounded-full bg-[#2a241e] hover:bg-[#3d3228] text-[#e8c98a] border border-[#4a3d31] flex items-center justify-center transition active:scale-95 shadow-md cursor-pointer"
+              title="Bağla (Esc)"
             >
               <X size={18} />
             </button>
           </div>
 
           {/* ========================================================= */}
-          {/* 3D CANVAS STAGE VIEWPORT                                 */}
+          {/* 3D CANVAS STAGE VIEWPORT & 2D SLEEVE OVERLAY             */}
           {/* ========================================================= */}
-          <div className="relative flex-1 w-full h-full min-h-[300px] flex items-center justify-center overflow-hidden">
-            {/* 2D Side View Overlay Mode (If User Clicks Sol/Sağ) */}
-            {activeSideView2D ? (
-              <div className="relative w-full h-full flex items-center justify-center p-6 animate-in fade-in duration-200">
-                <div className="relative max-w-sm aspect-square w-full flex items-center justify-center">
-                  <img
-                    src={activeSideView2D === "left" ? leftSleeveImgSrc : rightSleeveImgSrc}
-                    alt="Side Mockup"
-                    className="max-h-full max-w-full object-contain drop-shadow-2xl select-none pointer-events-none"
-                  />
-                  {/* Side Print Artwork */}
-                  {((activeSideView2D === "left" ? activeLeftSleeve : activeRightSleeve).uploadedImage ||
-                    (activeSideView2D === "left" ? activeLeftSleeve : activeRightSleeve).originalImage) && (
-                    <img
-                      src={
-                        (activeSideView2D === "left" ? activeLeftSleeve : activeRightSleeve).originalImage ||
-                        (activeSideView2D === "left" ? activeLeftSleeve : activeRightSleeve).uploadedImage ||
-                        ""
-                      }
-                      alt="Side Print"
-                      className="absolute max-w-[28%] max-h-[28%] object-contain drop-shadow-md select-none pointer-events-none"
-                      style={{
-                        transform: `translate(${activeSideView2D === "left" ? "-15px" : "15px"}, -20px) scale(${
-                          (activeSideView2D === "left" ? activeLeftSleeve : activeRightSleeve).scale || 0.8
-                        })`,
-                      }}
-                    />
-                  )}
-                </div>
-              </div>
-            ) : hasWebGl ? (
+          <div
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            className="relative flex-1 w-full h-full min-h-[300px] flex items-center justify-center overflow-hidden select-none"
+          >
+            {/* 1. Permanent 3D WebGL Canvas Layer (Always mounted so 3D state/lighting is preserved) */}
+            {hasWebGl ? (
               <div
                 ref={mountRef}
                 onDoubleClick={handleDoubleClick}
-                className="w-full h-full cursor-grab active:cursor-grabbing select-none"
+                className={`w-full h-full cursor-grab active:cursor-grabbing transition-opacity duration-250 ${
+                  activeView === "leftSleeve" || activeView === "rightSleeve"
+                    ? "opacity-0 pointer-events-none"
+                    : "opacity-100 pointer-events-auto"
+                }`}
                 title="Fırlatmaq üçün siçanla dartın (±40° məhdud bucaq), yaxınlaşdırmaq üçün təkəri fırladın, sıfırlamaq üçün ikiqat klikləyin"
               />
             ) : (
@@ -930,6 +987,41 @@ export function PhotoRoom3DPreviewModal({
                 </span>
               </div>
             )}
+
+            {/* 2. Seamless 2D Sleeve Overlay Layer (Smooth 250ms fade/scale transition) */}
+            <div
+              className={`absolute inset-0 z-20 flex items-center justify-center p-6 transition-all duration-250 ease-out ${
+                activeView === "leftSleeve" || activeView === "rightSleeve"
+                  ? "opacity-100 scale-100 pointer-events-auto"
+                  : "opacity-0 scale-95 pointer-events-none"
+              }`}
+            >
+              <div className="relative max-w-sm aspect-square w-full flex items-center justify-center">
+                <img
+                  src={activeView === "leftSleeve" ? leftSleeveImgSrc : rightSleeveImgSrc}
+                  alt="Side Mockup"
+                  className="max-h-full max-w-full object-contain drop-shadow-2xl select-none pointer-events-none"
+                />
+                {/* Side Print Artwork */}
+                {((activeView === "leftSleeve" ? activeLeftSleeve : activeRightSleeve).uploadedImage ||
+                  (activeView === "leftSleeve" ? activeLeftSleeve : activeRightSleeve).originalImage) && (
+                  <img
+                    src={
+                      (activeView === "leftSleeve" ? activeLeftSleeve : activeRightSleeve).originalImage ||
+                      (activeView === "leftSleeve" ? activeLeftSleeve : activeRightSleeve).uploadedImage ||
+                      ""
+                    }
+                    alt="Side Print"
+                    className="absolute max-w-[28%] max-h-[28%] object-contain drop-shadow-md select-none pointer-events-none"
+                    style={{
+                      transform: `translate(${activeView === "leftSleeve" ? "-15px" : "15px"}, -20px) scale(${
+                        (activeView === "leftSleeve" ? activeLeftSleeve : activeRightSleeve).scale || 0.8
+                      })`,
+                    }}
+                  />
+                )}
+              </div>
+            </div>
 
             {/* Loading Indicator Spinner */}
             {isLoading && (
@@ -968,25 +1060,25 @@ export function PhotoRoom3DPreviewModal({
             <div className="flex items-center bg-[#251f1a] p-1 rounded-full border border-[#42362b]">
               <button
                 type="button"
-                onClick={() => rotateCameraToAngle(0, "front")}
-                className={`h-7 px-3 rounded-full font-semibold transition active:scale-95 text-[11px] ${
-                  !activeSideView2D && currentViewTarget === "front"
+                onClick={() => handleViewSelect("front")}
+                className={`h-7 px-3 rounded-full font-semibold transition active:scale-95 text-[11px] cursor-pointer ${
+                  activeView === "front"
                     ? "bg-[#e8c98a] text-[#181512] font-bold shadow-xs"
                     : "text-[#c4b5a3] hover:text-white"
                 }`}
               >
-                Ön
+                Ön (3D)
               </button>
               <button
                 type="button"
-                onClick={() => rotateCameraToAngle(180, "back")}
-                className={`h-7 px-3 rounded-full font-semibold transition active:scale-95 text-[11px] ${
-                  !activeSideView2D && currentViewTarget === "back"
+                onClick={() => handleViewSelect("back")}
+                className={`h-7 px-3 rounded-full font-semibold transition active:scale-95 text-[11px] cursor-pointer ${
+                  activeView === "back"
                     ? "bg-[#e8c98a] text-[#181512] font-bold shadow-xs"
                     : "text-[#c4b5a3] hover:text-white"
                 }`}
               >
-                Arxa
+                Arxa (3D)
               </button>
 
               {/* Show Sağ and Sol buttons ONLY if product has side images (T-shirt & Oversize) */}
@@ -994,33 +1086,27 @@ export function PhotoRoom3DPreviewModal({
                 <>
                   <button
                     type="button"
-                    onClick={() => {
-                      setAutoRotate(false);
-                      setActiveSideView2D("right");
-                    }}
-                    className={`h-7 px-3 rounded-full font-semibold transition active:scale-95 text-[11px] ${
-                      activeSideView2D === "right"
+                    onClick={() => handleViewSelect("rightSleeve")}
+                    className={`h-7 px-3 rounded-full font-semibold transition active:scale-95 text-[11px] cursor-pointer ${
+                      activeView === "rightSleeve"
                         ? "bg-[#e8c98a] text-[#181512] font-bold shadow-xs"
                         : "text-[#c4b5a3] hover:text-white"
                     }`}
                     title="Sağ qolun 2D yan görünüşü"
                   >
-                    Sağ qol
+                    Sağ qol (2D)
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      setAutoRotate(false);
-                      setActiveSideView2D("left");
-                    }}
-                    className={`h-7 px-3 rounded-full font-semibold transition active:scale-95 text-[11px] ${
-                      activeSideView2D === "left"
+                    onClick={() => handleViewSelect("leftSleeve")}
+                    className={`h-7 px-3 rounded-full font-semibold transition active:scale-95 text-[11px] cursor-pointer ${
+                      activeView === "leftSleeve"
                         ? "bg-[#e8c98a] text-[#181512] font-bold shadow-xs"
                         : "text-[#c4b5a3] hover:text-white"
                     }`}
                     title="Sol qolun 2D yan görünüşü"
                   >
-                    Sol qol
+                    Sol qol (2D)
                   </button>
                 </>
               )}
@@ -1030,7 +1116,9 @@ export function PhotoRoom3DPreviewModal({
             <button
               type="button"
               onClick={() => {
-                setActiveSideView2D(null);
+                if (activeView === "leftSleeve" || activeView === "rightSleeve") {
+                  handleViewSelect("front");
+                }
                 setAutoRotate((prev) => !prev);
               }}
               className={`h-9 px-3 rounded-full border transition active:scale-95 flex items-center gap-1.5 font-semibold text-[11px] ${

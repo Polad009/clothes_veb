@@ -213,8 +213,12 @@ export function Footer() {
 
         {/* Bottom row: Payment methods & Copyright */}
         <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/50">
-          <div>
-            © {new Date().getFullYear()} HORVVALLE ATELIER. Bütün hüquqlar qorunur.
+          <div className="flex items-center flex-wrap gap-x-3 gap-y-1">
+            <span>© {new Date().getFullYear()} HORVVALLE ATELIER. Bütün hüquqlar qorunur.</span>
+            <span className="text-white/20">·</span>
+            <Link href="/third-party-notices" className="hover:text-white transition underline underline-offset-2">
+              Üçüncü tərəf bildirişləri
+            </Link>
           </div>
 
           {/* Official Payment Icons */}

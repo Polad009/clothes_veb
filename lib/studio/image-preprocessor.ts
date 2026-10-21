@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * Client-side high-performance image preprocessor
- * Zero external APIs, 100% in-browser, fully open-source (MIT/Apache compatible).
+ * Client-side high-performance image preprocessor & IS-Net AI segmentation
+ * Zero external APIs, 100% in-browser, fully open-source (MIT/Apache-2.0 compatible).
  */
 
 export interface PreprocessResult {
@@ -71,7 +71,7 @@ export function autoTrimCanvas(canvas: HTMLCanvasElement): HTMLCanvasElement {
 
   if (!hasContent || minX >= maxX || minY >= maxY) return canvas;
 
-  // Add 4px padding
+  // Add 4px safe margin
   minX = Math.max(0, minX - 4);
   minY = Math.max(0, minY - 4);
   maxX = Math.min(w - 1, maxX + 4);
@@ -91,121 +91,157 @@ export function autoTrimCanvas(canvas: HTMLCanvasElement): HTMLCanvasElement {
 }
 
 /**
- * 2. Flood-Fill Solid Background Removal with tolerance (0-60) and 1px edge feathering
+ * 2. Edge Bleed / Color Dilation & Alpha Mask Composite
+ * Prevents white/gray halo around isolated objects by expanding foreground RGB 2-3px
  */
-export function removeSolidBackground(
-  canvas: HTMLCanvasElement,
-  tolerance = 25
+export function applyMaskWithAntiHalo(
+  sourceCanvas: HTMLCanvasElement,
+  maskBytes: Uint8ClampedArray,
+  autoTrim = true
 ): HTMLCanvasElement {
-  const w = canvas.width;
-  const h = canvas.height;
+  const w = sourceCanvas.width;
+  const h = sourceCanvas.height;
+
   const outCanvas = document.createElement("canvas");
   outCanvas.width = w;
   outCanvas.height = h;
 
   const ctx = outCanvas.getContext("2d", { willReadFrequently: true });
-  if (!ctx) return canvas;
+  if (!ctx) return sourceCanvas;
 
-  ctx.drawImage(canvas, 0, 0);
+  ctx.drawImage(sourceCanvas, 0, 0);
   const imgData = ctx.getImageData(0, 0, w, h);
   const data = imgData.data;
 
-  // Sample 4 corners to find background reference color
-  const sampleCorner = (x: number, y: number) => {
-    const idx = (y * w + x) * 4;
-    return [data[idx], data[idx + 1], data[idx + 2]];
-  };
-
-  const corners = [
-    sampleCorner(0, 0),
-    sampleCorner(w - 1, 0),
-    sampleCorner(0, h - 1),
-    sampleCorner(w - 1, h - 1),
-  ];
-
-  const bgR = (corners[0][0] + corners[1][0] + corners[2][0] + corners[3][0]) / 4;
-  const bgG = (corners[0][1] + corners[1][1] + corners[2][1] + corners[3][1]) / 4;
-  const bgB = (corners[0][2] + corners[1][2] + corners[2][2] + corners[3][2]) / 4;
-
-  const visited = new Uint8Array(w * h);
-  const queue: number[] = [];
-
-  // Seed boundary border pixels
-  for (let x = 0; x < w; x++) {
-    queue.push(0 * w + x);
-    queue.push((h - 1) * w + x);
-    visited[0 * w + x] = 1;
-    visited[(h - 1) * w + x] = 1;
-  }
-  for (let y = 0; y < h; y++) {
-    queue.push(y * w + 0);
-    queue.push(y * w + (w - 1));
-    visited[y * w + 0] = 1;
-    visited[y * w + (w - 1)] = 1;
-  }
-
-  const tolSquared = tolerance * tolerance * 3;
-
-  let head = 0;
-  while (head < queue.length) {
-    const curr = queue[head++];
-    const cx = curr % w;
-    const cy = Math.floor(curr / w);
-    const pIdx = curr * 4;
-
-    const r = data[pIdx];
-    const g = data[pIdx + 1];
-    const b = data[pIdx + 2];
-
-    const dr = r - bgR;
-    const dg = g - bgG;
-    const db = b - bgB;
-    const distSq = dr * dr + dg * dg + db * db;
-
-    if (distSq <= tolSquared) {
-      data[pIdx + 3] = 0; // Make transparent
-
-      // Check 4 neighbors
-      const neighbors = [
-        cx > 0 ? cy * w + (cx - 1) : -1,
-        cx < w - 1 ? cy * w + (cx + 1) : -1,
-        cy > 0 ? (cy - 1) * w + cx : -1,
-        cy < h - 1 ? (cy + 1) * w + cx : -1,
-      ];
-
-      for (const n of neighbors) {
-        if (n !== -1 && !visited[n]) {
-          visited[n] = 1;
-          queue.push(n);
+  // Step 1: Color Bleed / Dilation into semi-transparent boundary
+  // For pixels with 10 <= alpha <= 200, sample nearest high-confidence opaque pixel
+  for (let pass = 0; pass < 2; pass++) {
+    for (let y = 1; y < h - 1; y++) {
+      for (let x = 1; x < w - 1; x++) {
+        const i = y * w + x;
+        const alpha = maskBytes[i];
+        if (alpha > 0 && alpha < 210) {
+          // Check 4 cardinal neighbors for solid foreground color
+          const neighbors = [i - 1, i + 1, i - w, i + w];
+          for (const n of neighbors) {
+            if (maskBytes[n] > 230) {
+              const nIdx = n * 4;
+              const curIdx = i * 4;
+              data[curIdx] = data[nIdx];
+              data[curIdx + 1] = data[nIdx + 1];
+              data[curIdx + 2] = data[nIdx + 2];
+              break;
+            }
+          }
         }
       }
     }
   }
 
-  // 1px Feathering / Edge softening
-  for (let y = 1; y < h - 1; y++) {
-    for (let x = 1; x < w - 1; x++) {
-      const idx = (y * w + x) * 4;
-      if (data[idx + 3] > 0) {
-        const hasTransparentNeighbor =
-          data[((y - 1) * w + x) * 4 + 3] === 0 ||
-          data[((y + 1) * w + x) * 4 + 3] === 0 ||
-          data[(y * w + (x - 1)) * 4 + 3] === 0 ||
-          data[(y * w + (x + 1)) * 4 + 3] === 0;
-
-        if (hasTransparentNeighbor) {
-          data[idx + 3] = Math.round(data[idx + 3] * 0.75); // Soften boundary
-        }
-      }
-    }
+  // Step 2: Apply final mask to alpha channel
+  for (let i = 0; i < maskBytes.length; i++) {
+    data[i * 4 + 3] = maskBytes[i];
   }
 
   ctx.putImageData(imgData, 0, 0);
-  return outCanvas;
+
+  return autoTrim ? autoTrimCanvas(outCanvas) : outCanvas;
 }
 
 /**
- * 3. Auto-fit scale to occupy ~75% of printable chest area
+ * 3. IS-Net Background Removal Web Worker Orchestrator
+ * Fully client-side, zero server API calls, lazy-loads model, keeps UI 60fps responsive
+ */
+let workerInstance: Worker | null = null;
+
+function getOrCreateWorker(): Worker {
+  if (!workerInstance) {
+    workerInstance = new Worker("/workers/rmbg-worker.js");
+  }
+  return workerInstance;
+}
+
+export function removeBackgroundWithISNet(
+  imageSrc: string,
+  onProgress?: (percent: number, statusText: string) => void
+): Promise<{
+  processedDataUrl: string;
+  maskBytes: Uint8ClampedArray;
+  width: number;
+  height: number;
+  originalCanvas: HTMLCanvasElement;
+}> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const w = img.naturalWidth || img.width;
+      const h = img.naturalHeight || img.height;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      if (!ctx) {
+        return reject(new Error("Canvas context yaradıla bilmədi"));
+      }
+      ctx.drawImage(img, 0, 0, w, h);
+      const imgData = ctx.getImageData(0, 0, w, h);
+
+      const worker = getOrCreateWorker();
+      const requestId = `rmbg_${Date.now()}`;
+
+      const handleMessage = (e: MessageEvent) => {
+        const data = e.data;
+        if (!data) return;
+
+        if (data.type === "progress") {
+          onProgress?.(data.percent || 0, data.message || "Model yüklənir…");
+        } else if (data.type === "status") {
+          onProgress?.(50, data.message || "Emal edilir…");
+        } else if (data.type === "complete" && data.id === requestId) {
+          worker.removeEventListener("message", handleMessage);
+          const maskBytes = new Uint8ClampedArray(data.mask);
+
+          onProgress?.(100, "Fon təmizləndi!");
+          const finalCanvas = applyMaskWithAntiHalo(canvas, maskBytes, true);
+
+          resolve({
+            processedDataUrl: finalCanvas.toDataURL("image/png"),
+            maskBytes,
+            width: w,
+            height: h,
+            originalCanvas: canvas,
+          });
+        } else if (data.type === "error" && data.id === requestId) {
+          worker.removeEventListener("message", handleMessage);
+          reject(new Error(data.error || "IS-Net emalında xəta baş verdi"));
+        }
+      };
+
+      worker.addEventListener("message", handleMessage);
+
+      // Send RGBA buffer to worker
+      onProgress?.(5, "Model hazırlanır…");
+      worker.postMessage(
+        {
+          type: "segment",
+          id: requestId,
+          rgbaBuffer: imgData.data.buffer,
+          width: w,
+          height: h,
+        },
+        [imgData.data.buffer]
+      );
+    };
+
+    img.onerror = (e) => reject(new Error("Şəkil faylı oxuna bilmədi"));
+    img.src = imageSrc;
+  });
+}
+
+/**
+ * 4. Auto-fit scale to occupy ~75% of printable chest area
  */
 export function calculateAutoFitScale(
   artWidth: number,

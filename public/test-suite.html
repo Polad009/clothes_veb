@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <title>IS-Net AI Fon Silmə Test Paneli</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #12100e; color: #f4ede4; padding: 24px; margin: 0; }
+    h1 { color: #d4af37; margin-bottom: 8px; font-size: 24px; }
+    p.sub { color: #a89a8c; font-size: 14px; margin-top: 0; margin-bottom: 24px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px; }
+    .card { background: #1c1815; border: 1px solid #362e27; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+    .card h3 { margin: 0; color: #e8c98a; font-size: 16px; }
+    .status { font-size: 12px; font-weight: bold; padding: 4px 10px; border-radius: 8px; width: fit-content; }
+    .status.pending { background: #3a2e1d; color: #f59e0b; }
+    .status.running { background: #1e3a5f; color: #60a5fa; }
+    .status.done { background: #143d2b; color: #34d399; }
+    .views { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .view-box { background: #0c0a09; border: 1px solid #29231d; border-radius: 12px; padding: 8px; text-align: center; }
+    .view-box h4 { margin: 0 0 6px 0; font-size: 11px; text-transform: uppercase; color: #887a6b; letter-spacing: 0.5px; }
+    .view-box img, .view-box canvas { width: 100%; height: 160px; object-fit: contain; }
+    .checkered { background: linear-gradient(45deg, #1f1b17 25%, transparent 25%), linear-gradient(-45deg, #1f1b17 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #1f1b17 75%), linear-gradient(-45deg, transparent 75%, #1f1b17 75%); background-size: 16px 16px; background-color: #12100e; }
+    .metrics { font-size: 12px; color: #c4b5a3; background: #25201b; padding: 8px 12px; border-radius: 8px; font-family: monospace; }
+    button { background: #d4af37; color: #12100e; font-weight: bold; border: none; padding: 8px 16px; border-radius: 10px; cursor: pointer; transition: 0.2s; }
+    button:hover { background: #e8c98a; }
+  </style>
+</head>
+<body>
+  <h1>IS-Net AI Fon Silmə Test Paneli (100% Cihaz Daxilində)</h1>
+  <p class="sub">Apache-2.0 IS-Net Q8 ONNX modeli + onnxruntime-web (WebGPU / WASM)</p>
+
+  <div style="margin-bottom: 20px;">
+    <button id="runAllBtn" onclick="runAllTests()">Bütün Testləri Başlat</button>
+    <span id="globalStatus" style="margin-left: 14px; font-size: 13px; color: #e8c98a;"></span>
+  </div>
+
+  <div class="grid">
+    <!-- Test A -->
+    <div class="card" id="cardA">
+      <h3>(a) Qarajdakı maşın şəkli (Mürəkkəb fon)</h3>
+      <span class="status pending" id="statusA">Gözləyir</span>
+      <div class="views">
+        <div class="view-box">
+          <h4>Orijinal</h4>
+          <img src="/images/presets/bmw-m4-original.jpg" id="origA" />
+        </div>
+        <div class="view-box checkered">
+          <h4>Fonsuz (AI)</h4>
+          <canvas id="outA"></canvas>
+        </div>
+      </div>
+      <div class="metrics" id="metricsA">Vaxt: - | Ölçü: -</div>
+    </div>
+
+    <!-- Test B -->
+    <div class="card" id="cardB">
+      <h3>(b) Ağ fonlu loqo (Yüksək kontrast)</h3>
+      <span class="status pending" id="statusB">Gözləyir</span>
+      <div class="views">
+        <div class="view-box">
+          <h4>Orijinal</h4>
+          <img src="/brand/logo-full-light.png" id="origB" />
+        </div>
+        <div class="view-box checkered">
+          <h4>Fonsuz (AI)</h4>
+          <canvas id="outB"></canvas>
+        </div>
+      </div>
+      <div class="metrics" id="metricsB">Vaxt: - | Ölçü: -</div>
+    </div>
+
+    <!-- Test C -->
+    <div class="card" id="cardC">
+      <h3>(c) Sadə fonda şəxs (Portret / Model)</h3>
+      <span class="status pending" id="statusC">Gözləyir</span>
+      <div class="views">
+        <div class="view-box">
+          <h4>Orijinal</h4>
+          <img src="/images/models/female_front.jpg" id="origC" />
+        </div>
+        <div class="view-box checkered">
+          <h4>Fonsuz (AI)</h4>
+          <canvas id="outC"></canvas>
+        </div>
+      </div>
+      <div class="metrics" id="metricsC">Vaxt: - | Ölçü: -</div>
+    </div>
+  </div>
+
+  <script>
+    let worker = null;
+
+    function getWorker() {
+      if (!worker) {
+        worker = new Worker('/workers/rmbg-worker.js');
+      }
+      return worker;
+    }
+
+    function processImage(imgElement, outCanvas, statusEl, metricsEl) {
+      return new Promise((resolve, reject) => {
+        statusEl.className = 'status running';
+        statusEl.innerText = 'Emal olunur…';
+
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          const w = img.naturalWidth || img.width;
+          const h = img.naturalHeight || img.height;
+
+          const offCanvas = document.createElement('canvas');
+          offCanvas.width = w;
+          offCanvas.height = h;
+          const ctx = offCanvas.getContext('2d', { willReadFrequently: true });
+          ctx.drawImage(img, 0, 0, w, h);
+          const imgData = ctx.getImageData(0, 0, w, h);
+
+          const wkr = getWorker();
+          const reqId = 'test_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+          const startTime = performance.now();
+
+          const listener = (e) => {
+            if (e.data.id !== reqId) return;
+            if (e.data.type === 'progress') {
+              statusEl.innerText = `Model: ${e.data.percent}%`;
+            } else if (e.data.type === 'status') {
+              statusEl.innerText = e.data.message;
+            } else if (e.data.type === 'complete') {
+              wkr.removeEventListener('message', listener);
+              const elapsed = Math.round(performance.now() - startTime);
+
+              const mask = new Uint8ClampedArray(e.data.mask);
+              outCanvas.width = w;
+              outCanvas.height = h;
+              const outCtx = outCanvas.getContext('2d');
+              
+              // Apply mask
+              const outImgData = ctx.getImageData(0, 0, w, h);
+              for (let i = 0; i < mask.length; i++) {
+                outImgData.data[i * 4 + 3] = mask[i];
+              }
+              outCtx.putImageData(outImgData, 0, 0);
+
+              statusEl.className = 'status done';
+              statusEl.innerText = 'Tamamlandı ✓';
+              metricsEl.innerText = `Vaxt: ${elapsed}ms | Ölçü: ${w}x${h}px`;
+              resolve({ elapsed, width: w, height: h });
+            } else if (e.data.type === 'error') {
+              wkr.removeEventListener('message', listener);
+              statusEl.innerText = 'Xəta: ' + e.data.error;
+              reject(new Error(e.data.error));
+            }
+          };
+
+          wkr.addEventListener('message', listener);
+          wkr.postMessage({
+            type: 'segment',
+            id: reqId,
+            rgbaBuffer: imgData.data.buffer,
+            width: w,
+            height: h
+          }, [imgData.data.buffer]);
+        };
+        img.onerror = () => reject(new Error('Şəkil yüklənmədi'));
+        img.src = imgElement.src;
+      });
+    }
+
+    async function runAllTests() {
+      const btn = document.getElementById('runAllBtn');
+      btn.disabled = true;
+      const gStatus = document.getElementById('globalStatus');
+      gStatus.innerText = 'Testlər icra olunur...';
+
+      try {
+        gStatus.innerText = 'Test A: Qarajdakı maşın...';
+        await processImage(
+          document.getElementById('origA'),
+          document.getElementById('outA'),
+          document.getElementById('statusA'),
+          document.getElementById('metricsA')
+        );
+
+        gStatus.innerText = 'Test B: Loqo...';
+        await processImage(
+          document.getElementById('origB'),
+          document.getElementById('outB'),
+          document.getElementById('statusB'),
+          document.getElementById('metricsB')
+        );
+
+        gStatus.innerText = 'Test C: Model şəxs...';
+        await processImage(
+          document.getElementById('origC'),
+          document.getElementById('outC'),
+          document.getElementById('statusC'),
+          document.getElementById('metricsC')
+        );
+
+        gStatus.innerText = 'Bütün 3 test uğurla tamamlandı! ✓';
+      } catch (err) {
+        gStatus.innerText = 'Xəta: ' + err.message;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

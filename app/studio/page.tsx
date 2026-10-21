@@ -7,10 +7,10 @@ import { playAddToCartSound } from "@/lib/soundEffects";
 import { GarmentCanvas, StudioSurface, getStudioGarmentCategory, getStudioGarmentImage } from "@/components/studio/GarmentCanvas";
 import { LiveModelPreviewModal } from "@/components/studio/LiveModelPreviewModal";
 import { PhotoRoom3DPreviewModal } from "@/components/studio/PhotoRoom3DPreviewModal";
-import { removeImageBackground } from "@/lib/imageProcessing";
 import {
   autoTrimCanvas,
-  removeSolidBackground,
+  removeBackgroundWithISNet,
+  applyMaskWithAntiHalo,
   calculateAutoFitScale,
 } from "@/lib/studio/image-preprocessor";
 import { CustomDropdown } from "@/components/ui/CustomDropdown";
@@ -29,6 +29,10 @@ import {
   Wand2,
   ChevronUp,
   ChevronDown,
+  Paintbrush,
+  Eraser,
+  Undo2,
+  Redo2,
 } from "lucide-react";
 
 export interface GarmentOption {
@@ -311,14 +315,26 @@ export default function StudioPage() {
   const [previewRawImage, setPreviewRawImage] = useState<string | null>(null);
   const [trimmedBaseImage, setTrimmedBaseImage] = useState<string | null>(null);
   const [previewCleanImage, setPreviewCleanImage] = useState<string | null>(null);
-  const [removeBgChecked, setRemoveBgChecked] = useState(false);
-  const [bgTolerance, setBgTolerance] = useState(25);
+  const [aiCutoutImage, setAiCutoutImage] = useState<string | null>(null);
+  const [compareTab, setCompareTab] = useState<"cutout" | "original">("cutout");
   const [imageDims, setImageDims] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
   const [isLowDpi, setIsLowDpi] = useState(false);
   const [autoFittedScale, setAutoFittedScale] = useState(1.0);
   const [isCleaningBg, setIsCleaningBg] = useState(false);
   const [bgCleaned, setBgCleaned] = useState(false);
-  const [cleaningStatusText, setCleaningStatusText] = useState("Süni intellekt fonu təmizləyir...");
+  const [cleaningStatusText, setCleaningStatusText] = useState("Süni intellekt hazırlanır…");
+  const [downloadProgress, setDownloadProgress] = useState(0);
+
+  // Manual Brush Refinement State
+  const [isBrushMode, setIsBrushMode] = useState(false);
+  const [brushTool, setBrushTool] = useState<"restore" | "erase">("restore");
+  const [brushSize, setBrushSize] = useState(25);
+  const maskBytesRef = useRef<Uint8ClampedArray | null>(null);
+  const originalCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const brushHistoryRef = useRef<Uint8ClampedArray[]>([]);
+  const brushFutureRef = useRef<Uint8ClampedArray[]>([]);
+  const isPaintingRef = useRef(false);
+  const brushCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
   // Lock body scroll completely while upload modal is open so it stays locked dead-center
   useEffect(() => {
@@ -518,24 +534,6 @@ export default function StudioPage() {
     });
   };
 
-  // Process image with solid background removal on demand
-  const runSolidBgRemoval = (sourceDataUrl: string, tolerance: number): Promise<string> => {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => {
-        const c = document.createElement("canvas");
-        c.width = img.width;
-        c.height = img.height;
-        const ctx = c.getContext("2d");
-        if (ctx) ctx.drawImage(img, 0, 0);
-        const processed = removeSolidBackground(c, tolerance);
-        resolve(processed.toDataURL("image/png"));
-      };
-      img.onerror = () => resolve(sourceDataUrl);
-      img.src = sourceDataUrl;
-    });
-  };
-
   // File Upload Initiator -> Auto-EXIF, Auto-Trim, DPI Check, Auto-Fit Scale ~75%
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -568,9 +566,14 @@ export default function StudioPage() {
             setPreviewRawImage(rawOriginal);
             setTrimmedBaseImage(trimmedDataUrl);
             setPreviewCleanImage(trimmedDataUrl);
-            setRemoveBgChecked(false);
-            setBgTolerance(25);
+            setAiCutoutImage(null);
+            setCompareTab("cutout");
             setBgCleaned(false);
+            setIsBrushMode(false);
+            maskBytesRef.current = null;
+            originalCanvasRef.current = canvas;
+            brushHistoryRef.current = [];
+            brushFutureRef.current = [];
             setImageDims({ width: img.width, height: img.height });
             setIsLowDpi(isLow);
             setAutoFittedScale(autoScale);
@@ -585,39 +588,188 @@ export default function StudioPage() {
     }
   };
 
-  // Toggle "Fonu sil" (Checkbox)
-  const handleToggleRemoveBg = async (checked: boolean) => {
-    setRemoveBgChecked(checked);
-    if (!trimmedBaseImage) return;
-    if (checked) {
-      setIsCleaningBg(true);
-      const cleaned = await runSolidBgRemoval(trimmedBaseImage, bgTolerance);
-      setPreviewCleanImage(cleaned);
+  // Run IS-Net AI Background Removal (100% in-browser, WebWorker + WebGPU/WASM)
+  const handleRunISNetBgRemoval = async () => {
+    if (!previewRawImage) return;
+    setIsCleaningBg(true);
+    setCleaningStatusText("Model hazırlanır…");
+    setDownloadProgress(0);
+
+    try {
+      const result = await removeBackgroundWithISNet(previewRawImage, (pct, status) => {
+        setDownloadProgress(pct);
+        setCleaningStatusText(status);
+      });
+
+      maskBytesRef.current = new Uint8ClampedArray(result.maskBytes);
+      originalCanvasRef.current = result.originalCanvas;
+      brushHistoryRef.current = [new Uint8ClampedArray(result.maskBytes)];
+      brushFutureRef.current = [];
+
+      setAiCutoutImage(result.processedDataUrl);
+      setPreviewCleanImage(result.processedDataUrl);
       setBgCleaned(true);
+      setCompareTab("cutout");
+    } catch (err: any) {
+      console.error("IS-Net bg removal error:", err);
+      alert("Fon silinərkən xəta baş verdi: " + (err.message || "Model yüklənə bilmədi"));
+    } finally {
       setIsCleaningBg(false);
-    } else {
-      setPreviewCleanImage(trimmedBaseImage);
-      setBgCleaned(false);
     }
   };
 
-  // Adjust Tolerance Slider (0-60)
-  const handleToleranceChange = async (newTol: number) => {
-    setBgTolerance(newTol);
-    if (!removeBgChecked || !trimmedBaseImage) return;
-    const cleaned = await runSolidBgRemoval(trimmedBaseImage, newTol);
-    setPreviewCleanImage(cleaned);
-    setBgCleaned(true);
-  };
-
-  // "Geri qaytar" button
+  // Reset to original image
   const handleResetBg = () => {
-    setRemoveBgChecked(false);
-    setBgTolerance(25);
+    setPreviewCleanImage(trimmedBaseImage || previewRawImage);
+    setAiCutoutImage(null);
     setBgCleaned(false);
-    if (trimmedBaseImage) {
-      setPreviewCleanImage(trimmedBaseImage);
+    setCompareTab("original");
+    setIsBrushMode(false);
+    maskBytesRef.current = null;
+    brushHistoryRef.current = [];
+    brushFutureRef.current = [];
+  };
+
+  // Manual Brush Refinement Helpers
+  const renderBrushCanvas = useCallback(() => {
+    const canvas = brushCanvasRef.current;
+    const origCanvas = originalCanvasRef.current;
+    const mask = maskBytesRef.current;
+    if (!canvas || !origCanvas || !mask) return;
+
+    const w = origCanvas.width;
+    const h = origCanvas.height;
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width = w;
+      canvas.height = h;
     }
+
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    if (!ctx) return;
+
+    const origCtx = origCanvas.getContext("2d");
+    if (!origCtx) return;
+    const imgData = origCtx.getImageData(0, 0, w, h);
+    const data = imgData.data;
+
+    for (let i = 0; i < mask.length; i++) {
+      data[i * 4 + 3] = mask[i];
+    }
+
+    ctx.putImageData(imgData, 0, 0);
+  }, []);
+
+  const applyBrushStrokeAt = (clientX: number, clientY: number) => {
+    const canvas = brushCanvasRef.current;
+    const mask = maskBytesRef.current;
+    if (!canvas || !mask) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    const imgX = (clientX - rect.left) * scaleX;
+    const imgY = (clientY - rect.top) * scaleY;
+    const radius = Math.max(2, brushSize * (canvas.width / 400));
+    const r2 = radius * radius;
+
+    const w = canvas.width;
+    const h = canvas.height;
+    const minX = Math.max(0, Math.floor(imgX - radius));
+    const maxX = Math.min(w - 1, Math.ceil(imgX + radius));
+    const minY = Math.max(0, Math.floor(imgY - radius));
+    const maxY = Math.min(h - 1, Math.ceil(imgY + radius));
+
+    const targetVal = brushTool === "restore" ? 255 : 0;
+
+    for (let py = minY; py <= maxY; py++) {
+      for (let px = minX; px <= maxX; px++) {
+        const d2 = (px - imgX) * (px - imgX) + (py - imgY) * (py - imgY);
+        if (d2 <= r2) {
+          mask[py * w + px] = targetVal;
+        }
+      }
+    }
+
+    renderBrushCanvas();
+  };
+
+  const handleBrushMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    isPaintingRef.current = true;
+    if (maskBytesRef.current) {
+      brushHistoryRef.current.push(new Uint8ClampedArray(maskBytesRef.current));
+      if (brushHistoryRef.current.length > 20) brushHistoryRef.current.shift();
+      brushFutureRef.current = [];
+    }
+    applyBrushStrokeAt(e.clientX, e.clientY);
+  };
+
+  const handleBrushMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isPaintingRef.current) return;
+    applyBrushStrokeAt(e.clientX, e.clientY);
+  };
+
+  const handleBrushMouseUp = () => {
+    isPaintingRef.current = false;
+  };
+
+  const handleBrushTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (e.touches.length !== 1) return;
+    isPaintingRef.current = true;
+    if (maskBytesRef.current) {
+      brushHistoryRef.current.push(new Uint8ClampedArray(maskBytesRef.current));
+      if (brushHistoryRef.current.length > 20) brushHistoryRef.current.shift();
+      brushFutureRef.current = [];
+    }
+    const touch = e.touches[0];
+    applyBrushStrokeAt(touch.clientX, touch.clientY);
+  };
+
+  const handleBrushTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (!isPaintingRef.current || e.touches.length !== 1) return;
+    const touch = e.touches[0];
+    applyBrushStrokeAt(touch.clientX, touch.clientY);
+  };
+
+  const handleBrushTouchEnd = () => {
+    isPaintingRef.current = false;
+  };
+
+  const handleOpenBrushMode = () => {
+    if (!maskBytesRef.current || !originalCanvasRef.current) return;
+    setIsBrushMode(true);
+    setTimeout(() => {
+      renderBrushCanvas();
+    }, 50);
+  };
+
+  const handleApplyBrushChanges = () => {
+    if (!originalCanvasRef.current || !maskBytesRef.current) {
+      setIsBrushMode(false);
+      return;
+    }
+    const finalCanvas = applyMaskWithAntiHalo(originalCanvasRef.current, maskBytesRef.current, true);
+    const updatedUrl = finalCanvas.toDataURL("image/png");
+    setPreviewCleanImage(updatedUrl);
+    setAiCutoutImage(updatedUrl);
+    setCompareTab("cutout");
+    setIsBrushMode(false);
+  };
+
+  const handleUndoBrush = () => {
+    if (brushHistoryRef.current.length === 0 || !maskBytesRef.current) return;
+    const prev = brushHistoryRef.current.pop()!;
+    brushFutureRef.current.push(new Uint8ClampedArray(maskBytesRef.current));
+    maskBytesRef.current = prev;
+    renderBrushCanvas();
+  };
+
+  const handleRedoBrush = () => {
+    if (brushFutureRef.current.length === 0 || !maskBytesRef.current) return;
+    const next = brushFutureRef.current.pop()!;
+    brushHistoryRef.current.push(new Uint8ClampedArray(maskBytesRef.current));
+    maskBytesRef.current = next;
+    renderBrushCanvas();
   };
 
   // Confirm image placement from modal onto the garment (Auto-fit ~75% centered at posX: 0, posY: -30)
@@ -1372,10 +1524,12 @@ export default function StudioPage() {
       {isUploadModalOpen && (
         <div
           className="fixed inset-0 z-[100] bg-stone-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-200"
-          onClick={() => setIsUploadModalOpen(false)}
+          onClick={() => {
+            if (!isCleaningBg) setIsUploadModalOpen(false);
+          }}
         >
           <div
-            className="bg-[#FCFAF7] rounded-3xl max-w-md w-full p-4 sm:p-5 shadow-2xl border border-stone-200/90 space-y-3 relative overflow-hidden my-auto max-h-[94vh] flex flex-col justify-between"
+            className="bg-[#FCFAF7] rounded-3xl max-w-lg w-full p-4 sm:p-5 shadow-2xl border border-stone-200/90 space-y-3 relative overflow-hidden my-auto max-h-[94vh] flex flex-col justify-between"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Ambient gold glow */}
@@ -1383,131 +1537,302 @@ export default function StudioPage() {
 
             {/* Modal Header */}
             <div className="text-center space-y-1 relative pr-6">
-              {/* Close (X) button top-right */}
-              <button
-                type="button"
-                onClick={() => setIsUploadModalOpen(false)}
-                className="absolute -top-1 -right-1 p-1.5 rounded-full text-stone-400 hover:text-stone-800 hover:bg-stone-200/60 transition cursor-pointer"
-                title="Bağla"
-              >
-                <X size={16} />
-              </button>
+              {!isCleaningBg && (
+                <button
+                  type="button"
+                  onClick={() => setIsUploadModalOpen(false)}
+                  className="absolute -top-1 -right-1 p-1.5 rounded-full text-stone-400 hover:text-stone-800 hover:bg-stone-200/60 transition cursor-pointer"
+                  title="Bağla"
+                >
+                  <X size={16} />
+                </button>
+              )}
 
               <h2 className="text-xl sm:text-2xl font-bold text-stone-900 tracking-tight">
-                Şəkli yoxla
+                {isBrushMode ? "Əl ilə dəqiqləşdirmə" : "Şəkli yoxla"}
               </h2>
-              <p className="text-xs text-stone-500 max-w-xs mx-auto leading-tight">
-                Kənarlar avtomatik kəsildi. Çap üçün fonu şəffaflaşdıra bilərsiniz.
+              <p className="text-xs text-stone-500 max-w-sm mx-auto leading-tight">
+                {isBrushMode
+                  ? "Fırça ilə silinən hissələri bərpa edin və ya qalan fonu silin"
+                  : imageDims.width > 0
+                  ? `${imageDims.width}×${imageDims.height}px • ${uploadedFileName || "Dizayn"}`
+                  : "Kənarlar avtomatik kəsildi. Çap üçün fonu AI ilə silə bilərsiniz."}
               </p>
             </div>
 
-            {/* Preview Box with Luxury Transparent Checkerboard */}
-            <div className="relative w-full h-40 sm:h-48 rounded-2xl border border-stone-200 bg-[linear-gradient(45deg,#f1eee9_25%,transparent_25%),linear-gradient(-45deg,#f1eee9_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#f1eee9_75%),linear-gradient(-45deg,transparent_75%,#f1eee9_75%)] bg-[size:16px_16px] bg-[#faf8f5] p-2 flex items-center justify-center overflow-hidden shadow-inner">
-              {/* Corner Accents */}
-              <div className="absolute top-2 left-2 w-2.5 h-2.5 border-t-2 border-l-2 border-amber-600/40 pointer-events-none" />
-              <div className="absolute top-2 right-2 w-2.5 h-2.5 border-t-2 border-r-2 border-amber-600/40 pointer-events-none" />
-              <div className="absolute bottom-2 left-2 w-2.5 h-2.5 border-b-2 border-l-2 border-amber-600/40 pointer-events-none" />
-              <div className="absolute bottom-2 right-2 w-2.5 h-2.5 border-b-2 border-r-2 border-amber-600/40 pointer-events-none" />
-
-              {/* Status Badge */}
-              <div className="absolute top-2.5 right-2.5 z-10">
-                {removeBgChecked ? (
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-700 text-white text-[9px] font-bold tracking-wider uppercase shadow-xs flex items-center gap-1">
-                    <Check size={10} /> Şəffaf Fon
-                  </span>
-                ) : (
-                  <span className="px-2 py-0.5 rounded-full bg-stone-900/80 text-white text-[9px] font-semibold tracking-wider uppercase shadow-xs">
-                    Avto-Kəsilmiş
-                  </span>
-                )}
-              </div>
-
-              {previewCleanImage ? (
-                <img
-                  src={previewCleanImage}
-                  alt="Preview"
-                  className="max-h-full max-w-full object-contain drop-shadow-md select-none transition-all duration-300"
-                />
-              ) : (
-                <div className="text-xs text-stone-400">Şəkil tapılmadı</div>
-              )}
-            </div>
-
-            {/* DPI / Image Quality Warning */}
-            {isLowDpi && (
-              <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-900 text-[11px] flex items-center gap-2 font-medium">
-                <span className="text-base shrink-0">⚠️</span>
-                <span>Şəkil ölçüsü kiçikdir ({imageDims.width}x{imageDims.height}px). Çapda dənəvərlik ola bilər (tövsiyə min. 1000px).</span>
-              </div>
-            )}
-
-            {/* Solid Background Removal Control Box (Point 4c) */}
-            <div className="bg-stone-100/85 p-3 rounded-2xl border border-stone-200 space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={removeBgChecked}
-                    onChange={(e) => handleToggleRemoveBg(e.target.checked)}
-                    className="w-4 h-4 rounded text-stone-900 accent-stone-900 cursor-pointer"
-                  />
-                  <span className="text-xs font-bold text-stone-900">Fonu sil (Həmcins fon)</span>
-                </label>
-
-                {removeBgChecked && (
-                  <button
-                    type="button"
-                    onClick={handleResetBg}
-                    className="text-[11px] text-stone-600 hover:text-stone-900 font-bold underline cursor-pointer"
-                  >
-                    Geri qaytar
-                  </button>
-                )}
-              </div>
-
-              {removeBgChecked && (
-                <div className="space-y-1.5 pt-1">
-                  <div className="flex items-center justify-between text-[11px] text-stone-600 font-medium">
-                    <span>Həssaslıq (Tolerans):</span>
-                    <span className="font-bold text-stone-900">{bgTolerance}</span>
+            {/* BRUSH MODE INTERFACE */}
+            {isBrushMode ? (
+              <div className="space-y-3">
+                {/* Brush Toolbar */}
+                <div className="bg-stone-100 p-2.5 rounded-2xl border border-stone-200/90 flex flex-wrap items-center justify-between gap-2">
+                  {/* Tool Selection */}
+                  <div className="flex items-center gap-1 bg-stone-200/80 p-1 rounded-xl">
+                    <button
+                      type="button"
+                      onClick={() => setBrushTool("restore")}
+                      className={`px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition ${
+                        brushTool === "restore"
+                          ? "bg-emerald-600 text-white shadow-xs"
+                          : "text-stone-700 hover:text-stone-900"
+                      }`}
+                    >
+                      <Paintbrush size={14} />
+                      <span>Bərpa et</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBrushTool("erase")}
+                      className={`px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition ${
+                        brushTool === "erase"
+                          ? "bg-rose-600 text-white shadow-xs"
+                          : "text-stone-700 hover:text-stone-900"
+                      }`}
+                    >
+                      <Eraser size={14} />
+                      <span>Sil</span>
+                    </button>
                   </div>
-                  <input
-                    type="range"
-                    min={0}
-                    max={60}
-                    value={bgTolerance}
-                    onChange={(e) => handleToleranceChange(Number(e.target.value))}
-                    className="w-full accent-stone-900 h-1.5 bg-stone-300 rounded-lg cursor-pointer"
+
+                  {/* Brush Size Slider */}
+                  <div className="flex items-center gap-2 flex-1 min-w-[130px] px-2">
+                    <span className="text-[11px] text-stone-600 font-medium shrink-0">Ölçü: {brushSize}px</span>
+                    <input
+                      type="range"
+                      min={6}
+                      max={70}
+                      value={brushSize}
+                      onChange={(e) => setBrushSize(Number(e.target.value))}
+                      className="w-full accent-stone-900 h-1.5 bg-stone-300 rounded-lg cursor-pointer"
+                    />
+                  </div>
+
+                  {/* Undo / Redo */}
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={handleUndoBrush}
+                      className="p-1.5 rounded-lg bg-white border border-stone-300 text-stone-700 hover:text-stone-900 hover:bg-stone-50 transition cursor-pointer"
+                      title="Geri al"
+                    >
+                      <Undo2 size={15} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleRedoBrush}
+                      className="p-1.5 rounded-lg bg-white border border-stone-300 text-stone-700 hover:text-stone-900 hover:bg-stone-50 transition cursor-pointer"
+                      title="İrəli al"
+                    >
+                      <Redo2 size={15} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Canvas Work Area */}
+                <div className="relative w-full h-56 sm:h-64 rounded-2xl border border-stone-200 bg-[linear-gradient(45deg,#f1eee9_25%,transparent_25%),linear-gradient(-45deg,#f1eee9_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#f1eee9_75%),linear-gradient(-45deg,transparent_75%,#f1eee9_75%)] bg-[size:16px_16px] bg-[#faf8f5] p-2 flex items-center justify-center overflow-hidden shadow-inner">
+                  <canvas
+                    ref={brushCanvasRef}
+                    onMouseDown={handleBrushMouseDown}
+                    onMouseMove={handleBrushMouseMove}
+                    onMouseUp={handleBrushMouseUp}
+                    onMouseLeave={handleBrushMouseUp}
+                    onTouchStart={handleBrushTouchStart}
+                    onTouchMove={handleBrushTouchMove}
+                    onTouchEnd={handleBrushTouchEnd}
+                    className="max-h-full max-w-full object-contain cursor-crosshair touch-none select-none drop-shadow-md"
                   />
                 </div>
-              )}
 
-              <p className="text-[10px] text-stone-500 leading-tight">
-                ℹ️ Yalnız bərabər rəngli fonlarda işləyir.
-              </p>
-            </div>
+                {/* Brush Mode Action Buttons */}
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={handleApplyBrushChanges}
+                    className="py-2.5 rounded-2xl bg-stone-900 hover:bg-black text-white font-bold text-xs uppercase tracking-wider transition shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <Check size={14} />
+                    <span>Tətbiq et</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsBrushMode(false)}
+                    className="py-2.5 rounded-2xl bg-stone-200 hover:bg-stone-300 text-stone-800 font-semibold text-xs transition flex items-center justify-center cursor-pointer"
+                  >
+                    <span>Ləğv et</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* STANDARD PREVIEW & AI CONTROL INTERFACE */
+              <div className="space-y-3">
+                {/* Before/After Comparison Tabs (Visible once cutout is created) */}
+                {bgCleaned && (
+                  <div className="flex items-center justify-center gap-2 bg-stone-100 p-1 rounded-2xl border border-stone-200">
+                    <button
+                      type="button"
+                      onClick={() => setCompareTab("cutout")}
+                      className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                        compareTab === "cutout"
+                          ? "bg-white text-stone-900 shadow-xs border border-stone-200/80"
+                          : "text-stone-500 hover:text-stone-800"
+                      }`}
+                    >
+                      <Sparkles size={13} className="text-amber-600" />
+                      <span>Fonsuz (AI)</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCompareTab("original")}
+                      className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                        compareTab === "original"
+                          ? "bg-white text-stone-900 shadow-xs border border-stone-200/80"
+                          : "text-stone-500 hover:text-stone-800"
+                      }`}
+                    >
+                      <Eye size={13} />
+                      <span>Orijinal</span>
+                    </button>
+                  </div>
+                )}
 
-            {/* Action Buttons Stack */}
-            <div className="space-y-2 pt-0.5">
-              {/* Button 1: Davam et */}
-              <button
-                type="button"
-                onClick={handleConfirmImageUpload}
-                disabled={isCleaningBg}
-                className="w-full py-2.5 sm:py-3 rounded-2xl bg-stone-900 hover:bg-black active:scale-98 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
-              >
-                <span>Davam et</span>
-              </button>
+                {/* Preview Box */}
+                <div
+                  className={`relative w-full h-44 sm:h-52 rounded-2xl border border-stone-200 p-2 flex items-center justify-center overflow-hidden shadow-inner ${
+                    compareTab === "cutout" && bgCleaned
+                      ? "bg-[linear-gradient(45deg,#f1eee9_25%,transparent_25%),linear-gradient(-45deg,#f1eee9_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#f1eee9_75%),linear-gradient(-45deg,transparent_75%,#f1eee9_75%)] bg-[size:16px_16px] bg-[#faf8f5]"
+                      : "bg-stone-50"
+                  }`}
+                >
+                  {/* Corner Accents */}
+                  <div className="absolute top-2 left-2 w-2.5 h-2.5 border-t-2 border-l-2 border-amber-600/40 pointer-events-none" />
+                  <div className="absolute top-2 right-2 w-2.5 h-2.5 border-t-2 border-r-2 border-amber-600/40 pointer-events-none" />
+                  <div className="absolute bottom-2 left-2 w-2.5 h-2.5 border-b-2 border-l-2 border-amber-600/40 pointer-events-none" />
+                  <div className="absolute bottom-2 right-2 w-2.5 h-2.5 border-b-2 border-r-2 border-amber-600/40 pointer-events-none" />
 
-              {/* Button 2: Ləğv et */}
-              <button
-                type="button"
-                onClick={() => setIsUploadModalOpen(false)}
-                className="w-full py-2 rounded-2xl bg-stone-100 hover:bg-stone-200 active:scale-98 text-stone-700 font-semibold text-xs transition-all flex items-center justify-center cursor-pointer"
-              >
-                <span>Ləğv et</span>
-              </button>
-            </div>
+                  {/* Status Badge */}
+                  <div className="absolute top-2.5 right-2.5 z-10">
+                    {bgCleaned ? (
+                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-700 text-white text-[10px] font-bold tracking-wider uppercase shadow-xs flex items-center gap-1">
+                        <Check size={11} /> {compareTab === "cutout" ? "Şəffaf Fon" : "Orijinal"}
+                      </span>
+                    ) : (
+                      <span className="px-2.5 py-0.5 rounded-full bg-stone-900/80 text-white text-[10px] font-semibold tracking-wider uppercase shadow-xs">
+                        Avto-Kəsilmiş
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Display Image */}
+                  {(compareTab === "cutout" && previewCleanImage) ? (
+                    <img
+                      src={previewCleanImage}
+                      alt="Preview"
+                      className="max-h-full max-w-full object-contain drop-shadow-md select-none transition-all duration-300"
+                    />
+                  ) : previewRawImage ? (
+                    <img
+                      src={previewRawImage}
+                      alt="Original"
+                      className="max-h-full max-w-full object-contain drop-shadow-md select-none transition-all duration-300"
+                    />
+                  ) : (
+                    <div className="text-xs text-stone-400">Şəkil tapılmadı</div>
+                  )}
+
+                  {/* Processing Overlay with Progress Bar */}
+                  {isCleaningBg && (
+                    <div className="absolute inset-0 bg-stone-950/75 backdrop-blur-sm z-20 flex flex-col items-center justify-center p-4 text-center text-white space-y-2.5 animate-in fade-in duration-200">
+                      <Loader2 size={32} className="animate-spin text-amber-400" />
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold tracking-wide">{cleaningStatusText}</p>
+                        <p className="text-[10px] text-stone-300">İntellektual IS-Net neyron şəbəkəsi işləyir</p>
+                      </div>
+
+                      {/* Progress bar */}
+                      <div className="w-48 bg-stone-800 rounded-full h-1.5 overflow-hidden border border-stone-700">
+                        <div
+                          className="bg-amber-400 h-full rounded-full transition-all duration-300"
+                          style={{ width: `${Math.max(5, downloadProgress)}%` }}
+                        />
+                      </div>
+                      <span className="text-[10px] font-mono text-amber-300">{downloadProgress}%</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* DPI / Image Quality Warning (Does NOT block background removal or confirmation) */}
+                {isLowDpi && (
+                  <div className="p-2.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-amber-900 text-[11px] flex items-center gap-2 font-medium">
+                    <span className="text-base shrink-0">⚠️</span>
+                    <span>Şəkil ölçüsü kiçikdir ({imageDims.width}×{imageDims.height}px). Çapda dənəvərlik ola bilər (tövsiyə min. 1000px).</span>
+                  </div>
+                )}
+
+                {/* AI Background Removal Control Box */}
+                {!bgCleaned ? (
+                  <div className="bg-stone-100/90 p-3 rounded-2xl border border-stone-200 space-y-2">
+                    <button
+                      type="button"
+                      onClick={handleRunISNetBgRemoval}
+                      disabled={isCleaningBg}
+                      className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    >
+                      <Wand2 size={15} />
+                      <span>Fonu AI ilə sil</span>
+                    </button>
+                    <p className="text-[10px] text-stone-500 text-center leading-tight">
+                      Süni intellekt əsas obyekti tanıyır və fonu avtomatik şəffaf edir (100% cihazınızda işləyir).
+                    </p>
+                  </div>
+                ) : (
+                  <div className="bg-emerald-50 border border-emerald-200/80 p-2.5 rounded-2xl flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 text-emerald-800 text-xs font-semibold">
+                      <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
+                      <span>Fon uğurla təmizləndi</span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={handleOpenBrushMode}
+                        className="px-2.5 py-1.5 rounded-xl bg-white border border-emerald-300 text-stone-800 hover:bg-emerald-100/60 font-bold text-xs transition flex items-center gap-1 cursor-pointer shadow-xs"
+                      >
+                        <Paintbrush size={13} className="text-stone-700" />
+                        <span>Fırça</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleResetBg}
+                        className="px-2.5 py-1.5 rounded-xl bg-white border border-stone-300 text-stone-700 hover:text-stone-900 hover:bg-stone-100 font-bold text-xs transition flex items-center gap-1 cursor-pointer shadow-xs"
+                      >
+                        <RotateCcw size={13} />
+                        <span>Geri qaytar</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Final Action Buttons Stack */}
+                <div className="space-y-2 pt-0.5">
+                  <button
+                    type="button"
+                    onClick={handleConfirmImageUpload}
+                    disabled={isCleaningBg}
+                    className="w-full py-2.5 sm:py-3 rounded-2xl bg-stone-900 hover:bg-black active:scale-98 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                  >
+                    <span>Davam et</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsUploadModalOpen(false)}
+                    disabled={isCleaningBg}
+                    className="w-full py-2 rounded-2xl bg-stone-100 hover:bg-stone-200 active:scale-98 text-stone-700 font-semibold text-xs transition-all flex items-center justify-center cursor-pointer"
+                  >
+                    <span>Ləğv et</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
