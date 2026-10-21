@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useCart } from "@/context/CartContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { playAddToCartSound } from "@/lib/soundEffects";
@@ -389,15 +389,123 @@ export default function StudioPage() {
 
   const currentDesign = designs[viewSide];
 
-  const updateCurrentDesign = (partial: Partial<SideDesignState>) => {
-    setDesigns((prev) => ({
-      ...prev,
-      [viewSide]: { ...prev[viewSide], ...partial },
-    }));
+  // Per-tab History Stacks for Undo/Redo (Ctrl+Z / Ctrl+Y)
+  const [history, setHistory] = useState<Record<StudioSurface, SideDesignState[]>>({
+    front: [],
+    back: [],
+    leftSleeve: [],
+    rightSleeve: [],
+  });
+
+  const [future, setFuture] = useState<Record<StudioSurface, SideDesignState[]>>({
+    front: [],
+    back: [],
+    leftSleeve: [],
+    rightSleeve: [],
+  });
+
+  const updateCurrentDesign = (partial: Partial<SideDesignState>, recordHistory = true) => {
+    setDesigns((prev) => {
+      const current = prev[viewSide];
+      if (recordHistory) {
+        setHistory((prevHist) => ({
+          ...prevHist,
+          [viewSide]: [...prevHist[viewSide].slice(-30), current],
+        }));
+        setFuture((prevFut) => ({
+          ...prevFut,
+          [viewSide]: [],
+        }));
+      }
+      return {
+        ...prev,
+        [viewSide]: { ...current, ...partial },
+      };
+    });
   };
+
+  const handleUndo = useCallback(() => {
+    setHistory((prevHist) => {
+      const sideHist = prevHist[viewSide];
+      if (!sideHist || sideHist.length === 0) return prevHist;
+      const prevItem = sideHist[sideHist.length - 1];
+      const newSideHist = sideHist.slice(0, -1);
+
+      setDesigns((prevDesigns) => {
+        const current = prevDesigns[viewSide];
+        setFuture((prevFut) => ({
+          ...prevFut,
+          [viewSide]: [current, ...prevFut[viewSide]],
+        }));
+        return {
+          ...prevDesigns,
+          [viewSide]: prevItem,
+        };
+      });
+
+      return {
+        ...prevHist,
+        [viewSide]: newSideHist,
+      };
+    });
+  }, [viewSide]);
+
+  const handleRedo = useCallback(() => {
+    setFuture((prevFut) => {
+      const sideFut = prevFut[viewSide];
+      if (!sideFut || sideFut.length === 0) return prevFut;
+      const nextItem = sideFut[0];
+      const newSideFut = sideFut.slice(1);
+
+      setDesigns((prevDesigns) => {
+        const current = prevDesigns[viewSide];
+        setHistory((prevHist) => ({
+          ...prevHist,
+          [viewSide]: [...prevHist[viewSide], current],
+        }));
+        return {
+          ...prevDesigns,
+          [viewSide]: nextItem,
+        };
+      });
+
+      return {
+        ...prevFut,
+        [viewSide]: newSideFut,
+      };
+    });
+  }, [viewSide]);
 
   // Garment category logic
   const garmentCategory = getStudioGarmentCategory(selectedGarment.id);
+
+  // Downscale large image for 2D canvas preview (max 2048px) while preserving original for orders
+  const downscaleForPreview = async (dataUrl: string, maxDim = 2048): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        if (img.width <= maxDim && img.height <= maxDim) {
+          resolve(dataUrl);
+          return;
+        }
+        const scale = Math.min(maxDim / img.width, maxDim / img.height);
+        const targetW = Math.round(img.width * scale);
+        const targetH = Math.round(img.height * scale);
+        const canvas = document.createElement("canvas");
+        canvas.width = targetW;
+        canvas.height = targetH;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(dataUrl);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, targetW, targetH);
+        resolve(canvas.toDataURL("image/png"));
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    });
+  };
 
   // File Upload Initiator -> Opens "Şəkli yoxla" modal (matching Image 1)
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -405,11 +513,13 @@ export default function StudioPage() {
     if (file) {
       const fileName = file.name;
       const reader = new FileReader();
-      reader.onload = () => {
+      reader.onload = async () => {
         if (typeof reader.result === "string") {
+          const rawOriginal = reader.result;
+          const previewImage = await downscaleForPreview(rawOriginal, 2048);
           setUploadedFileName(fileName);
-          setPreviewRawImage(reader.result);
-          setPreviewCleanImage(reader.result);
+          setPreviewRawImage(rawOriginal); // full resolution original for printing
+          setPreviewCleanImage(previewImage); // 2048px downscaled preview for 60fps canvas
           setBgCleaned(false);
           setIsCleaningBg(false);
           setIsUploadModalOpen(true);
@@ -578,10 +688,10 @@ export default function StudioPage() {
 
   // Surfaces definition
   const surfacesList: { id: StudioSurface; label: string; icon: string }[] = [
-    { id: "front", label: "Ön Görünüş", icon: "/images/studio/thumb-front.png" },
-    { id: "back", label: "Arxa Görünüş", icon: "/images/studio/thumb-back.png" },
-    { id: "leftSleeve", label: "Sol Qol", icon: "/images/studio/thumb-left.png" },
-    { id: "rightSleeve", label: "Sağ Qol", icon: "/images/studio/thumb-right.png" },
+    { id: "front", label: "Ön", icon: "/images/studio/thumb-front.png" },
+    { id: "back", label: "Arxa", icon: "/images/studio/thumb-back.png" },
+    { id: "leftSleeve", label: "Sol qol", icon: "/images/studio/thumb-left.png" },
+    { id: "rightSleeve", label: "Sağ qol", icon: "/images/studio/thumb-right.png" },
   ];
 
   return (
@@ -622,12 +732,11 @@ export default function StudioPage() {
           <div id="garment-canvas-section" className="lg:col-span-7 relative">
             <div className="lg:sticky lg:top-24 flex flex-col items-center w-full">
               
-              {/* View Switcher: Surfaces + Live Model Preview Button */}
-              <div className="w-full max-w-[500px] flex items-center justify-between gap-2 mb-4 flex-wrap">
-                <div className="flex items-center gap-1 bg-stone-200/70 p-1 rounded-full border border-stone-300/80">
+              {/* View Switcher: Equal-width single-line tabs + horizontal scroll on mobile */}
+              <div className="w-full max-w-[500px] flex items-center justify-between gap-2 mb-3">
+                <div className="flex-1 flex items-stretch gap-1 bg-stone-200/80 p-1 rounded-2xl border border-stone-300/80 overflow-x-auto scrollbar-none">
                   {surfacesList.map((s) => {
                     const isSleeve = s.id === "leftSleeve" || s.id === "rightSleeve";
-                    // Sleeves are strictly available on t-shirts & oversize
                     const isAvailable = (garmentCategory === "tshirt" || garmentCategory === "oversize") || !isSleeve;
                     if (!isAvailable) return null;
 
@@ -641,32 +750,32 @@ export default function StudioPage() {
                         key={s.id}
                         type="button"
                         onClick={() => setViewSide(s.id)}
-                        className={`relative px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+                        className={`flex-1 min-w-[70px] sm:min-w-0 py-2 px-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 flex items-center justify-center gap-1.5 ${
                           isActive
-                            ? "bg-stone-900 text-white shadow-xs font-bold"
-                            : "text-stone-700 hover:text-stone-900"
+                            ? "bg-stone-900 text-white shadow-xs font-bold ring-1 ring-stone-900"
+                            : "text-stone-700 hover:text-stone-900 hover:bg-white/50"
                         }`}
                       >
-                        <img src={s.icon} alt="" className="w-3.5 h-3.5 object-contain opacity-80" />
-                        <span>{s.label}</span>
+                        <img src={s.icon} alt="" className="w-4 h-4 object-contain shrink-0 opacity-90" />
+                        <span className="truncate leading-none">{s.label}</span>
                         {hasSurfaceDesign && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-sky-400 shrink-0" />
                         )}
                       </button>
                     );
                   })}
                 </div>
 
-                <div className="flex items-center gap-2">
-                  {/* PhotoRoom 3D Orbital Live Preview Button */}
+                <div className="shrink-0 flex items-center">
                   <button
                     type="button"
                     onClick={() => setIsPhotoRoom3DOpen(true)}
-                    className="flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full bg-stone-900 hover:bg-black text-white text-xs font-bold uppercase tracking-wider transition-all shadow-xs active:scale-95 group cursor-pointer"
-                    title="PhotoRoom kimi 360° fəzada fırlanan 3D canlı baxış"
+                    className="flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-xl bg-stone-900 hover:bg-black text-white text-xs font-bold uppercase tracking-wider transition-all shadow-xs active:scale-95 group cursor-pointer"
+                    title="3D Canlı Baxış pəncərəsini aç"
                   >
-                    <Eye size={15} className="text-amber-300" />
-                    <span>3D Canlı Baxış</span>
+                    <Eye size={15} className="text-[#e8c98a]" />
+                    <span className="hidden sm:inline">3D Canlı Baxış</span>
+                    <span className="sm:hidden">3D</span>
                   </button>
                 </div>
               </div>
@@ -693,6 +802,10 @@ export default function StudioPage() {
                 onClearImage={() => updateCurrentDesign({ uploadedImage: null })}
                 onClearText={() => updateCurrentDesign({ customText: "" })}
                 onRequestUpload={() => fileInputRef.current?.click()}
+                onUndo={handleUndo}
+                onRedo={handleRedo}
+                canUndo={(history[viewSide] || []).length > 0}
+                canRedo={(future[viewSide] || []).length > 0}
               />
 
               {/* Helper Hint */}
