@@ -31,10 +31,24 @@ export interface Product {
 
 export const MOCK_PRODUCTS: Product[] = (storeData.products as any[]).map(p => ({
   ...p,
-  colors: p.colors.map((c: any) => ({
-    ...c,
-    gallery: c.gallery && Array.isArray(c.gallery) && c.gallery.length > 0
-      ? c.gallery
-      : [c.image, c.hoverImage || c.image],
-  }))
+  colors: (p.colors || []).map((c: any) => {
+    const hasDistinctHover = Boolean(c.hoverImage && typeof c.hoverImage === 'string' && c.hoverImage.trim() !== '' && c.hoverImage !== c.image);
+    const validHover = hasDistinctHover ? c.hoverImage : undefined;
+
+    let gallery: string[] = [];
+    if (c.gallery && Array.isArray(c.gallery) && c.gallery.length > 0) {
+      // Keep unique non-empty images
+      gallery = c.gallery.filter((img: string, idx: number, arr: string[]) => img && typeof img === 'string' && arr.indexOf(img) === idx);
+    } else if (validHover) {
+      gallery = [c.image, validHover];
+    } else {
+      gallery = [c.image];
+    }
+
+    return {
+      ...c,
+      hoverImage: validHover,
+      gallery,
+    };
+  })
 }));

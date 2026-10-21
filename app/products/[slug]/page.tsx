@@ -42,8 +42,22 @@ export default function ProductDetailPage() {
   const [activeAccordion, setActiveAccordion] = useState<string | null>("details");
 
   const activeColor = product.colors[selectedColorIndex] || product.colors[0];
-  const gallery = activeColor.gallery || [activeColor.image, activeColor.hoverImage || activeColor.image];
-  const activeImage = gallery[selectedImageIndex] || activeColor.image;
+  const hasDistinctHover = Boolean(
+    activeColor?.hoverImage &&
+    typeof activeColor.hoverImage === "string" &&
+    activeColor.hoverImage.trim() !== "" &&
+    activeColor.hoverImage !== activeColor.image
+  );
+
+  const rawGallery = (activeColor.gallery && activeColor.gallery.length > 0
+    ? activeColor.gallery
+    : hasDistinctHover
+    ? [activeColor.image, activeColor.hoverImage!]
+    : [activeColor.image]
+  );
+  // Ensure unique, non-empty images only
+  const gallery = rawGallery.filter((img, idx, arr) => img && typeof img === "string" && img.trim() !== "" && arr.indexOf(img) === idx);
+  const activeImage = gallery[selectedImageIndex] || gallery[0] || activeColor.image;
 
   const handleAddToCart = () => {
     addItem({
@@ -92,7 +106,7 @@ export default function ProductDetailPage() {
             {/* Thumbnails */}
             <div className="flex sm:flex-col gap-3 overflow-x-auto sm:overflow-visible shrink-0 pb-2 sm:pb-0">
               {gallery.map((img, idx) => {
-                const label = idx === 0 ? "ÖN" : idx === 1 ? "ARXA" : "MOCKUP";
+                const label = idx === 0 ? "ÖN" : idx === 1 && hasDistinctHover ? "ARXA" : `DETAL ${idx + (hasDistinctHover ? 0 : 1)}`;
                 return (
                   <button
                     key={idx}
@@ -131,7 +145,7 @@ export default function ProductDetailPage() {
               <div className="relative z-10 w-full max-w-[420px] aspect-[4/5] flex items-center justify-center">
                 <img
                   src={activeImage}
-                  alt={`${product.name} - ${selectedImageIndex === 0 ? "Ön Görünüş" : selectedImageIndex === 1 ? "Arxa Görünüş" : "Tam Mockup"}`}
+                  alt={`${product.name} - ${selectedImageIndex === 0 ? "Ön Görünüş" : selectedImageIndex === 1 && hasDistinctHover ? "Arxa Görünüş" : "Görünüş"}`}
                   className="max-h-full max-w-full object-contain filter drop-shadow-xl transition-transform duration-500 ease-out group-hover:scale-105"
                 />
               </div>
@@ -145,13 +159,13 @@ export default function ProductDetailPage() {
                   <span className="w-1.5 h-1.5 rounded-full bg-stone-900 animate-pulse" />
                   {selectedImageIndex === 0
                     ? "Ön Görünüş"
-                    : selectedImageIndex === 1
+                    : selectedImageIndex === 1 && hasDistinctHover
                     ? "Arxa Görünüş"
-                    : "Tam Mockup"}
+                    : `Detal ${selectedImageIndex + (hasDistinctHover ? 0 : 1)}`}
                 </span>
               </div>
 
-              {/* Quick Flip Controls (Ön / Arxa / Mockup) */}
+              {/* Quick Flip Controls */}
               {gallery.length >= 2 && (
                 <div className="absolute bottom-4 left-4 z-10 flex items-center gap-2">
                   <button
@@ -165,30 +179,36 @@ export default function ProductDetailPage() {
                   >
                     Ön
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedImageIndex(1)}
-                    className={`px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider backdrop-blur-md transition-all active:scale-95 cursor-pointer ${
-                      selectedImageIndex === 1
-                        ? "bg-stone-900 text-white shadow-sm"
-                        : "bg-white/90 text-stone-700 border border-stone-200 hover:border-stone-400"
-                    }`}
-                  >
-                    Arxa
-                  </button>
-                  {gallery.length >= 3 && (
+                  {hasDistinctHover && (
                     <button
                       type="button"
-                      onClick={() => setSelectedImageIndex(2)}
+                      onClick={() => setSelectedImageIndex(1)}
                       className={`px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider backdrop-blur-md transition-all active:scale-95 cursor-pointer ${
-                        selectedImageIndex === 2
+                        selectedImageIndex === 1
                           ? "bg-stone-900 text-white shadow-sm"
                           : "bg-white/90 text-stone-700 border border-stone-200 hover:border-stone-400"
                       }`}
                     >
-                      Mockup
+                      Arxa
                     </button>
                   )}
+                  {gallery.slice(hasDistinctHover ? 2 : 1).map((_, i) => {
+                    const realIdx = (hasDistinctHover ? 2 : 1) + i;
+                    return (
+                      <button
+                        key={realIdx}
+                        type="button"
+                        onClick={() => setSelectedImageIndex(realIdx)}
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider backdrop-blur-md transition-all active:scale-95 cursor-pointer ${
+                          selectedImageIndex === realIdx
+                            ? "bg-stone-900 text-white shadow-sm"
+                            : "bg-white/90 text-stone-700 border border-stone-200 hover:border-stone-400"
+                        }`}
+                      >
+                        {`Detal ${i + 1}`}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
 

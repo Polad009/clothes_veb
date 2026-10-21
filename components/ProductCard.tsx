@@ -22,8 +22,14 @@ export function ProductCard({ product, variant = "light" }: ProductCardProps) {
   const [isWishlisted, setIsWishlisted] = useState(false);
 
   const activeColor = product.colors[selectedColorIndex] || product.colors[0];
+  const hasDistinctHover = Boolean(
+    activeColor?.hoverImage &&
+    typeof activeColor.hoverImage === "string" &&
+    activeColor.hoverImage.trim() !== "" &&
+    activeColor.hoverImage !== activeColor.image
+  );
   const displayImage =
-    isHovered && activeColor?.hoverImage
+    isHovered && hasDistinctHover
       ? activeColor.hoverImage
       : activeColor?.image;
 

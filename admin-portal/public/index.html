@@ -870,37 +870,44 @@
           </div>
         </div>
 
-        <!-- Image Pickers: Main Garment Image & Secondary (Hover) Image -->
-        <div class="space-y-4 pt-3 border-t border-slate-100 bg-slate-50/60 p-3.5 rounded-2xl border border-slate-200/80">
-          <div class="space-y-1">
-            <div class="flex items-center justify-between">
-              <label class="font-bold text-slate-800 flex items-center gap-1.5">
-                <span>1. Əsas Məhsul Şəkli (Ön Görünüş) *</span>
-                <span class="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">Əsas Şəkil</span>
-              </label>
+        <!-- Section: Colors & Color-specific Images -->
+        <div class="space-y-3 pt-3 border-t border-slate-100 bg-slate-50/70 p-4 rounded-2xl border border-slate-200/90">
+          <div class="flex items-center justify-between">
+            <div>
+              <h4 class="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+                <span>1. Məhsul Rəngləri və Görünüşləri</span>
+                <span class="text-[10px] text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">Rəng seçimləri</span>
+              </h4>
+              <p class="text-[11px] text-slate-500 mt-0.5">Hər rəng üçün ad, HEX tonu və həmin rəngə aid ön/arxa şəkilləri daxil edin.</p>
             </div>
-            <div class="flex items-center gap-2">
-              <img id="prodImagePreview" src="" class="w-12 h-14 rounded-xl object-contain border border-slate-200 bg-white p-1" />
-              <input type="text" id="prodImage" required placeholder="Məs: /images/products/.../front.png və ya yeni yüklə" class="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-900" />
-              <button type="button" onclick="openGalleryModal('prodImage')" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold transition">Qalereya</button>
-              <button type="button" onclick="triggerDirectUpload('prodImage')" class="px-3 py-2 rounded-xl bg-slate-900 text-white hover:bg-black text-xs font-bold transition">Yüklə</button>
-            </div>
+            <button type="button" onclick="addColorRow()" class="px-3 py-1.5 rounded-xl bg-slate-900 text-white hover:bg-black text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>+ Yeni Rəng Əlavə Et</span>
+            </button>
           </div>
 
-          <div class="space-y-1 pt-2 border-t border-slate-200/60">
-            <div class="flex items-center justify-between">
-              <label class="font-bold text-slate-800 flex items-center gap-1.5">
-                <span>2. İkinci Şəkil (Hover / Arxa Görünüş - İstəyə bağlı)</span>
-                <span class="text-[10px] text-slate-500 font-bold bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">Hover / Arxa</span>
-              </label>
+          <!-- Dynamic Colors Container -->
+          <div id="productColorsContainer" class="space-y-3 pt-1"></div>
+        </div>
+
+        <!-- Section: Additional Gallery Images -->
+        <div class="space-y-3 pt-3 border-t border-slate-100 bg-slate-50/70 p-4 rounded-2xl border border-slate-200/90">
+          <div class="flex items-center justify-between">
+            <div>
+              <h4 class="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+                <span>2. Məhsul Qalereyası (Əlavə Detal Şəkilləri)</span>
+                <span class="text-[10px] text-indigo-700 font-bold bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">İstədiyiniz qədər şəkil</span>
+              </h4>
+              <p class="text-[11px] text-slate-500 mt-0.5">Məhsul üçün istədiyiniz sayda əlavə yaxından çəkiliş və ya detal şəkilləri əlavə edin.</p>
             </div>
-            <div class="flex items-center gap-2">
-              <img id="prodHoverImagePreview" src="" class="w-12 h-14 rounded-xl object-contain border border-slate-200 bg-white p-1" />
-              <input type="text" id="prodHoverImage" placeholder="Məs: /images/products/.../back.png və ya yeni yüklə (isteğe bağlı)" class="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-900" />
-              <button type="button" onclick="openGalleryModal('prodHoverImage')" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold transition">Qalereya</button>
-              <button type="button" onclick="triggerDirectUpload('prodHoverImage')" class="px-3 py-2 rounded-xl bg-slate-900 text-white hover:bg-black text-xs font-bold transition">Yüklə</button>
-            </div>
+            <button type="button" onclick="addGalleryImageRow()" class="px-3 py-1.5 rounded-xl bg-slate-900 text-white hover:bg-black text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs">
+              <i data-lucide="image-plus" class="w-3.5 h-3.5"></i>
+              <span>+ Şəkil Əlavə Et</span>
+            </button>
           </div>
+
+          <!-- Dynamic Gallery Images Container -->
+          <div id="productGalleryContainer" class="space-y-2 pt-1"></div>
         </div>
 
         <!-- Characteristics & Details -->
@@ -1215,12 +1222,118 @@
       lucide.createIcons();
     }
 
+    let colorRowCounter = 0;
+    let galleryRowCounter = 0;
+
+    function addColorRow(colorData = {}) {
+      const container = document.getElementById('productColorsContainer');
+      const idx = ++colorRowCounter;
+      const card = document.createElement('div');
+      card.className = 'color-item-card p-3.5 bg-white rounded-xl border border-slate-200 shadow-2xs space-y-3';
+      card.dataset.colorId = idx;
+
+      const name = colorData.name || (colorRowCounter === 1 ? 'Standart' : `Rəng ${colorRowCounter}`);
+      const hex = colorData.hex || (colorRowCounter === 1 ? '#111111' : '#E5DFD5');
+      const image = colorData.image || '';
+      const hoverImage = colorData.hoverImage || '';
+
+      card.innerHTML = `
+        <div class="flex items-center justify-between gap-3 border-b border-slate-100 pb-2.5">
+          <div class="flex items-center gap-3 flex-wrap flex-1">
+            <div class="flex items-center gap-2">
+              <label class="font-bold text-slate-700 text-xs">Rəng Adı:</label>
+              <input type="text" class="color-name-input px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-900 w-36 focus:outline-none focus:border-slate-800" placeholder="Məs: Qara" value="${name}" required />
+            </div>
+            <div class="flex items-center gap-1.5">
+              <label class="font-bold text-slate-700 text-xs">HEX Rəng:</label>
+              <input type="color" class="color-picker-input w-8 h-8 rounded-lg border border-slate-200 cursor-pointer p-0.5" value="${hex}" oninput="this.nextElementSibling.value = this.value" />
+              <input type="text" class="color-hex-input px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-800 w-24 focus:outline-none focus:border-slate-800" value="${hex}" oninput="this.previousElementSibling.value = this.value" />
+            </div>
+          </div>
+          <button type="button" onclick="removeColorRow(this)" class="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 transition cursor-pointer" title="Rəngi sil">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <!-- Ön Şəkil -->
+          <div class="space-y-1">
+            <div class="flex items-center justify-between">
+              <label class="font-bold text-slate-700 text-[11px]">Ön Şəkil *</label>
+              <span class="text-[9px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-bold">Əsas Görünüş</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <img id="color_${idx}_imagePreview" src="${image}" class="w-10 h-12 rounded-lg object-contain border border-slate-200 bg-slate-50 p-0.5 shrink-0" onerror="this.src=''" />
+              <input type="text" id="color_${idx}_image" class="color-image-input flex-1 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-900" placeholder="Şəkil URL və ya yüklə" value="${image}" required />
+              <button type="button" onclick="openGalleryModal('color_${idx}_image')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold transition">Qalereya</button>
+              <button type="button" onclick="triggerDirectUpload('color_${idx}_image')" class="px-2.5 py-1.5 rounded-lg bg-slate-900 text-white hover:bg-black text-xs font-bold transition">Yüklə</button>
+            </div>
+          </div>
+
+          <!-- Arxa Şəkil -->
+          <div class="space-y-1">
+            <div class="flex items-center justify-between">
+              <label class="font-bold text-slate-700 text-[11px]">Arxa Şəkil (İstəyə bağlı)</label>
+              <span class="text-[9px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded font-bold">Hover / Arxa</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <img id="color_${idx}_hoverImagePreview" src="${hoverImage}" class="w-10 h-12 rounded-lg object-contain border border-slate-200 bg-slate-50 p-0.5 shrink-0" onerror="this.src=''" />
+              <input type="text" id="color_${idx}_hoverImage" class="color-hover-image-input flex-1 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-900" placeholder="Arxa şəkil (boş qala bilər)" value="${hoverImage}" />
+              <button type="button" onclick="openGalleryModal('color_${idx}_hoverImage')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold transition">Qalereya</button>
+              <button type="button" onclick="triggerDirectUpload('color_${idx}_hoverImage')" class="px-2.5 py-1.5 rounded-lg bg-slate-900 text-white hover:bg-black text-xs font-bold transition">Yüklə</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      container.appendChild(card);
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function removeColorRow(button) {
+      const container = document.getElementById('productColorsContainer');
+      const cards = container.querySelectorAll('.color-item-card');
+      if (cards.length <= 1) {
+        alert('Məhsulda ən azı bir rəng olmalıdır!');
+        return;
+      }
+      button.closest('.color-item-card').remove();
+    }
+
+    function addGalleryImageRow(url = '') {
+      const container = document.getElementById('productGalleryContainer');
+      const idx = ++galleryRowCounter;
+      const row = document.createElement('div');
+      row.className = 'gallery-item-row flex items-center gap-2 p-2 bg-white rounded-xl border border-slate-200 shadow-2xs';
+      row.innerHTML = `
+        <img id="gallery_${idx}_imagePreview" src="${url}" class="w-10 h-12 rounded-lg object-contain border border-slate-200 bg-slate-50 p-0.5 shrink-0" onerror="this.src=''" />
+        <input type="text" id="gallery_${idx}_image" class="gallery-image-input flex-1 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-900" placeholder="Əlavə detal şəklinin linki və ya fayl yüklə" value="${url}" />
+        <button type="button" onclick="openGalleryModal('gallery_${idx}_image')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold transition">Qalereya</button>
+        <button type="button" onclick="triggerDirectUpload('gallery_${idx}_image')" class="px-2.5 py-1.5 rounded-lg bg-slate-900 text-white hover:bg-black text-xs font-bold transition">Yüklə</button>
+        <button type="button" onclick="removeGalleryRow(this)" class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition cursor-pointer" title="Şəkli sil">
+          <i data-lucide="trash-2" class="w-4 h-4"></i>
+        </button>
+      `;
+      container.appendChild(row);
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function removeGalleryRow(button) {
+      button.closest('.gallery-item-row').remove();
+    }
+
     function openNewProductModal() {
       document.getElementById('productForm').reset();
       document.getElementById('prodId').value = '';
       document.getElementById('productModalTitle').textContent = 'YENİ MƏHSUL ƏLAVƏ ET';
-      setImageInputValue('prodImage', '');
-      setImageInputValue('prodHoverImage', '');
+      
+      document.getElementById('productColorsContainer').innerHTML = '';
+      document.getElementById('productGalleryContainer').innerHTML = '';
+      colorRowCounter = 0;
+      galleryRowCounter = 0;
+
+      addColorRow({ name: 'Standart', hex: '#111111', image: '', hoverImage: '' });
+
       document.getElementById('productModal').classList.remove('hidden');
       document.getElementById('productModal').classList.add('flex');
     }
@@ -1239,9 +1352,26 @@
       document.getElementById('prodBadge').value = p.badge || '';
       document.getElementById('prodComposition').value = p.composition || '';
       document.getElementById('prodInStock').value = (p.inStock !== false).toString();
-      setImageInputValue('prodImage', p.colors?.[0]?.image || p.image || '');
-      setImageInputValue('prodHoverImage', p.colors?.[0]?.hoverImage || '');
       document.getElementById('prodDescription').value = p.description || '';
+
+      document.getElementById('productColorsContainer').innerHTML = '';
+      document.getElementById('productGalleryContainer').innerHTML = '';
+      colorRowCounter = 0;
+      galleryRowCounter = 0;
+
+      const colors = (p.colors && p.colors.length > 0) ? p.colors : [
+        { name: 'Standart', hex: '#111111', image: p.image || '', hoverImage: p.hoverImage || '' }
+      ];
+
+      colors.forEach(c => addColorRow(c));
+
+      // Extra gallery images (beyond front and hover)
+      const primaryColor = colors[0];
+      const primaryFront = primaryColor?.image;
+      const primaryHover = primaryColor?.hoverImage;
+      const extraGallery = (primaryColor?.gallery || p.gallery || []).filter(img => img && img !== primaryFront && img !== primaryHover);
+
+      extraGallery.forEach(img => addGalleryImageRow(img));
 
       document.getElementById('productModalTitle').textContent = 'MƏHSULU REDAKTƏ ET';
       document.getElementById('productModal').classList.remove('hidden');
@@ -1256,23 +1386,61 @@
     async function handleProductSubmit(e) {
       e.preventDefault();
       const id = document.getElementById('prodId').value;
-      const name = document.getElementById('prodName').value;
-      const refCode = document.getElementById('prodRef').value;
+      const name = document.getElementById('prodName').value.trim();
+      const refCode = document.getElementById('prodRef').value.trim();
       const category = document.getElementById('prodCategory').value;
-      const fit = document.getElementById('prodFit').value;
+      const fit = document.getElementById('prodFit').value.trim();
       const price = parseFloat(document.getElementById('prodPrice').value);
       const compareAtPrice = parseFloat(document.getElementById('prodComparePrice').value) || undefined;
-      const badge = document.getElementById('prodBadge').value || undefined;
-      const composition = document.getElementById('prodComposition').value || "100% Premium Pambıq";
+      const badge = document.getElementById('prodBadge').value.trim() || undefined;
+      const composition = document.getElementById('prodComposition').value.trim() || "100% Premium Pambıq";
       const inStock = document.getElementById('prodInStock').value === "true";
-      const image = document.getElementById('prodImage').value.trim();
-      const hoverImage = document.getElementById('prodHoverImage').value.trim() || image;
-      const description = document.getElementById('prodDescription').value;
+      const description = document.getElementById('prodDescription').value.trim();
 
-      if (!image) {
-        alert("Zəhmət olmasa, əsas məhsul şəklini daxil edin və ya yükləyin!");
+      const colors = [];
+      const colorCards = document.querySelectorAll('.color-item-card');
+      colorCards.forEach((card, idx) => {
+        const cName = card.querySelector('.color-name-input')?.value.trim() || `Rəng ${idx + 1}`;
+        const cHex = card.querySelector('.color-hex-input')?.value.trim() || '#111111';
+        const cImage = card.querySelector('.color-image-input')?.value.trim();
+        const cHover = card.querySelector('.color-hover-image-input')?.value.trim();
+
+        if (cImage) {
+          const hasDistinct = Boolean(cHover && cHover !== cImage);
+          colors.push({
+            name: cName,
+            hex: cHex,
+            image: cImage,
+            hoverImage: hasDistinct ? cHover : undefined
+          });
+        }
+      });
+
+      if (colors.length === 0) {
+        alert("Zəhmət olmasa, ən azı bir rəng və onun ön şəklini daxil edin!");
         return;
       }
+
+      // Collect gallery images
+      const extraGallery = [];
+      document.querySelectorAll('.gallery-item-row .gallery-image-input').forEach(inp => {
+        const val = inp.value.trim();
+        if (val && !extraGallery.includes(val)) {
+          extraGallery.push(val);
+        }
+      });
+
+      // Construct gallery for each color (front + optional hover + extras)
+      colors.forEach(c => {
+        const gal = [c.image];
+        if (c.hoverImage) gal.push(c.hoverImage);
+        extraGallery.forEach(ext => {
+          if (!gal.includes(ext)) gal.push(ext);
+        });
+        c.gallery = gal;
+      });
+
+      const primary = colors[0];
 
       const payload = {
         id: id || undefined,
@@ -1288,14 +1456,10 @@
         inStock,
         description,
         sizes: category === "salvar" ? ["30", "32", "34", "36"] : ["S", "M", "L", "XL", "XXL"],
-        colors: [
-          {
-            name: "Standart",
-            hex: "#111111",
-            image: image,
-            hoverImage: hoverImage || image
-          }
-        ]
+        image: primary.image,
+        hoverImage: primary.hoverImage,
+        gallery: primary.gallery,
+        colors
       };
 
       try {

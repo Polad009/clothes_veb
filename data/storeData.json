@@ -91,6 +91,36 @@
   },
   "products": [
     {
+      "name": "911 GT3 RS Oversize T-Shirt",
+      "refCode": "TSH-P911-BLK-01",
+      "gender": "men",
+      "category": "koynek",
+      "fit": "Oversize Fit",
+      "price": 25,
+      "compareAtPrice": 45,
+      "badge": "Yeni",
+      "composition": "100% Pambıq",
+      "inStock": true,
+      "description": "Porsche 911 GT3 RS T-Shirt\n\nAvtomobil həvəskarları və motorsport ruhunu daşıyanlar üçün xüsusi dizayn edilmiş qrafik köynək. Yüksək keyfiyyətli parçası və dayanıqlı DTG (Direct-to-Garment) çapı ilə həm rahatlığı, həm də premium görünüşü bir arada təqdim edir.\n\nMaterial: 100% nəfəs alan pambıq parça\n\nÇap növü: Yuyulmaya davamlı, rəngini itirməyən yüksək keyfiyyətli rəqəmsal çap\n\nKəsim: Həm gündəlik, həm də küçə stili (streetwear) üçün ideal rahat kəsim\n\nQulluq qaydası: 30°C dərəcədə tərsinə çevirərək yumaq tövsiyə olunur.",
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL"
+      ],
+      "colors": [
+        {
+          "name": "Standart",
+          "hex": "#111111",
+          "image": "/images/uploads/Gemini_Generated_Image_bzg09hb_1792622301541.jpg",
+          "hoverImage": "/images/uploads/Gemini_Generated_Image_bzg09hb_1792622285359.jpg"
+        }
+      ],
+      "id": "vtx-mvip36t7",
+      "slug": "911-gt3-rs-oversize-t-shirt"
+    },
+    {
       "id": "magenta-tee",
       "slug": "magenta-tee",
       "name": "Canlı Magenta Pambıq T-Shirt",
