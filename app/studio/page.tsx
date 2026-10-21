@@ -1365,15 +1365,17 @@ export default function StudioPage() {
         }}
       />
 
-      {/* PhotoRoom 3D Floating Space Visualizer (360° Orbital Rotation) */}
+      {/* 3D Canlı Baxış (360° Fəza) */}
       <PhotoRoom3DPreviewModal
         isOpen={isPhotoRoom3DOpen}
         onClose={() => setIsPhotoRoom3DOpen(false)}
-        frontDesign={designs.front}
-        backDesign={designs.back}
-        colorHex={selectedColor.hex}
+        garmentId={selectedGarment.id}
         garmentName={selectedGarment.name}
-        garmentCategory={selectedGarment.category}
+        garmentCategory={garmentCategory}
+        colorKey={selectedColor.key}
+        colorHex={selectedColor.hex}
+        designs={designs}
+        currentSide={viewSide}
       />
 
       {/* ========================================================================= */}
@@ -1517,8 +1519,8 @@ export default function StudioPage() {
                   <button
                     type="button"
                     onClick={() => setIsPhotoRoom3DOpen(true)}
-                    className="py-1.5 px-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 text-[10px] font-bold active:scale-95 transition flex items-center gap-1 shadow-xs cursor-pointer"
-                    title="3D PhotoRoom baxışı"
+                    className="py-1.5 px-2.5 rounded-xl bg-stone-900 hover:bg-black text-[#e8c98a] border border-[#3d3228] text-[10px] font-bold active:scale-95 transition flex items-center gap-1 shadow-xs cursor-pointer"
+                    title="3D Canlı Baxış"
                   >
                     <Eye size={12} />
                     <span>3D Baxış</span>
