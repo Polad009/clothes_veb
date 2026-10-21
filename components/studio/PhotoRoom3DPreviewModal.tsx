@@ -8,21 +8,20 @@ import {
   Play,
   Pause,
   Download,
-  RotateCcw,
   Sparkles,
   Sun,
   Flame,
   Zap,
-  Camera,
-  Layers,
-  Check,
   Compass,
+  Check,
+  CheckSquare,
+  Square,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { StudioSurface, getStudioGarmentCategory, getStudioGarmentImage, PRINT_AREAS } from "@/components/studio/GarmentCanvas";
 import { SideDesignState } from "@/app/studio/page";
 import { getProductShapeConfig } from "@/lib/studio/product-shapes";
-import { buildInflatedGarmentGeometry } from "@/lib/studio/mesh-generator";
+import { buildInflatedGarmentGeometry, dilateTextureEdges } from "@/lib/studio/mesh-generator";
 
 interface PhotoRoom3DPreviewModalProps {
   isOpen: boolean;
@@ -55,9 +54,9 @@ export function PhotoRoom3DPreviewModal({
 }: PhotoRoom3DPreviewModalProps) {
   const mountRef = useRef<HTMLDivElement>(null);
 
-  // Fallback support if designs object or frontDesign/backDesign is passed
   const activeFront = designs?.front || frontDesign || {
     uploadedImage: null,
+    originalImage: null,
     customText: "",
     textColor: "#111827",
     fontFamily: "Inter",
@@ -69,6 +68,7 @@ export function PhotoRoom3DPreviewModal({
 
   const activeBack = designs?.back || backDesign || {
     uploadedImage: null,
+    originalImage: null,
     customText: "",
     textColor: "#111827",
     fontFamily: "Inter",
@@ -80,6 +80,7 @@ export function PhotoRoom3DPreviewModal({
 
   const activeLeftSleeve = designs?.leftSleeve || {
     uploadedImage: null,
+    originalImage: null,
     customText: "",
     textColor: "#111827",
     fontFamily: "Inter",
@@ -91,6 +92,7 @@ export function PhotoRoom3DPreviewModal({
 
   const activeRightSleeve = designs?.rightSleeve || {
     uploadedImage: null,
+    originalImage: null,
     customText: "",
     textColor: "#111827",
     fontFamily: "Inter",
@@ -105,17 +107,26 @@ export function PhotoRoom3DPreviewModal({
   const [lighting, setLighting] = useState<LightingPreset>("studio");
   const [activeViewLabel, setActiveViewLabel] = useState<string>("Ön baxış (0°)");
   const [isLoading, setIsLoading] = useState(true);
-  const [isCapturing, setIsCapturing] = useState(false);
+  const [isExportingHd, setIsExportingHd] = useState(false);
+  const [transparentBgExport, setTransparentBgExport] = useState(true);
   const [hasWebGl, setHasWebGl] = useState(true);
 
-  // References for Three.js state
+  // Three.js object references
   const sceneRef = useRef<THREE.Scene | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
   const garmentMeshRef = useRef<THREE.Mesh | null>(null);
+  const decalMeshRef = useRef<THREE.Mesh | null>(null);
   const shadowMeshRef = useRef<THREE.Mesh | null>(null);
   const rafIdRef = useRef<number | null>(null);
+
+  // Decal texture canvases (2048x2048 dedicated layer)
+  const frontDecalTextureRef = useRef<THREE.CanvasTexture | null>(null);
+  const backDecalTextureRef = useRef<THREE.CanvasTexture | null>(null);
+  const frontDecalCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const backDecalCanvasRef = useRef<HTMLCanvasElement | null>(null);
+
   const lightsRef = useRef<{
     keyLight: THREE.DirectionalLight;
     fillLight: THREE.DirectionalLight;
@@ -123,7 +134,7 @@ export function PhotoRoom3DPreviewModal({
     ambientLight: THREE.AmbientLight;
   } | null>(null);
 
-  // Camera animation interpolation
+  // Smooth camera animation
   const cameraAnimRef = useRef<{
     isAnimating: boolean;
     startTime: number;
@@ -144,12 +155,11 @@ export function PhotoRoom3DPreviewModal({
     radius: 4.6,
   });
 
-  // Resolve garment mockup image paths
   const frontImgSrc = getStudioGarmentImage(garmentId, colorKey, "front");
   const backImgSrc = getStudioGarmentImage(garmentId, colorKey, "back");
   const shapeConfig = getProductShapeConfig(garmentId);
 
-  // Check WebGL availability
+  // WebGL support check
   useEffect(() => {
     try {
       const canvas = document.createElement("canvas");
@@ -160,316 +170,424 @@ export function PhotoRoom3DPreviewModal({
     }
   }, []);
 
-  // Composite texture generator: Draws real transparent mockup photo + user artwork + typography + sleeve prints
-  const createSurfaceTexture = useCallback(
-    (side: "front" | "back"): Promise<THREE.CanvasTexture> => {
-      return new Promise((resolve) => {
+  // 1. Create procedural soft oval radial contact shadow texture (zero harsh edges)
+  const createContactShadowTexture = (): THREE.CanvasTexture => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      const grad = ctx.createRadialGradient(256, 256, 10, 256, 256, 240);
+      grad.addColorStop(0, "rgba(10, 8, 6, 0.48)");
+      grad.addColorStop(0.35, "rgba(10, 8, 6, 0.28)");
+      grad.addColorStop(0.7, "rgba(10, 8, 6, 0.08)");
+      grad.addColorStop(1, "rgba(10, 8, 6, 0)");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 512, 512);
+    }
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.generateMipmaps = true;
+    return texture;
+  };
+
+  // 2. Load Full-Resolution Base Mockup Textures with Edge Dilation (eliminates white halo)
+  const loadFullResMockupTexture = (
+    imageSrc: string,
+    maxAnisotropy: number
+  ): Promise<THREE.CanvasTexture> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
         const canvas = document.createElement("canvas");
-        canvas.width = 1024;
-        canvas.height = 1024;
+        canvas.width = img.naturalWidth || 1254;
+        canvas.height = img.naturalHeight || 1254;
         const ctx = canvas.getContext("2d", { willReadFrequently: true });
-        if (!ctx) {
-          resolve(new THREE.CanvasTexture(canvas));
-          return;
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          // Dilate edge colors 3px into alpha to prevent edge halos
+          dilateTextureEdges(canvas, 3);
         }
 
-        const baseImg = new Image();
-        baseImg.crossOrigin = "anonymous";
-        baseImg.src = side === "front" ? frontImgSrc : backImgSrc;
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.generateMipmaps = true;
+        texture.minFilter = THREE.LinearMipmapLinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        texture.anisotropy = Math.min(16, maxAnisotropy);
+        texture.needsUpdate = true;
+        resolve(texture);
+      };
+      img.onerror = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 512;
+        canvas.height = 512;
+        const texture = new THREE.CanvasTexture(canvas);
+        resolve(texture);
+      };
+      img.src = imageSrc;
+    });
+  };
 
-        baseImg.onload = () => {
-          // 1. Draw authentic garment mockup photo (contains real photographic fabric folds and shading)
-          ctx.drawImage(baseImg, 0, 0, 1024, 1024);
+  // 3. Render 2048x2048 High-Resolution Design Decal Canvas (Independent Layer)
+  const updateDecalCanvas = useCallback(
+    async (side: "front" | "back") => {
+      const design = side === "front" ? activeFront : activeBack;
+      const isFront = side === "front";
+      let canvas = isFront ? frontDecalCanvasRef.current : backDecalCanvasRef.current;
 
-          const design = side === "front" ? activeFront : activeBack;
-          const hasImg = Boolean(design.uploadedImage);
-          const hasTxt = Boolean(design.customText?.trim());
+      if (!canvas) {
+        canvas = document.createElement("canvas");
+        canvas.width = 2048;
+        canvas.height = 2048;
+        if (isFront) frontDecalCanvasRef.current = canvas;
+        else backDecalCanvasRef.current = canvas;
+      }
 
-          // Print area definition
-          const cat = getStudioGarmentCategory(garmentId);
-          const pAreas = PRINT_AREAS[cat] || PRINT_AREAS.tshirt;
-          const area = pAreas[side] || pAreas.front || { left: 0.28, top: 0.30, width: 0.44, height: 0.46 };
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      if (!ctx) return;
 
-          const printAreaCenterX = (area.left + area.width / 2) * 1024;
-          const printAreaCenterY = (area.top + area.height / 2) * 1024;
+      // Clear with transparent background
+      ctx.clearRect(0, 0, 2048, 2048);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
 
-          const finishTexture = () => {
-            // Also draw sleeve graphics if on front view
-            if (side === "front") {
-              // Left Sleeve print
-              if (activeLeftSleeve.uploadedImage) {
-                const sImg = new Image();
-                sImg.crossOrigin = "anonymous";
-                sImg.src = activeLeftSleeve.uploadedImage;
-                sImg.onload = () => {
-                  ctx.save();
-                  // Left sleeve coordinates on mockup canvas
-                  ctx.translate(220, 390);
-                  ctx.rotate(0.2);
-                  const sDim = 120 * (activeLeftSleeve.scale || 0.8);
-                  ctx.drawImage(sImg, -sDim / 2, -sDim / 2, sDim, sDim);
-                  ctx.restore();
-                  resolveTexture();
-                };
-                sImg.onerror = () => resolveTexture();
-                return;
-              }
-              // Right Sleeve print
-              if (activeRightSleeve.uploadedImage) {
-                const sImg = new Image();
-                sImg.crossOrigin = "anonymous";
-                sImg.src = activeRightSleeve.uploadedImage;
-                sImg.onload = () => {
-                  ctx.save();
-                  // Right sleeve coordinates on mockup canvas
-                  ctx.translate(800, 390);
-                  ctx.rotate(-0.2);
-                  const sDim = 120 * (activeRightSleeve.scale || 0.8);
-                  ctx.drawImage(sImg, -sDim / 2, -sDim / 2, sDim, sDim);
-                  ctx.restore();
-                  resolveTexture();
-                };
-                sImg.onerror = () => resolveTexture();
-                return;
-              }
-            }
-            resolveTexture();
+      const hasImg = Boolean(design.uploadedImage || design.originalImage);
+      const hasTxt = Boolean(design.customText?.trim());
+
+      const cat = getStudioGarmentCategory(garmentId);
+      const pAreas = PRINT_AREAS[cat] || PRINT_AREAS.tshirt;
+      const area = pAreas[side] || pAreas.front || { left: 0.28, top: 0.30, width: 0.44, height: 0.46 };
+
+      const printCenterX = (area.left + area.width / 2) * 2048;
+      const printCenterY = (area.top + area.height / 2) * 2048;
+      const pxRatio = 2048 / 450;
+
+      // Also render sleeves on front decal
+      const renderSleeves = () => {
+        if (!isFront) return;
+        if (activeLeftSleeve.uploadedImage || activeLeftSleeve.originalImage) {
+          const sImg = new Image();
+          sImg.crossOrigin = "anonymous";
+          sImg.onload = () => {
+            ctx.save();
+            ctx.translate(440, 780);
+            ctx.rotate(0.2);
+            const sDim = 240 * (activeLeftSleeve.scale || 0.8);
+            ctx.drawImage(sImg, -sDim / 2, -sDim / 2, sDim, sDim);
+            ctx.restore();
+            notifyTextureUpdate();
           };
-
-          const resolveTexture = () => {
-            const texture = new THREE.CanvasTexture(canvas);
-            texture.colorSpace = THREE.SRGBColorSpace;
-            texture.anisotropy = 8;
-            texture.generateMipmaps = true;
-            texture.needsUpdate = true;
-            resolve(texture);
+          sImg.src = activeLeftSleeve.originalImage || activeLeftSleeve.uploadedImage || "";
+        }
+        if (activeRightSleeve.uploadedImage || activeRightSleeve.originalImage) {
+          const sImg = new Image();
+          sImg.crossOrigin = "anonymous";
+          sImg.onload = () => {
+            ctx.save();
+            ctx.translate(1600, 780);
+            ctx.rotate(-0.2);
+            const sDim = 240 * (activeRightSleeve.scale || 0.8);
+            ctx.drawImage(sImg, -sDim / 2, -sDim / 2, sDim, sDim);
+            ctx.restore();
+            notifyTextureUpdate();
           };
+          sImg.src = activeRightSleeve.originalImage || activeRightSleeve.uploadedImage || "";
+        }
+      };
 
-          if (!hasImg && !hasTxt) {
-            finishTexture();
-            return;
-          }
+      const notifyTextureUpdate = () => {
+        const tex = isFront ? frontDecalTextureRef.current : backDecalTextureRef.current;
+        if (tex) {
+          tex.needsUpdate = true;
+        }
+      };
 
-          // Relative translation scaling from 2D canvas (approx 500px stage to 1024px texture)
-          const pxRatio = 1024 / 450;
-          const artX = printAreaCenterX + (design.posX || 0) * pxRatio;
-          const artY = printAreaCenterY + (design.posY || 0) * pxRatio;
-          const artScale = (design.scale || 1.0) * pxRatio * 0.95;
+      if (!hasImg && !hasTxt) {
+        renderSleeves();
+        notifyTextureUpdate();
+        return;
+      }
+
+      const drawText = () => {
+        if (hasTxt) {
+          ctx.save();
+          const txtX = printCenterX + (design.textPosX || 0) * pxRatio;
+          const txtY = printCenterY + (design.textPosY || 55) * pxRatio;
+          const txtScale = (design.textScale || 1.0) * pxRatio * 0.95;
+          const txtRot = ((design.textRotation || 0) * Math.PI) / 180;
+
+          ctx.translate(txtX, txtY);
+          ctx.rotate(txtRot);
+
+          const fontSize = Math.round(22 * txtScale);
+          ctx.font = `900 ${fontSize}px ${design.fontFamily || "Inter, sans-serif"}`;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+
+          // Micro-elevation shadow for realistic DTG print feel
+          ctx.shadowColor = "rgba(0,0,0,0.35)";
+          ctx.shadowBlur = 4;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 2;
+
+          ctx.fillStyle = design.textColor || "#111827";
+          ctx.fillText(design.customText.toUpperCase(), 0, 0);
+          ctx.restore();
+        }
+        renderSleeves();
+        notifyTextureUpdate();
+      };
+
+      // Draw user artwork using original high-resolution source
+      const artworkSrc = design.originalImage || design.uploadedImage;
+      if (artworkSrc) {
+        const artImg = new Image();
+        artImg.crossOrigin = "anonymous";
+        artImg.onload = () => {
+          ctx.save();
+          const artX = printCenterX + (design.posX || 0) * pxRatio;
+          const artY = printCenterY + (design.posY || 0) * pxRatio;
+          const artScale = (design.scale || 1.0) * pxRatio * 0.96;
           const artRot = ((design.rotation || 0) * Math.PI) / 180;
 
-          const renderText = () => {
-            if (hasTxt) {
-              ctx.save();
-              const txtX = printAreaCenterX + (design.textPosX || 0) * pxRatio;
-              const txtY = printAreaCenterY + (design.textPosY || 55) * pxRatio;
-              const txtScale = (design.textScale || 1.0) * pxRatio * 0.9;
-              const txtRot = ((design.textRotation || 0) * Math.PI) / 180;
+          ctx.translate(artX, artY);
+          ctx.rotate(artRot);
 
-              ctx.translate(txtX, txtY);
-              ctx.rotate(txtRot);
-
-              const fontSize = Math.round(22 * txtScale);
-              ctx.font = `900 ${fontSize}px ${design.fontFamily || "Inter, sans-serif"}`;
-              ctx.textAlign = "center";
-              ctx.textBaseline = "middle";
-
-              // Realistic DTG ink shadow
-              ctx.shadowColor = "rgba(0,0,0,0.35)";
-              ctx.shadowBlur = 3;
-              ctx.shadowOffsetX = 0;
-              ctx.shadowOffsetY = 1;
-
-              ctx.fillStyle = design.textColor || "#111827";
-              ctx.fillText(design.customText.toUpperCase(), 0, 0);
-              ctx.restore();
-            }
-            finishTexture();
-          };
-
-          if (hasImg && design.uploadedImage) {
-            const artImg = new Image();
-            artImg.crossOrigin = "anonymous";
-            artImg.onload = () => {
-              ctx.save();
-              ctx.translate(artX, artY);
-              ctx.rotate(artRot);
-
-              const maxDim = 200 * artScale;
-              let dw = maxDim;
-              let dh = maxDim;
-              if (artImg.width > artImg.height) {
-                dh = (artImg.height / artImg.width) * maxDim;
-              } else {
-                dw = (artImg.width / artImg.height) * maxDim;
-              }
-
-              // Realistic DTG printed ink adhesion
-              ctx.shadowColor = "rgba(0,0,0,0.4)";
-              ctx.shadowBlur = 4;
-              ctx.shadowOffsetX = 0;
-              ctx.shadowOffsetY = 2;
-
-              ctx.drawImage(artImg, -dw / 2, -dh / 2, dw, dh);
-              ctx.restore();
-              renderText();
-            };
-            artImg.onerror = () => renderText();
-            artImg.src = design.uploadedImage;
+          const maxDim = 200 * artScale;
+          let dw = maxDim;
+          let dh = maxDim;
+          if (artImg.width > artImg.height) {
+            dh = (artImg.height / artImg.width) * maxDim;
           } else {
-            renderText();
+            dw = (artImg.width / artImg.height) * maxDim;
           }
-        };
 
-        baseImg.onerror = () => {
-          // Fallback plain color fill
-          ctx.fillStyle = colorHex || "#FFFFFF";
-          ctx.fillRect(0, 0, 1024, 1024);
-          const texture = new THREE.CanvasTexture(canvas);
-          resolve(texture);
+          ctx.shadowColor = "rgba(0,0,0,0.38)";
+          ctx.shadowBlur = 6;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 3;
+
+          ctx.drawImage(artImg, -dw / 2, -dh / 2, dw, dh);
+          ctx.restore();
+          drawText();
         };
-      });
+        artImg.onerror = () => drawText();
+        artImg.src = artworkSrc;
+      } else {
+        drawText();
+      }
     },
-    [frontImgSrc, backImgSrc, garmentId, colorHex, activeFront, activeBack, activeLeftSleeve, activeRightSleeve]
+    [garmentId, activeFront, activeBack, activeLeftSleeve, activeRightSleeve]
   );
 
-  // Initialize Three.js 3D Studio Scene
+  // Debounced Decal Texture Update (120ms) when user adjusts design in 2D editor
+  useEffect(() => {
+    if (!isOpen) return;
+    const timer = setTimeout(() => {
+      updateDecalCanvas("front");
+      updateDecalCanvas("back");
+    }, 120);
+    return () => clearTimeout(timer);
+  }, [isOpen, updateDecalCanvas]);
+
+  // Main Three.js Scene Setup
   useEffect(() => {
     if (!isOpen || !mountRef.current || !hasWebGl) return;
 
     let isDisposed = false;
     setIsLoading(true);
 
-    const width = mountRef.current.clientWidth || 500;
-    const height = mountRef.current.clientHeight || 500;
+    const width = mountRef.current.clientWidth || 600;
+    const height = mountRef.current.clientHeight || 600;
 
     // 1. Scene
     const scene = new THREE.Scene();
     sceneRef.current = scene;
 
     // 2. Camera
-    const camera = new THREE.PerspectiveCamera(36, width / height, 0.1, 100);
-    camera.position.set(0, 0.1, 4.6);
+    const camera = new THREE.PerspectiveCamera(34, width / height, 0.1, 100);
+    camera.position.set(0, 0.08, 4.5);
     cameraRef.current = camera;
 
-    // 3. Renderer
+    // 3. Renderer with antialiasing and proper SRGB color space
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
-      preserveDrawingBuffer: true,
+      preserveDrawingBuffer: false,
       powerPreference: "high-performance",
     });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2.0));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMappingExposure = 1.0;
 
     mountRef.current.innerHTML = "";
     mountRef.current.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
+    const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
+
     // 4. OrbitControls
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
+    controls.dampingFactor = 0.06;
     controls.minDistance = 2.0;
     controls.maxDistance = 6.2;
-    controls.maxPolarAngle = Math.PI / 1.7; // Constrain viewing from underneath the floor
+    controls.maxPolarAngle = Math.PI / 1.7; // Constrain viewing from under floor
     controls.minPolarAngle = Math.PI / 8;
     controls.target.set(0, 0, 0);
     controlsRef.current = controls;
 
-    // Pause auto-rotation on user manual interaction
     controls.addEventListener("start", () => {
       setAutoRotate(false);
     });
 
-    // 5. Procedural Studio Lighting
-    const ambientLight = new THREE.AmbientLight(0xfff6ec, 0.95);
+    // 5. Lighting: Soft natural studio setup (avoids washing out fabric photo textures)
+    const ambientLight = new THREE.AmbientLight(0xfff8f0, 0.9);
     scene.add(ambientLight);
 
-    const keyLight = new THREE.DirectionalLight(0xfff5e6, 2.4);
-    keyLight.position.set(3.2, 3.8, 3.8);
-    keyLight.castShadow = true;
-    keyLight.shadow.mapSize.width = 1024;
-    keyLight.shadow.mapSize.height = 1024;
-    keyLight.shadow.bias = -0.0004;
+    const keyLight = new THREE.DirectionalLight(0xfff4e8, 1.8);
+    keyLight.position.set(2.8, 3.2, 3.5);
     scene.add(keyLight);
 
-    const fillLight = new THREE.DirectionalLight(0xe8f0ff, 1.3);
-    fillLight.position.set(-3.5, 1.2, 2.2);
+    const fillLight = new THREE.DirectionalLight(0xe8f2ff, 1.0);
+    fillLight.position.set(-3.2, 1.0, 2.0);
     scene.add(fillLight);
 
-    const rimLight = new THREE.DirectionalLight(0xe8c98a, 2.6); // Warm gold rim
-    rimLight.position.set(0, 3.2, -3.8);
+    const rimLight = new THREE.DirectionalLight(0xe8c98a, 2.0); // Warm gold rim
+    rimLight.position.set(0, 2.8, -3.5);
     scene.add(rimLight);
 
     lightsRef.current = { keyLight, fillLight, rimLight, ambientLight };
 
-    // 6. Soft Contact Shadow Plane Beneath Garment
-    const shadowGeo = new THREE.PlaneGeometry(3.6, 3.6);
-    const shadowMat = new THREE.ShadowMaterial({ opacity: 0.28 });
-    const shadowPlane = new THREE.Mesh(shadowGeo, shadowMat);
+    // 6. Soft Radial Contact Shadow Plane (Completely soft oval, no harsh parallelogram)
+    const shadowTex = createContactShadowTexture();
+    const shadowPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(3.6, 2.2),
+      new THREE.MeshBasicMaterial({
+        map: shadowTex,
+        transparent: true,
+        depthWrite: false,
+        opacity: 0.55,
+      })
+    );
     shadowPlane.rotation.x = -Math.PI / 2;
-    shadowPlane.position.y = -1.35;
-    shadowPlane.receiveShadow = true;
+    shadowPlane.position.y = -1.32;
     scene.add(shadowPlane);
     shadowMeshRef.current = shadowPlane;
 
-    // 7. Build Inflated 3D Mesh and Textures
-    const meshCacheKey = `${garmentId}_${shapeConfig.thickness}_${colorKey}`;
+    // 7. Load Smooth Geometry and Base Garment Mockup Textures
+    const meshCacheKey = `smooth_${garmentId}_${shapeConfig.thickness}`;
 
     Promise.all([
       buildInflatedGarmentGeometry(frontImgSrc, shapeConfig, meshCacheKey),
-      createSurfaceTexture("front"),
-      createSurfaceTexture("back"),
-    ]).then(([geometry, frontTex, backTex]) => {
+      loadFullResMockupTexture(frontImgSrc, maxAnisotropy),
+      loadFullResMockupTexture(backImgSrc, maxAnisotropy),
+    ]).then(([geometry, frontBaseTex, backBaseTex]) => {
       if (isDisposed) return;
 
-      const frontMat = new THREE.MeshStandardMaterial({
-        map: frontTex,
-        roughness: 0.65,
-        metalness: 0.04,
+      // LAYER 1: Base Garment Mesh (Full mockup photo quality, sub-pixel alpha anti-aliasing)
+      const frontBaseMat = new THREE.MeshStandardMaterial({
+        map: frontBaseTex,
+        transparent: true,
+        alphaTest: 0.05,
+        roughness: 0.72,
+        metalness: 0.02,
         side: THREE.FrontSide,
       });
 
-      const backMat = new THREE.MeshStandardMaterial({
-        map: backTex,
-        roughness: 0.65,
-        metalness: 0.04,
+      const backBaseMat = new THREE.MeshStandardMaterial({
+        map: backBaseTex,
+        transparent: true,
+        alphaTest: 0.05,
+        roughness: 0.72,
+        metalness: 0.02,
         side: THREE.FrontSide,
       });
 
-      const mesh = new THREE.Mesh(geometry, [frontMat, backMat]);
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
-      mesh.position.set(0, 0, 0);
+      const baseMesh = new THREE.Mesh(geometry, [frontBaseMat, backBaseMat]);
+      baseMesh.position.set(0, 0, 0);
+      scene.add(baseMesh);
+      garmentMeshRef.current = baseMesh;
 
-      scene.add(mesh);
-      garmentMeshRef.current = mesh;
+      // LAYER 2: Separate 2048x2048 High-Resolution Design Decal Mesh (PolygonOffset prevents z-fighting)
+      // Initialize decal canvas textures
+      const frontDecalCanvas = document.createElement("canvas");
+      frontDecalCanvas.width = 2048;
+      frontDecalCanvas.height = 2048;
+      frontDecalCanvasRef.current = frontDecalCanvas;
+
+      const backDecalCanvas = document.createElement("canvas");
+      backDecalCanvas.width = 2048;
+      backDecalCanvas.height = 2048;
+      backDecalCanvasRef.current = backDecalCanvas;
+
+      const frontDecalTex = new THREE.CanvasTexture(frontDecalCanvas);
+      frontDecalTex.colorSpace = THREE.SRGBColorSpace;
+      frontDecalTex.anisotropy = Math.min(16, maxAnisotropy);
+      frontDecalTex.generateMipmaps = true;
+      frontDecalTextureRef.current = frontDecalTex;
+
+      const backDecalTex = new THREE.CanvasTexture(backDecalCanvas);
+      backDecalTex.colorSpace = THREE.SRGBColorSpace;
+      backDecalTex.anisotropy = Math.min(16, maxAnisotropy);
+      backDecalTex.generateMipmaps = true;
+      backDecalTextureRef.current = backDecalTex;
+
+      const frontDecalMat = new THREE.MeshStandardMaterial({
+        map: frontDecalTex,
+        transparent: true,
+        depthWrite: false,
+        polygonOffset: true,
+        polygonOffsetFactor: -1.5,
+        polygonOffsetUnits: -1.5,
+        roughness: 0.62,
+        metalness: 0.02,
+        side: THREE.FrontSide,
+      });
+
+      const backDecalMat = new THREE.MeshStandardMaterial({
+        map: backDecalTex,
+        transparent: true,
+        depthWrite: false,
+        polygonOffset: true,
+        polygonOffsetFactor: -1.5,
+        polygonOffsetUnits: -1.5,
+        roughness: 0.62,
+        metalness: 0.02,
+        side: THREE.FrontSide,
+      });
+
+      const decalMesh = new THREE.Mesh(geometry, [frontDecalMat, backDecalMat]);
+      decalMesh.position.set(0, 0, 0);
+      scene.add(decalMesh);
+      decalMeshRef.current = decalMesh;
+
+      // Initial decal draw
+      updateDecalCanvas("front");
+      updateDecalCanvas("back");
+
       setIsLoading(false);
     });
 
-    // 8. Animation & Render Loop (Pauses when tab hidden or modal closed)
+    // 8. Animation & Render Loop
     let lastTime = performance.now();
 
     const animate = (currentTime: number) => {
       if (isDisposed) return;
       rafIdRef.current = requestAnimationFrame(animate);
 
-      // Pause render when browser tab is inactive
       if (document.visibilityState === "hidden") return;
 
       const delta = (currentTime - lastTime) / 1000;
       lastTime = currentTime;
 
-      // Camera Smooth 600ms Transitions (Animated Angle Snapping)
       const anim = cameraAnimRef.current;
       if (anim.isAnimating) {
         const elapsed = currentTime - anim.startTime;
         const progress = Math.min(1, elapsed / anim.duration);
-        // EaseInOutCubic
         const ease =
           progress < 0.5
             ? 4 * progress * progress * progress
@@ -487,7 +605,6 @@ export function PhotoRoom3DPreviewModal({
           anim.isAnimating = false;
         }
       } else if (autoRotate && controlsRef.current) {
-        // Slow continuous 360 rotation
         controls.autoRotate = true;
         controls.autoRotateSpeed = 2.0;
       } else {
@@ -500,7 +617,7 @@ export function PhotoRoom3DPreviewModal({
 
     rafIdRef.current = requestAnimationFrame(animate);
 
-    // 9. Resize handler
+    // Resize listener
     const handleResize = () => {
       if (!mountRef.current || !rendererRef.current || !cameraRef.current) return;
       const w = mountRef.current.clientWidth;
@@ -512,7 +629,6 @@ export function PhotoRoom3DPreviewModal({
 
     window.addEventListener("resize", handleResize);
 
-    // Cleanup and complete disposal
     return () => {
       isDisposed = true;
       window.removeEventListener("resize", handleResize);
@@ -537,6 +653,17 @@ export function PhotoRoom3DPreviewModal({
         }
       }
 
+      if (decalMeshRef.current) {
+        scene.remove(decalMeshRef.current);
+        if (Array.isArray(decalMeshRef.current.material)) {
+          decalMeshRef.current.material.forEach((m) => {
+            const mat = m as THREE.MeshStandardMaterial;
+            if (mat.map) mat.map.dispose();
+            mat.dispose();
+          });
+        }
+      }
+
       if (rendererRef.current) {
         rendererRef.current.dispose();
         rendererRef.current.forceContextLoss();
@@ -546,49 +673,49 @@ export function PhotoRoom3DPreviewModal({
       rendererRef.current = null;
       cameraRef.current = null;
     };
-  }, [isOpen, hasWebGl, frontImgSrc, shapeConfig.thickness, createSurfaceTexture, garmentId, colorKey]);
+  }, [isOpen, hasWebGl, frontImgSrc, backImgSrc, garmentId, shapeConfig.thickness, updateDecalCanvas]);
 
-  // Lighting Mode Controller (Procedural)
+  // Lighting Mode Controller
   useEffect(() => {
     const lights = lightsRef.current;
     if (!lights) return;
 
     if (lighting === "studio") {
-      lights.ambientLight.color.setHex(0xfff6ec);
-      lights.ambientLight.intensity = 0.95;
-      lights.keyLight.color.setHex(0xfff5e6);
-      lights.keyLight.intensity = 2.4;
-      lights.fillLight.color.setHex(0xe8f0ff);
-      lights.fillLight.intensity = 1.3;
+      lights.ambientLight.color.setHex(0xfff8f0);
+      lights.ambientLight.intensity = 0.9;
+      lights.keyLight.color.setHex(0xfff4e8);
+      lights.keyLight.intensity = 1.8;
+      lights.fillLight.color.setHex(0xe8f2ff);
+      lights.fillLight.intensity = 1.0;
       lights.rimLight.color.setHex(0xe8c98a); // Gold
-      lights.rimLight.intensity = 2.6;
+      lights.rimLight.intensity = 2.0;
     } else if (lighting === "atelier") {
       lights.ambientLight.color.setHex(0xffeed6);
       lights.ambientLight.intensity = 0.85;
       lights.keyLight.color.setHex(0xffd8a8);
-      lights.keyLight.intensity = 2.8;
+      lights.keyLight.intensity = 2.2;
       lights.fillLight.color.setHex(0xfce8d2);
-      lights.fillLight.intensity = 1.4;
+      lights.fillLight.intensity = 1.2;
       lights.rimLight.color.setHex(0xf59e0b);
-      lights.rimLight.intensity = 2.4;
+      lights.rimLight.intensity = 2.0;
     } else if (lighting === "daylight") {
       lights.ambientLight.color.setHex(0xffffff);
-      lights.ambientLight.intensity = 1.1;
+      lights.ambientLight.intensity = 1.0;
       lights.keyLight.color.setHex(0xffffff);
-      lights.keyLight.intensity = 3.0;
+      lights.keyLight.intensity = 2.2;
       lights.fillLight.color.setHex(0xdbeafe);
-      lights.fillLight.intensity = 1.8;
+      lights.fillLight.intensity = 1.4;
       lights.rimLight.color.setHex(0xfef08a);
-      lights.rimLight.intensity = 2.0;
+      lights.rimLight.intensity = 1.6;
     } else if (lighting === "neon") {
       lights.ambientLight.color.setHex(0x181528);
-      lights.ambientLight.intensity = 0.6;
+      lights.ambientLight.intensity = 0.55;
       lights.keyLight.color.setHex(0x06b6d4); // Cyan
-      lights.keyLight.intensity = 2.6;
+      lights.keyLight.intensity = 2.2;
       lights.fillLight.color.setHex(0xa855f7); // Purple
-      lights.fillLight.intensity = 1.8;
+      lights.fillLight.intensity = 1.6;
       lights.rimLight.color.setHex(0xec4899); // Magenta
-      lights.rimLight.intensity = 3.6;
+      lights.rimLight.intensity = 3.0;
     }
   }, [lighting]);
 
@@ -600,11 +727,10 @@ export function PhotoRoom3DPreviewModal({
     setAutoRotate(false);
     setActiveViewLabel(label);
 
-    const radius = Math.hypot(camera.position.x, camera.position.y, camera.position.z) || 4.6;
+    const radius = Math.hypot(camera.position.x, camera.position.y, camera.position.z) || 4.5;
     const currentTheta = Math.atan2(camera.position.x, camera.position.z);
     let targetTheta = (targetDeg * Math.PI) / 180;
 
-    // Shortest angular path
     while (targetTheta - currentTheta > Math.PI) targetTheta -= 2 * Math.PI;
     while (targetTheta - currentTheta < -Math.PI) targetTheta += 2 * Math.PI;
 
@@ -620,34 +746,67 @@ export function PhotoRoom3DPreviewModal({
     };
   };
 
-  // Double-Click on Canvas to Reset View to Front (0°)
   const handleDoubleClick = () => {
     rotateCameraToAngle(0, "Ön baxış (0°)");
   };
 
-  // High-Resolution 2x HD Snapshot Download
-  const handleDownloadSnapshot = () => {
-    if (!rendererRef.current || !sceneRef.current || !cameraRef.current) return;
-    setIsCapturing(true);
+  // Dedicated Offscreen 3x (2800px) Ultra-HD Image Export
+  const handleExportUltraHd = async () => {
+    if (!sceneRef.current || !cameraRef.current) return;
+    setIsExportingHd(true);
 
-    setTimeout(() => {
-      const renderer = rendererRef.current;
-      const scene = sceneRef.current;
-      const camera = cameraRef.current;
-      if (!renderer || !scene || !camera) {
-        setIsCapturing(false);
-        return;
+    // Allow UI to show "HD hazırlanır…" spinner
+    await new Promise((resolve) => setTimeout(resolve, 80));
+
+    try {
+      const exportWidth = 2800;
+      const exportHeight = 2800;
+
+      const offscreenRenderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+        preserveDrawingBuffer: false,
+        powerPreference: "high-performance",
+      });
+      offscreenRenderer.setSize(exportWidth, exportHeight);
+      offscreenRenderer.setPixelRatio(1);
+      offscreenRenderer.outputColorSpace = THREE.SRGBColorSpace;
+      offscreenRenderer.toneMapping = THREE.ACESFilmicToneMapping;
+      offscreenRenderer.toneMappingExposure = 1.0;
+
+      // Clone camera matching current angle
+      const currentCamera = cameraRef.current;
+      const exportCamera = currentCamera.clone();
+      exportCamera.aspect = 1.0;
+      exportCamera.updateProjectionMatrix();
+
+      // Temporarily toggle shadow visibility if transparent background is requested
+      const shadow = shadowMeshRef.current;
+      if (transparentBgExport && shadow) {
+        shadow.visible = false;
       }
 
-      renderer.render(scene, camera);
-      const dataUrl = renderer.domElement.toDataURL("image/png");
+      offscreenRenderer.render(sceneRef.current, exportCamera);
+      const dataUrl = offscreenRenderer.domElement.toDataURL("image/png");
 
+      if (transparentBgExport && shadow) {
+        shadow.visible = true;
+      }
+
+      // Download file
       const link = document.createElement("a");
-      link.download = `3D-Canli-Baxis-${garmentName.replace(/\s+/g, "_")}.png`;
+      link.download = `HD-3D-Baxis-${garmentName.replace(/\s+/g, "_")}-${transparentBgExport ? "seffaf" : "studiya"}.png`;
       link.href = dataUrl;
       link.click();
-      setIsCapturing(false);
-    }, 150);
+
+      // Immediately cleanup offscreen renderer
+      offscreenRenderer.dispose();
+      offscreenRenderer.forceContextLoss();
+    } catch (e) {
+      console.error("HD export error:", e);
+    } finally {
+      setIsExportingHd(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -655,7 +814,7 @@ export function PhotoRoom3DPreviewModal({
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 md:p-6 bg-black/85 backdrop-blur-md">
-        {/* Modal Window: Dark Obsidian/Brown Glass Panel */}
+        {/* Modal Window: Luxury Obsidian/Brown Glass Panel */}
         <motion.div
           initial={{ opacity: 0, scale: 0.94, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -663,7 +822,7 @@ export function PhotoRoom3DPreviewModal({
           transition={{ duration: 0.28, ease: "easeOut" }}
           className="relative w-full h-full sm:h-auto sm:max-w-4xl sm:aspect-[4/3] max-h-[95vh] rounded-none sm:rounded-3xl bg-[#181512]/95 border border-[#3d3228]/80 text-[#f7f2ea] shadow-[0_25px_60px_rgba(0,0,0,0.85)] flex flex-col overflow-hidden"
         >
-          {/* Subtle Ambient Gold Gradient Background */}
+          {/* Subtle Ambient Gold Gradient */}
           <div className="absolute inset-0 bg-radial from-[#e8c98a]/8 via-transparent to-black/60 pointer-events-none" />
 
           {/* ========================================================= */}
@@ -708,7 +867,6 @@ export function PhotoRoom3DPreviewModal({
                 title="Fırlatmaq üçün siçanla dartın, yaxınlaşdırmaq üçün təkəri fırladın, sıfırlamaq üçün ikiqat klikləyin"
               />
             ) : (
-              /* Fallback if WebGL unavailable */
               <div className="p-6 text-center flex flex-col items-center gap-3">
                 <img
                   src={frontImgSrc}
@@ -731,6 +889,16 @@ export function PhotoRoom3DPreviewModal({
               </div>
             )}
 
+            {/* HD Export Indicator */}
+            {isExportingHd && (
+              <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-[#181512]/92 backdrop-blur-md gap-3">
+                <div className="w-12 h-12 border-3 border-[#e8c98a] border-t-transparent rounded-full animate-spin" />
+                <span className="font-eb-garamond text-lg text-[#e8c98a] tracking-wider animate-pulse">
+                  HD hazırlanır… (2800px)
+                </span>
+              </div>
+            )}
+
             {/* Quick Helper Floating Tooltip */}
             <div className="absolute bottom-3 left-4 z-20 pointer-events-none hidden sm:flex items-center gap-1.5 text-[10px] text-[#a89b8c] bg-black/40 px-2.5 py-1 rounded-full border border-white/5 backdrop-blur-xs">
               <span>💡 İkiqat klik: mərkəzə sıfırla · Siçanla fırlat · Təkərlə yaxınlaşdır</span>
@@ -742,7 +910,7 @@ export function PhotoRoom3DPreviewModal({
           {/* ========================================================= */}
           <div className="relative z-20 px-3 sm:px-6 py-3 border-t border-[#3d3228]/70 bg-gradient-to-t from-[#14110e] to-[#1f1a15] flex flex-wrap items-center justify-between gap-2.5 text-xs">
             
-            {/* 1. Camera View Angle Buttons (Pill Group, Active White/Gold) */}
+            {/* 1. Camera View Angle Buttons (Pill Group, Active Gold) */}
             <div className="flex items-center bg-[#251f1a] p-1 rounded-full border border-[#42362b]">
               <button
                 type="button"
@@ -861,17 +1029,32 @@ export function PhotoRoom3DPreviewModal({
               </button>
             </div>
 
-            {/* 4. HD Snapshot 2x PNG Download Button */}
-            <button
-              type="button"
-              onClick={handleDownloadSnapshot}
-              disabled={isCapturing}
-              className="h-9 px-3.5 rounded-full bg-[#2a231c] hover:bg-[#382f25] border border-[#e8c98a]/50 text-[#e8c98a] font-semibold text-[11px] flex items-center gap-1.5 transition active:scale-95 shadow-sm ml-auto sm:ml-0"
-              title="Cari görünüşü 2x HD PNG formatında endir"
-            >
-              <Download size={13} />
-              <span>{isCapturing ? "Saxlanılır…" : "HD Şəkil"}</span>
-            </button>
+            {/* 4. HD Export Section: Transparent BG Checkbox + 3x HD Download */}
+            <div className="flex items-center gap-2 ml-auto sm:ml-0">
+              <label
+                onClick={() => setTransparentBgExport((prev) => !prev)}
+                className="flex items-center gap-1.5 text-[10px] text-[#c4b5a3] cursor-pointer hover:text-white select-none"
+                title="PNG ixracında fonu şəffaf et"
+              >
+                {transparentBgExport ? (
+                  <CheckSquare size={13} className="text-[#e8c98a]" />
+                ) : (
+                  <Square size={13} className="text-stone-500" />
+                )}
+                <span>Şəffaf fon</span>
+              </label>
+
+              <button
+                type="button"
+                onClick={handleExportUltraHd}
+                disabled={isExportingHd}
+                className="h-9 px-3.5 rounded-full bg-[#2a231c] hover:bg-[#382f25] border border-[#e8c98a]/50 text-[#e8c98a] font-semibold text-[11px] flex items-center gap-1.5 transition active:scale-95 shadow-sm"
+                title="Cari görünüşü 3x (2800px) Ultra-HD PNG kimi endir"
+              >
+                <Download size={13} />
+                <span>{isExportingHd ? "Hazırlanır…" : "HD Şəkil"}</span>
+              </button>
+            </div>
           </div>
         </motion.div>
       </div>

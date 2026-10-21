@@ -13,7 +13,6 @@ function computeDistanceTransform(mask: Uint8Array, width: number, height: numbe
   const dist = new Float32Array(width * height);
   const INF = 9999;
 
-  // Initialize
   for (let i = 0; i < mask.length; i++) {
     dist[i] = mask[i] ? INF : 0;
   }
@@ -48,66 +47,91 @@ function computeDistanceTransform(mask: Uint8Array, width: number, height: numbe
 }
 
 /**
- * Loads an image and extracts its binary silhouette mask
+ * Separable Gaussian / Box Blur to smooth the depth field and eliminate normal banding
  */
-function extractSilhouetteMask(
-  img: HTMLImageElement,
-  gridW: number,
-  gridH: number
-): { mask: Uint8Array; width: number; height: number; aspect: number } {
-  const canvas = document.createElement("canvas");
-  canvas.width = gridW;
-  canvas.height = gridH;
-  const ctx = canvas.getContext("2d", { willReadFrequently: true });
-  if (!ctx) {
-    return { mask: new Uint8Array(gridW * gridH), width: gridW, height: gridH, aspect: 1 };
-  }
+function gaussianBlur2D(src: Float32Array, width: number, height: number, radius = 8): Float32Array {
+  const tmp = new Float32Array(width * height);
+  const out = new Float32Array(width * height);
 
-  ctx.drawImage(img, 0, 0, gridW, gridH);
-  const imgData = ctx.getImageData(0, 0, gridW, gridH);
-  const data = imgData.data;
-  const mask = new Uint8Array(gridW * gridH);
-
-  // Check corner pixels to determine if image background is transparent or solid
-  let isAlphaTransparent = false;
-  for (let i = 3; i < data.length; i += 16) {
-    if (data[i] < 200) {
-      isAlphaTransparent = true;
-      break;
-    }
-  }
-
-  const bgR = (data[0] + data[(gridW - 1) * 4] + data[(gridH - 1) * gridW * 4]) / 3;
-  const bgG = (data[1] + data[(gridW - 1) * 4 + 1] + data[(gridH - 1) * gridW * 4 + 1]) / 3;
-  const bgB = (data[2] + data[(gridW - 1) * 4 + 2] + data[(gridH - 1) * gridW * 4 + 2]) / 3;
-
-  for (let y = 0; y < gridH; y++) {
-    for (let x = 0; x < gridW; x++) {
-      const idx = y * gridW + x;
-      const pIdx = idx * 4;
-
-      if (isAlphaTransparent) {
-        mask[idx] = data[pIdx + 3] > 40 ? 1 : 0;
-      } else {
-        const diff =
-          Math.abs(data[pIdx] - bgR) +
-          Math.abs(data[pIdx + 1] - bgG) +
-          Math.abs(data[pIdx + 2] - bgB);
-        mask[idx] = diff > 45 ? 1 : 0;
+  // Horizontal 1D pass
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let sum = 0;
+      let count = 0;
+      for (let k = -radius; k <= radius; k++) {
+        const nx = x + k;
+        if (nx >= 0 && nx < width) {
+          sum += src[y * width + nx];
+          count++;
+        }
       }
+      tmp[y * width + x] = sum / count;
     }
   }
 
-  return {
-    mask,
-    width: gridW,
-    height: gridH,
-    aspect: (img.naturalWidth || 1) / (img.naturalHeight || 1),
-  };
+  // Vertical 1D pass
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      let sum = 0;
+      let count = 0;
+      for (let k = -radius; k <= radius; k++) {
+        const ny = y + k;
+        if (ny >= 0 && ny < height) {
+          sum += tmp[ny * width + x];
+          count++;
+        }
+      }
+      out[y * width + x] = sum / count;
+    }
+  }
+
+  return out;
 }
 
 /**
- * Builds an organic, inflated 3D watertight BufferGeometry directly from mockup silhouette
+ * Dilates texture edges by 2-3px into transparent pixels to prevent white/gray halo around garment silhouette
+ */
+export function dilateTextureEdges(canvas: HTMLCanvasElement, radius = 3) {
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx) return;
+  const w = canvas.width;
+  const h = canvas.height;
+  const imgData = ctx.getImageData(0, 0, w, h);
+  const data = imgData.data;
+  const copy = new Uint8ClampedArray(data);
+
+  for (let pass = 0; pass < radius; pass++) {
+    for (let y = 1; y < h - 1; y++) {
+      for (let x = 1; x < w - 1; x++) {
+        const idx = (y * w + x) * 4;
+        // If transparent/semi-transparent near edge
+        if (copy[idx + 3] < 80) {
+          const neighbors = [
+            ((y - 1) * w + x) * 4,
+            ((y + 1) * w + x) * 4,
+            (y * w + (x - 1)) * 4,
+            (y * w + (x + 1)) * 4,
+          ];
+          for (const n of neighbors) {
+            if (copy[n + 3] >= 140) {
+              data[idx] = copy[n];
+              data[idx + 1] = copy[n + 1];
+              data[idx + 2] = copy[n + 2];
+              break;
+            }
+          }
+        }
+      }
+    }
+    copy.set(data);
+  }
+
+  ctx.putImageData(imgData, 0, 0);
+}
+
+/**
+ * Builds an organic, high-density (200x200) smooth inflated 3D BufferGeometry
+ * The edge silhouette is rendered anti-aliased by the texture alpha, while the mesh provides smooth 3D curvature.
  */
 export async function buildInflatedGarmentGeometry(
   imageSrc: string,
@@ -123,184 +147,137 @@ export async function buildInflatedGarmentGeometry(
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => {
-      const gridW = 80;
-      const gridH = 80;
-      const { mask, width, height, aspect } = extractSilhouetteMask(img, gridW, gridH);
-      const dist = computeDistanceTransform(mask, width, height);
+      // High-density 200x200 grid for butter-smooth curvature
+      const gridW = 200;
+      const gridH = 200;
 
-      // Find max distance
-      let maxDist = 1;
-      for (let i = 0; i < dist.length; i++) {
-        if (dist[i] > maxDist) maxDist = dist[i];
+      const canvas = document.createElement("canvas");
+      canvas.width = gridW;
+      canvas.height = gridH;
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      if (!ctx) {
+        resolve(new THREE.PlaneGeometry(1.8, 2.4, 64, 64));
+        return;
       }
 
-      // Arrays for BufferGeometry
-      const positions: number[] = [];
-      const normals: number[] = [];
-      const uvs: number[] = [];
-      const indices: number[] = [];
+      ctx.drawImage(img, 0, 0, gridW, gridH);
+      const imgData = ctx.getImageData(0, 0, gridW, gridH);
+      const data = imgData.data;
 
-      // Grid index lookup: -1 means transparent / outside
-      const frontGrid = new Int32Array(width * height).fill(-1);
-      const backGrid = new Int32Array(width * height).fill(-1);
+      const mask = new Uint8Array(gridW * gridH);
+      for (let i = 0; i < gridW * gridH; i++) {
+        mask[i] = data[i * 4 + 3] > 35 ? 1 : 0;
+      }
 
+      // Compute raw distance field
+      const rawDist = computeDistanceTransform(mask, gridW, gridH);
+      // Smooth distance field with Gaussian blur (radius ~10px) to prevent stepping
+      const smoothDist = gaussianBlur2D(rawDist, gridW, gridH, 10);
+
+      // Find max smoothed distance inside the garment body
+      let maxDist = 1;
+      for (let i = 0; i < smoothDist.length; i++) {
+        if (smoothDist[i] > maxDist) maxDist = smoothDist[i];
+      }
+
+      const aspect = (img.naturalWidth || 1) / (img.naturalHeight || 1);
       const targetHeight = 2.4;
       const targetWidth = targetHeight * aspect;
       const baseThickness = shapeConfig.thickness || 0.14;
 
-      // 1. Create Front Surface Vertices
-      for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-          const idx = y * width + x;
-          if (mask[idx] === 1) {
-            const posX = ((x / (width - 1)) - 0.5) * targetWidth;
-            const posY = (0.5 - (y / (height - 1))) * targetHeight;
+      const positions: number[] = [];
+      const normals: number[] = [];
+      const uvs: number[] = [];
 
-            // Smooth organic inflation profile using sine easing
-            const dNorm = Math.min(1, dist[idx] / Math.max(6, maxDist * 0.45));
-            const depth = baseThickness * Math.sin(dNorm * (Math.PI / 2));
-
-            const vIndex = positions.length / 3;
-            frontGrid[idx] = vIndex;
-
-            positions.push(posX, posY, depth);
-            uvs.push(x / (width - 1), 1 - (y / (height - 1)));
-            normals.push(0, 0, 1);
-          }
-        }
-      }
-
-      // 2. Create Back Surface Vertices
-      for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-          const idx = y * width + x;
-          if (mask[idx] === 1) {
-            const posX = ((x / (width - 1)) - 0.5) * targetWidth;
-            const posY = (0.5 - (y / (height - 1))) * targetHeight;
-
-            const dNorm = Math.min(1, dist[idx] / Math.max(6, maxDist * 0.45));
-            const depth = -baseThickness * Math.sin(dNorm * (Math.PI / 2));
-
-            const vIndex = positions.length / 3;
-            backGrid[idx] = vIndex;
-
-            positions.push(posX, posY, depth);
-            // Flip U for back viewing
-            uvs.push(1 - (x / (width - 1)), 1 - (y / (height - 1)));
-            normals.push(0, 0, -1);
-          }
-        }
-      }
-
-      // 3. Triangulate Front and Back Faces
       const frontIndices: number[] = [];
       const backIndices: number[] = [];
-      const rimIndices: number[] = [];
 
-      for (let y = 0; y < height - 1; y++) {
-        for (let x = 0; x < width - 1; x++) {
-          const idxTL = y * width + x;
-          const idxTR = y * width + (x + 1);
-          const idxBL = (y + 1) * width + x;
-          const idxBR = (y + 1) * width + (x + 1);
+      // 1. Generate Front and Back Vertices (continuous 200x200 mesh)
+      // Front vertices start at index 0, Back vertices start at offset (gridW * gridH)
+      const vertexOffset = gridW * gridH;
+
+      for (let y = 0; y < gridH; y++) {
+        const v = 1 - y / (gridH - 1);
+        const posY = (0.5 - y / (gridH - 1)) * targetHeight;
+
+        for (let x = 0; x < gridW; x++) {
+          const u = x / (gridW - 1);
+          const posX = (u - 0.5) * targetWidth;
+          const idx = y * gridW + x;
+
+          // Normalized distance from silhouette boundary (0 at and outside boundary, 1 inside core)
+          const dVal = smoothDist[idx];
+          const dNorm = Math.min(1, dVal / Math.max(8, maxDist * 0.42));
+
+          // Smooth sine profile for realistic garment volume bulge
+          const depth = baseThickness * Math.sin(dNorm * (Math.PI / 2));
+
+          // Front vertex
+          positions.push(posX, posY, depth);
+          uvs.push(u, v);
+          normals.push(0, 0, 1);
+
+          // Back vertex (depth is negated; mirrored U for natural back orientation)
+          // We push directly into the same buffers at offset
+        }
+      }
+
+      // Generate Back Vertices
+      for (let y = 0; y < gridH; y++) {
+        const v = 1 - y / (gridH - 1);
+        const posY = (0.5 - y / (gridH - 1)) * targetHeight;
+
+        for (let x = 0; x < gridW; x++) {
+          const u = x / (gridW - 1);
+          const posX = (u - 0.5) * targetWidth;
+          const idx = y * gridW + x;
+
+          const dVal = smoothDist[idx];
+          const dNorm = Math.min(1, dVal / Math.max(8, maxDist * 0.42));
+          const depth = -baseThickness * Math.sin(dNorm * (Math.PI / 2));
+
+          positions.push(posX, posY, depth);
+          uvs.push(1 - u, v);
+          normals.push(0, 0, -1);
+        }
+      }
+
+      // 2. Generate Triangles for Front and Back Faces
+      for (let y = 0; y < gridH - 1; y++) {
+        for (let x = 0; x < gridW - 1; x++) {
+          const tl = y * gridW + x;
+          const tr = y * gridW + (x + 1);
+          const bl = (y + 1) * gridW + x;
+          const br = (y + 1) * gridW + (x + 1);
 
           // Front Triangles (CCW)
-          const fTL = frontGrid[idxTL];
-          const fTR = frontGrid[idxTR];
-          const fBL = frontGrid[idxBL];
-          const fBR = frontGrid[idxBR];
-
-          if (fTL !== -1 && fTR !== -1 && fBL !== -1) {
-            frontIndices.push(fTL, fBL, fTR);
-          }
-          if (fTR !== -1 && fBL !== -1 && fBR !== -1) {
-            frontIndices.push(fTR, fBL, fBR);
-          }
+          frontIndices.push(tl, bl, tr);
+          frontIndices.push(tr, bl, br);
 
           // Back Triangles (CW when viewed from front, CCW when viewed from back)
-          const bTL = backGrid[idxTL];
-          const bTR = backGrid[idxTR];
-          const bBL = backGrid[idxBL];
-          const bBR = backGrid[idxBR];
+          const btl = vertexOffset + tl;
+          const btr = vertexOffset + tr;
+          const bbl = vertexOffset + bl;
+          const bbr = vertexOffset + br;
 
-          if (bTL !== -1 && bTR !== -1 && bBL !== -1) {
-            backIndices.push(bTL, bTR, bBL);
-          }
-          if (bTR !== -1 && bBL !== -1 && bBR !== -1) {
-            backIndices.push(bTR, bBR, bBL);
-          }
+          backIndices.push(btl, btr, bbl);
+          backIndices.push(btr, bbr, bbl);
         }
       }
 
-      // 4. Bridge Perimeter Rim Edges between Front and Back
-      for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-          const idx = y * width + x;
-          if (mask[idx] === 1) {
-            // Check 4-connected neighbors for boundary
-            const isTopEdge = y === 0 || mask[(y - 1) * width + x] === 0;
-            const isRightEdge = x === width - 1 || mask[y * width + (x + 1)] === 0;
-            const isBottomEdge = y === height - 1 || mask[(y + 1) * width + x] === 0;
-            const isLeftEdge = x === 0 || mask[y * width + (x - 1)] === 0;
+      const allIndices = [...frontIndices, ...backIndices];
 
-            const fCur = frontGrid[idx];
-            const bCur = backGrid[idx];
-
-            if (isRightEdge && y < height - 1 && mask[(y + 1) * width + x] === 1) {
-              const fNext = frontGrid[(y + 1) * width + x];
-              const bNext = backGrid[(y + 1) * width + x];
-              if (fNext !== -1 && bNext !== -1) {
-                rimIndices.push(fCur, fNext, bNext);
-                rimIndices.push(fCur, bNext, bCur);
-              }
-            }
-
-            if (isBottomEdge && x < width - 1 && mask[y * width + (x + 1)] === 1) {
-              const fNext = frontGrid[y * width + (x + 1)];
-              const bNext = backGrid[y * width + (x + 1)];
-              if (fNext !== -1 && bNext !== -1) {
-                rimIndices.push(fCur, bCur, bNext);
-                rimIndices.push(fCur, bNext, fNext);
-              }
-            }
-
-            if (isLeftEdge && y < height - 1 && mask[(y + 1) * width + x] === 1) {
-              const fNext = frontGrid[(y + 1) * width + x];
-              const bNext = backGrid[(y + 1) * width + x];
-              if (fNext !== -1 && bNext !== -1) {
-                rimIndices.push(fCur, bCur, bNext);
-                rimIndices.push(fCur, bNext, fNext);
-              }
-            }
-
-            if (isTopEdge && x < width - 1 && mask[y * width + (x + 1)] === 1) {
-              const fNext = frontGrid[y * width + (x + 1)];
-              const bNext = backGrid[y * width + (x + 1)];
-              if (fNext !== -1 && bNext !== -1) {
-                rimIndices.push(fCur, fNext, bNext);
-                rimIndices.push(fCur, bNext, bCur);
-              }
-            }
-          }
-        }
-      }
-
-      // Assemble BufferGeometry
-      const allIndices = [...frontIndices, ...backIndices, ...rimIndices];
       const geometry = new THREE.BufferGeometry();
       geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
       geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
       geometry.setIndex(allIndices);
 
-      // Define multi-material groups
+      // Define multi-material groups: Material 0 for Front, Material 1 for Back
       geometry.clearGroups();
-      geometry.addGroup(0, frontIndices.length, 0); // Material 0: Front
-      geometry.addGroup(frontIndices.length, backIndices.length, 1); // Material 1: Back
-      geometry.addGroup(frontIndices.length + backIndices.length, rimIndices.length, 0); // Material 0: Rim
+      geometry.addGroup(0, frontIndices.length, 0); // Front
+      geometry.addGroup(frontIndices.length, backIndices.length, 1); // Back
 
       geometry.computeVertexNormals();
-
-      // Center geometry around origin
       geometry.center();
 
       meshCache.set(cacheKey, geometry);
@@ -308,8 +285,7 @@ export async function buildInflatedGarmentGeometry(
     };
 
     img.onerror = () => {
-      // Emergency fallback to soft curved plane
-      const fallback = new THREE.PlaneGeometry(1.8, 2.2, 32, 32);
+      const fallback = new THREE.PlaneGeometry(1.8, 2.4, 64, 64);
       resolve(fallback);
     };
 
