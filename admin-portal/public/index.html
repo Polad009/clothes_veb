@@ -870,43 +870,36 @@
           </div>
         </div>
 
-        <!-- Image Pickers: Real Garment on Hanger & Dressed Model Photo -->
+        <!-- Image Pickers: Main Garment Image & Secondary (Hover) Image -->
         <div class="space-y-4 pt-3 border-t border-slate-100 bg-slate-50/60 p-3.5 rounded-2xl border border-slate-200/80">
           <div class="space-y-1">
             <div class="flex items-center justify-between">
               <label class="font-bold text-slate-800 flex items-center gap-1.5">
-                <span>1. Məhsulun Şəkli (Asılqan / Düz Çəkiliş)</span>
-                <span class="text-[10px] text-amber-600 font-bold bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">Satışda olan köynək</span>
+                <span>1. Əsas Məhsul Şəkli (Ön Görünüş) *</span>
+                <span class="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">Əsas Şəkil</span>
+              </label>
+            </div>
+            <div class="flex items-center gap-2">
+              <img id="prodImagePreview" src="" class="w-12 h-14 rounded-xl object-contain border border-slate-200 bg-white p-1" />
+              <input type="text" id="prodImage" required placeholder="Məs: /images/products/.../front.png və ya yeni yüklə" class="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-900" />
+              <button type="button" onclick="openGalleryModal('prodImage')" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold transition">Qalereya</button>
+              <button type="button" onclick="triggerDirectUpload('prodImage')" class="px-3 py-2 rounded-xl bg-slate-900 text-white hover:bg-black text-xs font-bold transition">Yüklə</button>
+            </div>
+          </div>
+
+          <div class="space-y-1 pt-2 border-t border-slate-200/60">
+            <div class="flex items-center justify-between">
+              <label class="font-bold text-slate-800 flex items-center gap-1.5">
+                <span>2. İkinci Şəkil (Hover / Arxa Görünüş - İstəyə bağlı)</span>
+                <span class="text-[10px] text-slate-500 font-bold bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">Hover / Arxa</span>
               </label>
             </div>
             <div class="flex items-center gap-2">
               <img id="prodHoverImagePreview" src="" class="w-12 h-14 rounded-xl object-contain border border-slate-200 bg-white p-1" />
-              <input type="text" id="prodHoverImage" placeholder="Məs: /images/products/.../front.jpg və ya yeni yüklə" class="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-900" />
+              <input type="text" id="prodHoverImage" placeholder="Məs: /images/products/.../back.png və ya yeni yüklə (isteğe bağlı)" class="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-900" />
               <button type="button" onclick="openGalleryModal('prodHoverImage')" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold transition">Qalereya</button>
               <button type="button" onclick="triggerDirectUpload('prodHoverImage')" class="px-3 py-2 rounded-xl bg-slate-900 text-white hover:bg-black text-xs font-bold transition">Yüklə</button>
             </div>
-          </div>
-
-          <div class="space-y-1 pt-1 border-t border-slate-200/60">
-            <div class="flex items-center justify-between">
-              <label class="font-bold text-slate-800 flex items-center gap-1.5">
-                <span>2. Model Üzərində Görünüş (Mockup)</span>
-                <span class="text-[10px] text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">Model bu köynəyi geyinəcək</span>
-              </label>
-              <button type="button" onclick="generateModelLookFromGarment()" id="btnAutoDressModel" class="px-3 py-1 rounded-lg bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800 hover:from-amber-500 hover:to-amber-700 text-white text-[11px] font-bold flex items-center gap-1 shadow-xs transition active:scale-95 cursor-pointer">
-                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-200"></i>
-                <span>✨ Köynəyi Modelə Geyindir</span>
-              </button>
-            </div>
-            <div class="flex items-center gap-2">
-              <img id="prodImagePreview" src="" class="w-12 h-14 rounded-xl object-cover border border-slate-200 bg-white" />
-              <input type="text" id="prodImage" required placeholder="Avtomatik modelə geyindir və ya xüsusi link daxil et" class="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-900" />
-              <button type="button" onclick="openGalleryModal('prodImage')" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold transition">Qalereya</button>
-              <button type="button" onclick="triggerDirectUpload('prodImage')" class="px-3 py-2 rounded-xl bg-slate-900 text-white hover:bg-black text-xs font-bold transition">Yüklə</button>
-            </div>
-            <p class="text-[10px] text-slate-500 italic mt-0.5">
-              💡 Köynəyin şəklini yüklədikdən sonra <strong>«Köynəyi Modelə Geyindir»</strong> düyməsinə klikləyin — sistem köynəyi dərhal canlı studiya modelinin əyninə geyindirib model şəklini yaradacaq.
-            </p>
           </div>
         </div>
 
@@ -1187,7 +1180,7 @@
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50 transition';
         const catLabel = p.category === 'koynek' ? 'Köynək' : p.category === 'salvar' ? 'Şalvar' : p.category === 'hudi' ? 'Hudi' : 'Aksesuar';
-        const mainImg = p.colors?.[0]?.image || p.image || '/images/products/vintage-king-of-pop-tee/mockup.jpg';
+        const mainImg = p.colors?.[0]?.image || p.image || '/images/products/vintage-king-of-pop-tee/front.png';
         const inStock = p.inStock !== false;
 
         tr.innerHTML = `
@@ -1260,117 +1253,6 @@
       document.getElementById('productModal').classList.remove('flex');
     }
 
-    // Auto Model Dressing Function (Köynəyi Modelə Geyindir)
-    async function generateModelLookFromGarment() {
-      const garmentUrl = document.getElementById('prodHoverImage').value.trim() || document.getElementById('prodImage').value.trim();
-      if (!garmentUrl) {
-        alert('Zəhmət olmasa, əvvəlcə 1-ci bölmədə satışda olan köynəyin/geyimin şəklini daxil edin və ya yükləyin!');
-        return;
-      }
-
-      const btn = document.getElementById('btnAutoDressModel');
-      const oldHtml = btn ? btn.innerHTML : '';
-      if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<span class="animate-spin inline-block mr-1">⌛</span> Modelə geyindirilir...';
-      }
-
-      try {
-        const category = document.getElementById('prodCategory').value || 'koynek';
-        const modelUrl = await createModelLookFromGarmentUrl(garmentUrl, category);
-        setImageInputValue('prodImage', modelUrl);
-        alert('✨ Əla! Yüklənən köynək canlı modelin əyninə geyindirildi və model şəkli yaradıldı!');
-      } catch (err) {
-        alert('Model geyindirilərkən xəta: ' + err.message);
-      } finally {
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = oldHtml;
-          if (window.lucide) lucide.createIcons();
-        }
-      }
-    }
-
-    async function createModelLookFromGarmentUrl(garmentUrl, category) {
-      return new Promise((resolve, reject) => {
-        const canvas = document.createElement('canvas');
-        canvas.width = 896;
-        canvas.height = 1200;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return reject(new Error('Canvas context tapılmadı'));
-
-        const baseModelImg = new Image();
-        baseModelImg.crossOrigin = 'anonymous';
-        baseModelImg.src = '/images/models/female_editorial.jpg';
-
-        baseModelImg.onload = () => {
-          ctx.drawImage(baseModelImg, 0, 0, 896, 1200);
-
-          const garmentImg = new Image();
-          garmentImg.crossOrigin = 'anonymous';
-          garmentImg.onload = () => {
-            ctx.save();
-
-            let targetY = 380;
-            let targetW = 440;
-            if (category === 'hudi') {
-              targetY = 405;
-              targetW = 475;
-            } else if (category === 'salvar') {
-              targetY = 780;
-              targetW = 390;
-            } else if (category === 'aksesuar') {
-              targetY = 115;
-              targetW = 205;
-            }
-
-            const targetH = (garmentImg.height / garmentImg.width) * targetW;
-            const targetX = (896 - targetW) / 2;
-
-            // Soft shadow behind garment
-            ctx.save();
-            ctx.filter = 'blur(12px)';
-            ctx.fillStyle = 'rgba(0,0,0,0.32)';
-            ctx.beginPath();
-            ctx.ellipse(448, targetY + targetH * 0.45, targetW * 0.42, targetH * 0.44, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-
-            // Draw garment
-            ctx.drawImage(garmentImg, targetX, targetY, targetW, targetH);
-            ctx.restore();
-
-            // Watermark
-            ctx.save();
-            ctx.font = 'bold 20px serif';
-            ctx.fillStyle = 'rgba(255,255,255,0.7)';
-            ctx.fillText('HORVVALLE ATELIER', 32, 1160);
-            ctx.restore();
-
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
-
-            fetch('/api/admin/upload-image', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ dataUrl, filename: 'model_look_' + Date.now() + '.jpg' })
-            })
-            .then(res => res.json())
-            .then(resData => {
-              if (resData.success && resData.url) {
-                resolve(resData.url);
-              } else {
-                resolve(dataUrl);
-              }
-            })
-            .catch(() => resolve(dataUrl));
-          };
-          garmentImg.onerror = () => reject(new Error('Köynək şəkli yüklənə bilmədi'));
-          garmentImg.src = garmentUrl;
-        };
-        baseModelImg.onerror = () => reject(new Error('Model şablonu yüklənə bilmədi'));
-      });
-    }
-
     async function handleProductSubmit(e) {
       e.preventDefault();
       const id = document.getElementById('prodId').value;
@@ -1383,19 +1265,13 @@
       const badge = document.getElementById('prodBadge').value || undefined;
       const composition = document.getElementById('prodComposition').value || "100% Premium Pambıq";
       const inStock = document.getElementById('prodInStock').value === "true";
-      let image = document.getElementById('prodImage').value.trim();
-      let hoverImage = document.getElementById('prodHoverImage').value.trim();
+      const image = document.getElementById('prodImage').value.trim();
+      const hoverImage = document.getElementById('prodHoverImage').value.trim() || image;
       const description = document.getElementById('prodDescription').value;
 
-      // Auto dress model if user uploaded garment and left model image empty
-      if (hoverImage && !image) {
-        try {
-          image = await createModelLookFromGarmentUrl(hoverImage, category);
-        } catch {
-          image = hoverImage;
-        }
-      } else if (!hoverImage && image) {
-        hoverImage = image;
+      if (!image) {
+        alert("Zəhmət olmasa, əsas məhsul şəklini daxil edin və ya yükləyin!");
+        return;
       }
 
       const payload = {
@@ -1416,7 +1292,7 @@
           {
             name: "Standart",
             hex: "#111111",
-            image: image || hoverImage,
+            image: image,
             hoverImage: hoverImage || image
           }
         ]
