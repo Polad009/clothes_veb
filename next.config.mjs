@@ -4,7 +4,17 @@ const nextConfig = {
   swcMinify: true,
   compress: true,
   experimental: {
-    optimizePackageImports: ["lucide-react", "framer-motion", "clsx", "tailwind-merge"],
+    optimizePackageImports: [
+      "lucide-react",
+      "framer-motion",
+      "clsx",
+      "tailwind-merge",
+      "three",
+      "@react-three/fiber",
+      "@react-three/drei",
+      "konva",
+      "react-konva",
+    ],
   },
   images: {
     formats: ["image/avif", "image/webp"],

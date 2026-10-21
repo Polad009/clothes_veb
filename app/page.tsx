@@ -22,25 +22,7 @@ export default function Home() {
   const campaignSecondary = storeData.content?.campaignSecondary;
   const [badgeIndex, setBadgeIndex] = useState(0);
 
-  const [introRevealed, setIntroRevealed] = useState(() => {
-    if (typeof window === "undefined") return true;
-    try {
-      return !!sessionStorage.getItem("hv-intro");
-    } catch {
-      return true;
-    }
-  });
-
-  useEffect(() => {
-    if (introRevealed) return;
-    const handleReveal = () => setIntroRevealed(true);
-    window.addEventListener("hv-intro-reveal", handleReveal);
-    const fallbackTimer = setTimeout(() => setIntroRevealed(true), 1200);
-    return () => {
-      window.removeEventListener("hv-intro-reveal", handleReveal);
-      clearTimeout(fallbackTimer);
-    };
-  }, [introRevealed]);
+  const [introRevealed, setIntroRevealed] = useState(true);
 
   const badgeMessages = [
     hero.tag || "HORVVALLE ATELIER · 2026 COUTURE · BAKI",

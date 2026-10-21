@@ -4,9 +4,18 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useCart } from "@/context/CartContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { playAddToCartSound } from "@/lib/soundEffects";
+import dynamic from "next/dynamic";
 import { GarmentCanvas, StudioSurface, getStudioGarmentCategory, getStudioGarmentImage } from "@/components/studio/GarmentCanvas";
-import { LiveModelPreviewModal } from "@/components/studio/LiveModelPreviewModal";
-import { PhotoRoom3DPreviewModal } from "@/components/studio/PhotoRoom3DPreviewModal";
+
+const LiveModelPreviewModal = dynamic(
+  () => import("@/components/studio/LiveModelPreviewModal").then((mod) => mod.LiveModelPreviewModal),
+  { ssr: false }
+);
+
+const PhotoRoom3DPreviewModal = dynamic(
+  () => import("@/components/studio/PhotoRoom3DPreviewModal").then((mod) => mod.PhotoRoom3DPreviewModal),
+  { ssr: false }
+);
 import {
   autoTrimCanvas,
   removeBackgroundWithISNet,

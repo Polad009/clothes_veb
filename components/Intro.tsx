@@ -27,20 +27,12 @@ export function Intro() {
       return;
     }
 
-    // 2. Check session storage or ?intro=1 bypass
+    // 2. Only show intro animation if explicitly requested with ?intro=1
     const forceIntro = typeof window !== "undefined" && window.location.search.includes("intro=1");
-    if (forceIntro) {
-      try {
-        sessionStorage.removeItem(STORAGE_KEY);
-      } catch {}
-    } else {
-      try {
-        if (sessionStorage.getItem(STORAGE_KEY)) {
-          document.documentElement.dataset.intro = "off";
-          setIsCompleted(true);
-          return;
-        }
-      } catch {}
+    if (!forceIntro) {
+      document.documentElement.dataset.intro = "off";
+      setIsCompleted(true);
+      return;
     }
 
     // Mark intro active on html tag
