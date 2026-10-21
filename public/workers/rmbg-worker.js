@@ -1,10 +1,16 @@
 // IS-Net Web Worker (Apache-2.0 model, MIT onnxruntime-web)
-// Runs 100% in-browser with zero external API calls.
+// 100% in-browser, WASM SIMD execution, zero external API calls.
 
 importScripts('/onnxruntime/ort.all.min.js');
 
 ort.env.wasm.wasmPaths = '/onnxruntime/';
-ort.env.wasm.numThreads = Math.min(4, Math.max(1, (self.navigator.hardwareConcurrency || 2) - 1));
+ort.env.wasm.simd = true;
+
+// Multi-threading requires SharedArrayBuffer (crossOriginIsolated === true)
+const isIsolated = typeof crossOriginIsolated !== 'undefined' && crossOriginIsolated;
+ort.env.wasm.numThreads = isIsolated
+  ? Math.min(4, Math.max(1, (self.navigator.hardwareConcurrency || 2) - 1))
+  : 1;
 
 let session = null;
 const CACHE_NAME = 'isnet-model-cache-v1';
@@ -87,33 +93,23 @@ async function initSession() {
   if (session) return session;
 
   const modelBuffer = await getOrDownloadModel();
-
   self.postMessage({ type: 'status', message: 'Süni intellekt mühərriki başladılır…' });
 
-  // 1. Try WebGPU if supported
-  if (typeof navigator !== 'undefined' && 'gpu' in navigator) {
-    try {
-      session = await ort.InferenceSession.create(modelBuffer, {
-        executionProviders: ['webgpu'],
-        graphOptimizationLevel: 'all',
-      });
-      console.log('✓ IS-Net session created with WebGPU EP');
-      return session;
-    } catch (gpuErr) {
-      console.warn('WebGPU EP failed, falling back to WASM:', gpuErr);
-    }
+  // Pure WASM execution (IS-Net MaxPool ceil_mode is fully supported on WASM SIMD)
+  try {
+    session = await ort.InferenceSession.create(modelBuffer, {
+      executionProviders: ['wasm'],
+      graphOptimizationLevel: 'all',
+    });
+    console.log('✓ IS-Net session created with WASM EP (threads:', ort.env.wasm.numThreads, ')');
+    return session;
+  } catch (err) {
+    session = null;
+    throw err;
   }
-
-  // 2. Fallback to WASM
-  session = await ort.InferenceSession.create(modelBuffer, {
-    executionProviders: ['wasm'],
-    graphOptimizationLevel: 'all',
-  });
-  console.log('✓ IS-Net session created with WASM EP');
-  return session;
 }
 
-// Bilinear interpolation resize from w*h to origW*origH
+// Bilinear interpolation resize from srcW*srcH to dstW*dstH
 function resizeMaskBilinear(srcMask, srcW, srcH, dstW, dstH) {
   const dst = new Float32Array(dstW * dstH);
   const xRatio = (srcW - 1) / Math.max(1, dstW - 1);
@@ -146,12 +142,23 @@ function resizeMaskBilinear(srcMask, srcW, srcH, dstW, dstH) {
 self.onmessage = async (e) => {
   const { type, id } = e.data;
 
+  if (type === 'reset') {
+    session = null;
+    self.postMessage({ type: 'reset_complete', id });
+    return;
+  }
+
   if (type === 'init') {
     try {
       await initSession();
       self.postMessage({ type: 'ready', id });
     } catch (err) {
-      self.postMessage({ type: 'error', id, error: err.message || String(err) });
+      session = null;
+      self.postMessage({
+        type: 'error',
+        id,
+        error: 'Fon silinmədi. Yenidən cəhd edin və ya fırça ilə əl ilə təmizləyin',
+      });
     }
     return;
   }
@@ -160,7 +167,7 @@ self.onmessage = async (e) => {
     const { rgbaBuffer, width, height } = e.data;
     try {
       const sess = await initSession();
-      self.postMessage({ type: 'status', message: 'Fon silinir…' });
+      self.postMessage({ type: 'status', message: 'Fon silinir… 5-15 saniyə çəkə bilər' });
 
       const rgba = new Uint8ClampedArray(rgbaBuffer);
       const TARGET_SIZE = 1024;
@@ -220,7 +227,7 @@ self.onmessage = async (e) => {
         }
       }
 
-      // 2. Run ONNX Inference
+      // 2. Run ONNX Inference with WASM
       const inputTensor = new ort.Tensor('float32', tensorData, [1, 3, TARGET_SIZE, TARGET_SIZE]);
       const feeds = { [sess.inputNames[0]]: inputTensor };
       const outputMap = await sess.run(feeds);
@@ -276,7 +283,12 @@ self.onmessage = async (e) => {
       );
     } catch (err) {
       console.error('IS-Net segmentation error:', err);
-      self.postMessage({ type: 'error', id, error: err.message || String(err) });
+      session = null; // Reset session on error so fresh attempt can retry
+      self.postMessage({
+        type: 'error',
+        id,
+        error: 'Fon silinmədi. Yenidən cəhd edin və ya fırça ilə əl ilə təmizləyin',
+      });
     }
   }
 };

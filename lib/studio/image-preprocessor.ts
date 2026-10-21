@@ -215,7 +215,7 @@ export function removeBackgroundWithISNet(
           });
         } else if (data.type === "error" && data.id === requestId) {
           worker.removeEventListener("message", handleMessage);
-          reject(new Error(data.error || "IS-Net emalında xəta baş verdi"));
+          reject(new Error(data.error || "Fon silinmədi. Yenidən cəhd edin və ya fırça ilə əl ilə təmizləyin"));
         }
       };
 

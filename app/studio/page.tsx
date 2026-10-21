@@ -612,7 +612,7 @@ export default function StudioPage() {
       setCompareTab("cutout");
     } catch (err: any) {
       console.error("IS-Net bg removal error:", err);
-      alert("Fon silinərkən xəta baş verdi: " + (err.message || "Model yüklənə bilmədi"));
+      alert("Fon silinmədi. Yenidən cəhd edin və ya fırça ilə əl ilə təmizləyin");
     } finally {
       setIsCleaningBg(false);
     }
