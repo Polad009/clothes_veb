@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, ArrowRight, Sparkles, Box, ChevronRight } from "lucide-react";
+import { Search, X, Sparkles, Box, ChevronRight } from "lucide-react";
 import { MOCK_PRODUCTS, Product } from "@/data/products";
 import { useCurrency } from "@/context/CurrencyContext";
 
@@ -54,12 +54,13 @@ export function HeaderQuickSearch({ isLightMode }: HeaderQuickSearchProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
-  // Auto focus input when opened
+  // Auto focus input when opened smoothly
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         inputRef.current?.focus();
-      }, 50);
+      }, 60);
+      return () => clearTimeout(timer);
     } else {
       setQuery("");
     }
@@ -106,122 +107,141 @@ export function HeaderQuickSearch({ isLightMode }: HeaderQuickSearchProps) {
         Inline Expanding Capsule Trigger:
         Smoothly morphs from a compact pill button into an active search input
       */}
-      {!isOpen ? (
-        <div className="flex items-center">
-          {/* Desktop Search Button */}
-          <button
-            type="button"
-            onClick={() => setIsOpen(true)}
-            className={`hidden sm:flex h-9 sm:h-10 xl:h-11 items-center gap-1.5 xl:gap-2 px-3 xl:px-4 rounded-full border text-xs font-medium transition-all cursor-pointer shadow-sm active:scale-95 ${
-              isLightMode
-                ? "bg-stone-100 hover:bg-stone-200/80 border-stone-200/80 text-stone-700"
-                : "bg-white/15 hover:bg-white/25 border-white/25 text-white"
-            }`}
-            aria-label="Axtarış"
+      <AnimatePresence mode="wait">
+        {!isOpen ? (
+          <motion.div
+            key="search-trigger"
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.96 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="flex items-center"
           >
-            <Search size={14} className={isLightMode ? "text-stone-600" : "text-[#E6C280]"} />
-            <span className="hidden xl:inline">Axtarış</span>
-            <kbd
-              className={`hidden xl:inline-flex px-1.5 py-0.5 rounded text-[9px] font-mono border ${
-                isLightMode
-                  ? "bg-white border-stone-200 text-stone-600"
-                  : "bg-black/40 border-white/20 text-white/80"
-              }`}
-            >
-              ⌘K
-            </kbd>
-          </button>
-
-          {/* Mobile Search Icon Button */}
-          <button
-            type="button"
-            onClick={() => setIsOpen(true)}
-            className={`sm:hidden h-9 w-9 rounded-full border transition-all active:scale-95 cursor-pointer flex items-center justify-center shrink-0 ${
-              isLightMode
-                ? "bg-stone-100 hover:bg-stone-200 text-stone-800 border-stone-200"
-                : "bg-white/15 hover:bg-white/25 text-white border-white/20"
-            }`}
-            aria-label="Axtarış"
-          >
-            <Search size={15} className={isLightMode ? "text-stone-600" : "text-[#E6C280]"} />
-          </button>
-        </div>
-      ) : (
-        /* Smoothly Expanded Search Bar */
-        <motion.form
-          initial={{ width: 40, opacity: 0.6 }}
-          animate={{ width: "auto", opacity: 1 }}
-          exit={{ width: 40, opacity: 0 }}
-          transition={{ type: "spring", stiffness: 380, damping: 28 }}
-          onSubmit={handleSubmit}
-          className={`flex items-center gap-2 h-9 sm:h-10 xl:h-11 px-3 rounded-full border shadow-md transition-all ${
-            isLightMode
-              ? "bg-white border-stone-300 text-stone-900 shadow-stone-200/50"
-              : "bg-[#180B04]/95 border-white/30 text-white shadow-black/40"
-          } w-[220px] sm:w-[280px] xl:w-[320px]`}
-        >
-          <Search
-            size={15}
-            className={`shrink-0 ${isLightMode ? "text-stone-500" : "text-[#E6C280]"}`}
-          />
-
-          <input
-            ref={inputRef}
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Axtarın..."
-            className="w-full bg-transparent text-xs sm:text-sm font-medium focus:outline-none placeholder-stone-400"
-          />
-
-          {query.trim() && (
+            {/* Desktop Search Button */}
             <button
               type="button"
-              onClick={() => {
-                setQuery("");
-                inputRef.current?.focus();
-              }}
-              className="p-1 text-stone-400 hover:text-stone-600 transition cursor-pointer"
-              aria-label="Təmizlə"
+              onClick={() => setIsOpen(true)}
+              className={`hidden sm:flex h-9 sm:h-10 xl:h-11 items-center gap-1.5 xl:gap-2 px-3 xl:px-4 rounded-full border text-xs font-medium transition-all cursor-pointer shadow-sm active:scale-95 ${
+                isLightMode
+                  ? "bg-stone-100 hover:bg-stone-200/80 border-stone-200/80 text-stone-700"
+                  : "bg-white/15 hover:bg-white/25 border-white/25 text-white"
+              }`}
+              aria-label="Axtarış"
             >
-              <X size={12} />
+              <Search size={14} className={isLightMode ? "text-stone-600" : "text-[#E6C280]"} />
+              <span className="hidden xl:inline">Axtarış</span>
+              <kbd
+                className={`hidden xl:inline-flex px-1.5 py-0.5 rounded text-[9px] font-mono border ${
+                  isLightMode
+                    ? "bg-white border-stone-200 text-stone-600"
+                    : "bg-black/40 border-white/20 text-white/80"
+                }`}
+              >
+                ⌘K
+              </kbd>
             </button>
-          )}
 
-          <button
-            type="button"
-            onClick={() => setIsOpen(false)}
-            className={`p-1 rounded-full transition cursor-pointer ${
-              isLightMode
-                ? "hover:bg-stone-100 text-stone-500 hover:text-stone-800"
-                : "hover:bg-white/10 text-white/60 hover:text-white"
-            }`}
-            aria-label="Bağla"
-            title="Bağla (Esc)"
+            {/* Mobile Search Icon Button */}
+            <button
+              type="button"
+              onClick={() => setIsOpen(true)}
+              className={`sm:hidden h-9 w-9 rounded-full border transition-all active:scale-95 cursor-pointer flex items-center justify-center shrink-0 ${
+                isLightMode
+                  ? "bg-stone-100 hover:bg-stone-200 text-stone-800 border-stone-200"
+                  : "bg-white/15 hover:bg-white/25 text-white border-white/20"
+              }`}
+              aria-label="Axtarış"
+            >
+              <Search size={15} className={isLightMode ? "text-stone-600" : "text-[#E6C280]"} />
+            </button>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="search-form"
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed sm:static inset-x-2.5 top-2.5 sm:top-auto sm:inset-auto z-[120] sm:z-auto"
           >
-            <X size={14} />
-          </button>
-        </motion.form>
-      )}
+            <form
+              onSubmit={handleSubmit}
+              style={{
+                backgroundColor: isLightMode ? "#FAF7F2" : "#140B05",
+              }}
+              className={`flex items-center gap-2 h-10 sm:h-10 xl:h-11 px-3.5 rounded-full border shadow-xl sm:shadow-md transition-all ${
+                isLightMode
+                  ? "border-stone-300 text-stone-900 shadow-stone-200/60"
+                  : "border-white/30 text-white shadow-black/50"
+              } w-full sm:w-[280px] xl:w-[320px]`}
+            >
+              <Search
+                size={15}
+                className={`shrink-0 ${isLightMode ? "text-stone-500" : "text-[#E6C280]"}`}
+              />
+
+              <input
+                ref={inputRef}
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Axtarın..."
+                className="w-full bg-transparent text-xs sm:text-sm font-medium focus:outline-none placeholder-stone-400"
+              />
+
+              {query.trim() && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setQuery("");
+                    inputRef.current?.focus();
+                  }}
+                  className="p-1 text-stone-400 hover:text-stone-600 transition cursor-pointer"
+                  aria-label="Təmizlə"
+                >
+                  <X size={13} />
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className={`p-1 rounded-full transition cursor-pointer ${
+                  isLightMode
+                    ? "hover:bg-stone-200/70 text-stone-500 hover:text-stone-800"
+                    : "hover:bg-white/15 text-white/60 hover:text-white"
+                }`}
+                aria-label="Bağla"
+                title="Bağla (Esc)"
+              >
+                <X size={15} />
+              </button>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Floating Animated Search Results Dropdown */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -8, scale: 0.96 }}
+            initial={{ opacity: 0, y: -4, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -6, scale: 0.96, transition: { duration: 0.15 } }}
-            transition={{ type: "spring", stiffness: 360, damping: 26 }}
-            className={`absolute z-50 top-full mt-2 right-0 left-auto w-[290px] sm:w-[340px] max-w-[calc(100vw-1.5rem)] rounded-2xl p-3 shadow-2xl backdrop-blur-xl border ${
+            exit={{ opacity: 0, y: -4, scale: 0.98 }}
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            style={{
+              backgroundColor: isLightMode ? "#FAF7F2" : "#140B05",
+            }}
+            className={`fixed sm:absolute z-[120] top-14 sm:top-full mt-1.5 sm:mt-2 right-2.5 sm:right-0 left-2.5 sm:left-auto w-auto sm:w-[340px] max-w-[calc(100vw-1.25rem)] rounded-2xl p-3 shadow-2xl border ${
               isLightMode
-                ? "bg-[#FAF7F2]/98 border-[#E8E2D8] text-[#1A1517] shadow-[0_20px_50px_rgba(0,0,0,0.12)]"
-                : "bg-[#180B04]/98 border-white/20 text-white shadow-[0_20px_50px_rgba(0,0,0,0.7)]"
+                ? "border-[#E8E2D8] text-[#1A1517] shadow-[0_25px_70px_rgba(0,0,0,0.18)]"
+                : "border-white/20 text-white shadow-[0_25px_70px_rgba(0,0,0,0.7)]"
             }`}
           >
             {/* If query is empty, show Quick Suggestion chips */}
             {!trimmed ? (
               <div className="space-y-2">
-                <div className="flex items-center justify-between px-1 pb-1 border-b border-stone-200/50">
+                <div className="flex items-center justify-between px-1 pb-1 border-b border-stone-200/70">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 flex items-center gap-1">
                     <Sparkles size={11} className={isLightMode ? "text-[#B08D57]" : "text-[#E6C280]"} />
                     Tövsiyə Olunanlar
@@ -237,7 +257,7 @@ export function HeaderQuickSearch({ isLightMode }: HeaderQuickSearchProps) {
                       onClick={() => handleSelectSuggestion(sug)}
                       className={`px-2.5 py-1.5 rounded-full text-[11px] font-medium transition-all border cursor-pointer flex items-center gap-1 active:scale-95 ${
                         isLightMode
-                          ? "bg-white hover:bg-stone-100 text-stone-700 border-stone-200/80 shadow-2xs"
+                          ? "bg-white hover:bg-stone-100 text-stone-700 border-stone-200/90 shadow-2xs"
                           : "bg-white/10 hover:bg-white/20 text-white border-white/15"
                       }`}
                     >
@@ -250,7 +270,7 @@ export function HeaderQuickSearch({ isLightMode }: HeaderQuickSearchProps) {
             ) : (
               /* If query has text, show real-time live matching products */
               <div className="space-y-2">
-                <div className="flex items-center justify-between px-1 pb-1 border-b border-stone-200/50">
+                <div className="flex items-center justify-between px-1 pb-1 border-b border-stone-200/70">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
                     Nəticələr ({matchingProducts.length})
                   </span>

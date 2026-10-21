@@ -13,9 +13,11 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import { HeaderQuickSearch } from "@/components/HeaderQuickSearch";
 import { UnifiedLocaleDropdown } from "@/components/UnifiedLocaleDropdown";
 import { useLanguage } from "@/context/LanguageContext";
+import { MOCK_PRODUCTS, Product } from "@/data/products";
 import Logo from "@/components/Logo";
 
 interface HeaderProps {
@@ -29,8 +31,10 @@ export function Header({ className = "" }: HeaderProps) {
   const currentCategory = searchParams?.get("category") || null;
 
   const { totalCount, openCart } = useCart();
+  const { formatPrice } = useCurrency();
   const { t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileSearchQuery, setMobileSearchQuery] = useState("");
   const [isOverHero, setIsOverHero] = useState(true);
   const [heroHeaderBg, setHeroHeaderBg] = useState<string>("#542E13");
   const [heroTopGradient, setHeroTopGradient] = useState<string>("linear-gradient(180deg, #3A1B07 0%, #542E13 100%)");
@@ -122,7 +126,7 @@ export function Header({ className = "" }: HeaderProps) {
   return (
     <>
       <div
-        className={`sticky top-0 z-40 w-full transition-all duration-300 ${
+        className={`sticky top-0 z-50 w-full transition-all duration-300 ${
           isLightMode
             ? "bg-white/95 backdrop-blur-md border-b border-stone-200/80 shadow-xs"
             : "bg-transparent border-none"
@@ -290,23 +294,119 @@ export function Header({ className = "" }: HeaderProps) {
 
               {/* Links with Staggered Cascading Entrance */}
               <div className="flex-1 p-4 sm:p-5 space-y-4 overflow-y-auto">
-                {/* Search trigger inside mobile menu */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    router.push("/collections");
-                  }}
-                  className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-full bg-white border border-[#E5DFD5] text-[#5C5247] text-xs font-medium hover:border-[#B08D57] transition cursor-pointer shadow-2xs"
-                >
-                  <span className="flex items-center gap-2">
-                    <Search size={14} className="text-[#B08D57]" />
-                    <span>Axtarış...</span>
-                  </span>
-                  <span className="text-[10px] bg-[#F3EFE8] border border-[#E5DFD5] px-2 py-0.5 rounded font-mono text-[#5C5247]">
-                    ⌘K
-                  </span>
-                </button>
+                {/* Interactive Real-time Search inside mobile menu */}
+                <div className="relative">
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const q = mobileSearchQuery.trim();
+                      if (q) {
+                        setMobileMenuOpen(false);
+                        setMobileSearchQuery("");
+                        router.push(`/collections?search=${encodeURIComponent(q)}`);
+                      }
+                    }}
+                    className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-white border border-[#E5DFD5] text-[#1A1517] text-xs font-medium focus-within:border-[#B08D57] transition shadow-2xs"
+                  >
+                    <Search size={14} className="text-[#B08D57] shrink-0" />
+                    <input
+                      type="text"
+                      value={mobileSearchQuery}
+                      onChange={(e) => setMobileSearchQuery(e.target.value)}
+                      placeholder="Axtarış..."
+                      className="w-full bg-transparent text-xs font-medium focus:outline-none placeholder:text-[#5C5247]/60 text-[#1A1517]"
+                    />
+                    {mobileSearchQuery.trim() ? (
+                      <button
+                        type="button"
+                        onClick={() => setMobileSearchQuery("")}
+                        className="p-0.5 rounded-full text-[#5C5247] hover:text-black cursor-pointer shrink-0"
+                        aria-label="Təmizlə"
+                      >
+                        <X size={13} />
+                      </button>
+                    ) : (
+                      <span className="text-[10px] bg-[#F3EFE8] border border-[#E5DFD5] px-1.5 py-0.5 rounded font-mono text-[#5C5247] shrink-0">
+                        ⌘K
+                      </span>
+                    )}
+                  </form>
+
+                  {/* Real-time search results inside mobile drawer */}
+                  {mobileSearchQuery.trim() && (
+                    <div className="mt-2 p-2 bg-white rounded-2xl border border-[#E8E2D8] shadow-lg space-y-1 max-h-60 overflow-y-auto">
+                      <div className="flex items-center justify-between px-1.5 py-1 text-[10px] text-stone-500 font-bold uppercase tracking-wider border-b border-stone-100">
+                        <span>
+                          Nəticələr (
+                          {
+                            MOCK_PRODUCTS.filter(
+                              (p) =>
+                                p.name.toLowerCase().includes(mobileSearchQuery.trim().toLowerCase()) ||
+                                p.category.toLowerCase().includes(mobileSearchQuery.trim().toLowerCase()) ||
+                                p.fit.toLowerCase().includes(mobileSearchQuery.trim().toLowerCase())
+                            ).length
+                          }
+                          )
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const q = mobileSearchQuery.trim();
+                            setMobileMenuOpen(false);
+                            setMobileSearchQuery("");
+                            router.push(`/collections?search=${encodeURIComponent(q)}`);
+                          }}
+                          className="text-[#B08D57] underline cursor-pointer lowercase"
+                        >
+                          hamısına bax
+                        </button>
+                      </div>
+
+                      {(() => {
+                        const q = mobileSearchQuery.trim().toLowerCase();
+                        const matches = MOCK_PRODUCTS.filter(
+                          (p) =>
+                            p.name.toLowerCase().includes(q) ||
+                            p.category.toLowerCase().includes(q) ||
+                            p.fit.toLowerCase().includes(q)
+                        ).slice(0, 5);
+
+                        if (matches.length === 0) {
+                          return (
+                            <div className="py-3 text-center text-xs text-stone-500">
+                              "{mobileSearchQuery}" tapılmadı
+                            </div>
+                          );
+                        }
+
+                        return matches.map((p) => (
+                          <div
+                            key={p.id}
+                            onClick={() => {
+                              setMobileMenuOpen(false);
+                              setMobileSearchQuery("");
+                              router.push(`/products/${p.slug}`);
+                            }}
+                            className="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-[#FAF7F2] transition cursor-pointer"
+                          >
+                            <img
+                              src={p.colors[0]?.image || "/shirts/keten-koynek.png"}
+                              alt={p.name}
+                              className="w-9 h-9 rounded-lg object-cover bg-stone-100 shrink-0 border border-stone-200/60"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="text-xs font-semibold text-stone-900 truncate">{p.name}</div>
+                              <div className="text-[10px] text-stone-500 uppercase">{p.category} · {p.fit}</div>
+                            </div>
+                            <div className="text-right text-xs font-bold text-[#B08D57] shrink-0">
+                              {formatPrice(p.price)}
+                            </div>
+                          </div>
+                        ));
+                      })()}
+                    </div>
+                  )}
+                </div>
 
                 <div className="pt-2">
                   <div className="text-[10px] font-bold uppercase tracking-widest text-[#9A7B4F] px-1 pb-2">

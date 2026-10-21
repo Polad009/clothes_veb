@@ -125,16 +125,15 @@ export function UnifiedLocaleDropdown({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: direction === "down" ? -10 : 10, scale: 0.94 }}
+            initial={{ opacity: 0, y: direction === "down" ? -6 : 6, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: direction === "down" ? -8 : 8, scale: 0.95, transition: { duration: 0.14, ease: "easeIn" } }}
+            exit={{ opacity: 0, y: direction === "down" ? -6 : 6, scale: 0.98, transition: { duration: 0.15, ease: "easeIn" } }}
             transition={{
-              type: "spring",
-              damping: 24,
-              stiffness: 380,
-              mass: 0.7,
+              duration: 0.22,
+              ease: [0.16, 1, 0.3, 1],
             }}
             style={{
+              backgroundColor: isDark ? "#140B05" : "#FAF7F2",
               transformOrigin:
                 direction === "down"
                   ? align === "right"
@@ -144,10 +143,10 @@ export function UnifiedLocaleDropdown({
                   ? "bottom right"
                   : "bottom left",
             }}
-            className={`absolute z-50 w-72 sm:w-80 max-w-[calc(100vw-1.5rem)] rounded-2xl p-3.5 shadow-2xl backdrop-blur-xl ${
+            className={`absolute z-[100] w-72 sm:w-80 max-w-[calc(100vw-1.5rem)] rounded-2xl p-3.5 shadow-2xl border ${
               isDark
-                ? "bg-[#180B04]/98 border border-white/20 text-white shadow-[0_25px_60px_rgba(0,0,0,0.7)]"
-                : "bg-[#FAF7F2]/98 border border-[#E8E2D8] text-[#1A1517] shadow-[0_25px_60px_rgba(0,0,0,0.14)]"
+                ? "border-white/20 text-white shadow-[0_25px_70px_rgba(0,0,0,0.7)]"
+                : "border-[#E8E2D8] text-[#1A1517] shadow-[0_25px_70px_rgba(0,0,0,0.2)]"
             } ${
               align === "right" ? "right-0 left-auto" : "left-0 right-auto"
             } ${
@@ -195,7 +194,7 @@ export function UnifiedLocaleDropdown({
                             : "bg-zinc-900 text-white font-bold border-zinc-900 shadow-sm"
                           : isDark
                           ? "bg-white/10 hover:bg-white/20 text-white border-white/15"
-                          : "bg-zinc-50 hover:bg-zinc-100 text-zinc-700 hover:text-black border-zinc-200/60"
+                          : "bg-white hover:bg-stone-50 text-zinc-800 hover:text-black border-stone-200/90 shadow-2xs"
                       }`}
                     >
                       <div className="flex items-center gap-2">
@@ -236,7 +235,7 @@ export function UnifiedLocaleDropdown({
                             : "bg-zinc-900 text-white font-bold border-zinc-900 shadow-sm"
                           : isDark
                           ? "bg-white/10 hover:bg-white/20 text-white border-white/15"
-                          : "bg-zinc-50 hover:bg-zinc-100 text-zinc-700 hover:text-black border-zinc-200/60"
+                          : "bg-white hover:bg-stone-50 text-zinc-800 hover:text-black border-stone-200/90 shadow-2xs"
                       }`}
                     >
                       <div className="flex items-center gap-1 font-bold">
