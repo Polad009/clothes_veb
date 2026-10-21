@@ -97,7 +97,7 @@ export default function Logo({
   return (
     <Link
       href="/"
-      aria-label="HORVVALLE — Fərdi Atelye"
+      aria-label="HORVVALLE"
       className={`inline-flex items-center gap-2 sm:gap-3 select-none group transition-opacity duration-200 active:scale-[0.99] ${className}`}
     >
       <LogoMark className={markSizeClass} theme={theme} />
@@ -109,15 +109,6 @@ export default function Logo({
         >
           HORVVALLE
         </span>
-        
-        {/* Couture Tagline */}
-        {showTagline && (
-          <span
-            className={`font-sans font-bold uppercase mt-1.5 leading-none transition-colors duration-200 ${subSizeClass} ${textSubtitleClass}`}
-          >
-            FƏRDİ ATELYE
-          </span>
-        )}
       </span>
     </Link>
   );

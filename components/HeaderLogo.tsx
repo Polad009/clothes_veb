@@ -310,17 +310,6 @@ export function HeaderLogo({
               </span>
             ))}
           </div>
-
-          {/* Subtitle: "— FƏRDİ ATELYE —" fades in last (0.6s) */}
-          <div
-            ref={subtitleRef}
-            style={{ opacity: settled ? 1 : 0 }}
-            className={`text-[9px] uppercase tracking-[0.24em] font-['Instrument_Sans',sans-serif] font-semibold mt-1 leading-none ${
-              light ? "text-[#E6C280]" : "text-[#9A7B4F]"
-            }`}
-          >
-            — FƏRDİ ATELYE —
-          </div>
         </div>
       )}
     </div>
