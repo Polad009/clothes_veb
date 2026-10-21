@@ -1,0 +1,679 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;0,6..96,700;1,6..96,400&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #1C0D05;
+    --foreground: #ffffff;
+    
+    /* Horvvalle Dark Atelier Theme Tokens */
+    --atelier-bg: #2A1406;
+    --atelier-bg-gradient: radial-gradient(circle at 50% 36%, #7D4C28 0%, #542E13 48%, #2A1406 100%);
+    --current-hero-gradient: radial-gradient(circle at 50% 36%, #7D4C28 0%, #542E13 48%, #2A1406 100%);
+    
+    --atelier-text: #FFFFFF;
+    --atelier-text-muted: rgba(255, 255, 255, 0.75);
+    --atelier-text-subtle: rgba(255, 255, 255, 0.55);
+    
+    /* Accent Gold / Cream */
+    --atelier-gold: #E6C280;
+    --atelier-gold-deep: #B08D57;
+    --atelier-gold-light: #F4E8D0;
+    
+    /* Glass Surfaces */
+    --atelier-glass-bg: rgba(0, 0, 0, 0.20);
+    --atelier-glass-border: rgba(255, 255, 255, 0.15);
+    --atelier-glass-border-subtle: rgba(255, 255, 255, 0.10);
+    
+    /* Buttons & Pills */
+    --atelier-pill-active-bg: #FFFFFF;
+    --atelier-pill-active-text: #000000;
+    --atelier-pill-inactive-bg: rgba(0, 0, 0, 0.40);
+    --atelier-pill-inactive-text: rgba(255, 255, 255, 0.85);
+    --atelier-pill-border: rgba(255, 255, 255, 0.15);
+    
+    /* Circular Controls */
+    --atelier-circle-bg: rgba(0, 0, 0, 0.45);
+    --atelier-circle-hover: rgba(0, 0, 0, 0.75);
+    --atelier-size-dark-bg: rgba(0, 0, 0, 0.85);
+    
+    /* Shadows */
+    --atelier-oval-shadow: rgba(0, 0, 0, 0.45);
+
+    /* Legacy compatibility tokens */
+    --oxblood: #2E1A22;
+    --oxblood-2: #3B1F2B;
+    --cream: #F3EDE3;
+    --paper: #FAF6EF;
+    --brass: #9A7B4F;
+    --brass-hi: #B08D57;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden !important;
+    max-width: 100vw;
+  }
+
+  body {
+    background-color: #FAF7F2;
+    color: #1A1517;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden !important;
+    max-width: 100vw;
+    min-height: 100vh;
+    position: relative;
+  }
+
+  ::selection {
+    background-color: #E6C280;
+    color: #000000;
+  }
+
+  /* Haute Couture Dynamic Adaptive Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--scrollbar-track, #FAF7F2);
+    transition: background 0.35s ease;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb, #D1C7B7);
+    border-radius: 9999px;
+    transition: background 0.35s ease;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover, #B08D57);
+  }
+
+  /* Lenis Smooth Scroll Engine Support */
+  html.lenis, html.lenis body {
+    height: auto;
+  }
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+  .lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+  }
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+  .lenis.lenis-scrolling iframe {
+    pointer-events: none;
+  }
+  /* Intro splash pre-paint rules */
+  html[data-intro="off"] #intro {
+    display: none !important;
+  }
+  html[data-intro="on"] body {
+    overflow: hidden !important;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .font-bodoni {
+    font-family: 'Bodoni Moda', 'Playfair Display', Georgia, serif;
+    font-variation-settings: "opsz" 32;
+    font-feature-settings: "locl" 1, "kern" 1;
+  }
+  .font-serif-luxury {
+    font-family: 'Playfair Display', 'Bodoni Moda', Georgia, serif;
+    font-feature-settings: "locl" 1, "kern" 1;
+  }
+  .bg-horvvalle-bordeaux {
+    background-color: #3d1420;
+  }
+  .text-horvvalle-bordeaux {
+    color: #3d1420;
+  }
+  .border-horvvalle-bordeaux {
+    border-color: #3d1420;
+  }
+  .bg-horvvalle-gold {
+    background-color: #b08d57;
+  }
+  .text-horvvalle-gold {
+    color: #b08d57;
+  }
+  .border-horvvalle-gold {
+    border-color: #b08d57;
+  }
+}
+
+/* Luxury Wordmark Gold Shimmer (~6s cycle) */
+@keyframes goldWordmarkShimmer {
+  0%, 75% {
+    background-position: -250% 0;
+  }
+  100% {
+    background-position: 250% 0;
+  }
+}
+
+.animate-gold-shimmer {
+  background: linear-gradient(
+    110deg,
+    #3D1424 0%,
+    #3D1424 35%,
+    #B08D57 48%,
+    #EDE3D0 52%,
+    #B08D57 56%,
+    #3D1424 70%,
+    #3D1424 100%
+  );
+  background-size: 260% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: goldWordmarkShimmer 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Orbiting tiny gold dot (~12s loop) */
+@keyframes orbitCircle {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-orbit-12s {
+  transform-origin: 28px 28px;
+  animation: orbitCircle 12s linear infinite;
+}
+
+/* Circular Text Badge Rotation (~22s loop) */
+@keyframes spinSlow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spinSlow 22s linear infinite;
+}
+
+/* Floating Editorial Arch Chips */
+@keyframes floatGentle1 {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-7px); }
+}
+
+@keyframes floatGentle2 {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(8px); }
+}
+
+@keyframes floatGentle3 {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+}
+
+.animate-float-1 {
+  animation: floatGentle1 5.5s ease-in-out infinite;
+}
+
+.animate-float-2 {
+  animation: floatGentle2 6.5s ease-in-out infinite;
+}
+
+.animate-float-3 {
+  animation: floatGentle3 4.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-gold-shimmer {
+    animation: none !important;
+    color: #3D1424 !important;
+    -webkit-text-fill-color: #3D1424 !important;
+  }
+  .animate-orbit-12s,
+  .animate-spin-slow,
+  .animate-float-1,
+  .animate-float-2,
+  .animate-float-3 {
+    animation: none !important;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0%); }
+}
+
+@keyframes marqueeLeft {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+
+@keyframes marqueeRight {
+  0% { transform: translate3d(-50%, 0, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slideInRight {
+  animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-marquee-left {
+  display: flex;
+  width: max-content;
+  animation: marqueeLeft 38s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-right {
+  display: flex;
+  width: max-content;
+  animation: marqueeRight 42s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-left:hover,
+.animate-marquee-right:hover {
+  animation-play-state: paused;
+}
+
+@keyframes frameBreathe {
+  0%, 100% {
+    transform: scale(1) translateY(0);
+    box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.08);
+  }
+  50% {
+    transform: scale(1.045) translateY(-6px);
+    box-shadow: 0 18px 30px -4px rgba(0, 0, 0, 0.16);
+  }
+}
+
+.animate-breathe {
+  animation: frameBreathe 4.5s ease-in-out infinite;
+  will-change: transform, box-shadow;
+}
+
+/* Lenis Smooth Scroll Core */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+@keyframes tickerScroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-ticker {
+  display: flex;
+  width: max-content;
+  animation: tickerScroll 28s linear infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+@keyframes heroFlowLeft {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes heroFlowRight {
+  0% {
+    transform: translate3d(-50%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animate-hero-flow-left {
+  display: flex;
+  width: max-content;
+  animation: heroFlowLeft 44s linear infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  perspective: 1000px;
+  contain: layout paint;
+}
+
+.animate-hero-flow-right {
+  display: flex;
+  width: max-content;
+  animation: heroFlowRight 48s linear infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  perspective: 1000px;
+  contain: layout paint;
+}
+
+@keyframes ambientFlow1 {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -40px) scale(1.15);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.92);
+  }
+}
+
+@keyframes ambientFlow2 {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(-40px, 30px) scale(1.18);
+  }
+  66% {
+    transform: translate(30px, -25px) scale(0.88);
+  }
+}
+
+.animate-ambient-1 {
+  animation: ambientFlow1 14s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-ambient-2 {
+  animation: ambientFlow2 18s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* =========================================================================
+   HORVVALLE GPU-ACCELERATED RUNWAY & PURE COMPOSITOR MARQUEE
+   ========================================================================= */
+@keyframes runwayTrackLeft {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes runwayTrackRight {
+  0% {
+    transform: translate3d(-50%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.runway-track-left {
+  display: flex;
+  width: max-content;
+  animation: runwayTrackLeft 44s linear infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.runway-track-right {
+  display: flex;
+  width: max-content;
+  animation: runwayTrackRight 48s linear infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Wavy vertical motion - ONLY on inner wrapper, never on card itself */
+@keyframes runwayWaveMotion {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate3d(0, -14px, 0) rotate(1.2deg);
+  }
+  50% {
+    transform: translate3d(0, -2px, 0) rotate(0.3deg);
+  }
+  75% {
+    transform: translate3d(0, 12px, 0) rotate(-1.2deg);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+}
+
+.runway-wave-inner {
+  animation: runwayWaveMotion 5.8s ease-in-out infinite;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Pausing strictly when scrolled out of viewport (data-paused="true") */
+.runway-track-left[data-paused="true"],
+.runway-track-right[data-paused="true"],
+.runway-wave-inner[data-paused="true"] {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .runway-track-left,
+  .runway-track-right,
+  .runway-wave-inner {
+    animation: none !important;
+  }
+}
+
+/* =========================================================================
+   UNIVERSAL TACTILE CLICK ANIMATIONS (Fast, Instant, Tactile Feedback)
+   ========================================================================= */
+button:not(.no-tactile),
+a:not(.no-tactile),
+[role="button"]:not(.no-tactile),
+.interactive-click {
+  transition: transform 0.12s cubic-bezier(0.2, 0.8, 0.4, 1), opacity 0.12s ease;
+}
+
+button:not(.no-tactile):active,
+a:not(.no-tactile):active,
+[role="button"]:not(.no-tactile):active {
+  transform: scale(0.96);
+}
+
+/* =========================================================================
+   STEPPED PAGE TRANSITION (Pilləli Kaskad Açılış)
+   ========================================================================= */
+@keyframes steppedReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-stepped-transition > *:nth-child(1) {
+  animation: steppedReveal 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.03s both;
+}
+.page-stepped-transition > *:nth-child(2) {
+  animation: steppedReveal 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+}
+.page-stepped-transition > *:nth-child(3) {
+  animation: steppedReveal 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.14s both;
+}
+.page-stepped-transition > *:nth-child(4) {
+  animation: steppedReveal 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.20s both;
+}
+.page-stepped-transition > *:nth-child(n+5) {
+  animation: steppedReveal 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.25s both;
+}
+
+/* =========================================================================
+   HORVVALLE EXACT BINDING DESIGN SYSTEM UTILITIES
+   ========================================================================= */
+.font-fraunces {
+  font-family: 'Fraunces', Georgia, serif;
+}
+
+.font-instrument {
+  font-family: 'Instrument Sans', -apple-system, sans-serif;
+}
+
+.font-editorial {
+  font-family: 'Fraunces', 'Playfair Display', Georgia, serif;
+}
+
+.font-garamond {
+  font-family: var(--font-eb-garamond), 'EB Garamond', 'Cormorant Garamond', Georgia, serif;
+}
+
+.font-eb-garamond {
+  font-family: var(--font-eb-garamond), 'EB Garamond', Garamond, Georgia, serif;
+}
+
+.bg-grain-texture {
+  background-image: radial-gradient(rgba(154, 123, 79, 0.14) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+@keyframes kenBurns10 {
+  0% {
+    transform: scale(1.0);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1.0);
+  }
+}
+
+.animate-ken-burns-10 {
+  animation: kenBurns10 10s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes marquee30s {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-marquee-30 {
+  display: flex;
+  width: max-content;
+  animation: marquee30s 35s linear infinite;
+  will-change: transform;
+}
+
+@keyframes hangerSway {
+  0%, 100% {
+    transform: rotate(-1.5deg);
+  }
+  50% {
+    transform: rotate(1.5deg);
+  }
+}
+
+.animate-hanger-sway {
+  transform-origin: 50% 0%;
+  animation: hangerSway 6s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes dampSwing {
+  0% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(4deg);
+  }
+  45% {
+    transform: rotate(-2.5deg);
+  }
+  70% {
+    transform: rotate(1.2deg);
+  }
+  88% {
+    transform: rotate(-0.5deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.animate-damp-swing {
+  transform-origin: 50% 0%;
+  animation: dampSwing 2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-hanger-sway,
+  .animate-damp-swing,
+  .animate-ken-burns-10,
+  .animate-ken-burns,
+  .animate-marquee-30,
+  .animate-marquee-gold {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+
+

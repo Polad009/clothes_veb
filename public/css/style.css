@@ -1,0 +1,850 @@
+/* =========================================================
+   ATELIER — Exact Match Minimalist Design System
+   Desktop & Mobile (Home, Product, Studio, Checkout)
+========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --bg-main: #FFFFFF;
+  --bg-card: #F4F4F4;
+  --bg-card-hover: #ECECEC;
+  --bg-dark: #1C1C1E;
+  
+  --text-main: #111111;
+  --text-muted: #767676;
+  --text-subtle: #999999;
+  --text-light: #FFFFFF;
+  
+  --border-color: #EAEAEA;
+  --border-dark: #222222;
+  
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --radius-pill: 9999px;
+  --radius-card: 16px;
+  --radius-sm: 8px;
+
+  /* Smooth Easing */
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: var(--font-family);
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  background: #FFFFFF;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  user-select: none;
+}
+
+.container {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+/* =========================================================
+   1. Header / Navbar (Desktop & Mobile)
+========================================================= */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+}
+
+.site-logo {
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-main);
+  transition: opacity 0.2s ease;
+}
+
+.site-logo:hover {
+  opacity: 0.8;
+}
+
+.header-menu-btn-mobile {
+  display: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+}
+
+.nav-link {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #444444;
+  position: relative;
+  padding: 6px 0;
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: var(--text-main);
+}
+
+.header-cart-btn {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-main);
+  transition: opacity 0.2s ease;
+}
+
+.header-cart-btn:hover {
+  opacity: 0.7;
+}
+
+/* =========================================================
+   2. Hero Section (Home)
+========================================================= */
+.hero-section {
+  text-align: center;
+  padding: 80px 0 70px 0;
+}
+
+.hero-eyebrow {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+.hero-title {
+  font-size: clamp(2.8rem, 5.5vw, 4.4rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.08;
+  color: var(--text-main);
+  margin-bottom: 18px;
+}
+
+.hero-subtitle {
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: #555555;
+  margin-bottom: 34px;
+}
+
+.hero-buttons-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Pill Buttons */
+.btn-pill-black {
+  background: var(--text-main);
+  color: #FFFFFF;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 12px 30px;
+  border-radius: var(--radius-pill);
+  transition: all 0.25s var(--ease-smooth);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-pill-black:hover {
+  background: #333333;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.btn-pill-black:active {
+  transform: scale(0.97) translateY(0);
+}
+
+.btn-pill-outline {
+  background: #FFFFFF;
+  color: var(--text-main);
+  border: 1px solid #222222;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 12px 30px;
+  border-radius: var(--radius-pill);
+  transition: all 0.25s var(--ease-smooth);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-pill-outline:hover {
+  background: #F7F7F7;
+  border-color: #000000;
+  transform: translateY(-2px);
+}
+
+.btn-pill-outline:active {
+  transform: scale(0.97) translateY(0);
+}
+
+.btn-pill-white {
+  background: #FFFFFF;
+  color: #111111;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 12px 32px;
+  border-radius: var(--radius-pill);
+  transition: all 0.25s var(--ease-smooth);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-pill-white:hover {
+  background: #EEEEEE;
+  transform: translateY(-2px) scale(1.02);
+}
+
+/* =========================================================
+   3. "Seçilmişlər" Section & Product Cards
+========================================================= */
+.featured-section {
+  padding: 30px 0 90px 0;
+}
+
+.featured-heading {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-main);
+  margin-bottom: 32px;
+}
+
+.products-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.minimal-card {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: transform 0.35s var(--ease-smooth);
+}
+
+.minimal-card:hover {
+  transform: translateY(-6px);
+}
+
+.card-silhouette-box {
+  width: 100%;
+  aspect-ratio: 1 / 1.18;
+  background: var(--bg-card);
+  border-radius: var(--radius-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.35s ease, box-shadow 0.35s var(--ease-smooth);
+}
+
+.minimal-card:hover .card-silhouette-box {
+  background: var(--bg-card-hover);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.05);
+}
+
+.apparel-svg {
+  width: 82%;
+  height: 82%;
+  transition: transform 0.4s var(--ease-smooth);
+  transform-origin: center center;
+}
+
+.minimal-card:hover .apparel-svg {
+  transform: scale(1.05) translateY(-2px);
+}
+
+.card-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14px;
+  font-size: 0.92rem;
+}
+
+.card-title {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.card-price {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+/* =========================================================
+   4. Studio Dark Banner
+========================================================= */
+.studio-banner-dark {
+  background: var(--bg-dark);
+  color: #FFFFFF;
+  text-align: center;
+  padding: 90px 20px;
+  margin: 40px 0 0 0;
+}
+
+.studio-banner-eyebrow {
+  font-size: 0.82rem;
+  color: #888888;
+  margin-bottom: 14px;
+}
+
+.studio-banner-title {
+  font-size: clamp(2.2rem, 4.5vw, 3.4rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+}
+
+.studio-banner-desc {
+  font-size: 1rem;
+  color: #AAAAAA;
+  max-width: 540px;
+  margin: 0 auto 32px auto;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   5. Info Columns (3 sütun)
+========================================================= */
+.info-columns-section {
+  padding: 80px 0;
+  background: #FFFFFF;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.info-columns-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+}
+
+.info-col-item h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 6px;
+}
+
+.info-col-item p {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+/* =========================================================
+   6. Footer
+========================================================= */
+.site-footer {
+  padding: 40px 0;
+  background: #FFFFFF;
+}
+
+.footer-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+  color: #888888;
+}
+
+.footer-logo {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #444444;
+}
+
+.footer-links-row {
+  display: flex;
+  gap: 16px;
+}
+
+.footer-links-row a {
+  color: #666666;
+  transition: color 0.2s ease;
+}
+
+.footer-links-row a:hover {
+  color: #111111;
+}
+
+/* =========================================================
+   7. MƏHSUL SƏHİFƏSİ (PRODUCT DETAIL PAGE - 1-ci & 3-cü Şəkil)
+========================================================= */
+.product-page-section {
+  padding: 40px 0 100px 0;
+  background: #FFFFFF;
+}
+
+.product-detail-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 64px;
+  align-items: flex-start;
+}
+
+/* Sol Qalereya / Rejim Seçicisi */
+.product-gallery-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Rejim düymələri (Şəkil / 3D / Modeldə) */
+.view-mode-pill-bar {
+  display: inline-flex;
+  align-items: center;
+  background: #F4F4F4;
+  padding: 4px;
+  border-radius: var(--radius-pill);
+  gap: 4px;
+  align-self: flex-start;
+}
+
+.view-mode-btn {
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 6px 18px;
+  border-radius: var(--radius-pill);
+  color: #555555;
+  transition: all 0.2s var(--ease-smooth);
+}
+
+.view-mode-btn.active {
+  background: #FFFFFF;
+  color: #111111;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  font-weight: 600;
+}
+
+/* Əsas Böyük Siluet Qutusu */
+.product-main-canvas-box {
+  width: 100%;
+  aspect-ratio: 1 / 1.15;
+  background: var(--bg-card);
+  border-radius: var(--radius-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  position: relative;
+  transition: background 0.3s ease;
+}
+
+.product-main-canvas-box .apparel-svg {
+  width: 90%;
+  height: 90%;
+}
+
+/* Kiçik Miniatur Qutuları (3 ədəd yan-yana) */
+.product-thumbs-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.thumb-silhouette-card {
+  width: 100%;
+  aspect-ratio: 1 / 1.05;
+  background: var(--bg-card);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: all 0.25s var(--ease-smooth);
+}
+
+.thumb-silhouette-card:hover {
+  background: #EDEDED;
+}
+
+.thumb-silhouette-card.active {
+  border-color: #111111;
+  background: #EDEDED;
+}
+
+.thumb-silhouette-card .apparel-svg {
+  width: 75%;
+  height: 75%;
+}
+
+/* Sağ Məhsul Məlumatları */
+.product-details-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.product-sub-category {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.product-main-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-main);
+  margin-bottom: 12px;
+}
+
+.product-price-large {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 16px;
+}
+
+.product-description-snippet {
+  font-size: 0.9rem;
+  color: #666666;
+  line-height: 1.55;
+  margin-bottom: 28px;
+}
+
+/* Rəng Seçimi Dairələri */
+.product-option-section {
+  margin-bottom: 24px;
+}
+
+.option-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.option-title {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.size-guide-link {
+  font-size: 0.85rem;
+  color: var(--text-main);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.color-circles-group {
+  display: flex;
+  gap: 12px;
+}
+
+.swatch-circle-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-pill);
+  padding: 2px;
+  border: 2px solid transparent;
+  transition: transform 0.2s var(--ease-spring), border-color 0.2s ease;
+}
+
+.swatch-circle-btn span {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  display: block;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.swatch-circle-btn.selected {
+  border-color: #111111;
+  transform: scale(1.12);
+}
+
+/* Ölçü Seçimi Qutuları */
+.size-boxes-group {
+  display: flex;
+  gap: 10px;
+}
+
+.size-box-btn {
+  min-width: 48px;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: #FFFFFF;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-main);
+  transition: all 0.2s var(--ease-smooth);
+}
+
+.size-box-btn:hover {
+  border-color: #111111;
+}
+
+.size-box-btn.selected {
+  border-color: #111111;
+  border-width: 1.5px;
+  background: #FFFFFF;
+}
+
+/* Əsas Fəaliyyət Düymələri (Səbətə at / Apple Pay ilə al) */
+.product-buy-buttons-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 28px 0 32px 0;
+}
+
+.btn-buy-black {
+  width: 100%;
+  background: var(--text-main);
+  color: #FFFFFF;
+  font-size: 0.92rem;
+  font-weight: 600;
+  padding: 15px;
+  border-radius: var(--radius-pill);
+  transition: all 0.25s var(--ease-smooth);
+}
+
+.btn-buy-black:hover {
+  background: #333333;
+  transform: translateY(-2px);
+}
+
+.btn-buy-apple {
+  width: 100%;
+  background: #FFFFFF;
+  color: var(--text-main);
+  border: 1px solid var(--border-dark);
+  font-size: 0.92rem;
+  font-weight: 600;
+  padding: 15px;
+  border-radius: var(--radius-pill);
+  transition: all 0.25s var(--ease-smooth);
+}
+
+.btn-buy-apple:hover {
+  background: #F7F7F7;
+  transform: translateY(-2px);
+}
+
+/* Çatdırılma / Qaytarma Məlumatları */
+.product-policy-info {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+/* Studio Promo Callout Box */
+.studio-custom-callout-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  padding: 20px 24px;
+  margin-top: 10px;
+}
+
+.studio-custom-callout-card h5 {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.studio-custom-callout-card a, .studio-custom-callout-card button {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-decoration: underline;
+  cursor: pointer;
+  display: inline-block;
+  margin-top: 2px;
+}
+
+.studio-custom-callout-card a:hover, .studio-custom-callout-card button:hover {
+  color: var(--text-main);
+}
+
+/* =========================================================
+   8. MOBİL XÜSUSİYYƏTLƏRİ (2-ci & 3-cü Şəkil)
+========================================================= */
+.mobile-sticky-bottom-bar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border-color);
+  padding: 14px 20px;
+  z-index: 200;
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .header-inner {
+    height: 56px;
+  }
+  
+  .header-menu-btn-mobile {
+    display: block;
+  }
+
+  .main-nav {
+    display: none;
+  }
+
+  .site-logo {
+    font-size: 1.05rem;
+  }
+
+  /* Mobil Hero */
+  .hero-section {
+    padding: 60px 0 50px 0;
+  }
+
+  .hero-eyebrow {
+    display: none;
+  }
+
+  .hero-title {
+    font-size: 2.8rem;
+    line-height: 1.08;
+    margin-bottom: 14px;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+    margin-bottom: 28px;
+  }
+
+  .hero-buttons-row {
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  .hero-buttons-row .btn-pill-black,
+  .hero-buttons-row .btn-pill-outline {
+    width: 100%;
+    padding: 14px;
+  }
+
+  /* Mobil Grid (2 sütun) */
+  .products-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  .featured-heading {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+
+  /* Mobil Studio Qara Banner */
+  .studio-banner-dark {
+    padding: 70px 20px;
+    text-align: left;
+  }
+
+  .studio-banner-eyebrow {
+    display: none;
+  }
+
+  .studio-banner-title {
+    font-size: 2.2rem;
+    margin-bottom: 12px;
+  }
+
+  .studio-banner-desc {
+    font-size: 0.95rem;
+    margin-bottom: 24px;
+  }
+
+  /* Mobil Məhsul Səhifəsi */
+  .product-detail-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .product-main-title {
+    font-size: 2rem;
+  }
+
+  .product-thumbs-row {
+    display: none; /* Mobildə təmiz 3-cü şəkildəki kimi */
+  }
+
+  .product-buy-buttons-group {
+    display: none; /* Mobildə aşağı yapışır */
+  }
+
+  .mobile-sticky-bottom-bar {
+    display: flex;
+  }
+
+  .mobile-sticky-bottom-bar .btn-buy-black,
+  .mobile-sticky-bottom-bar .btn-buy-apple {
+    flex: 1;
+    padding: 14px 10px;
+    font-size: 0.88rem;
+  }
+
+  .product-page-section {
+    padding-bottom: 120px;
+  }
+}

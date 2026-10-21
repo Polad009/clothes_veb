@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ATELIER</title>
+  <meta name="description" content="Atelier — Gündəlik geyim kolleksiyası və öz dizaynını yarat.">
+  
+  <!-- CSS Styles -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/studio.css">
+  <link rel="stylesheet" href="css/checkout.css">
+</head>
+<body>
+
+  <!-- =========================================================
+       1. HEADER / NAVBAR (Desktop: Şəkil 1, Mobil: Şəkil 2 & 3)
+  ========================================================= -->
+  <header class="site-header">
+    <div class="container">
+      <div class="header-inner">
+        <!-- Mobil üçün "Menyu" düyməsi (Sol) -->
+        <button class="header-menu-btn-mobile" onclick="App.toggleMobileMenu()">
+          Menyu
+        </button>
+
+        <!-- Logo (Desktop: Sol, Mobil: Mərkəz) -->
+        <a href="#home" class="site-logo" onclick="App.navigate('home')">
+          ATELIER
+        </a>
+
+        <!-- Desktop Mərkəz Menyu (Kişi, Qadın, Kolleksiyalar, Studio) -->
+        <nav class="main-nav">
+          <a href="#shop" class="nav-link" onclick="Store.setCategory('kişi')">Kişi</a>
+          <a href="#shop" class="nav-link" onclick="Store.setCategory('qadın')">Qadın</a>
+          <a href="#shop" class="nav-link" onclick="Store.setCategory('all')">Kolleksiyalar</a>
+          <a href="#studio" class="nav-link" onclick="App.navigate('studio')">Studio</a>
+        </nav>
+
+        <!-- Sağ Tərəf: Səbət (0) -->
+        <button class="header-cart-btn" onclick="Cart.openDrawer()">
+          Səbət (<span id="cartCountDisplay">0</span>)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobil Açılan Menyu Drawer -->
+  <div id="mobileNavDrawer" style="position: fixed; top: 56px; left: 0; right: 0; background: #fff; border-bottom: 1px solid var(--border-color); padding: 20px 32px; display: none; flex-direction: column; gap: 16px; z-index: 99; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
+    <a href="#shop" class="nav-link" onclick="Store.setCategory('kişi'); App.closeMobileMenu();">Kişi</a>
+    <a href="#shop" class="nav-link" onclick="Store.setCategory('qadın'); App.closeMobileMenu();">Qadın</a>
+    <a href="#shop" class="nav-link" onclick="Store.setCategory('all'); App.closeMobileMenu();">Kolleksiyalar</a>
+    <a href="#studio" class="nav-link" onclick="App.navigate('studio'); App.closeMobileMenu();">Studio</a>
+    <a href="#tracking" class="nav-link" onclick="App.navigate('tracking'); App.closeMobileMenu();">Sifariş İzləmə</a>
+  </div>
+
+  <!-- =========================================================
+       VIEW 1: ANA SƏHİFƏ (HOME VIEW - Şəkil 2 & Orijinal)
+  ========================================================= -->
+  <main id="view-home" class="view-section">
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="container">
+        <div class="hero-eyebrow">Yeni mövsüm</div>
+        <h1 class="hero-title">Sadə. Dəqiq.<br>Sənin.</h1>
+        <p class="hero-subtitle">Gündəlik geyim kolleksiyası və öz dizaynını yarat.</p>
+        <div class="hero-buttons-row">
+          <button class="btn-pill-black" onclick="App.navigate('shop')">
+            Kolleksiyaya bax
+          </button>
+          <button class="btn-pill-outline" onclick="App.navigate('studio')">
+            Dizayn et
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- "Seçilmişlər" Grid Section -->
+    <section class="featured-section">
+      <div class="container">
+        <h2 class="featured-heading">Seçilmişlər</h2>
+        <div class="products-grid-4" id="featuredProductsGrid">
+          <!-- JS Render (Classic Tee, Heavy Hoodie, Oversize Tee, Essential Tee) -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Studio Dark Banner Section -->
+    <section class="studio-banner-dark">
+      <div class="container">
+        <div class="studio-banner-eyebrow">Studio</div>
+        <h2 class="studio-banner-title">Öz paltarını dizayn et.</h2>
+        <p class="studio-banner-desc">
+          Dizaynı yüklə, 3D-də və modeldə gör, bizə göndər. Biz çap edək.
+        </p>
+        <button class="btn-pill-white" onclick="App.navigate('studio')">
+          Studio-nu aç
+        </button>
+      </div>
+    </section>
+
+    <!-- Three Info Columns Section -->
+    <section class="info-columns-section">
+      <div class="container">
+        <div class="info-columns-grid">
+          <div class="info-col-item">
+            <h4>Təhlükəsiz ödəniş</h4>
+            <p>Apple Pay, Google Pay, kart</p>
+          </div>
+          <div class="info-col-item">
+            <h4>Qapıda ödəniş</h4>
+            <p>Hazır məhsullar üçün</p>
+          </div>
+          <div class="info-col-item">
+            <h4>Fərdi çap</h4>
+            <p>Yalnız öncədən ödənişlə</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- =========================================================
+       VIEW 2: MƏHSUL SƏHİFƏSİ (PRODUCT VIEW - Şəkil 1 & 3)
+  ========================================================= -->
+  <main id="view-product" class="view-section" style="display: none;">
+    <section class="product-page-section">
+      <div class="container" id="productPageContainer">
+        <!-- JS Render (1-ci və 3-cü Şəkil Tam Dəqiqliklə) -->
+      </div>
+    </section>
+  </main>
+
+  <!-- =========================================================
+       VIEW 3: BÜTÜN KOLLEKSİYALAR (SHOP VIEW)
+  ========================================================= -->
+  <main id="view-shop" class="view-section" style="display: none; padding: 60px 0 100px 0;">
+    <div class="container">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 36px;">
+        <h2 class="featured-heading" style="margin-bottom: 0;">Bütün Kolleksiya</h2>
+        <div style="display: flex; gap: 16px;">
+          <button class="nav-link" onclick="Store.setCategory('all')">Hamısı</button>
+          <button class="nav-link" onclick="Store.setCategory('kişi')">Kişi</button>
+          <button class="nav-link" onclick="Store.setCategory('qadın')">Qadın</button>
+        </div>
+      </div>
+      <div class="products-grid-4" id="catalogProductsGrid">
+        <!-- JS Render -->
+      </div>
+    </div>
+  </main>
+
+  <!-- =========================================================
+       VIEW 4: STUDIO (ÖZ PALTARINI DİZAYN ET)
+  ========================================================= -->
+  <main id="view-studio" class="view-section" style="display: none;">
+    <section class="studio-section-view">
+      <div class="container">
+        <div style="margin-bottom: 36px;">
+          <span style="font-size: 0.85rem; color: var(--text-muted);">Studio</span>
+          <h1 style="font-size: 2.4rem; font-weight: 800; letter-spacing: -0.02em; margin-top: 4px;">Öz paltarını dizayn et</h1>
+        </div>
+
+        <div class="studio-grid-layout">
+          <!-- Canlı Vektor / 3D Canvas -->
+          <div class="studio-canvas-card" id="studioLiveVisualizer">
+            <!-- SVG + Print Render -->
+          </div>
+
+          <!-- Konfiqurasiya Sütunu -->
+          <div class="studio-config-column">
+            <!-- 1. Geyim Növü -->
+            <div class="config-block">
+              <div class="config-label">1. Geyim Növü</div>
+              <div class="config-options-grid">
+                <button class="studio-style-btn selected" data-style="classic-tee" onclick="Studio.selectStyle('classic-tee')">
+                  <strong>Classic Tee</strong>
+                  <div style="font-size: 0.8rem; color: #777;">35 ₼</div>
+                </button>
+                <button class="studio-style-btn" data-style="heavy-hoodie" onclick="Studio.selectStyle('heavy-hoodie')">
+                  <strong>Heavy Hoodie</strong>
+                  <div style="font-size: 0.8rem; color: #777;">65 ₼</div>
+                </button>
+                <button class="studio-style-btn" data-style="oversize-tee" onclick="Studio.selectStyle('oversize-tee')">
+                  <strong>Oversize Tee</strong>
+                  <div style="font-size: 0.8rem; color: #777;">40 ₼</div>
+                </button>
+                <button class="studio-style-btn" data-style="essential-tee" onclick="Studio.selectStyle('essential-tee')">
+                  <strong>Essential Tee</strong>
+                  <div style="font-size: 0.8rem; color: #777;">35 ₼</div>
+                </button>
+              </div>
+            </div>
+
+            <!-- 2. Rəng Seçimi -->
+            <div class="config-block">
+              <div class="config-label">
+                <span>2. Rəng</span>
+                <span id="studioActiveColorName" style="color: #888; font-weight: 500;">Açıq Boz</span>
+              </div>
+              <div style="display: flex; gap: 10px;" id="studioColorsPicker">
+                <!-- JS Render -->
+              </div>
+            </div>
+
+            <!-- 3. Dizayn Şəkli / Logo Yükləmə -->
+            <div class="config-block">
+              <div class="config-label">3. Dizayn və ya Şəkil Yüklə</div>
+              <label class="upload-dropzone">
+                <input type="file" id="studioUploadInput" accept="image/*" style="display: none;">
+                <svg style="width: 28px; height: 28px; margin: 0 auto 8px auto; color: #888;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <div style="font-size: 0.85rem; font-weight: 600;">Şəkil və ya Loqo seçin (PNG / JPG)</div>
+                <div style="font-size: 0.75rem; color: #999; margin-top: 4px;">Şəffaf arxa fonlu PNG tövsiyə olunur</div>
+              </label>
+            </div>
+
+            <!-- 4. Fərdi Yazı (Opsional) -->
+            <div class="config-block">
+              <div class="config-label">4. Fərdi Yazı (Opsional)</div>
+              <input type="text" id="studioCustomTextInput" placeholder="məs. ATELIER 2026" maxlength="20" oninput="Studio.updateText(this.value)" style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.9rem; outline: none;">
+            </div>
+
+            <!-- 5. Çap Yeri -->
+            <div class="config-block">
+              <div class="config-label">5. Çap Yeri</div>
+              <div style="display: flex; gap: 8px;">
+                <button class="studio-placement-btn selected" data-placement="front-center" onclick="Studio.setPlacement('front-center')">Ön Mərkəz</button>
+                <button class="studio-placement-btn" data-placement="front-chest" onclick="Studio.setPlacement('front-chest')">Sinə Loqosu</button>
+                <button class="studio-placement-btn" data-placement="back-large" onclick="Studio.setPlacement('back-large')">Arxa Çap</button>
+              </div>
+            </div>
+
+            <!-- 6. Ölçü -->
+            <div class="config-block">
+              <div class="config-label">6. Ölçü</div>
+              <div style="display: flex; gap: 8px;">
+                <button class="studio-size-btn" data-size="S" onclick="Studio.setSize('S')">S</button>
+                <button class="studio-size-btn" data-size="M" onclick="Studio.setSize('M')">M</button>
+                <button class="studio-size-btn selected" data-size="L" onclick="Studio.setSize('L')">L</button>
+                <button class="studio-size-btn" data-size="XL" onclick="Studio.setSize('XL')">XL</button>
+                <button class="studio-size-btn" data-size="XXL" onclick="Studio.setSize('XXL')">XXL</button>
+              </div>
+            </div>
+
+            <!-- Qiymət və Səbətə Əlavə -->
+            <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 10px;">
+              <div>
+                <div style="font-size: 0.8rem; color: #888;">Yekun Qiymət:</div>
+                <div id="studioCalculatedPrice" style="font-size: 1.8rem; font-weight: 800;">45 ₼</div>
+              </div>
+              <button class="btn-pill-black" onclick="Studio.addToCart()">
+                Səbətə əlavə et
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- =========================================================
+       VIEW 5: ÖDƏNİŞ (CHECKOUT VIEW)
+  ========================================================= -->
+  <main id="view-checkout" class="view-section" style="display: none;">
+    <section class="checkout-section-view">
+      <div class="container" id="checkoutMainContainer">
+        
+        <!-- Sifariş Formu Bölməsi -->
+        <div id="checkoutFormSection">
+          <h1 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 32px;">Sifarişin Rəsmiləşdirilməsi</h1>
+          
+          <div class="checkout-grid-layout">
+            <div>
+              <form onsubmit="Checkout.submitOrder(event)">
+                <!-- 1. Çatdırılma -->
+                <div class="checkout-card-box">
+                  <h3>1. Çatdırılma Məlumatları</h3>
+                  <div class="two-col-inputs">
+                    <div class="input-field-group">
+                      <label>Ad və Soyad *</label>
+                      <input type="text" id="orderFullName" required value="Elşən Məmmədov">
+                    </div>
+                    <div class="input-field-group">
+                      <label>Telefon *</label>
+                      <input type="tel" id="orderPhone" required value="+994 50 123 45 67">
+                    </div>
+                  </div>
+                  <div class="two-col-inputs">
+                    <div class="input-field-group">
+                      <label>E-poçt</label>
+                      <input type="email" id="orderEmail" value="elsan@example.com">
+                    </div>
+                    <div class="input-field-group">
+                      <label>Şəhər</label>
+                      <select id="orderCity">
+                        <option value="Bakı">Bakı şəhəri</option>
+                        <option value="Sumqayıt">Sumqayıt</option>
+                        <option value="Gəncə">Gəncə</option>
+                        <option value="Digər">Digər rayonlar</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="input-field-group">
+                    <label>Ünvan *</label>
+                    <input type="text" id="orderAddress" required value="Nizami küçəsi 45, mənzil 18">
+                  </div>
+                </div>
+
+                <!-- 2. Ödəniş Üsulu (Apple Pay, Google Pay, Kart, Qapıda Nağd) -->
+                <div class="checkout-card-box">
+                  <h3>2. Ödəniş Üsulu</h3>
+                  
+                  <div class="payment-methods-grid">
+                    <button type="button" class="payment-method-btn" data-method="apple_pay" onclick="Checkout.setPaymentMethod('apple_pay')">
+                      <svg fill="currentColor" viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.62-.75 1.04-1.8 0.92-2.85-.9.04-2 .6-2.65 1.35-.56.65-1.06 1.72-.93 2.75 1.01.08 2.04-.5 2.66-1.25z"/></svg>
+                      Apple Pay
+                    </button>
+                    <button type="button" class="payment-method-btn" data-method="google_pay" onclick="Checkout.setPaymentMethod('google_pay')">
+                      <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>
+                      Google Pay
+                    </button>
+                    <button type="button" class="payment-method-btn active" data-method="card" onclick="Checkout.setPaymentMethod('card')">
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                      Bank Kartı
+                    </button>
+                    <button type="button" class="payment-method-btn" data-method="cash" onclick="Checkout.setPaymentMethod('cash')">
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                      Qapıda Nağd
+                    </button>
+                  </div>
+
+                  <!-- 1. Apple Pay Button Box -->
+                  <div id="applePayFields" style="display: none; padding: 10px 0;">
+                    <button type="button" class="btn-apple-pay" onclick="Checkout.submitOrder(event, 'apple_pay')">
+                       Pay ilə Ödə
+                    </button>
+                    <p style="font-size: 0.8rem; color: #888; text-align: center; margin-top: 10px;">FaceID və ya TouchID ilə ani və təhlükəsiz ödəniş.</p>
+                  </div>
+
+                  <!-- 2. Google Pay Button Box -->
+                  <div id="googlePayFields" style="display: none; padding: 10px 0;">
+                    <button type="button" class="btn-google-pay" onclick="Checkout.submitOrder(event, 'google_pay')">
+                      <span>G Pay ilə Ödə</span>
+                    </button>
+                    <p style="font-size: 0.8rem; color: #888; text-align: center; margin-top: 10px;">Google hesabınıza bağlı kartla sürətli təsdiq.</p>
+                  </div>
+
+                  <!-- 3. Credit Card Fields -->
+                  <div id="creditCardFields">
+                    <div class="input-field-group">
+                      <label>Kart Nömrəsi</label>
+                      <input type="text" id="cardNumInput" placeholder="4169 •••• •••• ••••" value="4169 8840 2319 9042">
+                    </div>
+                    <div class="two-col-inputs">
+                      <div class="input-field-group">
+                        <label>Bitmə Tarixi</label>
+                        <input type="text" id="cardExpInput" placeholder="12/28" value="12/28">
+                      </div>
+                      <div class="input-field-group">
+                        <label>CVV</label>
+                        <input type="password" id="cardCvvInput" placeholder="842" value="842">
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 4. Cash Notice -->
+                  <div id="cashPaymentNotice" style="display: none; padding: 18px; background: #FAFAFA; border-radius: 8px; font-size: 0.88rem; color: #555;">
+                    ℹ️ Sifarişinizi qapıda kuryerdən təhvil alarkən nağd və ya POS-terminal vasitəsilə kartla ödəyə bilərsiniz.
+                  </div>
+                </div>
+
+                <button type="submit" id="btnSubmitOrder" class="btn-pill-black" style="width: 100%; padding: 16px; font-size: 1rem;">
+                  Sifarişi Təsdiq Et və Kartla Ödə
+                </button>
+              </form>
+            </div>
+
+            <!-- Summary Sütunu -->
+            <div>
+              <div class="order-summary-box">
+                <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 20px;">Səbət Xülasəsi</h3>
+                <div id="checkoutSummaryItems">
+                  <!-- JS Render -->
+                </div>
+
+                <!-- Promo -->
+                <form onsubmit="Checkout.applyPromoCode(event)" style="display: flex; gap: 8px; margin: 20px 0;">
+                  <input type="text" id="checkoutPromoInput" placeholder="Promo-kod (məs. ATELIER10)" style="flex: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; text-transform: uppercase;">
+                  <button type="submit" class="btn-pill-black" style="padding: 10px 18px;">Tətbiq</button>
+                </form>
+                <div id="checkoutPromoBadge" style="display: none; margin-bottom: 14px; font-size: 0.85rem; color: #1E4B3C;"></div>
+
+                <div class="summary-row">
+                  <span>Məhsullar:</span>
+                  <span id="checkoutSubtotal">0 ₼</span>
+                </div>
+                <div class="summary-row" id="checkoutDiscountRow" style="display: none; color: #1E4B3C;">
+                  <span>Endirim:</span>
+                  <span id="checkoutDiscount">0 ₼</span>
+                </div>
+                <div class="summary-row">
+                  <span>Çatdırılma:</span>
+                  <span id="checkoutShipping">PULSUZ</span>
+                </div>
+                <div class="summary-row total">
+                  <span>Yekun:</span>
+                  <span id="checkoutTotal">0 ₼</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sifariş Uğur Ekranı -->
+        <div id="checkoutSuccessSection" style="display: none;">
+          <!-- JS Render -->
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- =========================================================
+       VIEW 6: SİFARİŞ İZLƏMƏ (TRACKING VIEW)
+  ========================================================= -->
+  <main id="view-tracking" class="view-section" style="display: none; padding: 60px 0 100px 0;">
+    <div class="container" style="max-width: 600px;">
+      <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 8px;">Sifarişinizi İzləyin</h2>
+      <p style="color: #666; margin-bottom: 24px;">Sifariş Nömrəsini (məs. ORD-1092) və ya İzləmə Kodunu daxil edin:</p>
+      <form onsubmit="event.preventDefault(); OrderTracking.searchOrder();" style="display: flex; gap: 10px;">
+        <input type="text" id="trackingCodeInput" placeholder="məs. ORD-1092" style="flex: 1; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: var(--radius-pill); outline: none;">
+        <button type="submit" class="btn-pill-black">Axtar</button>
+      </form>
+      <div id="trackingResultContainer" style="margin-top: 24px;"></div>
+    </div>
+  </main>
+
+  <!-- =========================================================
+       CART DRAWER
+  ========================================================= -->
+  <div class="cart-drawer-overlay" id="cartDrawerOverlay" onclick="if(event.target===this) Cart.closeDrawer()">
+    <div class="cart-drawer">
+      <div class="cart-header">
+        <h3>Səbət (<span id="drawerCartCount">0</span>)</h3>
+        <button onclick="Cart.closeDrawer()" style="font-size: 1.2rem;">✕</button>
+      </div>
+      <div class="cart-items-container" id="cartItemsList">
+        <!-- JS Render -->
+      </div>
+      <div class="cart-footer">
+        <div class="summary-row">
+          <span>Cəmi:</span>
+          <span id="cartSubtotalAmount">0 ₼</span>
+        </div>
+        <div class="summary-row total" style="margin: 12px 0 18px 0; padding-top: 10px; border-top: 1px solid var(--border-color);">
+          <span>Yekun:</span>
+          <span id="cartTotalAmount">0 ₼</span>
+        </div>
+        <button class="btn-pill-black" style="width: 100%;" onclick="Cart.closeDrawer(); App.navigate('checkout'); Checkout.resetForm();">
+          Ödənişə keç
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOBİL AŞAĞI BƏRKİDİLMİŞ DÜYMƏLƏR (Şəkil 3) -->
+  <div class="mobile-sticky-bottom-bar" id="mobileStickyBottomBar">
+    <button class="btn-buy-black" onclick="Store.addToCartFromPage()">
+      Səbətə at
+    </button>
+    <button class="btn-buy-apple" onclick="Store.buyNowApplePay()">
+      Apple Pay
+    </button>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- =========================================================
+       FOOTER (Şəkil 1 & 2 Dəqiq)
+  ========================================================= -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-logo">
+          © ATELIER
+        </div>
+        <div class="footer-links-row">
+          <a href="#tracking" onclick="App.navigate('tracking')">Çatdırılma</a>
+          <span>·</span>
+          <a href="#tracking" onclick="App.navigate('tracking')">Qaytarma</a>
+          <span>·</span>
+          <a href="#tracking" onclick="App.navigate('tracking')">Əlaqə</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/studio.js"></script>
+  <script src="js/checkout.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

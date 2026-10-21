@@ -1,0 +1,2195 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Horvvalle — İdarəetmə və Əsas Admin Portalı</title>
+  <!-- Tailwind CSS & Google Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { background-color: #f8fafc; color: #0f172a; font-family: 'Inter', sans-serif; }
+    .font-serif-luxury { font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    @media print {
+      body * { visibility: hidden; }
+      #invoiceModal, #invoiceModal * { visibility: visible; }
+      #invoiceModal { position: absolute; left: 0; top: 0; width: 100%; height: auto; background: white; padding: 0; }
+      .no-print { display: none !important; }
+    }
+
+    /* ============================================================
+       SDU-STYLE LUXURY ATELIER ANIMATED STATUS DROPDOWNS
+       ============================================================ */
+    .status-dropdown-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    /* Refined Luxury Pill Button */
+    .status-trigger-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      border: 1px solid transparent;
+      outline: none;
+      background: white;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+    .status-trigger-btn:hover {
+      transform: translateY(-1.5px);
+      box-shadow: 0 4px 14px -2px rgba(15, 23, 42, 0.08);
+      filter: brightness(0.98);
+    }
+    .status-trigger-btn:active {
+      transform: scale(0.96);
+    }
+    .status-trigger-btn.open {
+      box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.08);
+    }
+
+    .status-trigger-btn .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 9999px;
+      flex-shrink: 0;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .status-trigger-btn:hover .status-dot {
+      transform: scale(1.25);
+    }
+
+    .status-trigger-btn .status-chevron {
+      width: 12px;
+      height: 12px;
+      opacity: 0.55;
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+      margin-left: 2px;
+    }
+    .status-trigger-btn.open .status-chevron {
+      transform: rotate(180deg);
+      opacity: 0.95;
+    }
+
+    /* Professional Executive Color Palettes (Refined, Luxury, Not Harsh) */
+    .status-style-red {
+      background-color: #fef2f2 !important;
+      color: #991b1b !important;
+      border-color: #fecaca !important;
+    }
+    .status-style-red .status-dot {
+      background-color: #ef4444;
+      box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+    }
+
+    .status-style-green {
+      background-color: #f0fdf4 !important;
+      color: #166534 !important;
+      border-color: #bbf7d0 !important;
+    }
+    .status-style-green .status-dot {
+      background-color: #22c55e;
+      box-shadow: 0 0 6px rgba(34, 197, 94, 0.6);
+    }
+
+    .status-style-amber {
+      background-color: #fffbeb !important;
+      color: #92400e !important;
+      border-color: #fde68a !important;
+    }
+    .status-style-amber .status-dot {
+      background-color: #f59e0b;
+      box-shadow: 0 0 6px rgba(245, 158, 11, 0.6);
+    }
+
+    .status-style-teal {
+      background-color: #f0fdfa !important;
+      color: #115e59 !important;
+      border-color: #99f6e4 !important;
+    }
+    .status-style-teal .status-dot {
+      background-color: #14b8a6;
+      box-shadow: 0 0 6px rgba(20, 184, 166, 0.6);
+    }
+
+    .status-style-indigo {
+      background-color: #eef2ff !important;
+      color: #3730a3 !important;
+      border-color: #c7d2fe !important;
+    }
+    .status-style-indigo .status-dot {
+      background-color: #6366f1;
+      box-shadow: 0 0 6px rgba(99, 102, 241, 0.6);
+    }
+
+    .status-style-sky {
+      background-color: #f0f9ff !important;
+      color: #075985 !important;
+      border-color: #bae6fd !important;
+    }
+    .status-style-sky .status-dot {
+      background-color: #0ea5e9;
+      box-shadow: 0 0 6px rgba(14, 165, 233, 0.6);
+    }
+
+    /* SDU-Style Animated Floating Dropdown Menu */
+    @keyframes sduDropdownOpen {
+      0% {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.95);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .status-dropdown-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      z-index: 100;
+      min-width: 195px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 1rem;
+      padding: 0.35rem;
+      box-shadow: 0 14px 34px -4px rgba(15, 23, 42, 0.16), 0 4px 10px -2px rgba(15, 23, 42, 0.05);
+      animation: sduDropdownOpen 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      transform-origin: top left;
+    }
+
+    .status-dropdown-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 0.45rem 0.65rem;
+      border-radius: 0.65rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+      user-select: none;
+    }
+    .status-dropdown-item:hover {
+      background-color: #f8fafc;
+      color: #0f172a;
+      padding-left: 0.85rem;
+    }
+    .status-dropdown-item.selected {
+      background-color: #f1f5f9;
+      color: #0f172a;
+      font-weight: 700;
+    }
+
+    .status-dropdown-item .item-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 9999px;
+      margin-right: 0.5rem;
+      flex-shrink: 0;
+      transition: transform 0.15s ease;
+    }
+    .status-dropdown-item:hover .item-dot {
+      transform: scale(1.3);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased text-slate-800 bg-slate-50">
+
+  <!-- Top Global Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 px-6 py-3.5 flex items-center justify-between shadow-xs">
+    <div class="flex items-center gap-3.5">
+      <div class="w-9 h-9 rounded-full border border-[#3D1420] bg-[#F6F2EA] flex items-center justify-center text-[#3D1420] font-serif text-sm font-bold shadow-xs">
+        W
+      </div>
+      <div>
+        <div class="flex items-center gap-2.5">
+          <span class="text-xl font-serif-luxury tracking-normal text-slate-900 leading-none">Horvvalle</span>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-900 text-white shadow-2xs">
+            Detallı İdarəetmə Portalı
+          </span>
+        </div>
+        <span class="text-[11px] text-slate-400">Canlı Məlumatlar · Məhsul, DTF Çap, Sifariş və CRM İdarəsi</span>
+      </div>
+    </div>
+
+    <!-- Quick Stats & Store Link -->
+    <div class="flex items-center gap-4">
+      <div class="hidden md:flex items-center gap-5 text-xs text-slate-600 pr-4 border-r border-slate-200">
+        <div>Dövriyyə: <strong id="statRevenue" class="text-emerald-700 font-extrabold">0.00 ₼</strong></div>
+        <div>Məhsullar: <strong id="statProducts" class="text-slate-900 font-bold">0</strong></div>
+        <div>Sifarişlər: <strong id="statOrders" class="text-slate-900 font-bold">0</strong></div>
+        <div>3D Çaplar: <strong id="statPod" class="text-blue-700 font-bold">0</strong></div>
+      </div>
+
+      <a href="http://localhost:3000" target="_blank" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#3D1420] hover:bg-[#280D17] text-[#F6F2EA] text-xs font-bold transition shadow-xs">
+        <i data-lucide="external-link" class="w-4 h-4"></i>
+        <span>Saytı Aç (Canlı)</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Layout Container: Left Sidebar + Right Full Content -->
+  <div class="flex flex-1">
+    
+    <!-- Left Navigation Sidebar -->
+    <aside class="w-64 bg-white border-r border-slate-200 p-4 flex flex-col justify-between shrink-0 shadow-xs sticky top-[65px] h-[calc(100vh-65px)] overflow-y-auto">
+      <div class="space-y-1">
+        <div class="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-3 py-2">
+          ƏSAS BÖLMƏLƏR
+        </div>
+
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item active w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition bg-slate-900 text-white shadow-xs">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+          <span>İcmal & Analitika</span>
+        </button>
+
+        <button onclick="switchTab('products')" id="nav-products" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-black hover:bg-slate-100 transition">
+          <i data-lucide="package" class="w-4 h-4"></i>
+          <span>Məhsul Kataloqu</span>
+        </button>
+
+        <button onclick="switchTab('orders')" id="nav-orders" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-black hover:bg-slate-100 transition">
+          <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+          <span>Sifarişlər & Fakturalar</span>
+        </button>
+
+        <button onclick="switchTab('pod')" id="nav-pod" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-black hover:bg-slate-100 transition">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+          <span>Fərdi 3D Çap Atelyesi</span>
+        </button>
+
+        <div class="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-3 pt-4 pb-1">
+          MARKETİNQ & MÜŞTƏRİ
+        </div>
+
+        <button onclick="switchTab('promos')" id="nav-promos" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-black hover:bg-slate-100 transition">
+          <i data-lucide="tag" class="w-4 h-4"></i>
+          <span>Promo-kodlar & Kuponlar</span>
+        </button>
+
+        <button onclick="switchTab('customers')" id="nav-customers" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-black hover:bg-slate-100 transition">
+          <i data-lucide="users" class="w-4 h-4"></i>
+          <span>Müştərilər (CRM)</span>
+        </button>
+
+        <button onclick="switchTab('cms')" id="nav-cms" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-black hover:bg-slate-100 transition">
+          <i data-lucide="edit-3" class="w-4 h-4"></i>
+          <span>Mətnlər & Bannerlər</span>
+        </button>
+
+        <button onclick="switchTab('settings')" id="nav-settings" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-black hover:bg-slate-100 transition">
+          <i data-lucide="sliders" class="w-4 h-4"></i>
+          <span>Mağaza Parametrləri</span>
+        </button>
+      </div>
+
+      <!-- Quick Helpful Guide Box -->
+      <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-600 space-y-1.5 mt-4">
+        <div class="font-bold text-slate-900 flex items-center gap-1.5">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i>
+          <span>Canlı Sinxronizasiya</span>
+        </div>
+        <p class="text-[11px] text-slate-500 leading-relaxed">
+          Admin panelində edilən bütün dəyişikliklər birbaşa mağazada və 3D studiyada tətbiq olunur.
+        </p>
+      </div>
+    </aside>
+
+    <!-- Main Content Area: Smooth, Full-Width, Unblocked Native Scrolling -->
+    <main class="flex-1 p-6 md:p-8 bg-slate-50 overflow-y-auto">
+
+      <!-- ======================================================== -->
+      <!-- TAB 0: DASHBOARD / ANALYTICS                             -->
+      <!-- ======================================================== -->
+      <section id="tab-dashboard" class="tab-content space-y-6">
+        <!-- Top KPI Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+            <div>
+              <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Ümumi Dövriyyə</span>
+              <span id="dashRevenue" class="text-2xl font-black text-slate-900 mt-1 block">0.00 ₼</span>
+              <span class="text-[11px] text-emerald-600 font-bold flex items-center gap-1 mt-1">
+                <i data-lucide="trending-up" class="w-3.5 h-3.5"></i> +18.4% bu ay
+              </span>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+              <i data-lucide="banknote" class="w-6 h-6"></i>
+            </div>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+            <div>
+              <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Toplam Sifarişlər</span>
+              <span id="dashOrders" class="text-2xl font-black text-slate-900 mt-1 block">0</span>
+              <span class="text-[11px] text-slate-500 mt-1 block">Təsdiqlənmiş & Aktiv</span>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center">
+              <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+            </div>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+            <div>
+              <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Fərdi 3D Çap Sifarişi</span>
+              <span id="dashPod" class="text-2xl font-black text-blue-600 mt-1 block">0</span>
+              <span class="text-[11px] text-blue-600 font-semibold mt-1 block">DTF / DTG İstehsalat</span>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-700 flex items-center justify-center">
+              <i data-lucide="printer" class="w-6 h-6"></i>
+            </div>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+            <div>
+              <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Orta Sifariş Dəyəri (AOV)</span>
+              <span id="dashAov" class="text-2xl font-black text-slate-900 mt-1 block">0.00 ₼</span>
+              <span class="text-[11px] text-slate-500 mt-1 block">Səbət üzrə orta çek</span>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center">
+              <i data-lucide="award" class="w-6 h-6"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Middle Overview: Recent Orders & Status Breakdown -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-slate-900 text-sm uppercase tracking-wide flex items-center gap-2">
+                <i data-lucide="clock" class="w-4 h-4 text-slate-500"></i>
+                Son Sifarişlər
+              </h3>
+              <button onclick="switchTab('orders')" class="text-xs font-bold text-blue-600 hover:underline">
+                Hamısına Bax →
+              </button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] tracking-wider border-b border-slate-200">
+                  <tr>
+                    <th class="p-3">Sifariş №</th>
+                    <th class="p-3">Müştəri</th>
+                    <th class="p-3">Məbləğ</th>
+                    <th class="p-3">Status</th>
+                    <th class="p-3 text-right">Əməliyyat</th>
+                  </tr>
+                </thead>
+                <tbody id="dashRecentOrdersTable" class="divide-y divide-slate-100">
+                  <!-- Rendered via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Quick Action Card / Production Status -->
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4 flex flex-col justify-between">
+            <div class="space-y-3">
+              <h3 class="font-bold text-slate-900 text-sm uppercase tracking-wide flex items-center gap-2">
+                <i data-lucide="pie-chart" class="w-4 h-4 text-purple-600"></i>
+                Sifariş Statuslarının Bölgüsü
+              </h3>
+              <div id="statusBreakdownContainer" class="space-y-2 text-xs">
+                <!-- Rendered via JS -->
+              </div>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-900 text-white space-y-2">
+              <div class="text-xs font-bold flex items-center gap-2 text-amber-400">
+                <i data-lucide="sparkles" class="w-4 h-4"></i>
+                <span>DTF Çap Avtomatlaşdırması</span>
+              </div>
+              <p class="text-[11px] text-slate-300 leading-relaxed">
+                Müştərilərin 3D studiyada hazırladığı yüksək dəqiqlikli çap dizaynları avtomatik vektor koordinatları ilə arxivlənir.
+              </p>
+              <button onclick="switchTab('pod')" class="w-full py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs uppercase tracking-wider transition mt-1">
+                Çap Sifarişlərinə Get
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- TAB 1: PRODUCTS (MƏHSULLARIN İDARƏ EDİLMƏSİ)             -->
+      <!-- ======================================================== -->
+      <section id="tab-products" class="tab-content hidden space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+          <div>
+            <h2 class="text-lg font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
+              <i data-lucide="package" class="w-5 h-5 text-[#3D1420]"></i>
+              Məhsulların İdarəedilməsi
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Məhsulların xarakteristikaları, qiymətləri, kəsimləri, rəngləri və şəkillərini dəyişin və ya yeni məhsul əlavə edin.
+            </p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <button onclick="openNewProductModal()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#3D1420] hover:bg-[#280D17] text-white text-xs font-bold transition shadow-xs">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i>
+              <span>Yeni Məhsul Əlavə Et</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Category Filter & Search Bar -->
+        <div class="flex items-center justify-between gap-4 flex-wrap">
+          <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="filterProductsCategory('all')" id="catBtn-all" class="cat-pill active px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white transition">Hamısı</button>
+            <button onclick="filterProductsCategory('koynek')" id="catBtn-koynek" class="cat-pill px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 hover:text-black border border-slate-200 transition">Köynəklər</button>
+            <button onclick="filterProductsCategory('hudi')" id="catBtn-hudi" class="cat-pill px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 hover:text-black border border-slate-200 transition">Hudilər</button>
+            <button onclick="filterProductsCategory('salvar')" id="catBtn-salvar" class="cat-pill px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 hover:text-black border border-slate-200 transition">Şalvarlar</button>
+            <button onclick="filterProductsCategory('aksesuar')" id="catBtn-aksesuar" class="cat-pill px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 hover:text-black border border-slate-200 transition">Aksesuarlar</button>
+          </div>
+
+          <div class="relative w-72">
+            <input type="text" id="prodSearchInput" oninput="searchProducts(this.value)" placeholder="Məhsul adı və ya kodu..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900 pl-8 focus:outline-none focus:border-slate-900" />
+            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5"></i>
+          </div>
+        </div>
+
+        <!-- Products Table -->
+        <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+              <tr>
+                <th class="p-4">Məhsul & Kod</th>
+                <th class="p-4">Kateqoriya</th>
+                <th class="p-4">Kəsim / Parça</th>
+                <th class="p-4">Qiymət</th>
+                <th class="p-4">Stok & Rənglər</th>
+                <th class="p-4">Etiket</th>
+                <th class="p-4 text-right">Əməliyyatlar</th>
+              </tr>
+            </thead>
+            <tbody id="productsTableBody" class="divide-y divide-slate-100">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- TAB 2: ORDERS & INVOICES (SİFARİŞLƏR VƏ FAKTURASI)       -->
+      <!-- ======================================================== -->
+      <section id="tab-orders" class="tab-content hidden space-y-6">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
+              <i data-lucide="shopping-bag" class="w-5 h-5 text-emerald-600"></i>
+              Sifarişlər, Ödənişlər və Fakturalar
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Müştərilərin verdiyi bütün sifarişlər, çatdırılma ünvanları, kuryer təlimatları və çap qaimələri.
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-slate-500">Cəmi: <strong id="ordersTotalCount" class="text-slate-900">0</strong> sifariş</span>
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl overflow-visible shadow-xs">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+              <tr>
+                <th class="p-4">Sifariş №</th>
+                <th class="p-4">Müştəri & Telefon</th>
+                <th class="p-4">Çatdırılma Ünvanı</th>
+                <th class="p-4">Məhsullar (Detallı)</th>
+                <th class="p-4">Ödəniş & Məbləğ</th>
+                <th class="p-4">Status</th>
+                <th class="p-4 text-right">Əməliyyatlar</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody" class="divide-y divide-slate-100">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- TAB 3: POD ORDERS (FƏRDİ 3D ÇAP SİFARİŞLƏRİ)             -->
+      <!-- ======================================================== -->
+      <section id="tab-pod" class="tab-content hidden space-y-6">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
+              <i data-lucide="printer" class="w-5 h-5 text-blue-600"></i>
+              Fərdi 3D Çap Sifarişləri & DTF Faylları
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Müştərilərin hazırladığı fərdi qrafikalar, koordinatlar və printerə göndəriləcək yüksək dəqiqlikli orijinal çap faylları.
+            </p>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+            DTF / DTG Çap Modulu
+          </span>
+        </div>
+
+        <div id="podCardsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Rendered via JS -->
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- TAB 4: PROMO CODES (PROMO-KODLAR VƏ KAMPANİYALAR)        -->
+      <!-- ======================================================== -->
+      <section id="tab-promos" class="tab-content hidden space-y-6">
+        <div class="flex items-center justify-between bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+          <div>
+            <h2 class="text-lg font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
+              <i data-lucide="tag" class="w-5 h-5 text-amber-600"></i>
+              Promo-kodlar və Endirim Kuponları
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Xüsusi kampaniya kodları təyin edin, müştərilərə faizlə və ya sabit məbləğlə endirimlər verin.
+            </p>
+          </div>
+          <button onclick="openNewPromoModal()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition shadow-xs">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>Yeni Promo-kod Yarat</span>
+          </button>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+              <tr>
+                <th class="p-4">Kupon Kodu</th>
+                <th class="p-4">Endirim Növü & Dəyəri</th>
+                <th class="p-4">Minimum Səbət Məbləği</th>
+                <th class="p-4">İstifadə Sayı</th>
+                <th class="p-4">Açıqlama</th>
+                <th class="p-4">Vəziyyət</th>
+                <th class="p-4 text-right">Əməliyyat</th>
+              </tr>
+            </thead>
+            <tbody id="promosTableBody" class="divide-y divide-slate-100">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- TAB 5: CUSTOMERS CRM (MÜŞTƏRİLƏRİN İDARƏSİ)               -->
+      <!-- ======================================================== -->
+      <section id="tab-customers" class="tab-content hidden space-y-6">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
+              <i data-lucide="users" class="w-5 h-5 text-indigo-600"></i>
+              Müştəri Bazası (CRM)
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Sifariş edən daimi müştərilərin əlaqə məlumatları, sifariş tarixçələri və ümumi xərcləmələri.
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+              <tr>
+                <th class="p-4">Müştəri Adı</th>
+                <th class="p-4">Telefon</th>
+                <th class="p-4">E-poçt</th>
+                <th class="p-4">Şəhər / Ünvan</th>
+                <th class="p-4">Sifariş Sayı</th>
+                <th class="p-4">Ümumi Xərcləmə</th>
+                <th class="p-4 text-right">Son Aktivlik</th>
+              </tr>
+            </thead>
+            <tbody id="customersTableBody" class="divide-y divide-slate-100">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- TAB 6: CMS / CONTENT (SAYT MƏTNLƏRİ VƏ BANNERLƏR)         -->
+      <!-- ======================================================== -->
+      <section id="tab-cms" class="tab-content hidden space-y-6 max-w-4xl">
+        <div class="flex items-center justify-between bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+          <div>
+            <h2 class="text-lg font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
+              <i data-lucide="edit-3" class="w-5 h-5 text-indigo-600"></i>
+              Saytın Dinamik Mətnləri və Bannerləri
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Əsas səhifədəki axıcı elanları, Hero başlığını, Lookbook təqdimatını və Atelye bannerlərini redaktə edin.
+            </p>
+          </div>
+          <button onclick="saveCmsContent()" class="px-5 py-2.5 rounded-xl bg-[#3D1420] hover:bg-[#280D17] text-white text-xs font-bold transition shadow-xs flex items-center gap-2">
+            <i data-lucide="save" class="w-4 h-4"></i>
+            <span>Bütün Dəyişiklikləri Saxla</span>
+          </button>
+        </div>
+
+        <!-- 1. Ticker Announcements -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              <i data-lucide="bell" class="w-4 h-4 text-amber-500"></i>
+              <span>1. Yuxarı Axıcı Elanlar Lenti (Ticker)</span>
+            </div>
+          </div>
+          <div id="cmsAnnouncementsList" class="space-y-2"></div>
+          <div class="flex gap-2 pt-2">
+            <input type="text" id="newAnnouncementInput" placeholder="Yeni bildiriş mətni daxil edin..." class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-900" />
+            <button onclick="addAnnouncement()" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition flex items-center gap-1.5">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>Əlavə Et</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Hero Section -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+          <div class="font-bold text-slate-900 text-sm flex items-center gap-2 border-b border-slate-100 pb-3">
+            <i data-lucide="tv" class="w-4 h-4 text-purple-600"></i>
+            <span>2. Əsas Hero Bölməsi və Lookbook</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-1">
+              <label class="text-[11px] font-bold text-slate-500 uppercase">Hero Etiketi (Badge)</label>
+              <input type="text" id="cmsHeroTag" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900" />
+            </div>
+            <div class="space-y-1">
+              <label class="text-[11px] font-bold text-slate-500 uppercase">Əsas Böyük Başlıq</label>
+              <input type="text" id="cmsHeroHeadline" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900" />
+            </div>
+            <div class="col-span-2 space-y-1">
+              <label class="text-[11px] font-bold text-slate-500 uppercase">Alt Açıqlama Mətni</label>
+              <textarea id="cmsHeroSubheadline" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900"></textarea>
+            </div>
+            <div class="space-y-1">
+              <label class="text-[11px] font-bold text-slate-500 uppercase">Lookbook Model Adı</label>
+              <input type="text" id="cmsHeroLookbookTitle" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900" />
+            </div>
+            <div class="space-y-1">
+              <label class="text-[11px] font-bold text-slate-500 uppercase">Lookbook Qiymət (₼)</label>
+              <input type="number" id="cmsHeroLookbookPrice" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900" />
+            </div>
+            <div class="col-span-2 space-y-1">
+              <label class="text-[11px] font-bold text-slate-500 uppercase">Lookbook Şəkli</label>
+              <div class="flex items-center gap-3">
+                <img id="cmsHeroLookbookImgPreview" src="" class="w-12 h-14 rounded-lg object-cover border border-slate-200 bg-slate-100" />
+                <input type="text" id="cmsHeroLookbookImg" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900" />
+                <button onclick="openGalleryModal('cmsHeroLookbookImg')" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition">Qalereya</button>
+                <button onclick="triggerDirectUpload('cmsHeroLookbookImg')" class="px-3 py-2 rounded-xl bg-slate-900 text-white hover:bg-black text-xs font-bold transition">Yüklə</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. POD & Campaign Banners -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+          <div class="font-bold text-slate-900 text-sm flex items-center gap-2 border-b border-slate-100 pb-3">
+            <i data-lucide="layers" class="w-4 h-4 text-blue-600"></i>
+            <span>3. Fərdi Çap və Kampaniya Bannerləri</span>
+          </div>
+          <div class="space-y-3">
+            <div class="space-y-1">
+              <label class="text-[11px] font-bold text-slate-500 uppercase">3D Atelye Banner Başlığı</label>
+              <input type="text" id="cmsPodTitle" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900" />
+            </div>
+            <div class="space-y-1">
+              <label class="text-[11px] font-bold text-slate-500 uppercase">3D Atelye Açıqlama</label>
+              <textarea id="cmsPodDesc" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900"></textarea>
+            </div>
+            <div class="grid grid-cols-2 gap-4 pt-2">
+              <div class="space-y-1">
+                <label class="text-[11px] font-bold text-slate-500 uppercase">Şalvar Banner Başlığı</label>
+                <input type="text" id="cmsPromoTitle" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900" />
+              </div>
+              <div class="space-y-1">
+                <label class="text-[11px] font-bold text-slate-500 uppercase">Hudi Banner Başlığı</label>
+                <input type="text" id="cmsCampTitle" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- TAB 7: SETTINGS (MAĞAZA PARAMETRLƏRİ)                     -->
+      <!-- ======================================================== -->
+      <section id="tab-settings" class="tab-content hidden space-y-6 max-w-2xl">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-5">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h2 class="text-base font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
+              <i data-lucide="sliders" class="w-5 h-5 text-slate-700"></i>
+              Mağaza Əlaqə və Çatdırılma Tənzimləmələri
+            </h2>
+          </div>
+
+          <div class="space-y-4">
+            <div class="space-y-1">
+              <label class="text-xs font-bold text-slate-700">Mağaza Adı</label>
+              <input type="text" id="settingStoreName" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900" />
+            </div>
+
+            <div class="space-y-1">
+              <label class="text-xs font-bold text-slate-700">Şüar (Tagline)</label>
+              <input type="text" id="settingTagline" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900" />
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div class="space-y-1">
+                <label class="text-xs font-bold text-slate-700">Əlaqə Telefonu</label>
+                <input type="text" id="settingPhone" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900" />
+              </div>
+
+              <div class="space-y-1">
+                <label class="text-xs font-bold text-slate-700">Pulsuz Çatdırılma Limiti (₼)</label>
+                <input type="number" id="settingFreeShip" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900" />
+              </div>
+            </div>
+
+            <div class="space-y-1">
+              <label class="text-xs font-bold text-slate-700">Dəstək E-poçtu</label>
+              <input type="email" id="settingEmail" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900" />
+            </div>
+
+            <button onclick="saveSettings()" class="w-full py-3 rounded-xl bg-[#3D1420] hover:bg-[#280D17] text-white text-xs font-bold uppercase tracking-wider transition shadow-xs mt-3 flex items-center justify-center gap-2">
+              <i data-lucide="check" class="w-4 h-4"></i>
+              <span>Parametrləri Saxla</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: DETAILED ORDER & INVOICE PREVIEW                  -->
+  <!-- ======================================================== -->
+  <div id="invoiceModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl border border-slate-200 my-auto overflow-hidden">
+      <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50 rounded-t-3xl no-print">
+        <div class="flex items-center gap-2">
+          <i data-lucide="file-text" class="w-5 h-5 text-emerald-700"></i>
+          <h3 class="text-sm font-black uppercase text-slate-900 tracking-wider">SİFARİŞ VƏ FAKTURA ÇIXARIŞI</h3>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="window.print()" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold flex items-center gap-1.5 transition">
+            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+            <span>Çap Et (Faktura)</span>
+          </button>
+          <button onclick="closeInvoiceModal()" class="p-2 rounded-xl text-slate-400 hover:text-black hover:bg-slate-200 transition">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="invoiceModalBody" class="p-6 sm:p-8 space-y-6 overflow-y-auto flex-1 text-xs">
+        <!-- Rendered dynamically via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: PRODUCT EDIT & ADD (Tam Xarakteristikalar)         -->
+  <!-- ======================================================== -->
+  <div id="productModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl border border-slate-200 my-auto">
+      <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50 rounded-t-3xl">
+        <h3 id="productModalTitle" class="text-sm font-black uppercase text-slate-900 tracking-wider">MƏHSUL ƏLAVƏ ET / REDAKTƏ</h3>
+        <button onclick="closeProductModal()" class="p-2 rounded-xl text-slate-400 hover:text-black hover:bg-slate-200 transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form id="productForm" onsubmit="handleProductSubmit(event)" class="p-6 space-y-4 overflow-y-auto flex-1 text-xs">
+        <input type="hidden" id="prodId" />
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="space-y-1">
+            <label class="font-bold text-slate-700">Məhsulun Adı *</label>
+            <input type="text" id="prodName" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-slate-900" />
+          </div>
+          <div class="space-y-1">
+            <label class="font-bold text-slate-700">Model Kodu / SKU</label>
+            <input type="text" id="prodRef" placeholder="Məs: HV-SH-001" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-slate-900" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4">
+          <div class="space-y-1">
+            <label class="font-bold text-slate-700">Kateqoriya *</label>
+            <select id="prodCategory" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-bold focus:outline-none focus:border-slate-900">
+              <option value="koynek">T-Shirt & Köynək</option>
+              <option value="hudi">Hudi & Sviter</option>
+              <option value="salvar">Şalvar & Şortik</option>
+              <option value="aksesuar">Aksesuar & Kepka</option>
+            </select>
+          </div>
+
+          <div class="space-y-1">
+            <label class="font-bold text-slate-700">Kəsim / Fit</label>
+            <input type="text" id="prodFit" placeholder="Məs: Oversize, Slim Chino" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900" />
+          </div>
+
+          <div class="space-y-1">
+            <label class="font-bold text-slate-700">Xüsusi Etiket (Badge)</label>
+            <input type="text" id="prodBadge" placeholder="Məs: YENİ, TREND, -20%" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="space-y-1">
+            <label class="font-bold text-slate-700">Qiymət (₼) *</label>
+            <input type="number" step="0.5" id="prodPrice" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900" />
+          </div>
+          <div class="space-y-1">
+            <label class="font-bold text-slate-700">Əvvəlki / Çəkilmiş Qiymət (₼)</label>
+            <input type="number" step="0.5" id="prodComparePrice" placeholder="Endirimsiz qiymət" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900" />
+          </div>
+        </div>
+
+        <!-- Image Pickers: Real Garment on Hanger & Dressed Model Photo -->
+        <div class="space-y-4 pt-3 border-t border-slate-100 bg-slate-50/60 p-3.5 rounded-2xl border border-slate-200/80">
+          <div class="space-y-1">
+            <div class="flex items-center justify-between">
+              <label class="font-bold text-slate-800 flex items-center gap-1.5">
+                <span>1. Məhsulun Şəkli (Asılqan / Düz Çəkiliş)</span>
+                <span class="text-[10px] text-amber-600 font-bold bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">Satışda olan köynək</span>
+              </label>
+            </div>
+            <div class="flex items-center gap-2">
+              <img id="prodHoverImagePreview" src="" class="w-12 h-14 rounded-xl object-contain border border-slate-200 bg-white p-1" />
+              <input type="text" id="prodHoverImage" placeholder="Məs: /images/products/.../front.jpg və ya yeni yüklə" class="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-900" />
+              <button type="button" onclick="openGalleryModal('prodHoverImage')" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold transition">Qalereya</button>
+              <button type="button" onclick="triggerDirectUpload('prodHoverImage')" class="px-3 py-2 rounded-xl bg-slate-900 text-white hover:bg-black text-xs font-bold transition">Yüklə</button>
+            </div>
+          </div>
+
+          <div class="space-y-1 pt-1 border-t border-slate-200/60">
+            <div class="flex items-center justify-between">
+              <label class="font-bold text-slate-800 flex items-center gap-1.5">
+                <span>2. Model Üzərində Görünüş (Mockup)</span>
+                <span class="text-[10px] text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">Model bu köynəyi geyinəcək</span>
+              </label>
+              <button type="button" onclick="generateModelLookFromGarment()" id="btnAutoDressModel" class="px-3 py-1 rounded-lg bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800 hover:from-amber-500 hover:to-amber-700 text-white text-[11px] font-bold flex items-center gap-1 shadow-xs transition active:scale-95 cursor-pointer">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-200"></i>
+                <span>✨ Köynəyi Modelə Geyindir</span>
+              </button>
+            </div>
+            <div class="flex items-center gap-2">
+              <img id="prodImagePreview" src="" class="w-12 h-14 rounded-xl object-cover border border-slate-200 bg-white" />
+              <input type="text" id="prodImage" required placeholder="Avtomatik modelə geyindir və ya xüsusi link daxil et" class="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-900" />
+              <button type="button" onclick="openGalleryModal('prodImage')" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold transition">Qalereya</button>
+              <button type="button" onclick="triggerDirectUpload('prodImage')" class="px-3 py-2 rounded-xl bg-slate-900 text-white hover:bg-black text-xs font-bold transition">Yüklə</button>
+            </div>
+            <p class="text-[10px] text-slate-500 italic mt-0.5">
+              💡 Köynəyin şəklini yüklədikdən sonra <strong>«Köynəyi Modelə Geyindir»</strong> düyməsinə klikləyin — sistem köynəyi dərhal canlı studiya modelinin əyninə geyindirib model şəklini yaradacaq.
+            </p>
+          </div>
+        </div>
+
+        <!-- Characteristics & Details -->
+        <div class="grid grid-cols-2 gap-4 pt-2">
+          <div class="space-y-1">
+            <label class="font-bold text-slate-700">Parça / Tərkib</label>
+            <input type="text" id="prodComposition" placeholder="Məs: 100% Premium Daranmış Pambıq" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900" />
+          </div>
+
+          <div class="space-y-1">
+            <label class="font-bold text-slate-700">Stok Vəziyyəti</label>
+            <select id="prodInStock" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900">
+              <option value="true">Stokda Var</option>
+              <option value="false">Bitib (Tükənib)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <label class="font-bold text-slate-700">Məhsul Təsviri</label>
+          <textarea id="prodDescription" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900"></textarea>
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
+          <button type="button" onclick="closeProductModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">İmtina</button>
+          <button type="submit" class="px-6 py-2.5 rounded-xl bg-[#3D1420] hover:bg-[#280D17] text-white text-xs font-bold transition shadow-xs">Saxla</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: PROMO CODE ADD/EDIT                               -->
+  <!-- ======================================================== -->
+  <div id="promoModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl w-full max-w-md flex flex-col shadow-2xl border border-slate-200">
+      <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50 rounded-t-3xl">
+        <h3 class="text-sm font-black uppercase text-slate-900 tracking-wider">YENİ PROMO-KOD YARAT</h3>
+        <button onclick="closePromoModal()" class="p-2 rounded-xl text-slate-400 hover:text-black hover:bg-slate-200 transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form id="promoForm" onsubmit="handlePromoSubmit(event)" class="p-6 space-y-4 text-xs">
+        <div class="space-y-1">
+          <label class="font-bold text-slate-700">Promo-kod Mətni (Böyük hərflərlə) *</label>
+          <input type="text" id="promoCodeInput" required placeholder="Məs: YAZ2026" class="w-full uppercase font-mono font-bold bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-slate-900" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="space-y-1">
+            <label class="font-bold text-slate-700">Endirim Növü</label>
+            <select id="promoTypeInput" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900">
+              <option value="percent">Faiz (%)</option>
+              <option value="fixed">Sabit Məbləğ (₼)</option>
+            </select>
+          </div>
+
+          <div class="space-y-1">
+            <label class="font-bold text-slate-700">Endirim Dəyəri *</label>
+            <input type="number" step="0.5" id="promoValueInput" required placeholder="Məs: 15" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900" />
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <label class="font-bold text-slate-700">Minimum Səbət Məbləği (₼)</label>
+          <input type="number" id="promoMinAmountInput" placeholder="Məs: 50" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900" />
+        </div>
+
+        <div class="space-y-1">
+          <label class="font-bold text-slate-700">Açıqlama / Qeyd</label>
+          <input type="text" id="promoDescInput" placeholder="Məs: Yaz endirimi kampaniyası" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900" />
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
+          <button type="button" onclick="closePromoModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">İmtina</button>
+          <button type="submit" class="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition shadow-xs">Yadda Saxla</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: IMAGE GALLERY PICKER                              -->
+  <!-- ======================================================== -->
+  <div id="galleryModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl border border-slate-200">
+      <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50 rounded-t-3xl">
+        <h3 class="text-sm font-black uppercase text-slate-900 tracking-wider">ŞƏKİL QALEREYASI</h3>
+        <button onclick="closeGalleryModal()" class="p-2 rounded-xl text-slate-400 hover:text-black hover:bg-slate-200 transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="p-4 border-b border-slate-100 flex items-center justify-between gap-4">
+        <input type="text" oninput="filterGallery(this.value)" placeholder="Şəkil axtar..." class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900" />
+        <button onclick="document.getElementById('globalDirectFileInput').click()" class="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition flex items-center gap-1.5">
+          <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+          <span>Kompüterdən Yeni Yüklə</span>
+        </button>
+      </div>
+
+      <div id="galleryGrid" class="p-4 overflow-y-auto grid grid-cols-4 sm:grid-cols-5 gap-3 max-h-[50vh]">
+        <!-- Gallery items via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden global file input for computer uploads -->
+  <input type="file" id="globalDirectFileInput" accept="image/*" class="hidden" onchange="handleDirectFileSelected(event)" />
+
+  <!-- JavaScript Application Logic -->
+  <script>
+    let STORE_DATA = null;
+    let GALLERY_CACHE = [];
+    let currentGalleryTargetInput = null;
+    let currentCategoryFilter = 'all';
+
+    async function loadData() {
+      try {
+        const res = await fetch('/api/admin/data');
+        STORE_DATA = await res.json();
+        renderAll();
+      } catch (err) {
+        console.error('Data load error:', err);
+      }
+    }
+
+    function renderAll() {
+      if (!STORE_DATA) return;
+
+      // 1. Calculate Analytics
+      const orders = STORE_DATA.orders || [];
+      const podOrders = STORE_DATA.podOrders || [];
+      const products = STORE_DATA.products || [];
+      const promoCodes = STORE_DATA.promoCodes || [];
+
+      const totalRev = orders.reduce((acc, o) => acc + (Number(o.total) || 0), 0);
+      const aov = orders.length > 0 ? (totalRev / orders.length) : 0;
+
+      // Update Header Stats
+      document.getElementById('statRevenue').textContent = totalRev.toFixed(2) + ' ₼';
+      document.getElementById('statProducts').textContent = products.length;
+      document.getElementById('statOrders').textContent = orders.length;
+      document.getElementById('statPod').textContent = podOrders.length;
+
+      // Update Dashboard KPIs
+      document.getElementById('dashRevenue').textContent = totalRev.toFixed(2) + ' ₼';
+      document.getElementById('dashOrders').textContent = orders.length;
+      document.getElementById('dashPod').textContent = podOrders.length;
+      document.getElementById('dashAov').textContent = aov.toFixed(2) + ' ₼';
+
+      // Render All Views
+      renderDashboardRecentOrders();
+      renderDashboardStatusBreakdown();
+      renderProducts();
+      renderOrders();
+      renderPodOrders();
+      renderPromos();
+      renderCustomers();
+      populateCmsFields();
+      populateSettings();
+      lucide.createIcons();
+    }
+
+    // ----------------------------------------------------
+    // TAB SWITCHING
+    // ----------------------------------------------------
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.nav-item').forEach(el => {
+        el.className = 'nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-black hover:bg-slate-100 transition';
+      });
+
+      const target = document.getElementById('tab-' + tabId);
+      const navBtn = document.getElementById('nav-' + tabId);
+      if (target) target.classList.remove('hidden');
+      if (navBtn) {
+        navBtn.className = 'nav-item active w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition bg-slate-900 text-white shadow-xs';
+      }
+      lucide.createIcons();
+    }
+
+    // ----------------------------------------------------
+    // DASHBOARD VIEWS
+    // ----------------------------------------------------
+    function renderDashboardRecentOrders() {
+      const tbody = document.getElementById('dashRecentOrdersTable');
+      tbody.innerHTML = '';
+      const list = (STORE_DATA.orders || []).slice(0, 5);
+
+      if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-400">Hələlik sifariş daxil olmayıb.</td></tr>';
+        return;
+      }
+
+      list.forEach(o => {
+        const custName = o.customer?.fullName || o.customer?.name || 'Müştəri';
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition';
+        tr.innerHTML = `
+          <td class="p-3 font-mono font-bold text-slate-900">${o.id}</td>
+          <td class="p-3 font-semibold text-slate-800">${custName}</td>
+          <td class="p-3 font-black text-slate-900">${Number(o.total || 0).toFixed(2)} ₼</td>
+          <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-100 text-slate-800">${o.orderStatus || 'Qəbul edildi'}</span></td>
+          <td class="p-3 text-right">
+            <button onclick="viewInvoice('${o.id}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-[11px] font-bold text-slate-700 transition">Baxış</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderDashboardStatusBreakdown() {
+      const container = document.getElementById('statusBreakdownContainer');
+      container.innerHTML = '';
+      const orders = STORE_DATA.orders || [];
+
+      const statusCounts = {
+        'Yeni': orders.filter(o => !o.orderStatus || o.orderStatus.includes('Yeni') || o.orderStatus.includes('Qəbul')).length,
+        'Dərzidə / Çapda': orders.filter(o => (o.orderStatus || '').includes('Dərzi') || (o.orderStatus || '').includes('çap') || (o.orderStatus || '').includes('Hazır')).length,
+        'Kuryerdə': orders.filter(o => (o.orderStatus || '').includes('Kuryer') || (o.orderStatus || '').includes('Çatdırılmada')).length,
+        'Çatdırıldı': orders.filter(o => (o.orderStatus || '').includes('Çatdırıldı') || (o.orderStatus || '').includes('Tamam')).length,
+      };
+
+      for (const [key, count] of Object.entries(statusCounts)) {
+        const pct = orders.length > 0 ? Math.round((count / orders.length) * 100) : 0;
+        const div = document.createElement('div');
+        div.className = 'space-y-1';
+        div.innerHTML = `
+          <div class="flex justify-between font-semibold text-slate-700">
+            <span>${key}</span>
+            <span class="font-bold">${count} (${pct}%)</span>
+          </div>
+          <div class="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden">
+            <div class="h-full bg-slate-900 rounded-full" style="width: ${pct}%"></div>
+          </div>
+        `;
+        container.appendChild(div);
+      }
+    }
+
+    // ----------------------------------------------------
+    // PRODUCTS MANAGEMENT
+    // ----------------------------------------------------
+    function filterProductsCategory(cat) {
+      currentCategoryFilter = cat;
+      document.querySelectorAll('.cat-pill').forEach(btn => {
+        btn.className = 'cat-pill px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 hover:text-black border border-slate-200 transition';
+      });
+      const activeBtn = document.getElementById('catBtn-' + cat);
+      if (activeBtn) activeBtn.className = 'cat-pill active px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white transition';
+      renderProducts();
+    }
+
+    function searchProducts(query) {
+      const q = query.toLowerCase().trim();
+      const tbody = document.getElementById('productsTableBody');
+      const rows = tbody.querySelectorAll('tr');
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(q) ? '' : 'none';
+      });
+    }
+
+    function renderProducts() {
+      if (!STORE_DATA) return;
+      const tbody = document.getElementById('productsTableBody');
+      tbody.innerHTML = '';
+
+      let list = STORE_DATA.products || [];
+      if (currentCategoryFilter !== 'all') {
+        list = list.filter(p => p.category === currentCategoryFilter);
+      }
+
+      list.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition';
+        const catLabel = p.category === 'koynek' ? 'Köynək' : p.category === 'salvar' ? 'Şalvar' : p.category === 'hudi' ? 'Hudi' : 'Aksesuar';
+        const mainImg = p.colors?.[0]?.image || p.image || '/images/products/vintage-king-of-pop-tee/mockup.jpg';
+        const inStock = p.inStock !== false;
+
+        tr.innerHTML = `
+          <td class="p-4 flex items-center gap-3">
+            <img src="${mainImg}" class="w-12 h-14 object-cover rounded-lg bg-slate-100 border border-slate-200 shrink-0" />
+            <div>
+              <div class="font-bold text-slate-900 text-xs">${p.name}</div>
+              <div class="text-[10px] text-slate-400 font-mono mt-0.5">${p.refCode || p.id}</div>
+            </div>
+          </td>
+          <td class="p-4 uppercase font-bold text-[#3D1420]">${catLabel}</td>
+          <td class="p-4 text-slate-600">${p.fit || p.composition || '-'}</td>
+          <td class="p-4">
+            <span class="font-black text-slate-900">${Number(p.price).toFixed(2)} ₼</span>
+            ${p.compareAtPrice ? `<span class="text-[10px] text-slate-400 line-through ml-1">${Number(p.compareAtPrice).toFixed(2)} ₼</span>` : ''}
+          </td>
+          <td class="p-4">
+            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase ${inStock ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'}">
+              <span class="w-1.5 h-1.5 rounded-full ${inStock ? 'bg-emerald-500' : 'bg-red-500'}"></span>
+              ${inStock ? 'Stokda Var' : 'Bitib'}
+            </span>
+            <div class="text-[10px] text-slate-400 mt-1">${(p.colors || []).length} rəng · ${(p.sizes || []).join(', ')}</div>
+          </td>
+          <td class="p-4">${p.badge ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-100 text-slate-800">${p.badge}</span>` : '-'}</td>
+          <td class="p-4 text-right space-x-2">
+            <button onclick="editProduct('${p.id}')" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">Düzəliş</button>
+            <button onclick="deleteProduct('${p.id}')" class="px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold transition">Sil</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      lucide.createIcons();
+    }
+
+    function openNewProductModal() {
+      document.getElementById('productForm').reset();
+      document.getElementById('prodId').value = '';
+      document.getElementById('productModalTitle').textContent = 'YENİ MƏHSUL ƏLAVƏ ET';
+      setImageInputValue('prodImage', '');
+      setImageInputValue('prodHoverImage', '');
+      document.getElementById('productModal').classList.remove('hidden');
+      document.getElementById('productModal').classList.add('flex');
+    }
+
+    function editProduct(id) {
+      const p = STORE_DATA.products.find(x => x.id === id);
+      if (!p) return;
+
+      document.getElementById('prodId').value = p.id;
+      document.getElementById('prodName').value = p.name;
+      document.getElementById('prodRef').value = p.refCode || '';
+      document.getElementById('prodCategory').value = p.category;
+      document.getElementById('prodFit').value = p.fit || '';
+      document.getElementById('prodPrice').value = p.price;
+      document.getElementById('prodComparePrice').value = p.compareAtPrice || '';
+      document.getElementById('prodBadge').value = p.badge || '';
+      document.getElementById('prodComposition').value = p.composition || '';
+      document.getElementById('prodInStock').value = (p.inStock !== false).toString();
+      setImageInputValue('prodImage', p.colors?.[0]?.image || p.image || '');
+      setImageInputValue('prodHoverImage', p.colors?.[0]?.hoverImage || '');
+      document.getElementById('prodDescription').value = p.description || '';
+
+      document.getElementById('productModalTitle').textContent = 'MƏHSULU REDAKTƏ ET';
+      document.getElementById('productModal').classList.remove('hidden');
+      document.getElementById('productModal').classList.add('flex');
+    }
+
+    function closeProductModal() {
+      document.getElementById('productModal').classList.add('hidden');
+      document.getElementById('productModal').classList.remove('flex');
+    }
+
+    // Auto Model Dressing Function (Köynəyi Modelə Geyindir)
+    async function generateModelLookFromGarment() {
+      const garmentUrl = document.getElementById('prodHoverImage').value.trim() || document.getElementById('prodImage').value.trim();
+      if (!garmentUrl) {
+        alert('Zəhmət olmasa, əvvəlcə 1-ci bölmədə satışda olan köynəyin/geyimin şəklini daxil edin və ya yükləyin!');
+        return;
+      }
+
+      const btn = document.getElementById('btnAutoDressModel');
+      const oldHtml = btn ? btn.innerHTML : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="animate-spin inline-block mr-1">⌛</span> Modelə geyindirilir...';
+      }
+
+      try {
+        const category = document.getElementById('prodCategory').value || 'koynek';
+        const modelUrl = await createModelLookFromGarmentUrl(garmentUrl, category);
+        setImageInputValue('prodImage', modelUrl);
+        alert('✨ Əla! Yüklənən köynək canlı modelin əyninə geyindirildi və model şəkli yaradıldı!');
+      } catch (err) {
+        alert('Model geyindirilərkən xəta: ' + err.message);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = oldHtml;
+          if (window.lucide) lucide.createIcons();
+        }
+      }
+    }
+
+    async function createModelLookFromGarmentUrl(garmentUrl, category) {
+      return new Promise((resolve, reject) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 896;
+        canvas.height = 1200;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return reject(new Error('Canvas context tapılmadı'));
+
+        const baseModelImg = new Image();
+        baseModelImg.crossOrigin = 'anonymous';
+        baseModelImg.src = '/images/models/female_editorial.jpg';
+
+        baseModelImg.onload = () => {
+          ctx.drawImage(baseModelImg, 0, 0, 896, 1200);
+
+          const garmentImg = new Image();
+          garmentImg.crossOrigin = 'anonymous';
+          garmentImg.onload = () => {
+            ctx.save();
+
+            let targetY = 380;
+            let targetW = 440;
+            if (category === 'hudi') {
+              targetY = 405;
+              targetW = 475;
+            } else if (category === 'salvar') {
+              targetY = 780;
+              targetW = 390;
+            } else if (category === 'aksesuar') {
+              targetY = 115;
+              targetW = 205;
+            }
+
+            const targetH = (garmentImg.height / garmentImg.width) * targetW;
+            const targetX = (896 - targetW) / 2;
+
+            // Soft shadow behind garment
+            ctx.save();
+            ctx.filter = 'blur(12px)';
+            ctx.fillStyle = 'rgba(0,0,0,0.32)';
+            ctx.beginPath();
+            ctx.ellipse(448, targetY + targetH * 0.45, targetW * 0.42, targetH * 0.44, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            // Draw garment
+            ctx.drawImage(garmentImg, targetX, targetY, targetW, targetH);
+            ctx.restore();
+
+            // Watermark
+            ctx.save();
+            ctx.font = 'bold 20px serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            ctx.fillText('HORVVALLE ATELIER', 32, 1160);
+            ctx.restore();
+
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+
+            fetch('/api/admin/upload-image', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ dataUrl, filename: 'model_look_' + Date.now() + '.jpg' })
+            })
+            .then(res => res.json())
+            .then(resData => {
+              if (resData.success && resData.url) {
+                resolve(resData.url);
+              } else {
+                resolve(dataUrl);
+              }
+            })
+            .catch(() => resolve(dataUrl));
+          };
+          garmentImg.onerror = () => reject(new Error('Köynək şəkli yüklənə bilmədi'));
+          garmentImg.src = garmentUrl;
+        };
+        baseModelImg.onerror = () => reject(new Error('Model şablonu yüklənə bilmədi'));
+      });
+    }
+
+    async function handleProductSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById('prodId').value;
+      const name = document.getElementById('prodName').value;
+      const refCode = document.getElementById('prodRef').value;
+      const category = document.getElementById('prodCategory').value;
+      const fit = document.getElementById('prodFit').value;
+      const price = parseFloat(document.getElementById('prodPrice').value);
+      const compareAtPrice = parseFloat(document.getElementById('prodComparePrice').value) || undefined;
+      const badge = document.getElementById('prodBadge').value || undefined;
+      const composition = document.getElementById('prodComposition').value || "100% Premium Pambıq";
+      const inStock = document.getElementById('prodInStock').value === "true";
+      let image = document.getElementById('prodImage').value.trim();
+      let hoverImage = document.getElementById('prodHoverImage').value.trim();
+      const description = document.getElementById('prodDescription').value;
+
+      // Auto dress model if user uploaded garment and left model image empty
+      if (hoverImage && !image) {
+        try {
+          image = await createModelLookFromGarmentUrl(hoverImage, category);
+        } catch {
+          image = hoverImage;
+        }
+      } else if (!hoverImage && image) {
+        hoverImage = image;
+      }
+
+      const payload = {
+        id: id || undefined,
+        name,
+        refCode,
+        gender: "men",
+        category,
+        fit,
+        price,
+        compareAtPrice,
+        badge,
+        composition,
+        inStock,
+        description,
+        sizes: category === "salvar" ? ["30", "32", "34", "36"] : ["S", "M", "L", "XL", "XXL"],
+        colors: [
+          {
+            name: "Standart",
+            hex: "#111111",
+            image: image || hoverImage,
+            hoverImage: hoverImage || image
+          }
+        ]
+      };
+
+      try {
+        const res = await fetch('/api/admin/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+        if (result.success) {
+          closeProductModal();
+          await loadData();
+          alert('✓ Məhsul uğurla yadda saxlanıldı!');
+        }
+      } catch (err) {
+        alert('Xəta baş verdi: ' + err.message);
+      }
+    }
+
+    async function deleteProduct(id) {
+      if (!confirm('Bu məhsulu silmək istədiyinizdən əminsiniz?')) return;
+      try {
+        const res = await fetch('/api/admin/products/' + id, { method: 'DELETE' });
+        const result = await res.json();
+        if (result.success) {
+          await loadData();
+        }
+      } catch (err) {
+        alert('Silinmə xətası: ' + err.message);
+      }
+    }
+
+    // ----------------------------------------------------
+    // ORDERS & INVOICES
+    // ----------------------------------------------------
+    // ----------------------------------------------------
+    // SDU-STYLE ANIMATED STATUS DROPDOWN SYSTEM
+    // ----------------------------------------------------
+    const ORDER_STATUS_OPTIONS = [
+      { name: 'Yeni Sifariş', styleClass: 'status-style-sky', dotColor: '#0ea5e9' },
+      { name: 'Təsdiqləndi', styleClass: 'status-style-indigo', dotColor: '#6366f1' },
+      { name: 'Çapdadır / Dərzidə', styleClass: 'status-style-amber', dotColor: '#f59e0b' },
+      { name: 'Kuryerdədir', styleClass: 'status-style-teal', dotColor: '#14b8a6' },
+      { name: 'Çatdırıldı', styleClass: 'status-style-green', dotColor: '#22c55e' },
+      { name: 'Ləğv edildi', styleClass: 'status-style-red', dotColor: '#ef4444' }
+    ];
+
+    const POD_STATUS_OPTIONS = [
+      { name: 'Yeni Sifariş', styleClass: 'status-style-sky', dotColor: '#0ea5e9' },
+      { name: 'Çapdadır', styleClass: 'status-style-amber', dotColor: '#f59e0b' },
+      { name: 'Hazırdır', styleClass: 'status-style-indigo', dotColor: '#6366f1' },
+      { name: 'Kuryerdədir', styleClass: 'status-style-teal', dotColor: '#14b8a6' },
+      { name: 'Çatdırıldı', styleClass: 'status-style-green', dotColor: '#22c55e' },
+      { name: 'Ləğv edildi', styleClass: 'status-style-red', dotColor: '#ef4444' }
+    ];
+
+    function getOrderStatusTheme(status) {
+      const s = (status || '').toLowerCase();
+      if (s.includes('ləğv') || s.includes('legv') || s.includes('cancel')) {
+        return { styleClass: 'status-style-red', dotColor: '#ef4444', label: 'Ləğv edildi' };
+      }
+      if (s.includes('çatdır') || s.includes('catdir') || s.includes('təhvil') || s.includes('tehvil') || s.includes('tamam')) {
+        return { styleClass: 'status-style-green', dotColor: '#22c55e', label: 'Çatdırıldı' };
+      }
+      if (s.includes('kuryer') || s.includes('yolda')) {
+        return { styleClass: 'status-style-teal', dotColor: '#14b8a6', label: 'Kuryerdədir' };
+      }
+      if (s.includes('çap') || s.includes('cap') || s.includes('dərzi') || s.includes('derzi') || s.includes('istehsal')) {
+        return { styleClass: 'status-style-amber', dotColor: '#f59e0b', label: 'Çapdadır / Dərzidə' };
+      }
+      if (s.includes('təsdiq') || s.includes('tesdiq') || s.includes('hazır')) {
+        return { styleClass: 'status-style-indigo', dotColor: '#6366f1', label: 'Təsdiqləndi' };
+      }
+      return { styleClass: 'status-style-sky', dotColor: '#0ea5e9', label: 'Yeni Sifariş' };
+    }
+
+    // Global listener to close dropdowns on outside click
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.status-dropdown-wrapper')) {
+        closeAllStatusDropdowns();
+      }
+    });
+
+    function closeAllStatusDropdowns() {
+      document.querySelectorAll('.status-dropdown-menu').forEach(m => m.classList.add('hidden'));
+      document.querySelectorAll('.status-trigger-btn').forEach(b => b.classList.remove('open'));
+    }
+
+    function toggleStatusDropdown(type, id, event) {
+      event.stopPropagation();
+      const menu = document.getElementById(`${type}-menu-${id}`);
+      const btn = document.getElementById(`${type}-btn-${id}`);
+      if (!menu || !btn) return;
+      const isClosed = menu.classList.contains('hidden');
+      closeAllStatusDropdowns();
+      if (isClosed) {
+        menu.classList.remove('hidden');
+        btn.classList.add('open');
+      }
+    }
+
+    async function selectOrderStatus(orderId, status, event) {
+      event.stopPropagation();
+      closeAllStatusDropdowns();
+      await changeOrderStatus(orderId, status);
+    }
+
+    async function selectPodStatus(podId, status, event) {
+      event.stopPropagation();
+      closeAllStatusDropdowns();
+      await changePodStatus(podId, status);
+    }
+
+    function renderOrders() {
+      if (!STORE_DATA) return;
+      const tbody = document.getElementById('ordersTableBody');
+      tbody.innerHTML = '';
+      const list = STORE_DATA.orders || [];
+      document.getElementById('ordersTotalCount').textContent = list.length;
+
+      if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-slate-400">Hələlik sifariş daxil olmayıb.</td></tr>';
+        return;
+      }
+
+      list.forEach(o => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50/80 transition';
+        const custName = o.customer?.fullName || o.customer?.name || 'Müştəri';
+        const custPhone = o.customer?.phone || '-';
+        const address = `${o.customer?.city || 'Bakı'}, ${o.customer?.address || '-'}`;
+        const itemsList = (o.items || []).map(i => `${i.name} (${i.size || 'L'}, ${i.color || 'Ağ'}) x${i.quantity || 1}`).join('<br/>');
+        const currentStatus = o.orderStatus || 'Yeni Sifariş';
+        const theme = getOrderStatusTheme(currentStatus);
+
+        tr.innerHTML = `
+          <td class="p-4 font-mono font-bold text-slate-900">
+            <div class="flex items-center gap-1.5">
+              <span>${o.id}</span>
+              <a href="http://localhost:3000/track?q=${o.id}" target="_blank" title="Müştərinin canlı izləmə səhifəsinə bax" class="text-slate-400 hover:text-indigo-600 transition">
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+              </a>
+            </div>
+            <div class="text-[10px] text-slate-400 font-normal">${o.date ? new Date(o.date).toLocaleDateString() : '-'}</div>
+          </td>
+          <td class="p-4">
+            <div class="font-bold text-slate-900">${custName}</div>
+            <div class="text-[11px] text-slate-500 font-mono">${custPhone}</div>
+          </td>
+          <td class="p-4 text-slate-600 max-w-xs truncate" title="${address}">${address}</td>
+          <td class="p-4 text-slate-700 text-[11px] leading-relaxed">${itemsList || '1 ədəd məhsul'}</td>
+          <td class="p-4">
+            <div class="font-black text-slate-900">${Number(o.total || 0).toFixed(2)} ₼</div>
+            <span class="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${o.paymentStatus === 'Ödənilib' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">${o.paymentStatus || 'Kartla Ödəniş'}</span>
+          </td>
+          <td class="p-4 overflow-visible">
+            <div class="status-dropdown-wrapper" id="order-wrap-${o.id}">
+              <button type="button" onclick="toggleStatusDropdown('order', '${o.id}', event)" class="status-trigger-btn ${theme.styleClass}" id="order-btn-${o.id}">
+                <span class="status-dot"></span>
+                <span>${theme.label}</span>
+                <svg class="status-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <div class="status-dropdown-menu hidden" id="order-menu-${o.id}">
+                ${ORDER_STATUS_OPTIONS.map(opt => `
+                  <div onclick="selectOrderStatus('${o.id}', '${opt.name}', event)" class="status-dropdown-item ${opt.name === theme.label ? 'selected' : ''}">
+                    <div class="flex items-center">
+                      <span class="item-dot" style="background-color: ${opt.dotColor}"></span>
+                      <span>${opt.name}</span>
+                    </div>
+                    ${opt.name === theme.label ? '<svg class="w-3.5 h-3.5 text-slate-700 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>' : ''}
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </td>
+          <td class="p-4 text-right">
+            <div class="flex items-center justify-end gap-2">
+              <a href="http://localhost:3000/track?q=${o.id}" target="_blank" class="px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition flex items-center gap-1" title="Müştərinin canlı izləmə ekranı">
+                <i data-lucide="compass" class="w-3.5 h-3.5"></i>
+                <span>İzləmə</span>
+              </a>
+              <button onclick="viewInvoice('${o.id}')" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-black text-white text-xs font-bold transition flex items-center gap-1.5">
+                <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                <span>Faktura</span>
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      lucide.createIcons();
+    }
+
+    async function changeOrderStatus(orderId, status) {
+      try {
+        const res = await fetch(`/api/admin/orders/${orderId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderStatus: status })
+        });
+        const result = await res.json();
+        if (result.success) {
+          await loadData();
+        }
+      } catch (err) {
+        alert('Status yenilənmədi: ' + err.message);
+      }
+    }
+
+    function viewInvoice(orderId) {
+      const o = (STORE_DATA.orders || []).find(x => x.id === orderId);
+      if (!o) return;
+
+      const custName = o.customer?.fullName || o.customer?.name || 'Müştəri';
+      const custPhone = o.customer?.phone || '-';
+      const custEmail = o.customer?.email || '-';
+      const address = `${o.customer?.city || 'Bakı'}, ${o.customer?.address || '-'}`;
+      const items = o.items || [];
+
+      const body = document.getElementById('invoiceModalBody');
+      body.innerHTML = `
+        <div class="border-b border-slate-200 pb-6 flex items-start justify-between">
+          <div>
+            <div class="text-2xl font-serif-luxury text-slate-900 font-bold">HORVVALLE</div>
+            <div class="text-[10px] uppercase font-bold tracking-widest text-[#3D1420] mt-0.5">HAUTE COUTURE & BESPOKE ATELIER</div>
+            <div class="text-[11px] text-slate-500 mt-2">Nizami küçəsi 44, Bakı, Azərbaycan</div>
+            <div class="text-[11px] text-slate-500">Tel: +994 50 300 40 50 · www.horvvalle.com</div>
+          </div>
+          <div class="text-right">
+            <div class="text-xs uppercase font-bold text-slate-400">RƏSMİ SATIŞ QAİMƏSİ</div>
+            <div class="text-lg font-mono font-black text-slate-900 mt-1">${o.id}</div>
+            <div class="text-xs text-slate-500 mt-1">Tarix: ${o.date ? new Date(o.date).toLocaleDateString() : new Date().toLocaleDateString()}</div>
+            <div class="text-xs font-bold text-emerald-700 mt-1">Status: ${o.orderStatus || 'Təsdiqləndi'}</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">MÜŞTƏRİ MƏLUMATLARI</span>
+            <div class="font-bold text-slate-900 text-sm">${custName}</div>
+            <div class="text-slate-600 mt-0.5">${custPhone}</div>
+            <div class="text-slate-600">${custEmail}</div>
+          </div>
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">ÇATDIRILMA ÜNVANI</span>
+            <div class="font-bold text-slate-900">${address}</div>
+            <div class="text-slate-500 mt-1">Ödəniş Metodu: <strong class="text-slate-900 uppercase">${o.paymentMethod || 'Kartla'}</strong></div>
+            <div class="text-slate-500">Ödəniş Vəziyyəti: <strong class="text-emerald-700">${o.paymentStatus || 'Ödənilib'}</strong></div>
+          </div>
+        </div>
+
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">SİFARİŞ EDİLMİŞ MƏHSULLAR</span>
+          <table class="w-full text-left text-xs border border-slate-200 rounded-xl overflow-hidden">
+            <thead class="bg-slate-100 text-slate-600 uppercase text-[10px] font-bold">
+              <tr>
+                <th class="p-3">Məhsul</th>
+                <th class="p-3">Ölçü / Rəng</th>
+                <th class="p-3 text-center">Say</th>
+                <th class="p-3 text-right">Qiymət</th>
+                <th class="p-3 text-right">Cəmi</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              ${items.map(item => `
+                <tr>
+                  <td class="p-3 font-bold text-slate-900">${item.name}</td>
+                  <td class="p-3 text-slate-600">${item.size || 'L'} · ${item.color || 'Standart'}</td>
+                  <td class="p-3 text-center font-bold">${item.quantity || 1}</td>
+                  <td class="p-3 text-right font-medium">${Number(item.price || 0).toFixed(2)} ₼</td>
+                  <td class="p-3 text-right font-bold text-slate-900">${((Number(item.price) || 0) * (item.quantity || 1)).toFixed(2)} ₼</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="border-t border-slate-200 pt-4 flex justify-between items-center text-xs">
+          <div class="text-slate-500">
+            Horvvalle Atelye seçdiyiniz üçün təşəkkür edirik.<br/>
+            Bütün fərdi geyimlər xalis pambıqdan hazırlanmışdır.
+          </div>
+          <div class="text-right space-y-1">
+            <div class="text-slate-500">Ara Cəm: <span class="font-bold text-slate-900">${Number(o.subtotal || o.total || 0).toFixed(2)} ₼</span></div>
+            <div class="text-slate-500">Çatdırılma: <span class="font-bold text-emerald-700">Pulsuz (0.00 ₼)</span></div>
+            <div class="text-base font-black text-slate-900 pt-1 border-t border-slate-200">
+              Yekun Məbləğ: ${Number(o.total || 0).toFixed(2)} ₼
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('invoiceModal').classList.remove('hidden');
+      document.getElementById('invoiceModal').classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closeInvoiceModal() {
+      document.getElementById('invoiceModal').classList.add('hidden');
+      document.getElementById('invoiceModal').classList.remove('flex');
+    }
+
+    // ----------------------------------------------------
+    // POD ORDERS (FƏRDİ 3D ÇAP ATELYESİ)
+    // ----------------------------------------------------
+    function renderPodOrders() {
+      if (!STORE_DATA) return;
+      const container = document.getElementById('podCardsContainer');
+      container.innerHTML = '';
+      const list = STORE_DATA.podOrders || [];
+
+      if (list.length === 0) {
+        container.innerHTML = '<div class="col-span-3 text-center py-16 text-slate-400 font-bold">Hələlik fərdi 3D çap sifarişi daxil olmayıb.</div>';
+        return;
+      }
+
+      list.forEach(pod => {
+        const custName = pod.customerName || pod.customer?.name || 'Müştəri';
+        const custPhone = pod.customerPhone || pod.customer?.phone || '-';
+        const cleanPrintImg = pod.frontDesign?.uploadedImage || pod.frontDesign?.artworkUrl || pod.backDesign?.uploadedImage || '/images/presets/bmw_gt3_clean.png';
+        const originalCustomerImg = pod.frontDesign?.originalImage || pod.backDesign?.originalImage || cleanPrintImg;
+        const podStatus = pod.status || 'Yeni Sifariş';
+        const podTheme = getOrderStatusTheme(podStatus);
+
+        const card = document.createElement('div');
+        card.className = 'bg-white border border-slate-200 rounded-3xl p-5 space-y-4 shadow-xs flex flex-col justify-between';
+        card.innerHTML = `
+          <div class="space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <span class="text-xs font-mono font-bold text-blue-600">${pod.id}</span>
+                <span class="text-[10px] text-slate-400 block">${pod.createdAt ? new Date(pod.createdAt).toLocaleString() : ''}</span>
+              </div>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase border flex items-center gap-1.5 shadow-2xs ${podTheme.styleClass}">
+                <span class="w-1.5 h-1.5 rounded-full" style="background-color: ${podTheme.dotColor}"></span>
+                <span>${podTheme.label}</span>
+              </span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 bg-slate-50 p-2.5 rounded-2xl border border-slate-100">
+              <div>
+                <span class="text-[9px] font-bold uppercase text-slate-400 block mb-1">Müştərinin Şəkli</span>
+                <div class="w-full h-28 bg-white rounded-lg border border-slate-200 p-1 flex items-center justify-center overflow-hidden">
+                  <img src="${originalCustomerImg}" class="max-h-full max-w-full object-contain" />
+                </div>
+              </div>
+              <div>
+                <span class="text-[9px] font-bold uppercase text-slate-400 block mb-1">Çap Maketi (Şəffaf)</span>
+                <div class="w-full h-28 bg-[linear-gradient(45deg,#f1eee9_25%,transparent_25%),linear-gradient(-45deg,#f1eee9_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#f1eee9_75%),linear-gradient(-45deg,transparent_75%,#f1eee9_75%)] bg-[size:10px_10px] bg-slate-100 rounded-lg border border-slate-200 p-1 flex items-center justify-center overflow-hidden">
+                  <img src="${cleanPrintImg}" class="max-h-full max-w-full object-contain drop-shadow" />
+                </div>
+              </div>
+            </div>
+
+            <div class="text-xs space-y-1 bg-slate-50 p-3 rounded-xl">
+              <div><strong>Müştəri:</strong> ${custName} (${custPhone})</div>
+              <div><strong>Geyim:</strong> ${pod.garmentType || 'T-Shirt Regular'}</div>
+              <div><strong>Ölçü & Rəng:</strong> <span class="font-bold text-slate-900">${pod.size || 'L'}</span> · ${pod.garmentColor || 'Ağ'}</div>
+              <div><strong>Məbləğ:</strong> <span class="font-black text-slate-900">${pod.price || 15} ₼</span></div>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2 overflow-visible">
+            <a href="${cleanPrintImg}" download="horvvalle_print_${pod.id}.png" target="_blank" class="flex-1 py-2 rounded-xl bg-slate-900 hover:bg-black text-white text-[11px] font-bold uppercase tracking-wider transition text-center flex items-center justify-center gap-1.5">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>DTF Çap Faylını Endir</span>
+            </a>
+
+            <div class="status-dropdown-wrapper" id="pod-wrap-${pod.id}">
+              <button type="button" onclick="toggleStatusDropdown('pod', '${pod.id}', event)" class="status-trigger-btn ${podTheme.styleClass}" id="pod-btn-${pod.id}">
+                <span class="status-dot"></span>
+                <span>${podTheme.label}</span>
+                <svg class="status-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <div class="status-dropdown-menu hidden" id="pod-menu-${pod.id}">
+                ${POD_STATUS_OPTIONS.map(opt => `
+                  <div onclick="selectPodStatus('${pod.id}', '${opt.name}', event)" class="status-dropdown-item ${opt.name === podTheme.label ? 'selected' : ''}">
+                    <div class="flex items-center">
+                      <span class="item-dot" style="background-color: ${opt.dotColor}"></span>
+                      <span>${opt.name}</span>
+                    </div>
+                    ${opt.name === podTheme.label ? '<svg class="w-3.5 h-3.5 text-slate-700 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>' : ''}
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    async function changePodStatus(podId, status) {
+      try {
+        const res = await fetch(`/api/admin/pod-orders/${podId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+        const result = await res.json();
+        if (result.success) {
+          await loadData();
+        }
+      } catch (err) {
+        alert('POD statusu dəyişdirilmədi: ' + err.message);
+      }
+    }
+
+    // ----------------------------------------------------
+    // PROMO CODES (KAMPANİYALAR VƏ KUPONLAR)
+    // ----------------------------------------------------
+    function renderPromos() {
+      if (!STORE_DATA) return;
+      const tbody = document.getElementById('promosTableBody');
+      tbody.innerHTML = '';
+      const list = STORE_DATA.promoCodes || [];
+
+      if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-slate-400">Aktiv promo-kod tapılmadı.</td></tr>';
+        return;
+      }
+
+      list.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition';
+        const typeLabel = p.type === 'percent' ? `${p.value}% Endirim` : `${p.value} ₼ Dərhal Endirim`;
+
+        tr.innerHTML = `
+          <td class="p-4 font-mono font-bold text-sm text-[#3D1420]">${p.code}</td>
+          <td class="p-4 font-bold text-slate-900">${typeLabel}</td>
+          <td class="p-4 text-slate-600">${p.minAmount ? p.minAmount + ' ₼' : 'Məhdudiyyətsiz'}</td>
+          <td class="p-4 font-bold text-slate-800">${p.uses || 0} dəfə</td>
+          <td class="p-4 text-slate-500">${p.desc || '-'}</td>
+          <td class="p-4"><span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase ${p.active !== false ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700'}">${p.active !== false ? 'Aktiv' : 'Deaktiv'}</span></td>
+          <td class="p-4 text-right">
+            <button onclick="deletePromo('${p.id || p.code}')" class="px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold transition">Sil</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function openNewPromoModal() {
+      document.getElementById('promoForm').reset();
+      document.getElementById('promoModal').classList.remove('hidden');
+      document.getElementById('promoModal').classList.add('flex');
+    }
+
+    function closePromoModal() {
+      document.getElementById('promoModal').classList.add('hidden');
+      document.getElementById('promoModal').classList.remove('flex');
+    }
+
+    async function handlePromoSubmit(e) {
+      e.preventDefault();
+      const code = document.getElementById('promoCodeInput').value.trim().toUpperCase();
+      const type = document.getElementById('promoTypeInput').value;
+      const value = parseFloat(document.getElementById('promoValueInput').value);
+      const minAmount = parseFloat(document.getElementById('promoMinAmountInput').value) || 0;
+      const desc = document.getElementById('promoDescInput').value;
+
+      try {
+        const res = await fetch('/api/admin/promos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code, type, value, minAmount, desc, active: true, uses: 0 })
+        });
+        const result = await res.json();
+        if (result.success) {
+          closePromoModal();
+          await loadData();
+          alert('✓ Yeni promo-kod aktivləşdirildi!');
+        }
+      } catch (err) {
+        alert('Xəta: ' + err.message);
+      }
+    }
+
+    async function deletePromo(id) {
+      if (!confirm('Bu promo-kodu silmək istədiyinizdən əminsiniz?')) return;
+      try {
+        const res = await fetch('/api/admin/promos/' + id, { method: 'DELETE' });
+        const result = await res.json();
+        if (result.success) {
+          await loadData();
+        }
+      } catch (err) {
+        alert('Silinmə xətası: ' + err.message);
+      }
+    }
+
+    // ----------------------------------------------------
+    // CUSTOMERS (CRM)
+    // ----------------------------------------------------
+    function renderCustomers() {
+      if (!STORE_DATA) return;
+      const tbody = document.getElementById('customersTableBody');
+      tbody.innerHTML = '';
+      const orders = STORE_DATA.orders || [];
+
+      // Group unique customers by phone or email
+      const customerMap = {};
+      orders.forEach(o => {
+        const phone = o.customer?.phone || 'Naməlum';
+        if (!customerMap[phone]) {
+          customerMap[phone] = {
+            name: o.customer?.fullName || o.customer?.name || 'Müştəri',
+            phone: phone,
+            email: o.customer?.email || '-',
+            city: o.customer?.city || 'Bakı',
+            address: o.customer?.address || '-',
+            ordersCount: 0,
+            totalSpent: 0,
+            lastDate: o.date
+          };
+        }
+        customerMap[phone].ordersCount++;
+        customerMap[phone].totalSpent += Number(o.total || 0);
+      });
+
+      const list = Object.values(customerMap);
+      if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-slate-400">Müştəri qeydiyyatı yoxdur.</td></tr>';
+        return;
+      }
+
+      list.forEach(c => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition';
+        tr.innerHTML = `
+          <td class="p-4 font-bold text-slate-900">${c.name}</td>
+          <td class="p-4 font-mono text-slate-600">${c.phone}</td>
+          <td class="p-4 text-slate-500">${c.email}</td>
+          <td class="p-4 text-slate-600">${c.city}, ${c.address}</td>
+          <td class="p-4 font-bold text-slate-900">${c.ordersCount} sifariş</td>
+          <td class="p-4 font-black text-emerald-700">${c.totalSpent.toFixed(2)} ₼</td>
+          <td class="p-4 text-right text-slate-400">${c.lastDate ? new Date(c.lastDate).toLocaleDateString() : '-'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ----------------------------------------------------
+    // CMS CONTENT
+    // ----------------------------------------------------
+    function populateCmsFields() {
+      if (!STORE_DATA) return;
+      const c = STORE_DATA.content || {};
+      const hero = c.hero || {};
+      const pod = c.podBanner || {};
+      const promo = c.promoBanner || {};
+      const camp = c.campaignSecondary || {};
+
+      // Announcements
+      const listDiv = document.getElementById('cmsAnnouncementsList');
+      listDiv.innerHTML = '';
+      (c.announcements || []).forEach((text, i) => {
+        const item = document.createElement('div');
+        item.className = 'flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs';
+        item.innerHTML = `
+          <span class="font-bold text-slate-800">${text}</span>
+          <button onclick="deleteAnnouncement(${i})" class="text-red-500 hover:text-red-700 font-bold px-2 py-1">Sil</button>
+        `;
+        listDiv.appendChild(item);
+      });
+
+      // Hero
+      document.getElementById('cmsHeroTag').value = hero.tag || '';
+      document.getElementById('cmsHeroHeadline').value = hero.headline || '';
+      document.getElementById('cmsHeroSubheadline').value = hero.subheadline || '';
+      document.getElementById('cmsHeroLookbookTitle').value = hero.lookbookTitle || '';
+      document.getElementById('cmsHeroLookbookPrice').value = hero.lookbookPrice || 55;
+      setImageInputValue('cmsHeroLookbookImg', hero.lookbookImage || '');
+
+      // Banners
+      document.getElementById('cmsPodTitle').value = pod.title || '';
+      document.getElementById('cmsPodDesc').value = pod.description || '';
+      document.getElementById('cmsPromoTitle').value = promo.title || '';
+      document.getElementById('cmsCampTitle').value = camp.title || '';
+    }
+
+    async function addAnnouncement() {
+      const input = document.getElementById('newAnnouncementInput');
+      if (!input.value.trim()) return;
+      const updated = [...(STORE_DATA.content.announcements || []), input.value.trim()];
+      await fetch('/api/admin/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: { ...STORE_DATA.content, announcements: updated } })
+      });
+      input.value = '';
+      await loadData();
+    }
+
+    async function deleteAnnouncement(idx) {
+      const updated = (STORE_DATA.content.announcements || []).filter((_, i) => i !== idx);
+      await fetch('/api/admin/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: { ...STORE_DATA.content, announcements: updated } })
+      });
+      await loadData();
+    }
+
+    async function saveCmsContent() {
+      try {
+        const hero = {
+          ...STORE_DATA.content.hero,
+          tag: document.getElementById('cmsHeroTag').value,
+          headline: document.getElementById('cmsHeroHeadline').value,
+          subheadline: document.getElementById('cmsHeroSubheadline').value,
+          lookbookTitle: document.getElementById('cmsHeroLookbookTitle').value,
+          lookbookPrice: parseFloat(document.getElementById('cmsHeroLookbookPrice').value) || 55,
+          lookbookImage: document.getElementById('cmsHeroLookbookImg').value,
+        };
+
+        const podBanner = {
+          ...STORE_DATA.content.podBanner,
+          title: document.getElementById('cmsPodTitle').value,
+          description: document.getElementById('cmsPodDesc').value,
+        };
+
+        const promoBanner = {
+          ...STORE_DATA.content.promoBanner,
+          title: document.getElementById('cmsPromoTitle').value,
+        };
+
+        const campaignSecondary = {
+          ...STORE_DATA.content.campaignSecondary,
+          title: document.getElementById('cmsCampTitle').value,
+        };
+
+        await fetch('/api/admin/content', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: { ...STORE_DATA.content, hero, podBanner, promoBanner, campaignSecondary } })
+        });
+
+        await loadData();
+        alert('✓ Məzmun və banner dəyişiklikləri yadda saxlanıldı!');
+      } catch (err) {
+        alert('Xəta: ' + err.message);
+      }
+    }
+
+    // ----------------------------------------------------
+    // SETTINGS
+    // ----------------------------------------------------
+    function populateSettings() {
+      if (!STORE_DATA?.settings) return;
+      const s = STORE_DATA.settings;
+      document.getElementById('settingStoreName').value = s.storeName || '';
+      document.getElementById('settingTagline').value = s.tagline || '';
+      document.getElementById('settingPhone').value = s.contactPhone || '';
+      document.getElementById('settingFreeShip').value = s.freeShippingThreshold || 60;
+      document.getElementById('settingEmail').value = s.contactEmail || '';
+    }
+
+    async function saveSettings() {
+      const payload = {
+        storeName: document.getElementById('settingStoreName').value,
+        tagline: document.getElementById('settingTagline').value,
+        contactPhone: document.getElementById('settingPhone').value,
+        freeShippingThreshold: parseFloat(document.getElementById('settingFreeShip').value) || 60,
+        contactEmail: document.getElementById('settingEmail').value,
+      };
+
+      try {
+        await fetch('/api/admin/content', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ settings: payload })
+        });
+        await loadData();
+        alert('✓ Mağaza parametrləri saxlanıldı!');
+      } catch (err) {
+        alert('Xəta: ' + err.message);
+      }
+    }
+
+    // ----------------------------------------------------
+    // GALLERY & UPLOADS
+    // ----------------------------------------------------
+    async function openGalleryModal(targetInputId) {
+      currentGalleryTargetInput = targetInputId;
+      document.getElementById('galleryModal').classList.remove('hidden');
+      document.getElementById('galleryModal').classList.add('flex');
+
+      if (GALLERY_CACHE.length === 0) {
+        const res = await fetch('/api/admin/gallery');
+        GALLERY_CACHE = await res.json();
+      }
+      renderGalleryGrid(GALLERY_CACHE);
+    }
+
+    function closeGalleryModal() {
+      document.getElementById('galleryModal').classList.add('hidden');
+      document.getElementById('galleryModal').classList.remove('flex');
+    }
+
+    function renderGalleryGrid(items) {
+      const grid = document.getElementById('galleryGrid');
+      grid.innerHTML = '';
+      items.forEach(url => {
+        const item = document.createElement('div');
+        item.className = 'group relative aspect-square rounded-xl overflow-hidden bg-slate-100 border border-slate-200 cursor-pointer hover:border-slate-900 transition';
+        item.onclick = () => selectGalleryImage(url);
+        item.innerHTML = `<img src="${url}" class="w-full h-full object-cover group-hover:scale-105 transition-transform" />`;
+        grid.appendChild(item);
+      });
+    }
+
+    function filterGallery(q) {
+      const filtered = GALLERY_CACHE.filter(url => url.toLowerCase().includes(q.toLowerCase().trim()));
+      renderGalleryGrid(filtered);
+    }
+
+    function selectGalleryImage(url) {
+      if (currentGalleryTargetInput) {
+        setImageInputValue(currentGalleryTargetInput, url);
+      }
+      closeGalleryModal();
+    }
+
+    function setImageInputValue(inputId, url) {
+      const input = document.getElementById(inputId);
+      if (input) input.value = url;
+      const preview = document.getElementById(inputId + 'Preview');
+      if (preview) preview.src = url;
+    }
+
+    function triggerDirectUpload(targetInputId) {
+      currentGalleryTargetInput = targetInputId;
+      document.getElementById('globalDirectFileInput').click();
+    }
+
+    async function handleDirectFileSelected(e) {
+      const file = e.target.files?.[0];
+      if (!file || !currentGalleryTargetInput) return;
+
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const res = await fetch('/api/admin/upload-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ dataUrl: reader.result, filename: file.name })
+          });
+          const result = await res.json();
+          if (result.success && result.url) {
+            setImageInputValue(currentGalleryTargetInput, result.url);
+            GALLERY_CACHE.unshift(result.url);
+            closeGalleryModal();
+            alert('✓ Şəkil uğurla yükləndi!');
+          }
+        } catch (err) {
+          alert('Şəkil yüklənərkən xəta: ' + err.message);
+        }
+      };
+      reader.readAsDataURL(file);
+      e.target.value = '';
+    }
+
+    // Initialize on page load
+    loadData();
+  </script>
+</body>
+</html>
