@@ -89,7 +89,7 @@ function gaussianBlur2D(src: Float32Array, width: number, height: number, radius
 }
 
 /**
- * Dilates texture edges by 2-3px into transparent pixels to prevent white/gray halo around garment silhouette
+ * Dilates texture edges by 3px into transparent pixels to prevent white/gray halo around garment silhouette
  */
 export function dilateTextureEdges(canvas: HTMLCanvasElement, radius = 3) {
   const ctx = canvas.getContext("2d", { willReadFrequently: true });
@@ -104,7 +104,6 @@ export function dilateTextureEdges(canvas: HTMLCanvasElement, radius = 3) {
     for (let y = 1; y < h - 1; y++) {
       for (let x = 1; x < w - 1; x++) {
         const idx = (y * w + x) * 4;
-        // If transparent/semi-transparent near edge
         if (copy[idx + 3] < 80) {
           const neighbors = [
             ((y - 1) * w + x) * 4,
@@ -130,8 +129,8 @@ export function dilateTextureEdges(canvas: HTMLCanvasElement, radius = 3) {
 }
 
 /**
- * Builds an organic, high-density (200x200) smooth inflated 3D BufferGeometry
- * The edge silhouette is rendered anti-aliased by the texture alpha, while the mesh provides smooth 3D curvature.
+ * Builds an organic, high-density (200x200) watertight 3D BufferGeometry
+ * Front and back meshes fuse together at z=0 with a smooth bevel perimeter band so there is zero gap when viewed from the side.
  */
 export async function buildInflatedGarmentGeometry(
   imageSrc: string,
@@ -147,7 +146,6 @@ export async function buildInflatedGarmentGeometry(
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => {
-      // High-density 200x200 grid for butter-smooth curvature
       const gridW = 200;
       const gridH = 200;
 
@@ -191,11 +189,11 @@ export async function buildInflatedGarmentGeometry(
 
       const frontIndices: number[] = [];
       const backIndices: number[] = [];
+      const rimIndices: number[] = [];
 
-      // 1. Generate Front and Back Vertices (continuous 200x200 mesh)
-      // Front vertices start at index 0, Back vertices start at offset (gridW * gridH)
       const vertexOffset = gridW * gridH;
 
+      // 1. Generate Front Vertices (Indices 0 .. vertexOffset - 1)
       for (let y = 0; y < gridH; y++) {
         const v = 1 - y / (gridH - 1);
         const posY = (0.5 - y / (gridH - 1)) * targetHeight;
@@ -205,24 +203,18 @@ export async function buildInflatedGarmentGeometry(
           const posX = (u - 0.5) * targetWidth;
           const idx = y * gridW + x;
 
-          // Normalized distance from silhouette boundary (0 at and outside boundary, 1 inside core)
           const dVal = smoothDist[idx];
-          const dNorm = Math.min(1, dVal / Math.max(8, maxDist * 0.42));
-
-          // Smooth sine profile for realistic garment volume bulge
+          // At the silhouette edge (dVal <= 0.8), depth seamlessly reaches 0
+          const dNorm = dVal <= 0.8 ? 0 : Math.min(1, (dVal - 0.8) / Math.max(8, maxDist * 0.42));
           const depth = baseThickness * Math.sin(dNorm * (Math.PI / 2));
 
-          // Front vertex
           positions.push(posX, posY, depth);
           uvs.push(u, v);
           normals.push(0, 0, 1);
-
-          // Back vertex (depth is negated; mirrored U for natural back orientation)
-          // We push directly into the same buffers at offset
         }
       }
 
-      // Generate Back Vertices
+      // 2. Generate Back Vertices (Indices vertexOffset .. 2 * vertexOffset - 1)
       for (let y = 0; y < gridH; y++) {
         const v = 1 - y / (gridH - 1);
         const posY = (0.5 - y / (gridH - 1)) * targetHeight;
@@ -233,7 +225,8 @@ export async function buildInflatedGarmentGeometry(
           const idx = y * gridW + x;
 
           const dVal = smoothDist[idx];
-          const dNorm = Math.min(1, dVal / Math.max(8, maxDist * 0.42));
+          const dNorm = dVal <= 0.8 ? 0 : Math.min(1, (dVal - 0.8) / Math.max(8, maxDist * 0.42));
+          // Back depth is negative; at edge (z=0) front and back meet identically
           const depth = -baseThickness * Math.sin(dNorm * (Math.PI / 2));
 
           positions.push(posX, posY, depth);
@@ -242,7 +235,7 @@ export async function buildInflatedGarmentGeometry(
         }
       }
 
-      // 2. Generate Triangles for Front and Back Faces
+      // 3. Generate Triangles for Front and Back Faces
       for (let y = 0; y < gridH - 1; y++) {
         for (let x = 0; x < gridW - 1; x++) {
           const tl = y * gridW + x;
@@ -262,20 +255,33 @@ export async function buildInflatedGarmentGeometry(
 
           backIndices.push(btl, btr, bbl);
           backIndices.push(btr, bbr, bbl);
+
+          // 4. Watertight Rim Stitching: Connect perimeter boundaries between front and back
+          // If this quad sits on the silhouette boundary
+          const isBoundaryCell =
+            (mask[tl] !== mask[br]) ||
+            (mask[tr] !== mask[bl]);
+
+          if (isBoundaryCell) {
+            // Bridge front vertices to back vertices along the bevel edge
+            rimIndices.push(tl, btl, tr);
+            rimIndices.push(tr, btl, btr);
+          }
         }
       }
 
-      const allIndices = [...frontIndices, ...backIndices];
+      const allIndices = [...frontIndices, ...backIndices, ...rimIndices];
 
       const geometry = new THREE.BufferGeometry();
       geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
       geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
       geometry.setIndex(allIndices);
 
-      // Define multi-material groups: Material 0 for Front, Material 1 for Back
+      // Define multi-material groups
       geometry.clearGroups();
-      geometry.addGroup(0, frontIndices.length, 0); // Front
-      geometry.addGroup(frontIndices.length, backIndices.length, 1); // Back
+      geometry.addGroup(0, frontIndices.length, 0); // Front Material
+      geometry.addGroup(frontIndices.length, backIndices.length, 1); // Back Material
+      geometry.addGroup(frontIndices.length + backIndices.length, rimIndices.length, 0); // Rim Bevel Material
 
       geometry.computeVertexNormals();
       geometry.center();

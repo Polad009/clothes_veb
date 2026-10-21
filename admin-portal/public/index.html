@@ -1741,8 +1741,9 @@
       list.forEach(pod => {
         const custName = pod.customerName || pod.customer?.name || 'Müştəri';
         const custPhone = pod.customerPhone || pod.customer?.phone || '-';
-        const cleanPrintImg = pod.frontDesign?.uploadedImage || pod.frontDesign?.artworkUrl || pod.backDesign?.uploadedImage || '/images/presets/bmw_gt3_clean.png';
-        const originalCustomerImg = pod.frontDesign?.originalImage || pod.backDesign?.originalImage || cleanPrintImg;
+        const cleanPrintImg = pod.processedImage || pod.frontDesign?.uploadedImage || pod.frontDesign?.artworkUrl || pod.backDesign?.uploadedImage || '/images/presets/bmw_gt3_clean.png';
+        const originalCustomerImg = pod.originalImage || pod.frontDesign?.originalImage || pod.backDesign?.originalImage || cleanPrintImg;
+        const previewImg = pod.previewImage || cleanPrintImg;
         const podStatus = pod.status || 'Yeni Sifariş';
         const podTheme = getOrderStatusTheme(podStatus);
 
@@ -1784,30 +1785,47 @@
             </div>
           </div>
 
-          <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2 overflow-visible">
-            <a href="${cleanPrintImg}" download="horvvalle_print_${pod.id}.png" target="_blank" class="flex-1 py-2 rounded-xl bg-slate-900 hover:bg-black text-white text-[11px] font-bold uppercase tracking-wider transition text-center flex items-center justify-center gap-1.5">
-              <i data-lucide="download" class="w-3.5 h-3.5"></i>
-              <span>DTF Çap Faylını Endir</span>
-            </a>
-
-            <div class="status-dropdown-wrapper" id="pod-wrap-${pod.id}">
-              <button type="button" onclick="toggleStatusDropdown('pod', '${pod.id}', event)" class="status-trigger-btn ${podTheme.styleClass}" id="pod-btn-${pod.id}">
-                <span class="status-dot"></span>
-                <span>${podTheme.label}</span>
-                <svg class="status-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
-                </svg>
+          <div class="space-y-2 pt-2 border-t border-slate-100">
+            <div class="grid grid-cols-2 gap-1.5">
+              <a href="${originalCustomerImg}" download="original_${pod.id}.png" target="_blank" class="py-1.5 px-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold uppercase tracking-wider transition text-center flex items-center justify-center gap-1 shadow-2xs">
+                <i data-lucide="image" class="w-3 h-3 text-slate-500"></i>
+                <span>Orijinal</span>
+              </a>
+              <a href="${cleanPrintImg}" download="print_${pod.id}.png" target="_blank" class="py-1.5 px-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold uppercase tracking-wider transition text-center flex items-center justify-center gap-1 shadow-xs">
+                <i data-lucide="printer" class="w-3 h-3"></i>
+                <span>Çap Faylı (PNG)</span>
+              </a>
+              <button type="button" onclick="downloadPlacementJson('${pod.id}')" class="py-1.5 px-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold uppercase tracking-wider transition text-center flex items-center justify-center gap-1 shadow-2xs cursor-pointer">
+                <i data-lucide="file-json" class="w-3 h-3 text-slate-500"></i>
+                <span>Yerləşmə (JSON)</span>
               </button>
-              <div class="status-dropdown-menu hidden" id="pod-menu-${pod.id}">
-                ${POD_STATUS_OPTIONS.map(opt => `
-                  <div onclick="selectPodStatus('${pod.id}', '${opt.name}', event)" class="status-dropdown-item ${opt.name === podTheme.label ? 'selected' : ''}">
-                    <div class="flex items-center">
-                      <span class="item-dot" style="background-color: ${opt.dotColor}"></span>
-                      <span>${opt.name}</span>
+              <a href="${previewImg}" download="preview_${pod.id}.png" target="_blank" class="py-1.5 px-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold uppercase tracking-wider transition text-center flex items-center justify-center gap-1 shadow-2xs">
+                <i data-lucide="eye" class="w-3 h-3 text-slate-500"></i>
+                <span>Önbaxış (PNG)</span>
+              </a>
+            </div>
+
+            <div class="flex items-center justify-between gap-2 pt-1 overflow-visible">
+              <span class="text-[11px] text-slate-500 font-semibold">Status:</span>
+              <div class="status-dropdown-wrapper" id="pod-wrap-${pod.id}">
+                <button type="button" onclick="toggleStatusDropdown('pod', '${pod.id}', event)" class="status-trigger-btn ${podTheme.styleClass}" id="pod-btn-${pod.id}">
+                  <span class="status-dot"></span>
+                  <span>${podTheme.label}</span>
+                  <svg class="status-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                <div class="status-dropdown-menu hidden" id="pod-menu-${pod.id}">
+                  ${POD_STATUS_OPTIONS.map(opt => `
+                    <div onclick="selectPodStatus('${pod.id}', '${opt.name}', event)" class="status-dropdown-item ${opt.name === podTheme.label ? 'selected' : ''}">
+                      <div class="flex items-center">
+                        <span class="item-dot" style="background-color: ${opt.dotColor}"></span>
+                        <span>${opt.name}</span>
+                      </div>
+                      ${opt.name === podTheme.label ? '<svg class="w-3.5 h-3.5 text-slate-700 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>' : ''}
                     </div>
-                    ${opt.name === podTheme.label ? '<svg class="w-3.5 h-3.5 text-slate-700 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>' : ''}
-                  </div>
-                `).join('')}
+                  `).join('')}
+                </div>
               </div>
             </div>
           </div>
@@ -1815,6 +1833,29 @@
         container.appendChild(card);
       });
       lucide.createIcons();
+    }
+
+    function downloadPlacementJson(podId) {
+      const pod = (STORE_DATA.podOrders || []).find(p => p.id === podId);
+      if (!pod) return;
+      const data = pod.placementData || {
+        orderId: pod.orderId,
+        podId: pod.id,
+        garmentType: pod.garmentType,
+        garmentColor: pod.garmentColor,
+        size: pod.size,
+        price: pod.price,
+        printArea: "30x40 cm",
+        frontDesign: pod.frontDesign,
+        backDesign: pod.backDesign,
+      };
+      const jsonStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+      const dl = document.createElement('a');
+      dl.setAttribute("href", jsonStr);
+      dl.setAttribute("download", `placement_${pod.id}.json`);
+      document.body.appendChild(dl);
+      dl.click();
+      dl.remove();
     }
 
     async function changePodStatus(podId, status) {

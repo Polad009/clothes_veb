@@ -28,10 +28,14 @@ export async function POST(req: NextRequest) {
       garmentColor: body.garmentColor || 'Onyx Black',
       size: body.size || 'L',
       price: body.price || 55,
-      frontDesign: body.frontDesign || {},
-      backDesign: body.backDesign || {},
+      frontDesign: body.frontDesign || body.customData?.frontDesign || {},
+      backDesign: body.backDesign || body.customData?.backDesign || {},
       status: 'Pending Print',
       createdAt: new Date().toISOString(),
+      originalImage: body.originalImage || body.customData?.originalImage || body.customData?.frontDesign?.originalImage || body.customData?.backDesign?.originalImage || '',
+      processedImage: body.processedImage || body.customData?.processedImage || body.customData?.frontDesign?.uploadedImage || body.customData?.backDesign?.uploadedImage || '',
+      placementData: body.placementData || body.customData?.placementData || null,
+      previewImage: body.previewImage || body.customData?.previewImage || '',
     };
 
     if (!db.podOrders) db.podOrders = [];

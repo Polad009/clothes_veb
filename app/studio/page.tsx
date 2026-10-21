@@ -8,6 +8,11 @@ import { GarmentCanvas, StudioSurface, getStudioGarmentCategory, getStudioGarmen
 import { LiveModelPreviewModal } from "@/components/studio/LiveModelPreviewModal";
 import { PhotoRoom3DPreviewModal } from "@/components/studio/PhotoRoom3DPreviewModal";
 import { removeImageBackground } from "@/lib/imageProcessing";
+import {
+  autoTrimCanvas,
+  removeSolidBackground,
+  calculateAutoFitScale,
+} from "@/lib/studio/image-preprocessor";
 import { CustomDropdown } from "@/components/ui/CustomDropdown";
 import {
   Upload,
@@ -304,7 +309,13 @@ export default function StudioPage() {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState<string>("");
   const [previewRawImage, setPreviewRawImage] = useState<string | null>(null);
+  const [trimmedBaseImage, setTrimmedBaseImage] = useState<string | null>(null);
   const [previewCleanImage, setPreviewCleanImage] = useState<string | null>(null);
+  const [removeBgChecked, setRemoveBgChecked] = useState(false);
+  const [bgTolerance, setBgTolerance] = useState(25);
+  const [imageDims, setImageDims] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
+  const [isLowDpi, setIsLowDpi] = useState(false);
+  const [autoFittedScale, setAutoFittedScale] = useState(1.0);
   const [isCleaningBg, setIsCleaningBg] = useState(false);
   const [bgCleaned, setBgCleaned] = useState(false);
   const [cleaningStatusText, setCleaningStatusText] = useState("Süni intellekt fonu təmizləyir...");
@@ -507,70 +518,118 @@ export default function StudioPage() {
     });
   };
 
-  // File Upload Initiator -> Opens "Şəkli yoxla" modal (matching Image 1)
+  // Process image with solid background removal on demand
+  const runSolidBgRemoval = (sourceDataUrl: string, tolerance: number): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const c = document.createElement("canvas");
+        c.width = img.width;
+        c.height = img.height;
+        const ctx = c.getContext("2d");
+        if (ctx) ctx.drawImage(img, 0, 0);
+        const processed = removeSolidBackground(c, tolerance);
+        resolve(processed.toDataURL("image/png"));
+      };
+      img.onerror = () => resolve(sourceDataUrl);
+      img.src = sourceDataUrl;
+    });
+  };
+
+  // File Upload Initiator -> Auto-EXIF, Auto-Trim, DPI Check, Auto-Fit Scale ~75%
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const fileName = file.name;
       const reader = new FileReader();
-      reader.onload = async () => {
+      reader.onload = () => {
         if (typeof reader.result === "string") {
           const rawOriginal = reader.result;
-          const previewImage = await downscaleForPreview(rawOriginal, 2048);
-          setUploadedFileName(fileName);
-          setPreviewRawImage(rawOriginal); // full resolution original for printing
-          setPreviewCleanImage(previewImage); // 2048px downscaled preview for 60fps canvas
-          setBgCleaned(false);
-          setIsCleaningBg(false);
-          setIsUploadModalOpen(true);
+          const img = new Image();
+          img.onload = () => {
+            // Draw to canvas to respect EXIF orientation and allow pixel manipulation
+            const canvas = document.createElement("canvas");
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext("2d");
+            if (ctx) ctx.drawImage(img, 0, 0);
+
+            // Auto-trim empty / uniform border pixels
+            const trimmedCanvas = autoTrimCanvas(canvas);
+            const trimmedDataUrl = trimmedCanvas.toDataURL("image/png");
+
+            // DPI / quality check
+            const isLow = img.width < 700 || img.height < 700;
+
+            // Auto-scale ~75% of printable chest area
+            const autoScale = calculateAutoFitScale(trimmedCanvas.width, trimmedCanvas.height, 200, 200, 0.75);
+
+            setUploadedFileName(fileName);
+            setPreviewRawImage(rawOriginal);
+            setTrimmedBaseImage(trimmedDataUrl);
+            setPreviewCleanImage(trimmedDataUrl);
+            setRemoveBgChecked(false);
+            setBgTolerance(25);
+            setBgCleaned(false);
+            setImageDims({ width: img.width, height: img.height });
+            setIsLowDpi(isLow);
+            setAutoFittedScale(autoScale);
+            setIsCleaningBg(false);
+            setIsUploadModalOpen(true);
+          };
+          img.src = rawOriginal;
         }
       };
       reader.readAsDataURL(file);
-      // reset file input
       e.target.value = "";
     }
   };
 
-  // AI Background Removal button in modal (with non-blocking render tick)
-  const handleRemoveBackgroundInModal = async () => {
-    if (!previewRawImage || isCleaningBg) return;
-    setIsCleaningBg(true);
-    setCleaningStatusText("Süni intellekt hazırlanır...");
-    // Yield 80ms to ensure browser renders the spinning loader smoothly before CPU compute starts
-    await new Promise((resolve) => setTimeout(resolve, 80));
-    try {
-      const cleaned = await removeImageBackground(
-        previewRawImage,
-        (_pct, msg) => {
-          setCleaningStatusText(msg);
-        }
-      );
-      if (cleaned) {
-        setPreviewCleanImage(cleaned);
-        setBgCleaned(true);
-      } else {
-        alert("Fon silinə bilmədi. Zəhmət olmasa başqa şəkil yoxlayın.");
-        setBgCleaned(false);
-      }
-    } catch (err) {
-      console.error("AI background removal error:", err);
-      alert("Fon silinə bilmədi. Zəhmət olmasa yenidən cəhd edin.");
-      setBgCleaned(false);
-    } finally {
+  // Toggle "Fonu sil" (Checkbox)
+  const handleToggleRemoveBg = async (checked: boolean) => {
+    setRemoveBgChecked(checked);
+    if (!trimmedBaseImage) return;
+    if (checked) {
+      setIsCleaningBg(true);
+      const cleaned = await runSolidBgRemoval(trimmedBaseImage, bgTolerance);
+      setPreviewCleanImage(cleaned);
+      setBgCleaned(true);
       setIsCleaningBg(false);
+    } else {
+      setPreviewCleanImage(trimmedBaseImage);
+      setBgCleaned(false);
     }
   };
 
-  // Confirm image placement from modal onto the garment
+  // Adjust Tolerance Slider (0-60)
+  const handleToleranceChange = async (newTol: number) => {
+    setBgTolerance(newTol);
+    if (!removeBgChecked || !trimmedBaseImage) return;
+    const cleaned = await runSolidBgRemoval(trimmedBaseImage, newTol);
+    setPreviewCleanImage(cleaned);
+    setBgCleaned(true);
+  };
+
+  // "Geri qaytar" button
+  const handleResetBg = () => {
+    setRemoveBgChecked(false);
+    setBgTolerance(25);
+    setBgCleaned(false);
+    if (trimmedBaseImage) {
+      setPreviewCleanImage(trimmedBaseImage);
+    }
+  };
+
+  // Confirm image placement from modal onto the garment (Auto-fit ~75% centered at posX: 0, posY: -30)
   const handleConfirmImageUpload = () => {
     const finalImage = previewCleanImage || previewRawImage;
     if (finalImage) {
       updateCurrentDesign({
         uploadedImage: finalImage,
         originalImage: previewRawImage,
-        scale: 1.0,
+        scale: autoFittedScale || 1.0,
         posX: 0,
-        posY: -35,
+        posY: -30,
         textScale: 1.0,
         textPosX: 0,
         textPosY: 55,
@@ -620,11 +679,90 @@ export default function StudioPage() {
     setIsAdding(true);
     playAddToCartSound();
 
+    const placementData = {
+      productId: selectedGarment.id,
+      productName: selectedGarment.name,
+      category: selectedGarment.category,
+      color: selectedColor.name,
+      colorHex: selectedColor.hex,
+      size: selectedSize,
+      price: totalPrice,
+      printType: printTypeLabel,
+      printArea: { widthCm: 30, heightCm: 40 },
+      surfaces: {
+        front: hasFront ? {
+          view: "front",
+          posX: designs.front.posX,
+          posY: designs.front.posY,
+          scale: designs.front.scale,
+          rotation: designs.front.rotation,
+          customText: designs.front.customText,
+          textColor: designs.front.textColor,
+          fontFamily: designs.front.fontFamily,
+          hasArtwork: Boolean(designs.front.uploadedImage),
+        } : null,
+        back: hasBack ? {
+          view: "back",
+          posX: designs.back.posX,
+          posY: designs.back.posY,
+          scale: designs.back.scale,
+          rotation: designs.back.rotation,
+          customText: designs.back.customText,
+          textColor: designs.back.textColor,
+          fontFamily: designs.back.fontFamily,
+          hasArtwork: Boolean(designs.back.uploadedImage),
+        } : null,
+        leftSleeve: hasLeftSleeve ? {
+          view: "leftSleeve",
+          posX: designs.leftSleeve.posX,
+          posY: designs.leftSleeve.posY,
+          scale: designs.leftSleeve.scale,
+          rotation: designs.leftSleeve.rotation,
+          customText: designs.leftSleeve.customText,
+          hasArtwork: Boolean(designs.leftSleeve.uploadedImage),
+        } : null,
+        rightSleeve: hasRightSleeve ? {
+          view: "rightSleeve",
+          posX: designs.rightSleeve.posX,
+          posY: designs.rightSleeve.posY,
+          scale: designs.rightSleeve.scale,
+          rotation: designs.rightSleeve.rotation,
+          customText: designs.rightSleeve.customText,
+          hasArtwork: Boolean(designs.rightSleeve.uploadedImage),
+        } : null,
+      },
+    };
+
+    const originalImg =
+      designs.front.originalImage ||
+      designs.back.originalImage ||
+      designs.leftSleeve.originalImage ||
+      designs.rightSleeve.originalImage ||
+      "";
+
+    const processedImg =
+      designs.front.uploadedImage ||
+      designs.back.uploadedImage ||
+      designs.leftSleeve.uploadedImage ||
+      designs.rightSleeve.uploadedImage ||
+      "";
+
+    const previewImage =
+      designs.front.uploadedImage ||
+      designs.back.uploadedImage ||
+      designs.leftSleeve.uploadedImage ||
+      designs.rightSleeve.uploadedImage ||
+      "/images/studio/tshirt/white-front-shirt.png";
+
     const customData = {
       garmentType: selectedGarment.name,
       garmentColor: selectedColor.name,
       size: selectedSize,
       price: totalPrice,
+      originalImage: originalImg,
+      processedImage: processedImg,
+      previewImage: previewImage,
+      placementData: placementData,
       frontDesign: {
         hasDesign: hasFront,
         ...designs.front,
@@ -642,13 +780,6 @@ export default function StudioPage() {
         ...designs.rightSleeve,
       },
     };
-
-    const previewImage =
-      designs.front.uploadedImage ||
-      designs.back.uploadedImage ||
-      designs.leftSleeve.uploadedImage ||
-      designs.rightSleeve.uploadedImage ||
-      "/images/studio/tshirt/white-front-shirt.png";
 
     addItem({
       id: `pod_${Date.now()}_${selectedGarment.id}_${selectedSize}`,
@@ -673,6 +804,10 @@ export default function StudioPage() {
           garmentColor: selectedColor.name,
           size: selectedSize,
           price: totalPrice,
+          originalImage: originalImg,
+          processedImage: processedImg,
+          placementData: placementData,
+          previewImage: previewImage,
           customData,
         }),
       });
@@ -1262,7 +1397,7 @@ export default function StudioPage() {
                 Şəkli yoxla
               </h2>
               <p className="text-xs text-stone-500 max-w-xs mx-auto leading-tight">
-                Seçdiyiniz şəkil budur. İstəsəniz fonu AI ilə təmizləyə bilərsiniz.
+                Kənarlar avtomatik kəsildi. Çap üçün fonu şəffaflaşdıra bilərsiniz.
               </p>
             </div>
 
@@ -1276,13 +1411,13 @@ export default function StudioPage() {
 
               {/* Status Badge */}
               <div className="absolute top-2.5 right-2.5 z-10">
-                {bgCleaned ? (
+                {removeBgChecked ? (
                   <span className="px-2 py-0.5 rounded-full bg-emerald-700 text-white text-[9px] font-bold tracking-wider uppercase shadow-xs flex items-center gap-1">
                     <Check size={10} /> Şəffaf Fon
                   </span>
                 ) : (
                   <span className="px-2 py-0.5 rounded-full bg-stone-900/80 text-white text-[9px] font-semibold tracking-wider uppercase shadow-xs">
-                    Orijinal
+                    Avto-Kəsilmiş
                   </span>
                 )}
               </div>
@@ -1298,41 +1433,73 @@ export default function StudioPage() {
               )}
             </div>
 
-            {/* Action Buttons Stack */}
-            <div className="space-y-2 pt-0.5">
-              {/* Button 1: Fonu AI ilə təmizlə */}
-              {isCleaningBg ? (
-                <div className="w-full py-2.5 sm:py-3 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center gap-2 text-blue-700 text-xs font-bold shadow-xs">
-                  <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin will-change-transform" />
-                  <span className="animate-pulse">Fon təmizlənir...</span>
+            {/* DPI / Image Quality Warning */}
+            {isLowDpi && (
+              <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-900 text-[11px] flex items-center gap-2 font-medium">
+                <span className="text-base shrink-0">⚠️</span>
+                <span>Şəkil ölçüsü kiçikdir ({imageDims.width}x{imageDims.height}px). Çapda dənəvərlik ola bilər (tövsiyə min. 1000px).</span>
+              </div>
+            )}
+
+            {/* Solid Background Removal Control Box (Point 4c) */}
+            <div className="bg-stone-100/85 p-3 rounded-2xl border border-stone-200 space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={removeBgChecked}
+                    onChange={(e) => handleToggleRemoveBg(e.target.checked)}
+                    className="w-4 h-4 rounded text-stone-900 accent-stone-900 cursor-pointer"
+                  />
+                  <span className="text-xs font-bold text-stone-900">Fonu sil (Həmcins fon)</span>
+                </label>
+
+                {removeBgChecked && (
+                  <button
+                    type="button"
+                    onClick={handleResetBg}
+                    className="text-[11px] text-stone-600 hover:text-stone-900 font-bold underline cursor-pointer"
+                  >
+                    Geri qaytar
+                  </button>
+                )}
+              </div>
+
+              {removeBgChecked && (
+                <div className="space-y-1.5 pt-1">
+                  <div className="flex items-center justify-between text-[11px] text-stone-600 font-medium">
+                    <span>Həssaslıq (Tolerans):</span>
+                    <span className="font-bold text-stone-900">{bgTolerance}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={60}
+                    value={bgTolerance}
+                    onChange={(e) => handleToleranceChange(Number(e.target.value))}
+                    className="w-full accent-stone-900 h-1.5 bg-stone-300 rounded-lg cursor-pointer"
+                  />
                 </div>
-              ) : bgCleaned ? (
-                <div className="w-full py-2.5 sm:py-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center justify-center gap-2 shadow-2xs">
-                  <Check size={15} className="text-emerald-600" />
-                  <span>Arxa fon təmizləndi</span>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleRemoveBackgroundInModal}
-                  className="w-full py-2.5 sm:py-3 rounded-2xl bg-blue-50 hover:bg-blue-100/80 text-blue-700 border border-blue-200 active:scale-98 text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer group"
-                >
-                  <Sparkles size={14} className="text-blue-600 group-hover:rotate-12 transition-transform" />
-                  <span>Fonu AI ilə təmizlə</span>
-                </button>
               )}
 
-              {/* Button 2: Davam et */}
+              <p className="text-[10px] text-stone-500 leading-tight">
+                ℹ️ Yalnız bərabər rəngli fonlarda işləyir.
+              </p>
+            </div>
+
+            {/* Action Buttons Stack */}
+            <div className="space-y-2 pt-0.5">
+              {/* Button 1: Davam et */}
               <button
                 type="button"
                 onClick={handleConfirmImageUpload}
                 disabled={isCleaningBg}
-                className="w-full py-2.5 sm:py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                className="w-full py-2.5 sm:py-3 rounded-2xl bg-stone-900 hover:bg-black active:scale-98 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
               >
                 <span>Davam et</span>
               </button>
 
-              {/* Button 3: Ləğv et */}
+              {/* Button 2: Ləğv et */}
               <button
                 type="button"
                 onClick={() => setIsUploadModalOpen(false)}

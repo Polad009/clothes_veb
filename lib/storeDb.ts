@@ -115,6 +115,10 @@ export interface PodOrder {
   backDesign: any;
   status: 'Pending Print' | 'In Production' | 'Printed' | 'Shipped';
   createdAt: string;
+  originalImage?: string;
+  processedImage?: string;
+  placementData?: any;
+  previewImage?: string;
 }
 
 export interface StoreData {
