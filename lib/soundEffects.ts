@@ -89,14 +89,13 @@ export function playAddToCartSound() {
   osc3.stop(now + 0.7);
 }
 
-let shopifySaleAudioInstance: HTMLAudioElement | null = null;
-
+let orderConfirmedAudioInstance: HTMLAudioElement | null = null;
 let lastPurchaseSoundTime = 0;
 
 /**
- * Celebratory Shopify Sale ("Cha-Ching!") Sound
- * Plays the official Shopify sale audio file from /sounds/shopify-sale.mp3
- * with synthesizer fallback and cooldown lock to prevent duplicate playback.
+ * Prestigious Luxury Order Confirmation Sound ("Sifariş Təsdiqləndi")
+ * Replaces the jarring merchant "cha-ching" with an elegant client-side confirmation chime.
+ * Uses /sounds/order-confirmed.wav with zero-latency Web Audio API acoustic fallback.
  */
 export function playPurchaseSuccessSound() {
   if (typeof window !== "undefined") {
@@ -107,63 +106,66 @@ export function playPurchaseSuccessSound() {
     lastPurchaseSoundTime = now;
 
     try {
-      if (!shopifySaleAudioInstance) {
-        shopifySaleAudioInstance = new Audio("/sounds/shopify-sale.mp3");
-        shopifySaleAudioInstance.preload = "auto";
+      if (!orderConfirmedAudioInstance) {
+        orderConfirmedAudioInstance = new Audio("/sounds/order-confirmed.wav");
+        orderConfirmedAudioInstance.preload = "auto";
       }
-      shopifySaleAudioInstance.currentTime = 0;
-      shopifySaleAudioInstance.volume = 1.0;
-      const playPromise = shopifySaleAudioInstance.play();
+      orderConfirmedAudioInstance.currentTime = 0;
+      orderConfirmedAudioInstance.volume = 0.85;
+      const playPromise = orderConfirmedAudioInstance.play();
       if (playPromise !== undefined) {
         playPromise.catch((err) => {
           if (err && err.name !== "AbortError") {
-            playFallbackPurchaseChime();
+            playOrderConfirmedChime();
           }
         });
         return;
       }
     } catch (e) {
-      playFallbackPurchaseChime();
+      playOrderConfirmedChime();
     }
   }
 }
 
-function playFallbackPurchaseChime() {
+/**
+ * Pure Web Audio API synthesized order confirmation chime
+ * Soothing, reassuring, prestigious double-bell resonance
+ */
+export function playOrderConfirmedChime() {
   const ctx = getAudioContext();
   if (!ctx) return;
 
   const now = ctx.currentTime;
 
   const masterGain = ctx.createGain();
-  masterGain.gain.setValueAtTime(0.35, now);
-  masterGain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+  masterGain.gain.setValueAtTime(0.3, now);
+  masterGain.gain.exponentialRampToValueAtTime(0.001, now + 1.4);
   masterGain.connect(ctx.destination);
 
-  // Arpeggiated celebratory chord: C5 -> E5 -> G5 -> C6
+  // Prestigious ascending confirmation notes: F5 (698.46Hz) -> A5 (880Hz) -> C6 (1046.5Hz)
   const chordNotes = [
-    { freq: 523.25, time: 0.0 },   // C5
-    { freq: 659.25, time: 0.1 },   // E5
-    { freq: 783.99, time: 0.2 },   // G5
-    { freq: 1046.5, time: 0.3 },   // C6
-    { freq: 1318.5, time: 0.42 },  // E6
+    { freq: 698.46, time: 0.00, dur: 0.8, type: "sine" as OscillatorType, vol: 0.4 },
+    { freq: 880.00, time: 0.12, dur: 0.9, type: "triangle" as OscillatorType, vol: 0.45 },
+    { freq: 1046.50, time: 0.24, dur: 1.2, type: "sine" as OscillatorType, vol: 0.55 },
+    { freq: 2093.00, time: 0.24, dur: 0.6, type: "sine" as OscillatorType, vol: 0.12 }, // Subtle high shimmer
   ];
 
-  chordNotes.forEach(({ freq, time }) => {
+  chordNotes.forEach(({ freq, time, dur, type, vol }) => {
     const osc = ctx.createOscillator();
     const noteGain = ctx.createGain();
 
-    osc.type = "sine";
+    osc.type = type;
     osc.frequency.setValueAtTime(freq, now + time);
 
     noteGain.gain.setValueAtTime(0, now + time);
-    noteGain.gain.linearRampToValueAtTime(0.6, now + time + 0.03);
-    noteGain.gain.exponentialRampToValueAtTime(0.001, now + time + 0.85);
+    noteGain.gain.linearRampToValueAtTime(vol, now + time + 0.02);
+    noteGain.gain.exponentialRampToValueAtTime(0.001, now + time + dur);
 
     osc.connect(noteGain);
     noteGain.connect(masterGain);
 
     osc.start(now + time);
-    osc.stop(now + time + 0.9);
+    osc.stop(now + time + dur + 0.05);
   });
 }
 
