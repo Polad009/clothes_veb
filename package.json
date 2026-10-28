@@ -10,8 +10,6 @@
     "start:frontend": "next start -p 3000",
     "start:admin": "node admin-portal/server.js",
     "start:backend": "node server/server.js",
-    "build:admin": "npm run --prefix admin-portal build",
-    "build:backend": "npm run --prefix server build",
     "admin": "node admin-portal/server.js",
     "lint": "next lint",
     "download-models": "node scripts/download-models.mjs"

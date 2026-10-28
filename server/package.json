@@ -1,9 +1,0 @@
-{
-  "name": "atelier-backend",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "build": "node -e \"console.log('Backend build complete')\"",
-    "start": "node server.js"
-  }
-}
