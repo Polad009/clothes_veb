@@ -143,7 +143,7 @@ function CheckoutSuccessContent() {
         </div>
 
         {/* WhatsApp Bookmark Option */}
-        <div className="pt-2">
+        <div className="pt-2 flex flex-col gap-2">
           <a
             href={`https://wa.me/?text=${whatsappMessage}`}
             target="_blank"
@@ -151,6 +151,16 @@ function CheckoutSuccessContent() {
             className="w-full py-2.5 px-4 rounded-xl bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center justify-center gap-2 transition"
           >
             <span>💬 Kodu WhatsApp ilə özünüzə göndərin</span>
+          </a>
+
+          <a
+            href={`https://wa.me/994557669050?text=${encodeURIComponent(`Salam! HORWALLE-dən #${orderId} nömrəli sifarişimlə bağlı məlumat almaq istəyirəm.`)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full py-2.5 px-4 rounded-xl bg-stone-100 hover:bg-stone-200/70 border border-stone-200 text-stone-800 text-xs font-semibold flex items-center justify-center gap-2 transition"
+          >
+            <span className="text-emerald-600 font-bold">🎧 Sualınız var?</span>
+            <span>WhatsApp Dəstək: <strong>+994 55-766-90-50</strong></span>
           </a>
         </div>
       </div>

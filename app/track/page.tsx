@@ -141,8 +141,8 @@ function OrderTrackerContent() {
   const currentStep = order?.statusMeta?.step || 1;
   const isCancelled = order?.statusMeta?.isCancelled || false;
 
-  const whatsappHelpUrl = `https://wa.me/994503004050?text=${encodeURIComponent(
-    "Salam! HORVVALLE-dən sifariş vermişdim amma izləmə kodunu xatırlamıram. Adım və telefon nömrəmlə sifarişimin statusunu öyrənməyə kömək edə bilərsiniz?"
+  const whatsappHelpUrl = `https://wa.me/994557669050?text=${encodeURIComponent(
+    "Salam! HORWALLE-dən sifariş vermişdim amma izləmə kodunu xatırlamıram. Adım və telefon nömrəmlə sifarişimin statusunu öyrənməyə kömək edə bilərsiniz?"
   )}`;
 
   return (
@@ -579,13 +579,13 @@ function OrderTrackerContent() {
             <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-stone-500">
               <div>Sifarişinizlə bağlı hər hansı sualınız var? Bizimlə dərhal əlaqə saxlayın.</div>
               <a
-                href="https://wa.me/994503004050"
+                href="https://wa.me/994557669050"
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition shadow-2xs"
               >
                 <Phone size={13} />
-                <span>WhatsApp Dəstək (+994 50 300 40 50)</span>
+                <span>WhatsApp Dəstək (+994 55-766-90-50)</span>
               </a>
             </div>
 

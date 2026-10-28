@@ -23,6 +23,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ArrowRight,
+  MessageCircle,
 } from "lucide-react";
 import { ApplePayLogo, PaymentLogosRow } from "@/components/PaymentLogos";
 
@@ -455,6 +456,19 @@ export default function ProductDetailPage() {
                 <ApplePayLogo className="h-4 w-auto" variant="light" />
                 <span>{language === "az" ? "ilə İndi Al" : language === "ru" ? "Купить сейчас с" : language === "tr" ? "ile Hemen Al" : "Buy now with"}</span>
               </button>
+
+              {/* WhatsApp Direct Order / Consultation Button */}
+              <a
+                href={`https://wa.me/994557669050?text=${encodeURIComponent(
+                  `Salam! HORWALLE-də "${product.name}" (${selectedSize}, ${activeColor?.name || ""}) haqqında məlumat almaq və ya sifariş etmək istəyirəm.`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-3 rounded-full bg-emerald-50 hover:bg-emerald-100/90 text-emerald-800 border border-emerald-300/80 font-bold text-xs transition-all flex items-center justify-center gap-2 active:scale-98 shadow-2xs cursor-pointer"
+              >
+                <MessageCircle size={15} className="text-emerald-600 fill-emerald-600" />
+                <span>WhatsApp Dəstək (+994 55-766-90-50)</span>
+              </a>
             </motion.div>
 
             {/* Trust Badges & Supported Payments */}

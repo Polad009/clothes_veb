@@ -115,6 +115,21 @@ export function Footer() {
                 </span>
               )}
             </div>
+
+            {/* Direct Support & WhatsApp */}
+            <div className="pt-2">
+              <a
+                href="https://wa.me/994557669050"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-white/5 hover:bg-emerald-950/40 border border-white/10 hover:border-emerald-500/40 text-stone-300 hover:text-white transition group"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span className="text-[11px]">
+                  WhatsApp Dəstək: <strong className="text-emerald-400 font-mono tracking-wider">+994 55-766-90-50</strong>
+                </span>
+              </a>
+            </div>
           </div>
 
           {/* Column 1: Köynəklər */}
@@ -206,6 +221,17 @@ export function Footer() {
                   <span className="text-[#E6C280]">📦</span>
                   <span>Sifarişini İzlə (Canlı)</span>
                 </Link>
+              </li>
+              <li className="pt-1">
+                <a
+                  href="https://wa.me/994557669050"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-stone-300 hover:text-emerald-400 transition flex items-center gap-1.5"
+                >
+                  <span className="text-emerald-400">💬</span>
+                  <span>WhatsApp: +994 55-766-90-50</span>
+                </a>
               </li>
             </ul>
           </div>

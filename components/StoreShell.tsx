@@ -9,6 +9,8 @@ import { CartDrawer } from "@/components/CartDrawer";
 import { Intro } from "@/components/Intro";
 import { SmoothScroll } from "@/components/SmoothScroll";
 
+import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
+
 export function StoreShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAdmin = pathname === "/admin" || pathname?.startsWith("/admin");
@@ -34,6 +36,7 @@ export function StoreShell({ children }: { children: React.ReactNode }) {
       </main>
       <Footer />
       <CartDrawer />
+      <FloatingWhatsApp />
     </SmoothScroll>
   );
 }

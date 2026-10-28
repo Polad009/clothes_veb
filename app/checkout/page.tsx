@@ -991,6 +991,28 @@ export default function CheckoutPage() {
                 Ölçü uyğun gəlmədikdə 14 gün ərzində asan dəyişmə və ya ödənişin tam geri qaytarılması təmin edilir.
               </p>
             </div>
+
+            {/* WhatsApp Assistance card */}
+            <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/90 text-xs text-emerald-950 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-bold flex items-center gap-1.5 text-emerald-900">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  Sifarişdə kömək lazımdır?
+                </span>
+                <span className="text-[10px] text-emerald-700 font-bold uppercase tracking-wider">Canlı Dəstək</span>
+              </div>
+              <p className="text-[11px] text-emerald-800/90 leading-relaxed">
+                Ölçü seçimi, çatdırılma və ya suallarınız üçün birbaşa WhatsApp dəstək xəttimizə yaza bilərsiniz:
+              </p>
+              <a
+                href="https://wa.me/994557669050?text=Salam!%20Sifarişi%20rəsmiləşdirməkdə%20kömək%20edə%20bilərsiniz?"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-2xs"
+              >
+                <span>💬 WhatsApp: +994 55-766-90-50</span>
+              </a>
+            </div>
           </div>
         </div>
       </div>
