@@ -93,6 +93,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { StoreShell } from "@/components/StoreShell";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -108,22 +110,13 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/brand/favicon.png?v=3" />
       </head>
       <body className={`${ebGaramond.variable} ${fraunces.variable} ${instrumentSans.variable} min-h-screen flex flex-col bg-[#FAF7F2] text-[#1A1517] font-sans antialiased selection:bg-[#E6C280] selection:text-black`}>
-        <Intro />
         <LanguageProvider>
           <CurrencyProvider>
             <CartProvider>
               <StoreDataProvider>
-                <SmoothScroll>
-                  <Suspense fallback={<div className="h-24 w-full bg-transparent" />}>
-                    <Ticker />
-                    <Header />
-                  </Suspense>
-                  <main id="main-content" className="flex-grow flex flex-col focus:outline-none">
-                    {children}
-                  </main>
-                  <Footer />
-                  <CartDrawer />
-                </SmoothScroll>
+                <StoreShell>
+                  {children}
+                </StoreShell>
               </StoreDataProvider>
             </CartProvider>
           </CurrencyProvider>

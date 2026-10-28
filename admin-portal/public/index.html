@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="az">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,10 +13,12 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Instrument+Sans:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Instrument+Sans:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  
+
   <style>
     body {
       background-color: #F8F9FA;
@@ -23,70 +26,138 @@
       font-family: 'Instrument Sans', 'Inter', -apple-system, sans-serif;
       -webkit-font-smoothing: antialiased;
     }
+
     .font-brand {
       font-family: 'EB Garamond', Georgia, serif;
       letter-spacing: 0.22em;
     }
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
-    ::-webkit-scrollbar-track { background: #f1f5f9; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
-    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
 
     @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      20%, 60% { transform: translateX(-6px); }
-      40%, 80% { transform: translateX(6px); }
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      20%,
+      60% {
+        transform: translateX(-6px);
+      }
+
+      40%,
+      80% {
+        transform: translateX(6px);
+      }
     }
-    .shake-anim { animation: shake 0.4s ease-in-out; }
+
+    .shake-anim {
+      animation: shake 0.4s ease-in-out;
+    }
 
     /* Exact Accent Stripes matching JANAB / Yusif Babazada Design */
-    .stripe-top-green { border-top: 4px solid #10b981; }
-    .stripe-top-navy { border-top: 4px solid #1e3a8a; }
-    .stripe-top-amber { border-top: 4px solid #f59e0b; }
-    .stripe-top-dark { border-top: 4px solid #111827; }
-    
-    .stripe-left-green { border-left: 5px solid #10b981; }
-    .stripe-left-navy { border-left: 5px solid #1e3a8a; }
+    .stripe-top-green {
+      border-top: 4px solid #10b981;
+    }
+
+    .stripe-top-navy {
+      border-top: 4px solid #1e3a8a;
+    }
+
+    .stripe-top-amber {
+      border-top: 4px solid #f59e0b;
+    }
+
+    .stripe-top-dark {
+      border-top: 4px solid #111827;
+    }
+
+    .stripe-left-green {
+      border-left: 5px solid #10b981;
+    }
+
+    .stripe-left-navy {
+      border-left: 5px solid #1e3a8a;
+    }
 
     /* Barcode lines styling */
     .barcode-lines {
-      background: repeating-linear-gradient(
-        90deg,
-        #000 0px,
-        #000 2px,
-        transparent 2px,
-        transparent 4px,
-        #000 4px,
-        #000 7px,
-        transparent 7px,
-        transparent 9px,
-        #000 9px,
-        #000 12px,
-        transparent 12px,
-        transparent 13px
-      );
+      background: repeating-linear-gradient(90deg,
+          #000 0px,
+          #000 2px,
+          transparent 2px,
+          transparent 4px,
+          #000 4px,
+          #000 7px,
+          transparent 7px,
+          transparent 9px,
+          #000 9px,
+          #000 12px,
+          transparent 12px,
+          transparent 13px);
     }
 
     /* Print styles for invoices */
     @media print {
-      body * { visibility: hidden; }
-      #printableInvoice, #printableInvoice * { visibility: visible; }
-      #printableInvoice { position: absolute; left: 0; top: 0; width: 100%; background: white; padding: 20px; }
-      .no-print { display: none !important; }
+      body * {
+        visibility: hidden;
+      }
+
+      #printableInvoice,
+      #printableInvoice * {
+        visibility: visible;
+      }
+
+      #printableInvoice {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: white;
+        padding: 20px;
+      }
+
+      .no-print {
+        display: none !important;
+      }
     }
   </style>
 </head>
+
 <body class="min-h-screen antialiased flex flex-col">
 
   <!-- ============================================================ -->
   <!-- 1. LOGIN SCREEN (Şifrəli Giriş Sistemi) -->
   <!-- ============================================================ -->
   <div id="loginScreen" class="fixed inset-0 z-50 bg-[#F4F5F7] flex items-center justify-center p-4">
-    <div id="loginCard" class="w-full max-w-md bg-white rounded-3xl p-8 sm:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.08)] border border-slate-100 flex flex-col items-center text-center">
-      <!-- Brand Logo -->
-      <div class="mb-5">
-        <h1 class="font-brand text-3xl font-bold tracking-[0.25em] text-black">HORVVALLE</h1>
-        <p class="text-[10px] tracking-[0.28em] text-slate-400 font-semibold uppercase mt-0.5">Atelier Couture</p>
+    <div id="loginCard"
+      class="w-full max-w-md bg-white rounded-3xl p-8 sm:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.08)] border border-slate-100 flex flex-col items-center text-center">
+      <!-- Brand Logo (Image 3) -->
+      <div class="mb-5 flex flex-col items-center">
+        <img 
+          src="/brand/horwalle_logo_transparent.png" 
+          alt="HORWALLE" 
+          class="h-16 w-auto object-contain mb-1 transition-transform duration-300 hover:scale-105" 
+          onerror="this.src='/brand/logo-horizontal-dark.png'"
+        />
+        <p class="text-[9.5px] tracking-[0.28em] text-slate-400 font-semibold uppercase mt-1">Atelier Couture · İdarəetmə</p>
       </div>
 
       <div class="w-12 h-1 bg-neutral-900 rounded-full mb-6"></div>
@@ -100,42 +171,31 @@
           <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">İstifadəçi Adı</label>
           <div class="relative">
             <i data-lucide="user" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
-            <input 
-              type="text" 
-              id="loginUsername" 
-              value="admin" 
-              required
+            <input type="text" id="loginUsername" value="admin" required
               class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:bg-white focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition"
-              placeholder="admin"
-            />
+              placeholder="admin" />
           </div>
         </div>
 
         <div>
           <div class="flex items-center justify-between mb-1.5">
             <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">İnzibatçı Şifrəsi</label>
-            <span class="text-[10px] text-slate-400">Standart: horvvalle2026</span>
+            <span class="text-[10px] text-slate-400 font-semibold">Təhlükəsiz Giriş</span>
           </div>
           <div class="relative">
             <i data-lucide="lock" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
-            <input 
-              type="password" 
-              id="loginPassword" 
-              required
+            <input type="password" id="loginPassword" required
               class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-2.5 text-sm text-slate-900 focus:bg-white focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition"
-              placeholder="••••••••••••"
-            />
-            <button 
-              type="button" 
-              onclick="togglePasswordVisibility()" 
-              class="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-700 cursor-pointer"
-            >
+              placeholder="••••••••••••" />
+            <button type="button" onclick="togglePasswordVisibility()"
+              class="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-700 cursor-pointer">
               <i id="passwordEyeIcon" data-lucide="eye" class="w-4 h-4"></i>
             </button>
           </div>
         </div>
 
-        <div id="loginError" class="hidden text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-xl p-3 flex items-center gap-2">
+        <div id="loginError"
+          class="hidden text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-xl p-3 flex items-center gap-2">
           <i data-lucide="alert-circle" class="w-4 h-4 shrink-0 text-rose-500"></i>
           <span id="loginErrorText">Daxil edilmiş şifrə yanlışdır.</span>
         </div>
@@ -147,16 +207,15 @@
           </label>
         </div>
 
-        <button 
-          type="submit" 
-          class="w-full py-3 bg-black hover:bg-neutral-800 active:scale-[0.99] text-white rounded-xl font-bold text-sm transition shadow-sm flex items-center justify-center gap-2 cursor-pointer mt-2"
-        >
+        <button type="submit"
+          class="w-full py-3 bg-black hover:bg-neutral-800 active:scale-[0.99] text-white rounded-xl font-bold text-sm transition shadow-sm flex items-center justify-center gap-2 cursor-pointer mt-2">
           <i data-lucide="log-in" class="w-4 h-4"></i>
           <span>Daxil Ol</span>
         </button>
       </form>
 
-      <div class="mt-6 pt-5 border-t border-slate-100 w-full flex items-center justify-between text-[11px] text-slate-400">
+      <div
+        class="mt-6 pt-5 border-t border-slate-100 w-full flex items-center justify-between text-[11px] text-slate-400">
         <span>Horvvalle V2.4 Portal</span>
         <span class="flex items-center gap-1.5 text-emerald-600 font-medium">
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sistem Aktivdir
@@ -170,30 +229,29 @@
   <!-- 2. MAIN APPLICATION (Şəkildəki Bütün 10 Ekran ilə Eyniləşdirilmiş) -->
   <!-- ============================================================ -->
   <div id="mainApp" class="hidden flex-1 flex flex-col md:flex-row w-full min-h-screen">
-    
+
     <!-- ---------------------------------------------------- -->
     <!-- LEFT SIDEBAR (Şəkildəki 10 menyu bəndi ilə) -->
     <!-- ---------------------------------------------------- -->
     <aside class="w-full md:w-64 bg-white border-r border-[#EEEEEE] flex flex-col shrink-0">
-      
-      <!-- Logo Header -->
-      <div class="h-20 flex items-center justify-center border-b border-[#F0F0F0] px-6">
-        <div class="text-center">
-          <h1 class="font-brand text-2xl font-bold tracking-[0.25em] text-black">HORVVALLE</h1>
-          <p class="text-[9px] tracking-[0.28em] text-slate-400 font-semibold uppercase">Atelier Couture</p>
-        </div>
+
+      <!-- Logo Header (Image 3) -->
+      <div class="h-20 flex items-center justify-center border-b border-[#F0F0F0] px-5">
+        <img 
+          src="/brand/logo-horizontal-dark.png" 
+          alt="HORWALLE" 
+          class="h-7.5 max-w-[190px] object-contain transition-transform duration-300 hover:scale-[1.02]" 
+          onerror="this.src='/brand/horwalle_logo_transparent.png'"
+        />
       </div>
 
       <!-- Navigation Links -->
       <div class="p-4 flex-1 space-y-6 overflow-y-auto">
-        
+
         <!-- 1. DASHBOARD (Primary Active Tab) -->
         <div>
-          <button 
-            onclick="switchTab('dashboard')" 
-            id="nav-dashboard"
-            class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition bg-black text-white shadow-xs cursor-pointer"
-          >
+          <button onclick="switchTab('dashboard')" id="nav-dashboard"
+            class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition bg-black text-white shadow-xs cursor-pointer">
             <i data-lucide="layout-grid" class="w-4 h-4"></i>
             <span>DASHBOARD</span>
           </button>
@@ -204,20 +262,15 @@
           <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">
             KATALOQ İDARƏETMƏSİ
           </div>
-          <button 
-            onclick="switchTab('products')" 
-            id="nav-products"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer"
-          >
+          <button onclick="switchTab('products')" id="nav-products"
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
             <i data-lucide="package" class="w-4 h-4 text-slate-400"></i>
             <span>Məhsul Portfeli</span>
-            <span id="badge-products-count" class="ml-auto text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">0</span>
+            <span id="badge-products-count"
+              class="ml-auto text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">0</span>
           </button>
-          <button 
-            onclick="switchTab('categories')" 
-            id="nav-categories"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer"
-          >
+          <button onclick="switchTab('categories')" id="nav-categories"
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
             <i data-lucide="layers" class="w-4 h-4 text-slate-400"></i>
             <span>Kateqoriyalar</span>
           </button>
@@ -228,19 +281,13 @@
           <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">
             MƏZMUN
           </div>
-          <button 
-            onclick="switchTab('staticPages')" 
-            id="nav-staticPages"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer"
-          >
+          <button onclick="switchTab('staticPages')" id="nav-staticPages"
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
             <i data-lucide="file-text" class="w-4 h-4 text-slate-400"></i>
             <span>Statik Səhifələr</span>
           </button>
-          <button 
-            onclick="switchTab('about')" 
-            id="nav-about"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer"
-          >
+          <button onclick="switchTab('about')" id="nav-about"
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
             <i data-lucide="info" class="w-4 h-4 text-slate-400"></i>
             <span>Haqqımızda</span>
           </button>
@@ -251,36 +298,25 @@
           <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">
             SATIŞ & LOYALLIQ
           </div>
-          <button 
-            onclick="switchTab('orders')" 
-            id="nav-orders"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer"
-          >
+          <button onclick="switchTab('orders')" id="nav-orders"
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
             <i data-lucide="shopping-bag" class="w-4 h-4 text-slate-400"></i>
             <span>Onlayn Sifarişlər</span>
-            <span id="badge-orders-count" class="ml-auto text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">0</span>
+            <span id="badge-orders-count"
+              class="ml-auto text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">0</span>
           </button>
-          <button 
-            onclick="switchTab('customers')" 
-            id="nav-customers"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer"
-          >
+          <button onclick="switchTab('customers')" id="nav-customers"
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
             <i data-lucide="users" class="w-4 h-4 text-slate-400"></i>
             <span>Müştəri Bazası</span>
           </button>
-          <button 
-            onclick="switchTab('loyalty')" 
-            id="nav-loyalty"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer"
-          >
+          <button onclick="switchTab('loyalty')" id="nav-loyalty"
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
             <i data-lucide="gem" class="w-4 h-4 text-slate-400"></i>
             <span>Loyallıq Terminalı</span>
           </button>
-          <button 
-            onclick="switchTab('promos')" 
-            id="nav-promos"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer"
-          >
+          <button onclick="switchTab('promos')" id="nav-promos"
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
             <i data-lucide="tag" class="w-4 h-4 text-slate-400"></i>
             <span>Reklam Kodları</span>
           </button>
@@ -291,19 +327,13 @@
           <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">
             OFLAYN MAĞAZA
           </div>
-          <button 
-            onclick="switchTab('posBarcode')" 
-            id="nav-posBarcode"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer"
-          >
+          <button onclick="switchTab('posBarcode')" id="nav-posBarcode"
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
             <i data-lucide="scan-barcode" class="w-4 h-4 text-slate-400"></i>
             <span>Barkod Skaner</span>
           </button>
-          <button 
-            onclick="switchTab('posReceipt')" 
-            id="nav-posReceipt"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer"
-          >
+          <button onclick="switchTab('posReceipt')" id="nav-posReceipt"
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
             <i data-lucide="receipt" class="w-4 h-4 text-slate-400"></i>
             <span>Satış Təsdiqi</span>
           </button>
@@ -311,14 +341,12 @@
 
         <!-- ƏLAVƏ: FƏRDİ ÇAP STUDİYASI (POD) -->
         <div class="space-y-1 pt-2 border-t border-slate-100">
-          <button 
-            onclick="switchTab('podOrders')" 
-            id="nav-podOrders"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer"
-          >
+          <button onclick="switchTab('podOrders')" id="nav-podOrders"
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
             <i data-lucide="sparkles" class="w-4 h-4 text-indigo-500"></i>
             <span>Fərdi Çap (POD)</span>
-            <span id="badge-pod-count" class="ml-auto text-[10px] font-bold bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full">0</span>
+            <span id="badge-pod-count"
+              class="ml-auto text-[10px] font-bold bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full">0</span>
           </button>
         </div>
 
@@ -326,10 +354,8 @@
 
       <!-- SİSTEMDƏN ÇIXIŞ BUTTON (Şəkildəki sol ən aşağı qırmızı düymə) -->
       <div class="p-4 border-t border-[#F0F0F0]">
-        <button 
-          onclick="handleLogout()" 
-          class="w-full py-2.5 px-4 rounded-xl border border-rose-300 text-rose-600 hover:bg-rose-50 font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
-        >
+        <button onclick="handleLogout()"
+          class="w-full py-2.5 px-4 rounded-xl border border-rose-300 text-rose-600 hover:bg-rose-50 font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs">
           <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
           <span>SİSTEMDƏN ÇIXIŞ</span>
         </button>
@@ -342,7 +368,7 @@
     <!-- RIGHT MAIN CONTENT AREA -->
     <!-- ---------------------------------------------------- -->
     <main class="flex-1 flex flex-col overflow-y-auto">
-      
+
       <!-- TOP BAR (Şəkildəki yuxarı zolaq) -->
       <header class="h-20 bg-white border-b border-[#EEEEEE] px-8 flex items-center justify-between sticky top-0 z-20">
         <div>
@@ -351,7 +377,8 @@
 
         <!-- Admin Profile Pill -->
         <div class="flex items-center gap-4">
-          <a href="/" target="_blank" class="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-black bg-slate-50 hover:bg-slate-100 border border-slate-200 px-3.5 py-1.5 rounded-full transition cursor-pointer">
+          <a href="/" target="_blank"
+            class="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-black bg-slate-50 hover:bg-slate-100 border border-slate-200 px-3.5 py-1.5 rounded-full transition cursor-pointer">
             <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
             <span>Mağazaya Keç</span>
           </a>
@@ -375,7 +402,7 @@
       <!-- SLIDE 1: DASHBOARD (ŞƏKİLDƏKİ ƏSAS İDARƏETMƏ PANELİ) -->
       <!-- ============================================================ -->
       <section id="tab-dashboard" class="tab-pane p-6 sm:p-8 space-y-6 max-w-7xl w-full">
-        
+
         <!-- Header & Date Filter Toolbar (Şəkildəki başlıq və filtirlər) -->
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
@@ -387,20 +414,27 @@
           <div class="flex flex-wrap items-center gap-2 text-xs">
             <!-- GÜN / HƏFTƏ / AY Pills -->
             <div class="bg-slate-100 p-1 rounded-xl flex items-center gap-1 border border-slate-200/60">
-              <button onclick="setDateRange('gun')" id="filter-gun" class="filter-range-btn px-3 py-1.5 rounded-lg font-bold text-slate-600 hover:text-black transition cursor-pointer">GÜN</button>
-              <button onclick="setDateRange('hefte')" id="filter-hefte" class="filter-range-btn px-3 py-1.5 rounded-lg font-bold text-slate-600 hover:text-black transition cursor-pointer">HƏFTƏ</button>
-              <button onclick="setDateRange('ay')" id="filter-ay" class="filter-range-btn px-3 py-1.5 rounded-lg font-bold bg-white text-black shadow-2xs border border-slate-200/80 cursor-pointer">AY</button>
+              <button onclick="setDateRange('gun')" id="filter-gun"
+                class="filter-range-btn px-3 py-1.5 rounded-lg font-bold text-slate-600 hover:text-black transition cursor-pointer">GÜN</button>
+              <button onclick="setDateRange('hefte')" id="filter-hefte"
+                class="filter-range-btn px-3 py-1.5 rounded-lg font-bold text-slate-600 hover:text-black transition cursor-pointer">HƏFTƏ</button>
+              <button onclick="setDateRange('ay')" id="filter-ay"
+                class="filter-range-btn px-3 py-1.5 rounded-lg font-bold bg-white text-black shadow-2xs border border-slate-200/80 cursor-pointer">AY</button>
             </div>
 
             <!-- Date range pickers -->
-            <div class="flex items-center gap-1 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-slate-600 shadow-2xs">
-              <input type="date" id="startDatePicker" class="bg-transparent text-xs text-slate-800 outline-none cursor-pointer">
+            <div
+              class="flex items-center gap-1 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-slate-600 shadow-2xs">
+              <input type="date" id="startDatePicker"
+                class="bg-transparent text-xs text-slate-800 outline-none cursor-pointer">
               <span class="text-slate-400">-</span>
-              <input type="date" id="endDatePicker" class="bg-transparent text-xs text-slate-800 outline-none cursor-pointer">
+              <input type="date" id="endDatePicker"
+                class="bg-transparent text-xs text-slate-800 outline-none cursor-pointer">
             </div>
 
             <!-- TƏTBİQ ET Button -->
-            <button onclick="applyDateFilter()" class="px-4 py-2 bg-black hover:bg-neutral-800 active:scale-98 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition shadow-2xs cursor-pointer">
+            <button onclick="applyDateFilter()"
+              class="px-4 py-2 bg-black hover:bg-neutral-800 active:scale-98 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition shadow-2xs cursor-pointer">
               TƏTBİQ ET
             </button>
           </div>
@@ -409,50 +443,58 @@
 
         <!-- ROW 1: 4 STATUS / CASH FLOW CARDS (Şəkildəki 4 rəngli zolaqlı kart) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          
+
           <!-- Card 1: Kassa (Tamamlanmış) -->
-          <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs stripe-top-green flex flex-col justify-between">
+          <div
+            class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs stripe-top-green flex flex-col justify-between">
             <div>
               <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">KASSA (TAMAMLANMIŞ)</div>
               <div id="stat-kassa-val" class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">0.00 ₼</div>
             </div>
-            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-emerald-600 tracking-wider uppercase">
+            <div
+              class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-emerald-600 tracking-wider uppercase">
               <span>STATUS: ÇATDIRILDI / ÖDƏNİLDİ</span>
               <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-500"></i>
             </div>
           </div>
 
           <!-- Card 2: Kuryerdə (Yolda) -->
-          <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs stripe-top-navy flex flex-col justify-between">
+          <div
+            class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs stripe-top-navy flex flex-col justify-between">
             <div>
               <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">KURYERDƏ (YOLDA)</div>
               <div id="stat-kuryer-val" class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">0.00 ₼</div>
             </div>
-            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-indigo-700 tracking-wider uppercase">
+            <div
+              class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-indigo-700 tracking-wider uppercase">
               <span>STATUS: KURYERƏ VERİLDİ</span>
               <i data-lucide="truck" class="w-3.5 h-3.5 text-indigo-600"></i>
             </div>
           </div>
 
           <!-- Card 3: Gözləmədə (Yeni) -->
-          <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs stripe-top-amber flex flex-col justify-between">
+          <div
+            class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs stripe-top-amber flex flex-col justify-between">
             <div>
               <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">GÖZLƏMƏDƏ (YENİ)</div>
               <div id="stat-gozleme-val" class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">0.00 ₼</div>
             </div>
-            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-amber-600 tracking-wider uppercase">
+            <div
+              class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-amber-600 tracking-wider uppercase">
               <span>STATUS: YENİ / TƏSDİQ</span>
               <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-500"></i>
             </div>
           </div>
 
           <!-- Card 4: Ümumi Aktiv Dövriyyə -->
-          <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs stripe-top-dark flex flex-col justify-between">
+          <div
+            class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs stripe-top-dark flex flex-col justify-between">
             <div>
               <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">ÜMUMİ AKTİV DÖVRİYYƏ</div>
               <div id="stat-dovriyye-val" class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">0.00 ₼</div>
             </div>
-            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-slate-400 tracking-wider uppercase">
+            <div
+              class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-slate-400 tracking-wider uppercase">
               <span>LƏĞVLƏR DAXİL DEYİL</span>
               <i data-lucide="trending-up" class="w-3.5 h-3.5 text-slate-400"></i>
             </div>
@@ -463,26 +505,30 @@
 
         <!-- ROW 2: 2 WIDE PAYMENT METHOD CARDS (Şəkildəki sol zolaqlı ödəniş kartları) -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          
+
           <!-- Card 1: Qapıda Ödəniş Dövriyyəsi -->
-          <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs stripe-left-green flex flex-col justify-between">
+          <div
+            class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs stripe-left-green flex flex-col justify-between">
             <div>
               <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">QAPIDA ÖDƏNİŞ DÖVRİYYƏSİ</div>
               <div id="stat-qapida-val" class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">0.00 ₼</div>
             </div>
-            <div class="mt-6 pt-3 border-t border-slate-100 text-[10.5px] font-bold text-slate-500 uppercase tracking-wide flex items-center justify-between">
+            <div
+              class="mt-6 pt-3 border-t border-slate-100 text-[10.5px] font-bold text-slate-500 uppercase tracking-wide flex items-center justify-between">
               <span>QAPIDA NƏĞD VƏ YA KARTLA EDİLƏN ÖDƏNİŞLƏR</span>
               <i data-lucide="banknote" class="w-4 h-4 text-emerald-600"></i>
             </div>
           </div>
 
           <!-- Card 2: Onlayn Ödəniş Dövriyyəsi -->
-          <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs stripe-left-navy flex flex-col justify-between">
+          <div
+            class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs stripe-left-navy flex flex-col justify-between">
             <div>
               <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">ONLAYN ÖDƏNİŞ DÖVRİYYƏSİ</div>
               <div id="stat-onlayn-val" class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">0.00 ₼</div>
             </div>
-            <div class="mt-6 pt-3 border-t border-slate-100 text-[10.5px] font-bold text-slate-500 uppercase tracking-wide flex items-center justify-between">
+            <div
+              class="mt-6 pt-3 border-t border-slate-100 text-[10.5px] font-bold text-slate-500 uppercase tracking-wide flex items-center justify-between">
               <span>SAYT ÜZƏRİNDƏN KART VƏ YA TAKSİTLƏ EDİLƏN ÖDƏNİŞLƏR</span>
               <i data-lucide="credit-card" class="w-4 h-4 text-indigo-700"></i>
             </div>
@@ -493,14 +539,15 @@
 
         <!-- ROW 3: 3 BOTTOM SUMMARY CARDS (Şəkildəki aşağı 3 kart) -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          
+
           <!-- SİFARİŞ SAYI -->
           <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
               <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">SİFARİŞ SAYI</div>
               <div id="stat-sifaris-sayi" class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">0</div>
             </div>
-            <div class="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-700">
+            <div
+              class="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-700">
               <i data-lucide="shopping-bag" class="w-6 h-6 stroke-1.5"></i>
             </div>
           </div>
@@ -511,7 +558,8 @@
               <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">AKTİV İNVENTAR</div>
               <div id="stat-inventar-sayi" class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">0</div>
             </div>
-            <div class="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-700">
+            <div
+              class="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-700">
               <i data-lucide="box" class="w-6 h-6 stroke-1.5"></i>
             </div>
           </div>
@@ -522,7 +570,8 @@
               <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">MÜŞTƏRİ BAZASI</div>
               <div id="stat-musteri-sayi" class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">0</div>
             </div>
-            <div class="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-700">
+            <div
+              class="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-700">
               <i data-lucide="users" class="w-6 h-6 stroke-1.5"></i>
             </div>
           </div>
@@ -537,7 +586,8 @@
               <h3 class="font-bold text-sm text-slate-900 uppercase tracking-wider">Son Gələn Sifarişlər</h3>
               <p class="text-xs text-slate-400">Canlı sifariş axını və dərhal status təyini</p>
             </div>
-            <button onclick="switchTab('orders')" class="text-xs font-bold text-slate-900 hover:underline flex items-center gap-1 cursor-pointer">
+            <button onclick="switchTab('orders')"
+              class="text-xs font-bold text-slate-900 hover:underline flex items-center gap-1 cursor-pointer">
               <span>Hamısına bax</span>
               <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
             </button>
@@ -545,7 +595,8 @@
 
           <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
-              <thead class="bg-slate-50 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-slate-100">
+              <thead
+                class="bg-slate-50 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-slate-100">
                 <tr>
                   <th class="p-3">Sifariş №</th>
                   <th class="p-3">Müştəri</th>
@@ -573,10 +624,12 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 class="text-2xl font-black text-slate-900 tracking-tight">MƏHSUL PORTFELİ</h1>
-            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Bütün Geyim Və Aksesuarların İdarə Edilməsi</p>
+            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Bütün Geyim Və Aksesuarların İdarə
+              Edilməsi</p>
           </div>
           <div class="flex items-center gap-2">
-            <button onclick="openProductModal()" class="px-5 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 cursor-pointer shadow-xs transition">
+            <button onclick="openProductModal()"
+              class="px-5 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 cursor-pointer shadow-xs transition">
               <i data-lucide="plus-circle" class="w-4 h-4"></i>
               <span>Yeni Məhsul Əlavə Et</span>
             </button>
@@ -587,9 +640,12 @@
         <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-wrap items-center gap-3">
           <div class="relative flex-1 min-w-[200px]">
             <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
-            <input type="text" id="productSearchInput" oninput="filterProductsTable()" placeholder="Ada, koda və ya kateqoriyaya görə axtarış..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs focus:bg-white focus:outline-none focus:border-black">
+            <input type="text" id="productSearchInput" oninput="filterProductsTable()"
+              placeholder="Ada, koda və ya kateqoriyaya görə axtarış..."
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs focus:bg-white focus:outline-none focus:border-black">
           </div>
-          <select id="productCategoryFilter" onchange="filterProductsTable()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none">
+          <select id="productCategoryFilter" onchange="filterProductsTable()"
+            class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 outline-none">
             <option value="all">Bütün Kateqoriyalar</option>
             <option value="koynek">T-Shirt & Köynək</option>
             <option value="hudi">Hudi & Sviter</option>
@@ -602,7 +658,8 @@
         <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
-              <thead class="bg-slate-50 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-slate-100">
+              <thead
+                class="bg-slate-50 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-slate-100">
                 <tr>
                   <th class="p-3.5">Şəkil</th>
                   <th class="p-3.5">Məhsul Adı</th>
@@ -631,7 +688,8 @@
             <h1 class="text-2xl font-black text-slate-900 tracking-tight">KATEQORİYALAR</h1>
             <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Mağaza Bölmələri Və Başlıqları</p>
           </div>
-          <button onclick="openCategoryModal()" class="px-5 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 cursor-pointer shadow-xs transition">
+          <button onclick="openCategoryModal()"
+            class="px-5 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 cursor-pointer shadow-xs transition">
             <i data-lucide="plus" class="w-4 h-4"></i>
             <span>Yeni Kateqoriya</span>
           </button>
@@ -648,58 +706,73 @@
       <section id="tab-staticPages" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-5xl w-full">
         <div>
           <h1 class="text-2xl font-black text-slate-900 tracking-tight">STATİK SƏHİFƏLƏR VƏ MƏZMUN</h1>
-          <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Ana Səhifə Başlıqları, Bannerlər Və Elan Zolaqları</p>
+          <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Ana Səhifə Başlıqları, Bannerlər Və
+            Elan Zolaqları</p>
         </div>
 
         <!-- Hero Settings Card -->
         <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
-          <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center gap-2">
+          <h3
+            class="text-sm font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center gap-2">
             <i data-lucide="layout" class="w-4 h-4"></i>
             <span>Ana Səhifə Hero Bölməsi</span>
           </h3>
           <div class="space-y-3">
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Əsas Şüar (Headline)</label>
-              <input type="text" id="heroHeadlineInput" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-black">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Əsas Şüar
+                (Headline)</label>
+              <input type="text" id="heroHeadlineInput"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-black">
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Alt Şüar (Subheadline)</label>
-              <textarea id="heroSubheadlineInput" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs focus:bg-white focus:outline-none focus:border-black"></textarea>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Alt Şüar
+                (Subheadline)</label>
+              <textarea id="heroSubheadlineInput" rows="3"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs focus:bg-white focus:outline-none focus:border-black"></textarea>
             </div>
           </div>
         </div>
 
         <!-- Announcement Bar Card -->
         <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
-          <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center gap-2">
+          <h3
+            class="text-sm font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center gap-2">
             <i data-lucide="megaphone" class="w-4 h-4"></i>
             <span>Yuxarı Elan Zolağı (Announcement Bar)</span>
           </h3>
           <div>
             <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Elan Mətni</label>
-            <input type="text" id="announcementTextInput" placeholder="Bakı daxili 60₼ üzəri sifarişlərə PULSUZ çatdırılma!" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-black">
+            <input type="text" id="announcementTextInput"
+              placeholder="Bakı daxili 60₼ üzəri sifarişlərə PULSUZ çatdırılma!"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-black">
           </div>
         </div>
 
         <!-- Policy Rules Card -->
         <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
-          <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center gap-2">
+          <h3
+            class="text-sm font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center gap-2">
             <i data-lucide="shield-check" class="w-4 h-4"></i>
             <span>Çatdırılma Və Geri Qaytarma Şərtləri</span>
           </h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Çatdırılma Müddəti & Qaydası</label>
-              <textarea id="shippingPolicyInput" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs">Bakı daxili 24 saat ərzində sürətli kuryer çatdırılması. Rayonlara poçtla 2-3 iş günü.</textarea>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Çatdırılma Müddəti &
+                Qaydası</label>
+              <textarea id="shippingPolicyInput" rows="3"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs">Bakı daxili 24 saat ərzində sürətli kuryer çatdırılması. Rayonlara poçtla 2-3 iş günü.</textarea>
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Qaytarma & Dəyişdirmə</label>
-              <textarea id="returnPolicyInput" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs">Məhsul çatdırıldıqdan sonra 14 gün ərzində etiketləri zədələnmədən dəyişdirmə və ya qaytarma imkanı.</textarea>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Qaytarma &
+                Dəyişdirmə</label>
+              <textarea id="returnPolicyInput" rows="3"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs">Məhsul çatdırıldıqdan sonra 14 gün ərzində etiketləri zədələnmədən dəyişdirmə və ya qaytarma imkanı.</textarea>
             </div>
           </div>
         </div>
 
-        <button onclick="saveCmsContent()" class="px-6 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs transition cursor-pointer">
+        <button onclick="saveCmsContent()"
+          class="px-6 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs transition cursor-pointer">
           Məzmun Dəyişikliklərini Yadda Saxla
         </button>
       </section>
@@ -711,54 +784,69 @@
       <section id="tab-about" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-5xl w-full">
         <div>
           <h1 class="text-2xl font-black text-slate-900 tracking-tight">HAQQIMIZDA VƏ BREND PARAMETRLƏRİ</h1>
-          <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Atelier Manifesti, Əlaqə Rekvizitləri Və Kuryer Şərtləri</p>
+          <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Atelier Manifesti, Əlaqə
+            Rekvizitləri Və Kuryer Şərtləri</p>
         </div>
 
         <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-5">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Brendin Adı</label>
-              <input type="text" id="settingStoreName" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+              <input type="text" id="settingStoreName"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Şüar (Tagline)</label>
-              <input type="text" id="settingTagline" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Şüar
+                (Tagline)</label>
+              <input type="text" id="settingTagline"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Əlaqə Telefonu (Kassa / Dəstək)</label>
-              <input type="text" id="settingContactPhone" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Əlaqə Telefonu
+                (Kassa / Dəstək)</label>
+              <input type="text" id="settingContactPhone"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Rəsmi Email</label>
-              <input type="email" id="settingContactEmail" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+              <input type="email" id="settingContactEmail"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Pulsuz Çatdırılma Limiti (₼)</label>
-              <input type="number" id="settingShippingThreshold" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Pulsuz Çatdırılma
+                Limiti (₼)</label>
+              <input type="number" id="settingShippingThreshold"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Standart Kuryer Haqqı (₼)</label>
-              <input type="number" id="settingCourierRate" value="4.00" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Standart Kuryer
+                Haqqı (₼)</label>
+              <input type="number" id="settingCourierRate" value="4.00"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
             </div>
           </div>
 
           <!-- Telegram Bot Status Pill -->
-          <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 p-4 rounded-xl">
+          <div
+            class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 p-4 rounded-xl">
             <div class="flex items-center gap-3">
               <div class="w-9 h-9 rounded-xl bg-blue-500 text-white flex items-center justify-center">
                 <i data-lucide="send" class="w-5 h-5"></i>
               </div>
               <div>
                 <div class="text-xs font-bold text-slate-900">Telegram Sifariş Bildirişləri</div>
-                <div class="text-[10px] text-slate-500">Yeni sifariş daxil olduqda dərhal kuryer qrupuna çatdırılır</div>
+                <div class="text-[10px] text-slate-500">Yeni sifariş daxil olduqda dərhal kuryer qrupuna çatdırılır
+                </div>
               </div>
             </div>
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+            <span
+              class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> BOT AKTİVDİR
             </span>
           </div>
 
-          <button onclick="saveGeneralSettings()" class="px-6 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs transition cursor-pointer">
+          <button onclick="saveGeneralSettings()"
+            class="px-6 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs transition cursor-pointer">
             Parametrləri Yenilə
           </button>
         </div>
@@ -772,14 +860,17 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 class="text-2xl font-black text-slate-900 tracking-tight">ONLAYN SİFARİŞLƏR</h1>
-            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Daxil Olan Sifarişlərin Çatdırılma Və Status İdarəetməsi</p>
+            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Daxil Olan Sifarişlərin Çatdırılma
+              Və Status İdarəetməsi</p>
           </div>
           <div class="flex items-center gap-2">
-            <button onclick="clearAllOrders()" class="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
+            <button onclick="clearAllOrders()"
+              class="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
               <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
               <span>Sınaq Sifarişlərini Sıfırla</span>
             </button>
-            <button onclick="loadData()" class="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
+            <button onclick="loadData()"
+              class="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
               <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
               <span>Yenilə</span>
             </button>
@@ -788,18 +879,27 @@
 
         <!-- Orders Status Tabs Filter -->
         <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs font-bold">
-          <button onclick="filterOrdersByStatus('all')" id="order-pill-all" class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-black text-white cursor-pointer">Hamısı</button>
-          <button onclick="filterOrdersByStatus('yeni')" id="order-pill-yeni" class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Yeni Sifarişlər</button>
-          <button onclick="filterOrdersByStatus('kuryer')" id="order-pill-kuryer" class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Kuryerdə (Yolda)</button>
-          <button onclick="filterOrdersByStatus('catdirildi')" id="order-pill-catdirildi" class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Çatdırıldı</button>
-          <button onclick="filterOrdersByStatus('legv')" id="order-pill-legv" class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Ləğv Edildi</button>
+          <button onclick="filterOrdersByStatus('all')" id="order-pill-all"
+            class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-black text-white cursor-pointer">Hamısı</button>
+          <button onclick="filterOrdersByStatus('yeni')" id="order-pill-yeni"
+            class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Yeni
+            Sifarişlər</button>
+          <button onclick="filterOrdersByStatus('kuryer')" id="order-pill-kuryer"
+            class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Kuryerdə
+            (Yolda)</button>
+          <button onclick="filterOrdersByStatus('catdirildi')" id="order-pill-catdirildi"
+            class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Çatdırıldı</button>
+          <button onclick="filterOrdersByStatus('legv')" id="order-pill-legv"
+            class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Ləğv
+            Edildi</button>
         </div>
 
         <!-- Orders Table -->
         <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
-              <thead class="bg-slate-50 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-slate-100">
+              <thead
+                class="bg-slate-50 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-slate-100">
                 <tr>
                   <th class="p-3.5">Sifariş № / Tarix</th>
                   <th class="p-3.5">Müştəri / Əlaqə</th>
@@ -825,7 +925,8 @@
       <section id="tab-customers" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-7xl w-full">
         <div>
           <h1 class="text-2xl font-black text-slate-900 tracking-tight">MÜŞTƏRİ BAZASI</h1>
-          <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Sifarişçilərin Əlaqə Məlumatları Və Alış Statistikası</p>
+          <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Sifarişçilərin Əlaqə Məlumatları Və
+            Alış Statistikası</p>
         </div>
 
         <!-- 3 KPI Cards -->
@@ -862,14 +963,17 @@
         <!-- Search Bar -->
         <div class="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-2">
           <i data-lucide="search" class="w-4 h-4 text-slate-400 ml-2"></i>
-          <input type="text" id="customerSearchInput" oninput="filterCustomersTable()" placeholder="Müştəri adı, telefon nömrəsi və ya ünvanı ilə axtarış..." class="w-full bg-transparent text-xs outline-none">
+          <input type="text" id="customerSearchInput" oninput="filterCustomersTable()"
+            placeholder="Müştəri adı, telefon nömrəsi və ya ünvanı ilə axtarış..."
+            class="w-full bg-transparent text-xs outline-none">
         </div>
 
         <!-- Table -->
         <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
-              <thead class="bg-slate-50 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-slate-100">
+              <thead
+                class="bg-slate-50 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-slate-100">
                 <tr>
                   <th class="p-3.5">Müştəri Adı</th>
                   <th class="p-3.5">Telefon</th>
@@ -895,7 +999,8 @@
       <section id="tab-loyalty" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-7xl w-full">
         <div>
           <h1 class="text-2xl font-black text-slate-900 tracking-tight">LOYALLIQ TERMİNALI</h1>
-          <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Müştəri Keşbeki, Bonus Xalları Və VIP Tiers</p>
+          <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Müştəri Keşbeki, Bonus Xalları Və
+            VIP Tiers</p>
         </div>
 
         <!-- 3 Tier Cards -->
@@ -906,28 +1011,36 @@
               <span class="text-xs font-black tracking-wider text-slate-800 uppercase">BRONZE / GÜMÜŞ</span>
               <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">3% Keşbek</span>
             </div>
-            <p class="text-xs text-slate-500 mt-3">0 — 200 ₼ arası alış edən bütün ilkin alıcılar üçün standart dərəcə.</p>
-            <div class="mt-4 pt-3 border-t border-slate-100 text-[10px] text-slate-400">Standart çatdırılma imtiyazı</div>
+            <p class="text-xs text-slate-500 mt-3">0 — 200 ₼ arası alış edən bütün ilkin alıcılar üçün standart dərəcə.
+            </p>
+            <div class="mt-4 pt-3 border-t border-slate-100 text-[10px] text-slate-400">Standart çatdırılma imtiyazı
+            </div>
           </div>
 
           <!-- Gold -->
-          <div class="bg-white rounded-2xl p-5 border border-amber-200 bg-amber-50/20 shadow-xs flex flex-col justify-between">
+          <div
+            class="bg-white rounded-2xl p-5 border border-amber-200 bg-amber-50/20 shadow-xs flex flex-col justify-between">
             <div class="flex items-center justify-between pb-3 border-b border-amber-100">
               <span class="text-xs font-black tracking-wider text-amber-800 uppercase">GOLD TIER</span>
               <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">7% Keşbek</span>
             </div>
-            <p class="text-xs text-slate-600 mt-3">200 ₼ — 500 ₼ arası alış edən aktiv daimi müştərilər üçün imtiyaz.</p>
-            <div class="mt-4 pt-3 border-t border-amber-100 text-[10px] text-amber-700 font-bold">Prioritet qablaşdırma & Hədiyyələr</div>
+            <p class="text-xs text-slate-600 mt-3">200 ₼ — 500 ₼ arası alış edən aktiv daimi müştərilər üçün imtiyaz.
+            </p>
+            <div class="mt-4 pt-3 border-t border-amber-100 text-[10px] text-amber-700 font-bold">Prioritet qablaşdırma
+              & Hədiyyələr</div>
           </div>
 
           <!-- Platinum VIP -->
-          <div class="bg-white rounded-2xl p-5 border border-purple-200 bg-purple-50/20 shadow-xs flex flex-col justify-between">
+          <div
+            class="bg-white rounded-2xl p-5 border border-purple-200 bg-purple-50/20 shadow-xs flex flex-col justify-between">
             <div class="flex items-center justify-between pb-3 border-b border-purple-100">
               <span class="text-xs font-black tracking-wider text-purple-900 uppercase">PLATINUM VIP</span>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-800">12% Keşbek</span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-800">12%
+                Keşbek</span>
             </div>
             <p class="text-xs text-slate-600 mt-3">500 ₼-dən yuxarı alış-veriş edən fərdi Couture müştəriləri.</p>
-            <div class="mt-4 pt-3 border-t border-purple-100 text-[10px] text-purple-800 font-bold">Həmişə PULSUZ ekspress kuryer</div>
+            <div class="mt-4 pt-3 border-t border-purple-100 text-[10px] text-purple-800 font-bold">Həmişə PULSUZ
+              ekspress kuryer</div>
           </div>
         </div>
 
@@ -938,7 +1051,8 @@
               <h3 class="font-bold text-sm text-slate-900 uppercase tracking-wider">Müştəri Keşbek & Xal Balansları</h3>
               <p class="text-xs text-slate-400">Hər müştərinin cari toplanmış balansı və səviyyəsi</p>
             </div>
-            <button onclick="openAddBonusModal()" class="px-4 py-2 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
+            <button onclick="openAddBonusModal()"
+              class="px-4 py-2 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
               <i data-lucide="plus" class="w-3.5 h-3.5"></i>
               <span>Bonus Xalı Əlavə Et</span>
             </button>
@@ -946,7 +1060,8 @@
 
           <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
-              <thead class="bg-slate-50 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-slate-100">
+              <thead
+                class="bg-slate-50 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-slate-100">
                 <tr>
                   <th class="p-3.5">Müştəri</th>
                   <th class="p-3.5">Telefon</th>
@@ -971,9 +1086,11 @@
         <div class="flex items-center justify-between">
           <div>
             <h1 class="text-2xl font-black text-slate-900 tracking-tight">REKLAM KODLARI</h1>
-            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Endirim Kampaniyaları Və Kuponlar</p>
+            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Endirim Kampaniyaları Və Kuponlar
+            </p>
           </div>
-          <button onclick="openPromoModal()" class="px-5 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 transition cursor-pointer">
+          <button onclick="openPromoModal()"
+            class="px-5 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 transition cursor-pointer">
             <i data-lucide="plus" class="w-4 h-4"></i>
             <span>Yeni Promokod</span>
           </button>
@@ -982,7 +1099,8 @@
         <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
-              <thead class="bg-slate-50 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-slate-100">
+              <thead
+                class="bg-slate-50 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-slate-100">
                 <tr>
                   <th class="p-3.5">Kod</th>
                   <th class="p-3.5">Növ</th>
@@ -1008,35 +1126,37 @@
       <section id="tab-posBarcode" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-7xl w-full">
         <div>
           <h1 class="text-2xl font-black text-slate-900 tracking-tight">BARKOD SKANER (OFLAYN MAĞAZA)</h1>
-          <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Sürətli Məhsul Və Ya Sifariş Axtarışı</p>
+          <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Sürətli Məhsul Və Ya Sifariş
+            Axtarışı</p>
         </div>
 
         <!-- Scanner Input Box -->
         <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
-          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Barkod və ya Kodu Daxil Edin</label>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Barkod və ya Kodu Daxil
+            Edin</label>
           <div class="flex items-center gap-3">
             <div class="relative flex-1">
               <i data-lucide="scan-barcode" class="w-5 h-5 text-slate-400 absolute left-3.5 top-3"></i>
-              <input 
-                type="text" 
-                id="posBarcodeQuery" 
-                onkeydown="if(event.key === 'Enter') handleBarcodeLookup()"
-                placeholder="Barkod skanerini oxudun və ya nömrəni daxil edin (məs: VTX-ORD-9064 və ya koynek)..." 
-                class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3 text-xs focus:bg-white focus:outline-none focus:border-black"
-              >
+              <input type="text" id="posBarcodeQuery" onkeydown="if(event.key === 'Enter') handleBarcodeLookup()"
+                placeholder="Barkod skanerini oxudun və ya nömrəni daxil edin (məs: VTX-ORD-9064 və ya koynek)..."
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3 text-xs focus:bg-white focus:outline-none focus:border-black">
             </div>
-            <button onclick="handleBarcodeLookup()" class="px-6 py-3 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs transition cursor-pointer">
+            <button onclick="handleBarcodeLookup()"
+              class="px-6 py-3 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs transition cursor-pointer">
               Axtar
             </button>
           </div>
 
           <div class="flex items-center gap-2 pt-2 text-[11px] text-slate-500">
             <span class="font-bold text-slate-700">Sınaq üçün nümunələr:</span>
-            <button onclick="document.getElementById('posBarcodeQuery').value='koynek'; handleBarcodeLookup()" class="underline hover:text-black cursor-pointer">koynek</button>
+            <button onclick="document.getElementById('posBarcodeQuery').value='koynek'; handleBarcodeLookup()"
+              class="underline hover:text-black cursor-pointer">koynek</button>
             <span>·</span>
-            <button onclick="document.getElementById('posBarcodeQuery').value='hudi'; handleBarcodeLookup()" class="underline hover:text-black cursor-pointer">hudi</button>
+            <button onclick="document.getElementById('posBarcodeQuery').value='hudi'; handleBarcodeLookup()"
+              class="underline hover:text-black cursor-pointer">hudi</button>
             <span>·</span>
-            <button onclick="setSampleOrderBarcode()" class="underline hover:text-black cursor-pointer">Sonuncu Sifariş</button>
+            <button onclick="setSampleOrderBarcode()" class="underline hover:text-black cursor-pointer">Sonuncu
+              Sifariş</button>
           </div>
         </div>
 
@@ -1057,7 +1177,8 @@
             <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">POS Qəbzi Və Rəsmi Çap Formatı</p>
           </div>
           <div class="flex items-center gap-2 no-print">
-            <button onclick="window.print()" class="px-5 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 transition cursor-pointer">
+            <button onclick="window.print()"
+              class="px-5 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 transition cursor-pointer">
               <i data-lucide="printer" class="w-4 h-4"></i>
               <span>Çap Et (Print)</span>
             </button>
@@ -1065,10 +1186,16 @@
         </div>
 
         <!-- Receipt Card (Printable) -->
-        <div id="printableInvoice" class="bg-white rounded-3xl p-8 sm:p-10 border border-slate-200/90 shadow-sm space-y-6 max-w-2xl mx-auto">
-          <!-- Receipt Header -->
-          <div class="text-center pb-6 border-b border-dashed border-slate-300">
-            <h2 class="font-brand text-3xl font-bold tracking-[0.25em] text-black">HORVVALLE</h2>
+        <div id="printableInvoice"
+          class="bg-white rounded-3xl p-8 sm:p-10 border border-slate-200/90 shadow-sm space-y-6 max-w-2xl mx-auto">
+          <!-- Receipt Header (Image 3) -->
+          <div class="text-center pb-6 border-b border-dashed border-slate-300 flex flex-col items-center">
+            <img 
+              src="/brand/logo-horizontal-dark.png" 
+              alt="HORWALLE" 
+              class="h-8 max-w-[190px] object-contain mb-1" 
+              onerror="this.src='/brand/horwalle_logo_transparent.png'"
+            />
             <p class="text-[10px] tracking-[0.28em] text-slate-400 font-semibold uppercase mt-0.5">Atelier Couture · Rəsmi Satış Fakturası</p>
             <div class="mt-4 flex items-center justify-center gap-4 text-[11px] text-slate-500 font-mono">
               <span id="posReceiptOrderNo">SİFARİŞ: VTX-ORD-9064</span>
@@ -1136,8 +1263,10 @@
           <!-- Barcode SVG graphic -->
           <div class="pt-6 border-t border-dashed border-slate-300 flex flex-col items-center justify-center space-y-2">
             <div class="w-64 h-12 barcode-lines rounded"></div>
-            <div id="posReceiptBarcodeText" class="font-mono text-xs tracking-[0.25em] text-slate-700">VTX-ORD-9064</div>
-            <div class="text-[9.5px] text-slate-400 uppercase tracking-widest pt-1">Təşəkkür edirik! Horvvalle Atelier Couture.</div>
+            <div id="posReceiptBarcodeText" class="font-mono text-xs tracking-[0.25em] text-slate-700">VTX-ORD-9064
+            </div>
+            <div class="text-[9.5px] text-slate-400 uppercase tracking-widest pt-1">Təşəkkür edirik! Horvvalle Atelier
+              Couture.</div>
           </div>
         </div>
       </section>
@@ -1150,7 +1279,8 @@
         <div class="flex items-center justify-between">
           <div>
             <h1 class="text-2xl font-black text-slate-900 tracking-tight">FƏRDİ ÇAP STUDİYASI (POD)</h1>
-            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">3D Studiyadan Hazırlanmış Xüsusi Dizayn Sifarişləri</p>
+            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">3D Studiyadan Hazırlanmış Xüsusi
+              Dizayn Sifarişləri</p>
           </div>
         </div>
         <div id="podOrdersGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -1168,7 +1298,8 @@
 
   <!-- PRODUCT ADD/EDIT MODAL -->
   <div id="productModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-2xl w-full p-7 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto space-y-4">
+    <div
+      class="bg-white rounded-3xl max-w-2xl w-full p-7 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto space-y-4">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100">
         <h3 id="productModalTitle" class="font-bold text-base text-slate-900">Məhsul Əlavə Et</h3>
         <button onclick="closeProductModal()" class="text-slate-400 hover:text-black cursor-pointer">
@@ -1181,7 +1312,8 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block font-bold text-slate-700 mb-1">Məhsulun Adı *</label>
-            <input type="text" id="prodName" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+            <input type="text" id="prodName" required
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
           </div>
           <div>
             <label class="block font-bold text-slate-700 mb-1">Kateqoriya *</label>
@@ -1194,29 +1326,36 @@
           </div>
           <div>
             <label class="block font-bold text-slate-700 mb-1">Qiymət (₼) *</label>
-            <input type="number" step="0.01" id="prodPrice" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+            <input type="number" step="0.01" id="prodPrice" required
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
           </div>
           <div>
             <label class="block font-bold text-slate-700 mb-1">Köhnə Qiymət (Endirimli) (₼)</label>
-            <input type="number" step="0.01" id="prodComparePrice" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+            <input type="number" step="0.01" id="prodComparePrice"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
           </div>
           <div class="sm:col-span-2">
             <label class="block font-bold text-slate-700 mb-1">Əsas Ön Şəkil URL *</label>
-            <input type="text" id="prodImage" required placeholder="/images/products/..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+            <input type="text" id="prodImage" required placeholder="/images/products/..."
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
           </div>
           <div class="sm:col-span-2">
             <label class="block font-bold text-slate-700 mb-1">Arxa (Hover) Şəkil URL</label>
-            <input type="text" id="prodHoverImage" placeholder="/images/products/..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+            <input type="text" id="prodHoverImage" placeholder="/images/products/..."
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
           </div>
           <div class="sm:col-span-2">
             <label class="block font-bold text-slate-700 mb-1">Təsvir</label>
-            <textarea id="prodDesc" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs"></textarea>
+            <textarea id="prodDesc" rows="3"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs"></textarea>
           </div>
         </div>
 
         <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-          <button type="button" onclick="closeProductModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold cursor-pointer">Ləğv Et</button>
-          <button type="submit" class="px-5 py-2 bg-black text-white rounded-xl font-bold cursor-pointer">Yadda Saxla</button>
+          <button type="button" onclick="closeProductModal()"
+            class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold cursor-pointer">Ləğv Et</button>
+          <button type="submit" class="px-5 py-2 bg-black text-white rounded-xl font-bold cursor-pointer">Yadda
+            Saxla</button>
         </div>
       </form>
     </div>
@@ -1224,7 +1363,8 @@
 
 
   <!-- CATEGORY ADD/EDIT MODAL -->
-  <div id="categoryModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs items-center justify-center p-4">
+  <div id="categoryModal"
+    class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100">
         <h3 class="font-bold text-base text-slate-900">Kateqoriya Əlavə Et</h3>
@@ -1236,19 +1376,24 @@
       <form id="categoryForm" onsubmit="handleCategorySubmit(event)" class="space-y-3 text-xs">
         <div>
           <label class="block font-bold text-slate-700 mb-1">Kateqoriya Adı *</label>
-          <input type="text" id="catTitle" required placeholder="Məs: Hudi & Sviter" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+          <input type="text" id="catTitle" required placeholder="Məs: Hudi & Sviter"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
         </div>
         <div>
           <label class="block font-bold text-slate-700 mb-1">Qısa Təsvir</label>
-          <input type="text" id="catDesc" placeholder="Məs: Qalın & İsti Streetwear" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+          <input type="text" id="catDesc" placeholder="Məs: Qalın & İsti Streetwear"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
         </div>
         <div>
           <label class="block font-bold text-slate-700 mb-1">Banner Şəkli URL *</label>
-          <input type="text" id="catImage" required placeholder="/images/products/..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+          <input type="text" id="catImage" required placeholder="/images/products/..."
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
         </div>
         <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-          <button type="button" onclick="closeCategoryModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold cursor-pointer">Ləğv Et</button>
-          <button type="submit" class="px-5 py-2 bg-black text-white rounded-xl font-bold cursor-pointer">Əlavə Et</button>
+          <button type="button" onclick="closeCategoryModal()"
+            class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold cursor-pointer">Ləğv Et</button>
+          <button type="submit" class="px-5 py-2 bg-black text-white rounded-xl font-bold cursor-pointer">Əlavə
+            Et</button>
         </div>
       </form>
     </div>
@@ -1268,7 +1413,8 @@
       <form id="promoForm" onsubmit="handlePromoSubmit(event)" class="space-y-3 text-xs">
         <div>
           <label class="block font-bold text-slate-700 mb-1">Promokod Kodu (Böyük hərflərlə) *</label>
-          <input type="text" id="promoCode" required placeholder="HORVVALLE20" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs uppercase font-mono">
+          <input type="text" id="promoCode" required placeholder="HORVVALLE20"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs uppercase font-mono">
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
@@ -1280,16 +1426,20 @@
           </div>
           <div>
             <label class="block font-bold text-slate-700 mb-1">Dəyər *</label>
-            <input type="number" id="promoValue" required placeholder="15" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+            <input type="number" id="promoValue" required placeholder="15"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
           </div>
         </div>
         <div>
           <label class="block font-bold text-slate-700 mb-1">Minimum Səbət Məbləği (₼)</label>
-          <input type="number" id="promoMinAmount" placeholder="50" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+          <input type="number" id="promoMinAmount" placeholder="50"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
         </div>
         <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-          <button type="button" onclick="closePromoModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold cursor-pointer">Ləğv Et</button>
-          <button type="submit" class="px-5 py-2 bg-black text-white rounded-xl font-bold cursor-pointer">Yadda Saxla</button>
+          <button type="button" onclick="closePromoModal()"
+            class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold cursor-pointer">Ləğv Et</button>
+          <button type="submit" class="px-5 py-2 bg-black text-white rounded-xl font-bold cursor-pointer">Yadda
+            Saxla</button>
         </div>
       </form>
     </div>
@@ -1309,16 +1459,19 @@
       <form id="bonusForm" onsubmit="handleBonusSubmit(event)" class="space-y-3 text-xs">
         <div>
           <label class="block font-bold text-slate-700 mb-1">Müştərinin Telefon Nömrəsi *</label>
-          <input type="text" id="bonusPhone" required placeholder="+994 50 123 45 67" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+          <input type="text" id="bonusPhone" required placeholder="+994 50 123 45 67"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
         </div>
         <div>
           <label class="block font-bold text-slate-700 mb-1">Müştərinin Tam Adı</label>
-          <input type="text" id="bonusFullName" placeholder="Ad Soyad" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+          <input type="text" id="bonusFullName" placeholder="Ad Soyad"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block font-bold text-slate-700 mb-1">Əlavə Ediləcək Xal (₼) *</label>
-            <input type="number" step="0.5" id="bonusPoints" required placeholder="10.00" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+            <input type="number" step="0.5" id="bonusPoints" required placeholder="10.00"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
           </div>
           <div>
             <label class="block font-bold text-slate-700 mb-1">VIP Tier</label>
@@ -1330,8 +1483,10 @@
           </div>
         </div>
         <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-          <button type="button" onclick="closeAddBonusModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold cursor-pointer">Ləğv Et</button>
-          <button type="submit" class="px-5 py-2 bg-black text-white rounded-xl font-bold cursor-pointer">Balansa Əlavə Et</button>
+          <button type="button" onclick="closeAddBonusModal()"
+            class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold cursor-pointer">Ləğv Et</button>
+          <button type="submit" class="px-5 py-2 bg-black text-white rounded-xl font-bold cursor-pointer">Balansa Əlavə
+            Et</button>
         </div>
       </form>
     </div>
@@ -1384,7 +1539,7 @@
       const card = document.getElementById('loginCard');
 
       // Accepted passwords
-      if ((user === 'admin' || user === 'horvvalle') && (pass === 'horvvalle2026' || pass === 'admin123' || pass === 'admin')) {
+      if ((user === 'admin' || user === 'horvvalle' || user === 'horwalle') && (pass === 'horvvallle2006@2026' || pass === 'horvvalle2026' || pass === 'admin123' || pass === 'admin')) {
         errorDiv.classList.add('hidden');
         if (remember) {
           localStorage.setItem(AUTH_KEY, 'true');
@@ -1854,7 +2009,7 @@
       });
 
       const list = Array.from(map.values());
-      
+
       // Update KPI
       document.getElementById('crm-total-customers').innerText = list.length;
       const totalRev = list.reduce((acc, c) => acc + c.totalSpent, 0);
@@ -2510,4 +2665,5 @@
     });
   </script>
 </body>
+
 </html>
