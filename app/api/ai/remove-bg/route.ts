@@ -3,11 +3,41 @@ import { spawn } from "child_process";
 import fs from "fs";
 import path from "path";
 import os from "os";
+import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 
 export const maxDuration = 60; // Next.js route max duration
 
+let lastDaemonSpawnAttempt = 0;
+
 export async function POST(req: NextRequest) {
   try {
+    // 0. Rate Limiting & Daily Quota Guard
+    const clientIp = getClientIp(req);
+    const rateCheck = checkRateLimit(clientIp, {
+      windowMs: 60 * 1000,
+      maxPerWindow: 10, // Max 10 AI background removals / minute
+      dailyQuota: 40,   // Max 40 AI background removals / day per IP
+    });
+
+    if (!rateCheck.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: rateCheck.error,
+          dailyRemaining: rateCheck.dailyRemaining,
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(rateCheck.resetSeconds),
+            "X-RateLimit-Limit": String(rateCheck.limit),
+            "X-RateLimit-Remaining": String(rateCheck.remaining),
+            "X-RateLimit-Daily-Remaining": String(rateCheck.dailyRemaining),
+          },
+        }
+      );
+    }
+
     const body = await req.json();
     const { image } = body;
 
@@ -40,15 +70,19 @@ export async function POST(req: NextRequest) {
         }
       }
     } catch {
-      // Local daemon is not running: spawn it in the background so future requests are instant (<0.5s)
-      try {
-        const srvScript = path.join(process.cwd(), "scripts", "bg_server.py");
-        const srvChild = spawn("python", [srvScript], {
-          detached: true,
-          stdio: "ignore",
-        });
-        srvChild.unref();
-      } catch {}
+      // Local daemon is not running: throttle spawn attempt to once every 60 seconds to prevent process explosion
+      const now = Date.now();
+      if (now - lastDaemonSpawnAttempt > 60000) {
+        lastDaemonSpawnAttempt = now;
+        try {
+          const srvScript = path.join(process.cwd(), "scripts", "bg_server.py");
+          const srvChild = spawn("python", [srvScript], {
+            detached: true,
+            stdio: "ignore",
+          });
+          srvChild.unref();
+        } catch {}
+      }
     }
 
     // 2. Direct fallback via Python CLI

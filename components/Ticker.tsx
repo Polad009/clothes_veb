@@ -13,20 +13,14 @@ export function Ticker({ className = "" }: TickerProps) {
   const { t } = useLanguage();
   const isHome = pathname === "/";
 
-  // Site's existing announcement strings without any "Bakı" / "Baku" text
   const rawList = [
     t.announcements?.cottonLinen || "100% PREMİUM DARANMIŞ PAMBIQ VƏ TƏBİİ KƏTAN KOLLEKSİYASI",
     t.announcements?.guaranteedReturns || "14 GÜN ƏRZİNDƏ ASAN VƏ ZƏMANƏTLİ QAYTARILMA",
-    t.announcements?.freeShipping || "60 ₼ VƏ ÜZƏRİ BÜTÜN SİFARİŞLƏRƏ PULSUZ ÇATDIRILMA",
+    t.announcements?.freeShipping || "BAKI VƏ SUMQAYIT ƏRAZİSİNƏ ÇATDIRILMA TAM PULSUZDUR",
     t.announcements?.customStudio || "FƏRDİ ÇAP STUDİYASI — ÖZ DİZAYNINI KÖYNƏYƏ ÇAP ET",
   ];
 
-  // Strictly filter out any items containing "Bakı", "Baku", or "Баку"
-  const filteredList = rawList.filter(
-    (item) => !/bak[ıiüu]/i.test(item) && !/baku/i.test(item) && !/баку/i.test(item)
-  );
-
-  const tickerString = filteredList.join(" • ") + " • ";
+  const tickerString = rawList.join(" • ") + " • ";
 
   return (
     <div

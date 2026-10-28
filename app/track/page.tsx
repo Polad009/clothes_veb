@@ -14,7 +14,6 @@ import {
   Phone,
   ArrowRight,
   ShieldCheck,
-  Sparkles,
   MapPin,
   Calendar,
   CreditCard,
@@ -84,7 +83,7 @@ function OrderTrackerContent() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       try {
-        const raw = localStorage.getItem("horvvalle_saved_orders") || localStorage.getItem("novaco_saved_orders");
+        const raw = localStorage.getItem("horvvalle_saved_orders");
         if (raw) {
           const parsed = JSON.parse(raw);
           if (Array.isArray(parsed) && parsed.length > 0) {

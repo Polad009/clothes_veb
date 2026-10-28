@@ -22,7 +22,7 @@ function CheckoutSuccessContent() {
     // Automatically persist recent order to localStorage for instant 1-click recovery
     if (typeof window !== "undefined" && orderId) {
       try {
-        const raw = localStorage.getItem("horvvalle_saved_orders") || localStorage.getItem("novaco_saved_orders");
+        const raw = localStorage.getItem("horvvalle_saved_orders");
         const list = raw ? JSON.parse(raw) : [];
         const filtered = list.filter((item: any) => item.id !== orderId);
         filtered.unshift({

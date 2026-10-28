@@ -137,6 +137,3 @@ export function HorvvalleLogo({
     </div>
   );
 }
-
-// Backward compatibility export
-export const NovaLogo = HorvvalleLogo;

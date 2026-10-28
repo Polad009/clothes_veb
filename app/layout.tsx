@@ -6,13 +6,19 @@ import { Footer } from "@/components/Footer";
 import { CartProvider } from "@/context/CartContext";
 import { CurrencyProvider } from "@/context/CurrencyContext";
 import { LanguageProvider } from "@/context/LanguageContext";
-import { CartDrawer } from "@/components/CartDrawer";
+import { StoreDataProvider } from "@/context/StoreDataContext";
+import dynamic from "next/dynamic";
 import { PageTransition } from "@/components/PageTransition";
 import { Intro } from "@/components/Intro";
 import { SmoothScroll } from "@/components/SmoothScroll";
 
+const CartDrawer = dynamic(
+  () => import("@/components/CartDrawer").then((mod) => mod.CartDrawer),
+  { ssr: false }
+);
+
 import React, { Suspense } from "react";
-import { EB_Garamond } from "next/font/google";
+import { EB_Garamond, Fraunces, Instrument_Sans } from "next/font/google";
 
 const ebGaramond = EB_Garamond({
   subsets: ["latin"],
@@ -22,8 +28,22 @@ const ebGaramond = EB_Garamond({
   display: "swap",
 });
 
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-fraunces",
+  display: "swap",
+});
+
+const instrumentSans = Instrument_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-instrument",
+  display: "swap",
+});
+
 export const viewport: Viewport = {
-  themeColor: "#140702",
+  themeColor: "#090707",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
@@ -34,6 +54,14 @@ export const metadata: Metadata = {
   title: {
     default: "Horvvalle — Lüks Geyim & Fərdi Atelye | Rəsmi Mağaza",
     template: "%s | Horvvalle",
+  },
+  icons: {
+    icon: [
+      { url: "/brand/favicon-32x32.png?v=3", sizes: "32x32", type: "image/png" },
+      { url: "/brand/favicon.png?v=3", sizes: "512x512", type: "image/png" },
+    ],
+    shortcut: "/brand/favicon.png?v=3",
+    apple: "/brand/favicon.png?v=3",
   },
   description: "Horvvalle — Sənin ölçün, sənin üslubun. Atelyedə hər geyim ölçünə görə tikilir, istədiyin dizayn isə canlı 3D çapla köynəyə köçürülür.",
   keywords: [
@@ -75,33 +103,28 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap"
-          rel="stylesheet"
-        />
-        {/* Tiny inline script to decide intro state before first paint */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{if(window.location.search.indexOf('intro=1')!==-1){sessionStorage.removeItem('hv-intro');document.documentElement.dataset.intro='on';}else{document.documentElement.dataset.intro=sessionStorage.getItem('hv-intro')?'off':'on';}}catch(e){document.documentElement.dataset.intro='off';}})();`,
-          }}
-        />
+        <link rel="icon" type="image/png" sizes="32x32" href="/brand/favicon-32x32.png?v=3" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/brand/favicon.png?v=3" />
+        <link rel="apple-touch-icon" href="/brand/favicon.png?v=3" />
       </head>
-      <body className={`${ebGaramond.variable} min-h-screen flex flex-col bg-[#FAF7F2] text-[#1A1517] font-sans antialiased selection:bg-[#E6C280] selection:text-black`}>
+      <body className={`${ebGaramond.variable} ${fraunces.variable} ${instrumentSans.variable} min-h-screen flex flex-col bg-[#FAF7F2] text-[#1A1517] font-sans antialiased selection:bg-[#E6C280] selection:text-black`}>
+        <Intro />
         <LanguageProvider>
           <CurrencyProvider>
             <CartProvider>
-              <SmoothScroll>
-                <Intro />
-                <Suspense fallback={<div className="h-24 w-full bg-[#FAF7F2]" />}>
-                  <Ticker />
-                  <Header />
-                </Suspense>
-                <main id="main-content" className="flex-grow flex flex-col focus:outline-none">
-                  <PageTransition>{children}</PageTransition>
-                </main>
-                <Footer />
-                <CartDrawer />
-              </SmoothScroll>
+              <StoreDataProvider>
+                <SmoothScroll>
+                  <Suspense fallback={<div className="h-24 w-full bg-transparent" />}>
+                    <Ticker />
+                    <Header />
+                  </Suspense>
+                  <main id="main-content" className="flex-grow flex flex-col focus:outline-none">
+                    {children}
+                  </main>
+                  <Footer />
+                  <CartDrawer />
+                </SmoothScroll>
+              </StoreDataProvider>
             </CartProvider>
           </CurrencyProvider>
         </LanguageProvider>

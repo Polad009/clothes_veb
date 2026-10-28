@@ -4,11 +4,14 @@ import { readStoreDb, writeStoreDb, StoreProduct } from '@/lib/storeDb';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
+  const startTime = Date.now();
   try {
     const { searchParams } = new URL(req.url);
     const gender = searchParams.get('gender');
     const category = searchParams.get('category');
     const search = searchParams.get('q')?.toLowerCase();
+    const limitParam = searchParams.get('limit');
+    const limit = limitParam ? parseInt(limitParam, 10) : undefined;
 
     const db = readStoreDb();
     let products = db.products;
@@ -23,6 +26,9 @@ export async function GET(req: NextRequest) {
 
     if (search) {
       products = products.filter(p =>
+        (p.slug && p.slug.toLowerCase() === search) ||
+        (p.slug && p.slug.toLowerCase().includes(search)) ||
+        p.id.toLowerCase() === search ||
         p.name.toLowerCase().includes(search) ||
         p.description.toLowerCase().includes(search) ||
         p.category.toLowerCase().includes(search) ||
@@ -30,8 +36,22 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(products);
+    if (limit && limit > 0) {
+      products = products.slice(0, limit);
+    }
+
+    const durationMs = Date.now() - startTime;
+    console.log(`[Store API Timing] GET /api/store/products - ${durationMs}ms (${products.length} items)`);
+
+    return NextResponse.json(products, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+        'X-Response-Time': `${durationMs}ms`,
+      },
+    });
   } catch (error: any) {
+    const durationMs = Date.now() - startTime;
+    console.error(`[Store API Timing Error] Failed in ${durationMs}ms:`, error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

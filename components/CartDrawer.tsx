@@ -105,29 +105,18 @@ export function CartDrawer() {
                 </button>
               </div>
 
-              {/* Free Shipping Progress Meter */}
-              <div className="bg-[#F5EFE6] px-5 py-3 border-b border-[#E8E2D8]">
-                <div className="flex items-center justify-between text-xs mb-1.5 font-medium">
+              {/* Free Shipping Banner */}
+              <div className="bg-[#F5EFE6] px-5 py-2.5 border-b border-[#E8E2D8]">
+                <div className="flex items-center justify-center text-xs font-medium">
                   <span className="flex items-center gap-1.5 text-[#5C5247]">
-                    <Truck size={14} className="text-[#B08D57]" />
-                    {remainingForFree === 0
-                      ? "Təbriklər! Pulsuz çatdırılma aktivdir 🎉"
-                      : `Pulsuz çatdırılmaya daha ${formatPrice(remainingForFree)} qaldı`}
+                    <Truck size={14} className="text-[#B08D57] shrink-0" />
+                    <span>Bakı və Sumqayıt daxili çatdırılma <strong>PULSUZ</strong></span>
                   </span>
-                  <span className="text-[#B08D57] font-bold">{progressPercent}%</span>
-                </div>
-                <div className="w-full h-1.5 bg-[#E5DFD5] rounded-full overflow-hidden">
-                  <motion.div
-                    className="h-full bg-[#B08D57] rounded-full"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${progressPercent}%` }}
-                    transition={{ duration: 0.4, ease: "easeOut" }}
-                  />
                 </div>
               </div>
 
               {/* Cart Items List */}
-              <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5">
+              <div data-lenis-prevent className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5 overscroll-contain">
                 {items.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-center space-y-4 py-16">
                     <div className="w-16 h-16 rounded-full bg-[#EFEAE1] border border-[#E5DFD5] flex items-center justify-center text-[#9A7B4F]">
@@ -259,12 +248,12 @@ export function CartDrawer() {
                     <div className="flex justify-between">
                       <span>Çatdırılma:</span>
                       <span className="font-bold text-[#047857]">
-                        {remainingForFree === 0 ? "PULSUZ" : "5.00 ₼"}
+                        PULSUZ (Bakı & Sumqayıt)
                       </span>
                     </div>
                     <div className="flex justify-between text-base font-normal text-[#1A1517] font-eb-garamond pt-2 border-t border-[#E8E2D8]">
                       <span>Yekun Məbləğ:</span>
-                      <span className="font-bold text-xl text-[#B08D57]">{formatPrice(remainingForFree === 0 ? totalPrice : totalPrice + 5)}</span>
+                      <span className="font-bold text-xl text-[#B08D57]">{formatPrice(totalPrice)}</span>
                     </div>
                   </div>
 

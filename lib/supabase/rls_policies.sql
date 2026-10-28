@@ -63,7 +63,10 @@ CREATE POLICY "Users can update own profile"
 -- 4. CUSTOM DESIGNS POLICIES
 CREATE POLICY "Users can view own custom designs or admin"
   ON custom_designs FOR SELECT
-  USING (auth.uid() = user_id OR is_admin() OR user_id IS NULL);
+  USING (
+    is_admin() OR 
+    (auth.uid() IS NOT NULL AND auth.uid() = user_id)
+  );
 
 CREATE POLICY "Users can insert custom designs"
   ON custom_designs FOR INSERT
@@ -76,7 +79,10 @@ CREATE POLICY "Admins can update custom designs status"
 -- 5. ORDERS & ORDER ITEMS POLICIES
 CREATE POLICY "Users can view own orders or admin"
   ON orders FOR SELECT
-  USING (auth.uid() = user_id OR is_admin());
+  USING (
+    is_admin() OR 
+    (auth.uid() IS NOT NULL AND auth.uid() = user_id)
+  );
 
 CREATE POLICY "Anyone can create orders"
   ON orders FOR INSERT
@@ -88,7 +94,14 @@ CREATE POLICY "Admins can update orders"
 
 CREATE POLICY "Users can view own order items or admin"
   ON order_items FOR SELECT
-  USING (true);
+  USING (
+    is_admin() OR
+    EXISTS (
+      SELECT 1 FROM orders
+      WHERE orders.id = order_items.order_id
+      AND orders.user_id = auth.uid()
+    )
+  );
 
 CREATE POLICY "Anyone can create order items"
   ON order_items FOR INSERT

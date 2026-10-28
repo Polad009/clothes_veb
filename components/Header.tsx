@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -18,6 +19,7 @@ import { HeaderQuickSearch } from "@/components/HeaderQuickSearch";
 import { UnifiedLocaleDropdown } from "@/components/UnifiedLocaleDropdown";
 import { useLanguage } from "@/context/LanguageContext";
 import { MOCK_PRODUCTS, Product } from "@/data/products";
+import { useStoreData } from "@/context/StoreDataContext";
 import Logo from "@/components/Logo";
 
 interface HeaderProps {
@@ -32,10 +34,12 @@ export function Header({ className = "" }: HeaderProps) {
 
   const { totalCount, openCart } = useCart();
   const { formatPrice } = useCurrency();
+  const { products } = useStoreData();
   const { t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchQuery, setMobileSearchQuery] = useState("");
-  const [isOverHero, setIsOverHero] = useState(true);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isOverHero, setIsOverHero] = useState(pathname === "/");
   const [heroHeaderBg, setHeroHeaderBg] = useState<string>("#542E13");
   const [heroTopGradient, setHeroTopGradient] = useState<string>("linear-gradient(180deg, #3A1B07 0%, #542E13 100%)");
 
@@ -49,31 +53,62 @@ export function Header({ className = "" }: HeaderProps) {
     return () => window.removeEventListener("hv-hero-color-change", handleColorChange);
   }, []);
 
-  // IntersectionObserver: Detect whether user is currently over the #hero-section
+  // Detect whether user is currently over the #hero-section (with back-navigation & scroll resilience)
   useEffect(() => {
     if (pathname !== "/") {
       setIsOverHero(false);
       return;
     }
 
-    const heroEl = document.getElementById("hero-section");
-    if (!heroEl) {
-      setIsOverHero(false);
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsOverHero(entry.isIntersecting);
-      },
-      {
-        threshold: 0,
-        rootMargin: "-70px 0px 0px 0px",
+    const checkHeroIntersect = () => {
+      if (pathname !== "/") return;
+      const scrollY = typeof window !== "undefined" ? window.scrollY || document.documentElement.scrollTop || 0 : 0;
+      
+      // If at or near top of the page on home, we are ALWAYS over hero!
+      if (scrollY < 120) {
+        setIsOverHero(true);
+        return;
       }
-    );
 
-    observer.observe(heroEl);
-    return () => observer.disconnect();
+      const heroEl = document.getElementById("hero-section");
+      if (heroEl) {
+        const rect = heroEl.getBoundingClientRect();
+        if (rect.height > 0) {
+          setIsOverHero(rect.bottom > 70);
+          return;
+        }
+      }
+      setIsOverHero(scrollY < 500);
+    };
+
+    // Immediate check
+    checkHeroIntersect();
+
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          checkHeroIntersect();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    // Attach scroll listener with passive flag and RAF throttle
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("hv-intro-reveal", checkHeroIntersect);
+
+    // Staggered retries to catch element after DOM mounts / animates
+    const t1 = setTimeout(checkHeroIntersect, 50);
+    const t2 = setTimeout(checkHeroIntersect, 200);
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("hv-intro-reveal", checkHeroIntersect);
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
   }, [pathname]);
 
   const isLightMode = pathname !== "/" || !isOverHero;
@@ -158,7 +193,9 @@ export function Header({ className = "" }: HeaderProps) {
 
           {/* Center: Glass Pill Navigation */}
           <nav
-            className={`hidden lg:flex items-center gap-0.5 xl:gap-1 p-1 xl:p-1.5 rounded-full border transition-colors duration-300 ${
+            className={`hidden lg:flex items-center gap-0.5 xl:gap-1 p-1 xl:p-1.5 rounded-full border transition-all duration-200 ${
+              isSearchOpen ? "opacity-0 pointer-events-none scale-95" : "opacity-100 scale-100"
+            } ${
               isLightMode
                 ? "bg-stone-100/90 border-stone-200/80 text-stone-700 shadow-2xs backdrop-blur-md"
                 : "bg-black/20 border-white/15 text-white shadow-sm backdrop-blur-md"
@@ -215,7 +252,7 @@ export function Header({ className = "" }: HeaderProps) {
           {/* Right: Search, Language/Currency, Cart */}
           <div className="flex items-center gap-1.5 sm:gap-2 xl:gap-2.5 shrink-0">
             {/* Smooth Animated Inline Header Quick Search */}
-            <HeaderQuickSearch isLightMode={isLightMode} />
+            <HeaderQuickSearch isLightMode={isLightMode} onOpenChange={setIsSearchOpen} />
 
             {/* AZ / AZN Selector */}
             <div className="hidden sm:block">
@@ -339,7 +376,7 @@ export function Header({ className = "" }: HeaderProps) {
                         <span>
                           Nəticələr (
                           {
-                            MOCK_PRODUCTS.filter(
+                            (products.length > 0 ? products : MOCK_PRODUCTS).filter(
                               (p) =>
                                 p.name.toLowerCase().includes(mobileSearchQuery.trim().toLowerCase()) ||
                                 p.category.toLowerCase().includes(mobileSearchQuery.trim().toLowerCase()) ||
@@ -364,7 +401,7 @@ export function Header({ className = "" }: HeaderProps) {
 
                       {(() => {
                         const q = mobileSearchQuery.trim().toLowerCase();
-                        const matches = MOCK_PRODUCTS.filter(
+                        const matches = (products.length > 0 ? products : MOCK_PRODUCTS).filter(
                           (p) =>
                             p.name.toLowerCase().includes(q) ||
                             p.category.toLowerCase().includes(q) ||
@@ -380,18 +417,21 @@ export function Header({ className = "" }: HeaderProps) {
                         }
 
                         return matches.map((p) => (
-                          <div
+                          <Link
                             key={p.id}
+                            href={`/products/${p.slug}`}
+                            prefetch={true}
                             onClick={() => {
                               setMobileMenuOpen(false);
                               setMobileSearchQuery("");
-                              router.push(`/products/${p.slug}`);
                             }}
                             className="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-[#FAF7F2] transition cursor-pointer"
                           >
-                            <img
+                            <Image
                               src={p.colors[0]?.image || "/shirts/keten-koynek.png"}
                               alt={p.name}
+                              width={36}
+                              height={36}
                               className="w-9 h-9 rounded-lg object-cover bg-stone-100 shrink-0 border border-stone-200/60"
                             />
                             <div className="flex-1 min-w-0">
@@ -401,7 +441,7 @@ export function Header({ className = "" }: HeaderProps) {
                             <div className="text-right text-xs font-bold text-[#B08D57] shrink-0">
                               {formatPrice(p.price)}
                             </div>
-                          </div>
+                          </Link>
                         ));
                       })()}
                     </div>

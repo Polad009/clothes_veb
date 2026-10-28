@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
@@ -48,7 +48,12 @@ export default function CheckoutPage() {
   // Promo code
   const [promoCode, setPromoCode] = useState("");
   const [discountPercent, setDiscountPercent] = useState(0);
+  const [promoDiscountAmount, setPromoDiscountAmount] = useState(0);
   const [promoApplied, setPromoApplied] = useState(false);
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [promoSuccessMsg, setPromoSuccessMsg] = useState<string | null>(null);
+  const [appliedPromoCode, setAppliedPromoCode] = useState<string | null>(null);
+  const [isCheckingPromo, setIsCheckingPromo] = useState(false);
 
   // Status & Validation State
   const [isProcessing, setIsProcessing] = useState(false);
@@ -60,8 +65,10 @@ export default function CheckoutPage() {
   const [showApplePayModal, setShowApplePayModal] = useState(false);
   const [showGooglePayModal, setShowGooglePayModal] = useState(false);
 
-  const shippingCost = totalPrice >= 60 ? 0 : 5;
-  const discountAmount = (totalPrice * discountPercent) / 100;
+  // Free delivery for Baku & Sumqayit regardless of cart amount
+  const isFreeZone = /^(bak[ıi]|sumqay[ıi]t)/i.test(city.trim());
+  const shippingCost = isFreeZone ? 0 : (totalPrice >= 60 ? 0 : 5);
+  const discountAmount = promoDiscountAmount > 0 ? promoDiscountAmount : (totalPrice * discountPercent) / 100;
   const finalTotal = Math.max(0, totalPrice - discountAmount + shippingCost);
 
   const clearFieldError = (field: string) => {
@@ -156,20 +163,76 @@ export default function CheckoutPage() {
     return true;
   };
 
-  const applyPromo = (e: React.FormEvent) => {
+  const applyPromo = async (e: React.FormEvent) => {
     e.preventDefault();
+    setPromoError(null);
+    setPromoSuccessMsg(null);
     const clean = promoCode.trim().toUpperCase();
-    if (clean === "NOVA15" || clean === "APPLE15") {
-      setDiscountPercent(15);
-      setPromoApplied(true);
-      setErrorMsg(null);
-    } else if (clean === "YENI10") {
-      setDiscountPercent(10);
-      setPromoApplied(true);
-      setErrorMsg(null);
-    } else {
-      setErrorMsg("Keçərsiz promokod. 'NOVA15' və ya 'YENI10' yazaraq yoxlayın.");
+
+    if (!clean) {
+      setPromoError("Zəhmət olmasa promokod daxil edin.");
+      return;
     }
+
+    setIsCheckingPromo(true);
+    try {
+      const res = await fetch("/api/store/data");
+      const data = await res.json();
+      const promos: any[] = data.promoCodes || [];
+
+      const found = promos.find(
+        (p) => (p.code || "").trim().toUpperCase() === clean
+      );
+
+      if (!found || found.active === false) {
+        setPromoApplied(false);
+        setDiscountPercent(0);
+        setPromoDiscountAmount(0);
+        setAppliedPromoCode(null);
+        setPromoError("Yanlış promokod.");
+        return;
+      }
+
+      const minAmount = Number(found.minAmount) || 0;
+      if (minAmount > 0 && totalPrice < minAmount) {
+        setPromoApplied(false);
+        setDiscountPercent(0);
+        setPromoDiscountAmount(0);
+        setAppliedPromoCode(null);
+        setPromoError(`Minimum sifariş məbləği ${minAmount} ₼ olmalıdır.`);
+        return;
+      }
+
+      if (found.type === "fixed") {
+        const val = Number(found.value) || 0;
+        setDiscountPercent(0);
+        setPromoDiscountAmount(val);
+        setPromoApplied(true);
+        setAppliedPromoCode(found.code);
+        setPromoSuccessMsg(`✓ ${found.code} promokodu tətbiq edildi (-${val} ₼)`);
+      } else {
+        const pct = Number(found.value) || 0;
+        setDiscountPercent(pct);
+        setPromoDiscountAmount((totalPrice * pct) / 100);
+        setPromoApplied(true);
+        setAppliedPromoCode(found.code);
+        setPromoSuccessMsg(`✓ ${found.code} promokodu tətbiq edildi (-${pct}%)`);
+      }
+    } catch (err) {
+      setPromoError("Yanlış promokod.");
+    } finally {
+      setIsCheckingPromo(false);
+    }
+  };
+
+  const removePromo = () => {
+    setPromoCode("");
+    setDiscountPercent(0);
+    setPromoDiscountAmount(0);
+    setPromoApplied(false);
+    setAppliedPromoCode(null);
+    setPromoError(null);
+    setPromoSuccessMsg(null);
   };
 
   const processOrder = async (chosenMethod: string) => {
@@ -214,6 +277,7 @@ export default function CheckoutPage() {
           subtotal: totalPrice,
           shipping: shippingCost,
           discount: discountAmount,
+          promoCode: appliedPromoCode || null,
           total: finalTotal,
         }),
       });
@@ -223,13 +287,10 @@ export default function CheckoutPage() {
         throw new Error(data.error || "Sifariş zamanı xəta baş verdi.");
       }
 
-      try {
-        playPurchaseSuccessSound();
-      } catch (e) {}
 
       if (typeof window !== "undefined" && data?.order?.id) {
         try {
-          const raw = localStorage.getItem("horvvalle_saved_orders") || localStorage.getItem("novaco_saved_orders");
+          const raw = localStorage.getItem("horvvalle_saved_orders");
           const list = raw ? JSON.parse(raw) : [];
           const filtered = list.filter((item: any) => item.id !== data.order.id);
           filtered.unshift({
@@ -504,14 +565,68 @@ export default function CheckoutPage() {
                   </motion.div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-stone-700 uppercase">Şəhər</label>
-                    <input
-                      id="field-city"
-                      type="text"
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                      className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 text-xs text-stone-900 placeholder-stone-400 focus:outline-none focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900 transition"
-                    />
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-semibold text-stone-700 uppercase">Şəhər / Ərazi *</label>
+                      <span className="text-[10px] font-semibold text-emerald-700">
+                        {isFreeZone ? "✓ Pulsuz Çatdırılma" : "Bölgə: 5 ₼"}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCity("Bakı");
+                          clearFieldError("city");
+                        }}
+                        className={`py-2 px-2.5 rounded-xl border text-xs font-semibold transition cursor-pointer text-center ${
+                          city === "Bakı"
+                            ? "bg-stone-900 text-white border-stone-900 shadow-xs"
+                            : "bg-stone-50 text-stone-700 border-stone-200 hover:border-stone-400"
+                        }`}
+                      >
+                        Bakı <span className="block text-[9.5px] opacity-80 font-normal">Pulsuz</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCity("Sumqayıt");
+                          clearFieldError("city");
+                        }}
+                        className={`py-2 px-2.5 rounded-xl border text-xs font-semibold transition cursor-pointer text-center ${
+                          city === "Sumqayıt"
+                            ? "bg-stone-900 text-white border-stone-900 shadow-xs"
+                            : "bg-stone-50 text-stone-700 border-stone-200 hover:border-stone-400"
+                        }`}
+                      >
+                        Sumqayıt <span className="block text-[9.5px] opacity-80 font-normal">Pulsuz</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (city === "Bakı" || city === "Sumqayıt") setCity("");
+                        }}
+                        className={`py-2 px-2.5 rounded-xl border text-xs font-semibold transition cursor-pointer text-center ${
+                          city !== "Bakı" && city !== "Sumqayıt"
+                            ? "bg-stone-900 text-white border-stone-900 shadow-xs"
+                            : "bg-stone-50 text-stone-700 border-stone-200 hover:border-stone-400"
+                        }`}
+                      >
+                        Bölgələr <span className="block text-[9.5px] opacity-80 font-normal">Rayonlar</span>
+                      </button>
+                    </div>
+
+                    {city !== "Bakı" && city !== "Sumqayıt" && (
+                      <input
+                        id="field-city"
+                        type="text"
+                        placeholder="Rayon və ya şəhər qeyd edin (Məs: Gəncə, Şəki)"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        className="w-full mt-2 bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2 text-xs text-stone-900 placeholder-stone-400 focus:outline-none focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900 transition"
+                      />
+                    )}
                   </div>
                 </div>
 
@@ -776,21 +891,52 @@ export default function CheckoutPage() {
                 <form onSubmit={applyPromo} className="flex gap-2">
                   <input
                     type="text"
-                    placeholder="Promokod (məs: NOVA15)"
+                    placeholder="Promokod daxil edin"
                     value={promoCode}
-                    onChange={(e) => setPromoCode(e.target.value)}
-                    className="bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs text-stone-900 placeholder-stone-400 uppercase flex-1 focus:outline-none focus:border-stone-900"
+                    disabled={promoApplied || isCheckingPromo}
+                    onChange={(e) => {
+                      setPromoCode(e.target.value);
+                      if (promoError) setPromoError(null);
+                    }}
+                    className={`bg-stone-50 border rounded-xl px-3 py-2 text-xs text-stone-900 placeholder-stone-400 uppercase flex-1 focus:outline-none transition ${
+                      promoError
+                        ? "border-rose-400 focus:border-rose-500 bg-rose-50/40"
+                        : promoApplied
+                        ? "border-emerald-300 bg-emerald-50/30 font-bold"
+                        : "border-stone-200 focus:border-stone-900"
+                    }`}
                   />
-                  <button
-                    type="submit"
-                    className="px-4 py-2 rounded-xl bg-stone-900 hover:bg-black text-white font-semibold text-xs uppercase transition"
-                  >
-                    Tətbiq Et
-                  </button>
+                  {promoApplied ? (
+                    <button
+                      type="button"
+                      onClick={removePromo}
+                      className="px-3.5 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold text-xs transition"
+                    >
+                      Ləğv et
+                    </button>
+                  ) : (
+                    <button
+                      type="submit"
+                      disabled={isCheckingPromo}
+                      className="px-4 py-2 rounded-xl bg-stone-900 hover:bg-black text-white font-semibold text-xs uppercase transition disabled:opacity-50 cursor-pointer"
+                    >
+                      {isCheckingPromo ? "Yoxlanır..." : "Tətbiq Et"}
+                    </button>
+                  )}
                 </form>
-                {promoApplied && (
-                  <span className="text-[11px] text-emerald-700 font-bold mt-1.5 block">
-                    ✓ {discountPercent}% endirim tətbiq olundu!
+
+                {/* Inline Error Message directly below input */}
+                {promoError && (
+                  <span className="text-[11px] text-rose-600 font-medium mt-1.5 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
+                    <span>{promoError}</span>
+                  </span>
+                )}
+
+                {/* Inline Success Message directly below input */}
+                {promoApplied && promoSuccessMsg && (
+                  <span className="text-[11px] text-emerald-700 font-bold mt-1.5 flex items-center gap-1.5">
+                    <span>{promoSuccessMsg}</span>
                   </span>
                 )}
               </div>
@@ -803,14 +949,22 @@ export default function CheckoutPage() {
                 </div>
                 {discountAmount > 0 && (
                   <div className="flex justify-between text-emerald-700">
-                    <span>Endirim ({discountPercent}%):</span>
+                    <span>
+                      Endirim {appliedPromoCode ? `(${appliedPromoCode})` : ""}:
+                    </span>
                     <span className="font-bold">-{formatPrice(discountAmount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
                   <span>Çatdırılma:</span>
                   <span className="font-bold text-stone-900">
-                    {shippingCost === 0 ? "PULSUZ (60 ₼+)" : formatPrice(shippingCost)}
+                    {shippingCost === 0 ? (
+                      <span className="text-emerald-700">
+                        PULSUZ {isFreeZone ? "(Bakı & Sumqayıt)" : ""}
+                      </span>
+                    ) : (
+                      formatPrice(shippingCost)
+                    )}
                   </span>
                 </div>
                 <div className="flex justify-between text-base font-normal text-stone-900 pt-2 border-t border-stone-100">
@@ -820,10 +974,17 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Guarantee Box */}
-            <div className="p-4 rounded-2xl bg-white border border-stone-200/80 text-xs text-stone-600 space-y-2 shadow-xs">
+            {/* Delivery & Guarantee Box */}
+            <div className="p-4 rounded-2xl bg-white border border-stone-200/80 text-xs text-stone-600 space-y-2.5 shadow-xs">
               <div className="flex items-center gap-2 text-stone-900 font-semibold">
-                <ShieldCheck size={18} className="text-stone-800" />
+                <Truck size={17} className="text-emerald-700" />
+                <span>Bakı və Sumqayıt Ərazisinə Pulsuz Çatdırılma</span>
+              </div>
+              <p className="text-[11px] leading-relaxed text-stone-500">
+                Bakı və Sumqayıt daxili bütün sifarişlər heç bir məbləğ məhdudiyyəti olmadan kuryerlə tam pulsuz çatdırılır.
+              </p>
+              <div className="pt-2 border-t border-stone-100 flex items-center gap-2 text-stone-900 font-semibold">
+                <ShieldCheck size={16} className="text-stone-800" />
                 <span>HORVVALLE Atelye Zəmanəti</span>
               </div>
               <p className="text-[11px] leading-relaxed text-stone-500">

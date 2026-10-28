@@ -161,7 +161,8 @@ const studioColors = [
 ];
 
 const promoCodes = [
-  { code: "ATELIER10", discountPercent: 10, minAmount: 30, desc: "İlk sifarişə 10% endirim" },
+  { code: "HORVVALLE10", discountPercent: 10, minAmount: 30, desc: "İlk sifarişə 10% endirim" },
+  { code: "HORVVALLE20", discountPercent: 20, minAmount: 70, desc: "Xüsusi 20% endirim" },
   { code: "STUDIO20", discountPercent: 20, minAmount: 70, desc: "Studio sifarişlərinə 20% endirim" }
 ];
 

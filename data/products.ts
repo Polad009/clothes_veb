@@ -5,6 +5,8 @@ export interface ProductColor {
   hex: string;
   image: string;
   hoverImage?: string;
+  leftShoulderImage?: string;
+  rightShoulderImage?: string;
   gallery?: string[];
 }
 
@@ -27,6 +29,9 @@ export interface Product {
   inStock: boolean;
   sizes: string[];
   colors: ProductColor[];
+  image?: string;
+  hoverImage?: string;
+  gallery?: string[];
 }
 
 export const MOCK_PRODUCTS: Product[] = (storeData.products as any[]).map(p => ({

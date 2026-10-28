@@ -116,9 +116,22 @@ export interface PodOrder {
   status: 'Pending Print' | 'In Production' | 'Printed' | 'Shipped';
   createdAt: string;
   originalImage?: string;
-  processedImage?: string;
+  placement?: string;
+  customerNote?: string;
   placementData?: any;
   previewImage?: string;
+  customData?: any;
+}
+
+export interface StorePromoCode {
+  id?: string;
+  code: string;
+  type: 'percent' | 'fixed';
+  value: number;
+  minAmount?: number;
+  active: boolean;
+  desc?: string;
+  uses?: number;
 }
 
 export interface StoreData {
@@ -127,6 +140,7 @@ export interface StoreData {
   products: StoreProduct[];
   orders: StoreOrder[];
   podOrders: PodOrder[];
+  promoCodes?: StorePromoCode[];
 }
 
 export function readStoreDb(): StoreData {

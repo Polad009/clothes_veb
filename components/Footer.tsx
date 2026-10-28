@@ -34,7 +34,7 @@ export function Footer() {
               <h4 className="text-xs font-bold text-white uppercase tracking-wider">
                 Sürətli Çatdırılma
               </h4>
-              <p className="text-[11px] text-white/60">60 ₼-dən yuxarı pulsuz</p>
+              <p className="text-[11px] text-white/60">Bakı & Sumqayıtda pulsuz</p>
             </div>
           </div>
 
@@ -183,12 +183,12 @@ export function Footer() {
             <ul className="space-y-2 text-xs">
               <li>
                 <Link href="/collections?category=hudi" className="text-white/70 hover:text-white transition">
-                  Heavyweight 3iplik Hudi
+                  Hody qalın (3iplik)
                 </Link>
               </li>
               <li>
                 <Link href="/collections?category=aksesuar" className="text-white/70 hover:text-white transition">
-                  Snapback Qalın Kepka
+                  Kepka - qalın
                 </Link>
               </li>
               <li>

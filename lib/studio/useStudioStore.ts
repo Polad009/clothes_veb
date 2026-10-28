@@ -64,7 +64,7 @@ export const useStudioStore = create<StudioState>((set, get) => ({
     front: {
       ...DEFAULT_SIDE_DESIGN,
       uploadedImage: "/images/presets/bmw-m4-clean.png?v=3",
-      customText: "NOVA STUDIO",
+      customText: "HORVVALLE",
       posY: -35,
     },
     back: { ...DEFAULT_SIDE_DESIGN },

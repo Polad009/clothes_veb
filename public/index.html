@@ -3,8 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ATELIER</title>
-  <meta name="description" content="Atelier — Gündəlik geyim kolleksiyası və öz dizaynını yarat.">
+  <title>HORVVALLE — Lüks Moda & Fərdi Dərzilik Atelyesi</title>
+  <meta name="description" content="HORVVALLE — Lüks geyim kolleksiyası və canlı 3D dizayn studiyası.">
+  <meta http-equiv="refresh" content="0; url=http://localhost:3000/">
+  <script>
+    if (typeof window !== 'undefined' && window.location.port !== '3000') {
+      window.location.replace('http://localhost:3000/');
+    }
+  </script>
   
   <!-- CSS Styles -->
   <link rel="stylesheet" href="css/style.css">
@@ -14,7 +20,7 @@
 <body>
 
   <!-- =========================================================
-       1. HEADER / NAVBAR (Desktop: Şəkil 1, Mobil: Şəkil 2 & 3)
+       1. HEADER / NAVBAR (Desktop & Mobil)
   ========================================================= -->
   <header class="site-header">
     <div class="container">
@@ -25,20 +31,20 @@
         </button>
 
         <!-- Logo (Desktop: Sol, Mobil: Mərkəz) -->
-        <a href="#home" class="site-logo" onclick="App.navigate('home')">
-          ATELIER
+        <a href="http://localhost:3000/" class="site-logo" style="letter-spacing:0.18em; font-weight:700;">
+          HORVVALLE
         </a>
 
         <!-- Desktop Mərkəz Menyu (Kişi, Qadın, Kolleksiyalar, Studio) -->
         <nav class="main-nav">
-          <a href="#shop" class="nav-link" onclick="Store.setCategory('kişi')">Kişi</a>
-          <a href="#shop" class="nav-link" onclick="Store.setCategory('qadın')">Qadın</a>
-          <a href="#shop" class="nav-link" onclick="Store.setCategory('all')">Kolleksiyalar</a>
-          <a href="#studio" class="nav-link" onclick="App.navigate('studio')">Studio</a>
+          <a href="http://localhost:3000/collections?gender=men" class="nav-link">Kişi</a>
+          <a href="http://localhost:3000/collections?gender=women" class="nav-link">Qadın</a>
+          <a href="http://localhost:3000/collections" class="nav-link">Kolleksiyalar</a>
+          <a href="http://localhost:3000/studio" class="nav-link">Studio</a>
         </nav>
 
         <!-- Sağ Tərəf: Səbət (0) -->
-        <button class="header-cart-btn" onclick="Cart.openDrawer()">
+        <button class="header-cart-btn" onclick="window.location.href='http://localhost:3000/'">
           Səbət (<span id="cartCountDisplay">0</span>)
         </button>
       </div>
@@ -47,28 +53,28 @@
 
   <!-- Mobil Açılan Menyu Drawer -->
   <div id="mobileNavDrawer" style="position: fixed; top: 56px; left: 0; right: 0; background: #fff; border-bottom: 1px solid var(--border-color); padding: 20px 32px; display: none; flex-direction: column; gap: 16px; z-index: 99; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
-    <a href="#shop" class="nav-link" onclick="Store.setCategory('kişi'); App.closeMobileMenu();">Kişi</a>
-    <a href="#shop" class="nav-link" onclick="Store.setCategory('qadın'); App.closeMobileMenu();">Qadın</a>
-    <a href="#shop" class="nav-link" onclick="Store.setCategory('all'); App.closeMobileMenu();">Kolleksiyalar</a>
-    <a href="#studio" class="nav-link" onclick="App.navigate('studio'); App.closeMobileMenu();">Studio</a>
-    <a href="#tracking" class="nav-link" onclick="App.navigate('tracking'); App.closeMobileMenu();">Sifariş İzləmə</a>
+    <a href="http://localhost:3000/collections?gender=men" class="nav-link">Kişi</a>
+    <a href="http://localhost:3000/collections?gender=women" class="nav-link">Qadın</a>
+    <a href="http://localhost:3000/collections" class="nav-link">Kolleksiyalar</a>
+    <a href="http://localhost:3000/studio" class="nav-link">Studio</a>
+    <a href="http://localhost:3000/track" class="nav-link">Sifariş İzləmə</a>
   </div>
 
   <!-- =========================================================
-       VIEW 1: ANA SƏHİFƏ (HOME VIEW - Şəkil 2 & Orijinal)
+       VIEW 1: ANA SƏHİFƏ (HOME VIEW - HORVVALLE)
   ========================================================= -->
   <main id="view-home" class="view-section">
     <!-- Hero Section -->
     <section class="hero-section">
       <div class="container">
-        <div class="hero-eyebrow">Yeni mövsüm</div>
-        <h1 class="hero-title">Sadə. Dəqiq.<br>Sənin.</h1>
-        <p class="hero-subtitle">Gündəlik geyim kolleksiyası və öz dizaynını yarat.</p>
+        <div class="hero-eyebrow">HORVVALLE ATELIER · 2026 COUTURE · BAKI</div>
+        <h1 class="hero-title">GEYİMDƏ LÜKS<br>VƏ FƏRDİ İMZA</h1>
+        <p class="hero-subtitle">Horvvalle fərdi atelyesi: 100% daranmış premium pambıq köynəklər, dəqiq kəsimli şalvarlar və geyiminizi sənət əsərinə çevirən canlı 3D çap studiyası.</p>
         <div class="hero-buttons-row">
-          <button class="btn-pill-black" onclick="App.navigate('shop')">
+          <button class="btn-pill-black" onclick="window.location.href='http://localhost:3000/collections'">
             Kolleksiyaya bax
           </button>
-          <button class="btn-pill-outline" onclick="App.navigate('studio')">
+          <button class="btn-pill-outline" onclick="window.location.href='http://localhost:3000/studio'">
             Dizayn et
           </button>
         </div>
@@ -174,20 +180,20 @@
               <div class="config-label">1. Geyim Növü</div>
               <div class="config-options-grid">
                 <button class="studio-style-btn selected" data-style="classic-tee" onclick="Studio.selectStyle('classic-tee')">
-                  <strong>Classic Tee</strong>
-                  <div style="font-size: 0.8rem; color: #777;">35 ₼</div>
+                  <strong>T-shirt Regular (Süprəm)</strong>
+                  <div style="font-size: 0.8rem; color: #777;">14 ₼</div>
                 </button>
                 <button class="studio-style-btn" data-style="heavy-hoodie" onclick="Studio.selectStyle('heavy-hoodie')">
-                  <strong>Heavy Hoodie</strong>
-                  <div style="font-size: 0.8rem; color: #777;">65 ₼</div>
+                  <strong>Hody qalın (3iplik)</strong>
+                  <div style="font-size: 0.8rem; color: #777;">32 ₼</div>
                 </button>
                 <button class="studio-style-btn" data-style="oversize-tee" onclick="Studio.selectStyle('oversize-tee')">
-                  <strong>Oversize Tee</strong>
-                  <div style="font-size: 0.8rem; color: #777;">40 ₼</div>
+                  <strong>Oversize T-shirt (Süprəm / 2iplik)</strong>
+                  <div style="font-size: 0.8rem; color: #777;">18 ₼</div>
                 </button>
                 <button class="studio-style-btn" data-style="essential-tee" onclick="Studio.selectStyle('essential-tee')">
-                  <strong>Essential Tee</strong>
-                  <div style="font-size: 0.8rem; color: #777;">35 ₼</div>
+                  <strong>Polo - qısaqol</strong>
+                  <div style="font-size: 0.8rem; color: #777;">19 ₼</div>
                 </button>
               </div>
             </div>

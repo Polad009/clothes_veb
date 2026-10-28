@@ -1,5 +1,9 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { usePathname } from "next/navigation";
 
 export function PageTransition({ children }: { children: React.ReactNode }) {
-  return <div className="flex-grow flex flex-col w-full">{children}</div>;
+  return <>{children}</>;
 }

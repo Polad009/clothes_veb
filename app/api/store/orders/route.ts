@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readStoreDb, writeStoreDb, StoreOrder } from '@/lib/storeDb';
+import { notifyNewOrder } from '@/lib/notifications/orderNotifier';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,6 +55,11 @@ export async function POST(req: NextRequest) {
           garmentColor: item.color,
           size: item.size,
           price: item.price,
+          placement: item.customData.placement || 'Sinə (Mərkəz)',
+          customerNote: item.customData.customerNote || '',
+          originalImage: item.customData.uploadedImage || item.customData.originalImage || '',
+          previewImage: item.customData.previewImage || '',
+          customData: item.customData,
           frontDesign: item.customData.frontDesign || {},
           backDesign: item.customData.backDesign || {},
           status: 'Pending Print',
@@ -63,6 +69,10 @@ export async function POST(req: NextRequest) {
     }
 
     writeStoreDb(db);
+
+    // Send instant free mobile notification (Telegram / NTFY)
+    notifyNewOrder(newOrder).catch(() => {});
+
     return NextResponse.json({ success: true, order: newOrder });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -84,6 +94,35 @@ export async function PATCH(req: NextRequest) {
 
     writeStoreDb(db);
     return NextResponse.json({ success: true, order: db.orders[orderIndex] });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+    const clearAll = searchParams.get('clearAll');
+
+    const db = readStoreDb();
+
+    if (clearAll === 'true') {
+      db.orders = [];
+      db.podOrders = [];
+      writeStoreDb(db);
+      return NextResponse.json({ success: true, message: 'Bütün sifarişlər təmizləndi.' });
+    }
+
+    if (!id) {
+      return NextResponse.json({ error: 'Sifariş ID-si tələb olunur.' }, { status: 400 });
+    }
+
+    db.orders = db.orders.filter((o) => o.id !== id);
+    db.podOrders = (db.podOrders || []).filter((p) => p.orderId !== id && p.id !== id);
+
+    writeStoreDb(db);
+    return NextResponse.json({ success: true, message: 'Sifariş silindi.' });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

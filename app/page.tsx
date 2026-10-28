@@ -4,22 +4,37 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Palette, ShieldCheck, Truck, RotateCcw, Award, CheckCircle2 } from "lucide-react";
+import dynamic from "next/dynamic";
+import Image from "next/image";
 import { MOCK_PRODUCTS } from "@/data/products";
 import { ProductCard } from "@/components/ProductCard";
 import { Hero } from "@/components/Hero";
-import { UnwovenLoom } from "@/components/UnwovenLoom";
 import storeData from "@/data/storeData.json";
+
+const UnwovenLoom = dynamic(
+  () => import("@/components/UnwovenLoom").then((mod) => mod.UnwovenLoom),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-80 flex items-center justify-center bg-[#FAF7F2]">
+        <div className="w-8 h-8 rounded-full border-2 border-stone-300 border-t-stone-800 animate-spin" />
+      </div>
+    ),
+  }
+);
 import { useLanguage } from "@/context/LanguageContext";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useStoreData } from "@/context/StoreDataContext";
 
 export default function Home() {
   const { t } = useLanguage();
   const { formatPrice } = useCurrency();
+  const { products, content } = useStoreData();
   const [activeCategory, setActiveCategory] = useState<"all" | "koynek" | "hudi" | "salvar" | "aksesuar">("all");
-  const hero = storeData.content?.hero || {};
-  const podBanner = (storeData.content as any)?.podBanner || {};
-  const promoBanner = storeData.content?.promoBanner;
-  const campaignSecondary = storeData.content?.campaignSecondary;
+  const hero = content?.hero || storeData.content?.hero || {};
+  const podBanner = content?.podBanner || (storeData.content as any)?.podBanner || {};
+  const promoBanner = content?.promoBanner || storeData.content?.promoBanner;
+  const campaignSecondary = content?.campaignSecondary || storeData.content?.campaignSecondary;
   const [badgeIndex, setBadgeIndex] = useState(0);
 
   const [introRevealed, setIntroRevealed] = useState(true);
@@ -28,7 +43,7 @@ export default function Home() {
     hero.tag || "HORVVALLE ATELIER · 2026 COUTURE · BAKI",
     "100% XALİS DARANMIŞ PAMBIQ (220-380 GSM)",
     "CANLI 3D DTG ÇAP STUDİYASI — BAKI",
-    "60 ₼ VƏ ÜZƏRİ PULSUZ ÇATDIRILMA",
+    "BAKI VƏ SUMQAYIT ƏRAZİSİNƏ PULSUZ ÇATDIRILMA",
   ];
 
   useEffect(() => {
@@ -38,9 +53,11 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [badgeMessages.length]);
 
-  const filteredProducts = activeCategory === "all"
-    ? MOCK_PRODUCTS
-    : MOCK_PRODUCTS.filter(p => p.category === activeCategory);
+  const filteredProducts = (
+    activeCategory === "all"
+      ? products
+      : products.filter((p) => p.category === activeCategory)
+  ).slice(0, 12);
 
   const categoryHighlights = [
     {
@@ -91,7 +108,7 @@ export default function Home() {
 
 
   return (
-    <div className="w-full flex flex-col text-[#1A1517] overflow-x-clip -mt-[112px] sm:-mt-[120px] bg-[#FAF7F2]">
+    <div className="w-full flex flex-col text-[#1A1517] overflow-x-clip bg-[#FAF7F2]">
       {/* =========================================================================
           1. FULL-VIEWPORT HALLY REFERENCE HERO WITH INTEGRATED NAVBAR & SLIDER
           ========================================================================= */}
@@ -160,10 +177,13 @@ export default function Home() {
                     prefetch={true}
                     className="block relative aspect-[4/3] rounded-2xl overflow-hidden bg-stone-100 my-4 cursor-pointer"
                   >
-                    <img
+                    <Image
                       src={cat.image}
                       alt={cat.title}
-                      className="w-full h-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-108"
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-108"
+                      loading="lazy"
                     />
                     <div className="absolute inset-0 bg-stone-900/0 group-hover:bg-stone-900/10 transition-colors" />
                     <div className="absolute bottom-2.5 right-2.5 px-2.5 py-1 rounded-full bg-white/95 backdrop-blur-md border border-stone-200/80 text-[10px] font-semibold text-stone-800 shadow-sm flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -259,7 +279,7 @@ export default function Home() {
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-8"
         >
           <AnimatePresence mode="popLayout">
-            {filteredProducts.map((product) => (
+            {filteredProducts.map((product, idx) => (
               <motion.div
                 key={product.id}
                 layout
@@ -268,7 +288,7 @@ export default function Home() {
                 exit={{ opacity: 0, scale: 0.94 }}
                 transition={{ duration: 0.22, ease: "easeOut" }}
               >
-                <ProductCard product={product} variant="light" />
+                <ProductCard product={product} variant="light" priority={idx < 4} />
               </motion.div>
             ))}
           </AnimatePresence>
@@ -280,7 +300,7 @@ export default function Home() {
             prefetch={true}
             className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-stone-900 hover:bg-black text-white font-medium text-xs uppercase tracking-wider transition-all shadow-md group"
           >
-            <span>Bütün Kolleksiyanı Gör ({MOCK_PRODUCTS.length} Məhsul)</span>
+            <span>Bütün Kolleksiyanı Gör ({products.length} Məhsul)</span>
             <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
@@ -336,10 +356,13 @@ export default function Home() {
             {/* Right Visual Demo Mockup */}
             <div className="lg:col-span-5 relative">
               <div className="relative aspect-square max-w-md mx-auto rounded-3xl overflow-hidden border border-stone-200/80 bg-white shadow-apple p-6 flex items-center justify-center">
-                <img
+                <Image
                   src={podBanner.image || "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?q=80&w=800&auto=format&fit=crop"}
                   alt="Custom Print Cotton Tee"
-                  className="w-full h-full object-contain"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 450px"
+                  className="object-contain p-6"
+                  loading="lazy"
                 />
 
                 {/* Simulated Custom Print Overlay */}
@@ -367,12 +390,15 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Banner 1: Chino & Cins Şalvarlar */}
           <div data-cms-section="promoBanner" data-cms-title="Şalvar Kolleksiyası Banneri" className="relative aspect-[4/5] sm:aspect-[16/11] rounded-3xl overflow-hidden border border-stone-200/80 group bg-white shadow-2xs">
-            <img
+            <Image
               src={promoBanner?.image || "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?q=80&w=1200&auto=format&fit=crop"}
               alt="Şalvar Kolleksiyası"
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-103"
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover transition-transform duration-700 group-hover:scale-103"
+              loading="lazy"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-6 sm:p-10 text-white">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-6 sm:p-10 text-white z-10">
               <span className="text-xs font-semibold text-stone-300 uppercase tracking-wider">
                 {promoBanner?.tag || "PREMIUM KƏSİMLƏR"}
               </span>
@@ -397,12 +423,15 @@ export default function Home() {
 
           {/* Banner 2: Premium 3iplik Hudi Kolleksiyası */}
           <div data-cms-section="campaignSecondary" data-cms-title="Hudi Kolleksiyası Banneri" className="relative aspect-[4/5] sm:aspect-[16/11] rounded-3xl overflow-hidden border border-stone-200/80 group bg-white shadow-2xs">
-            <img
+            <Image
               src={campaignSecondary?.image || "/images/products/heavyweight-hoodie-black/mockup.jpg"}
               alt="Hudi Kolleksiyası"
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-103"
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover transition-transform duration-700 group-hover:scale-103"
+              loading="lazy"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-6 sm:p-10 text-white">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-6 sm:p-10 text-white z-10">
               <span className="text-xs font-semibold text-stone-300 uppercase tracking-wider">
                 {campaignSecondary?.tag || "PREMIUM 3İPLİK"}
               </span>

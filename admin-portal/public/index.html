@@ -4,16 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Horvvalle — İdarəetmə və Əsas Admin Portalı</title>
+  <!-- Official Horvvalle Favicon & App Icon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/brand/favicon-32x32.png?v=3">
+  <link rel="icon" type="image/png" sizes="512x512" href="/brand/favicon.png?v=3">
+  <link rel="shortcut icon" href="/brand/favicon.png?v=3">
+  <link rel="apple-touch-icon" href="/brand/favicon.png?v=3">
   <!-- Tailwind CSS & Google Fonts -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Fraunces:wght@400;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-    body { background-color: #f8fafc; color: #0f172a; font-family: 'Inter', sans-serif; }
-    .font-serif-luxury { font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; }
+    body { background-color: #FAF7F2; color: #1A1517; font-family: 'Instrument Sans', 'Inter', sans-serif; }
+    .font-brand { font-family: 'EB Garamond', Georgia, serif; letter-spacing: 0.18em; }
+    .font-serif-luxury { font-family: 'EB Garamond', 'Fraunces', Georgia, serif; }
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #f1f5f9; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
@@ -212,36 +218,42 @@
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col font-sans antialiased text-slate-800 bg-slate-50">
+<body class="min-h-screen flex flex-col font-sans antialiased text-[#1A1517] bg-[#FAF7F2]">
 
-  <!-- Top Global Header -->
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 px-6 py-3.5 flex items-center justify-between shadow-xs">
+  <!-- Top Global Header: Horvvalle Atelier Control -->
+  <header class="bg-[#1A1517] text-[#FAF7F2] border-b border-[#D4AF37]/20 sticky top-0 z-40 px-6 py-3.5 flex items-center justify-between shadow-md">
     <div class="flex items-center gap-3.5">
-      <div class="w-9 h-9 rounded-full border border-[#3D1420] bg-[#F6F2EA] flex items-center justify-center text-[#3D1420] font-serif text-sm font-bold shadow-xs">
-        W
+      <div class="w-10 h-10 rounded-xl bg-[#0E0A0B] border border-[#D4AF37]/40 flex items-center justify-center p-1.5 shadow-sm shrink-0">
+        <img src="/brand/icon-light.png" alt="HORVVALLE Monogram" class="w-full h-full object-contain filter drop-shadow-[0_2px_8px_rgba(212,175,55,0.4)]" />
       </div>
       <div>
         <div class="flex items-center gap-2.5">
-          <span class="text-xl font-serif-luxury tracking-normal text-slate-900 leading-none">Horvvalle</span>
-          <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-900 text-white shadow-2xs">
-            Detallı İdarəetmə Portalı
+          <img src="/brand/wordmark-light.png" alt="HORVVALLE" class="h-5 sm:h-5.5 w-auto object-contain filter drop-shadow-[0_2px_8px_rgba(212,175,55,0.25)]" />
+          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#FAF7F2]/10 text-[#E6C280] border border-[#D4AF37]/30 shadow-2xs font-mono">
+            Atelier Control
           </span>
         </div>
-        <span class="text-[11px] text-slate-400">Canlı Məlumatlar · Məhsul, DTF Çap, Sifariş və CRM İdarəsi</span>
+        <span class="text-[11px] text-[#FAF7F2]/60">2026 Couture · Canlı Məlumatlar · Məhsul, 3D Çap, Sifariş və CRM İdarəsi</span>
       </div>
     </div>
 
     <!-- Quick Stats & Store Link -->
     <div class="flex items-center gap-4">
-      <div class="hidden md:flex items-center gap-5 text-xs text-slate-600 pr-4 border-r border-slate-200">
-        <div>Dövriyyə: <strong id="statRevenue" class="text-emerald-700 font-extrabold">0.00 ₼</strong></div>
-        <div>Məhsullar: <strong id="statProducts" class="text-slate-900 font-bold">0</strong></div>
-        <div>Sifarişlər: <strong id="statOrders" class="text-slate-900 font-bold">0</strong></div>
-        <div>3D Çaplar: <strong id="statPod" class="text-blue-700 font-bold">0</strong></div>
+      <div class="hidden md:flex items-center gap-5 text-xs text-[#FAF7F2]/75 pr-4 border-r border-white/10">
+        <div>Dövriyyə: <strong id="statRevenue" class="text-[#E6C280] font-extrabold">0.00 ₼</strong></div>
+        <div>Məhsullar: <strong id="statProducts" class="text-[#FAF7F2] font-bold">0</strong></div>
+        <div>Sifarişlər: <strong id="statOrders" class="text-[#FAF7F2] font-bold">0</strong></div>
+        <div>3D Çaplar: <strong id="statPod" class="text-amber-300 font-bold">0</strong></div>
       </div>
 
-      <a href="http://localhost:3000" target="_blank" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#3D1420] hover:bg-[#280D17] text-[#F6F2EA] text-xs font-bold transition shadow-xs">
-        <i data-lucide="external-link" class="w-4 h-4"></i>
+      <!-- Shopify Order Sound Test Button -->
+      <button type="button" onclick="testOrderSound()" id="soundTestBtn" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-[#FAF7F2] text-xs font-bold transition border border-white/15 cursor-pointer shadow-2xs" title="Sifariş gəlişi səsini (Shopify Cha-Ching) yoxlayın">
+        <i data-lucide="volume-2" class="w-4 h-4 text-[#E6C280]"></i>
+        <span>Səs Sınağı (Shopify)</span>
+      </button>
+
+      <a href="http://localhost:3000" target="_blank" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#D4AF37] to-[#B08D57] hover:from-[#E6C280] hover:to-[#D4AF37] text-[#1A1517] text-xs font-bold transition shadow-sm hover:scale-[1.02]">
+        <i data-lucide="external-link" class="w-4 h-4 text-[#1A1517]"></i>
         <span>Saytı Aç (Canlı)</span>
       </a>
     </div>
@@ -257,46 +269,46 @@
           ƏSAS BÖLMƏLƏR
         </div>
 
-        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item active w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition bg-slate-900 text-white shadow-xs">
-          <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item active w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition bg-[#1A1517] text-[#FAF7F2] border border-[#D4AF37]/40 shadow-xs">
+          <i data-lucide="layout-dashboard" class="w-4 h-4 text-[#D4AF37]"></i>
           <span>İcmal & Analitika</span>
         </button>
 
-        <button onclick="switchTab('products')" id="nav-products" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-black hover:bg-slate-100 transition">
+        <button onclick="switchTab('products')" id="nav-products" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-[#1A1517] hover:bg-[#FAF7F2] transition border border-transparent">
           <i data-lucide="package" class="w-4 h-4"></i>
           <span>Məhsul Kataloqu</span>
         </button>
 
-        <button onclick="switchTab('orders')" id="nav-orders" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-black hover:bg-slate-100 transition">
+        <button onclick="switchTab('orders')" id="nav-orders" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-[#1A1517] hover:bg-[#FAF7F2] transition border border-transparent">
           <i data-lucide="shopping-bag" class="w-4 h-4"></i>
           <span>Sifarişlər & Fakturalar</span>
         </button>
 
-        <button onclick="switchTab('pod')" id="nav-pod" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-black hover:bg-slate-100 transition">
+        <button onclick="switchTab('pod')" id="nav-pod" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-[#1A1517] hover:bg-[#FAF7F2] transition border border-transparent">
           <i data-lucide="printer" class="w-4 h-4"></i>
           <span>Fərdi 3D Çap Atelyesi</span>
         </button>
 
-        <div class="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-3 pt-4 pb-1">
+        <div class="text-[10px] font-bold uppercase tracking-widest text-[#B08D57] px-3 pt-4 pb-1">
           MARKETİNQ & MÜŞTƏRİ
         </div>
 
-        <button onclick="switchTab('promos')" id="nav-promos" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-black hover:bg-slate-100 transition">
+        <button onclick="switchTab('promos')" id="nav-promos" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-[#1A1517] hover:bg-[#FAF7F2] transition border border-transparent">
           <i data-lucide="tag" class="w-4 h-4"></i>
           <span>Promo-kodlar & Kuponlar</span>
         </button>
 
-        <button onclick="switchTab('customers')" id="nav-customers" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-black hover:bg-slate-100 transition">
+        <button onclick="switchTab('customers')" id="nav-customers" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-[#1A1517] hover:bg-[#FAF7F2] transition border border-transparent">
           <i data-lucide="users" class="w-4 h-4"></i>
           <span>Müştərilər (CRM)</span>
         </button>
 
-        <button onclick="switchTab('cms')" id="nav-cms" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-black hover:bg-slate-100 transition">
+        <button onclick="switchTab('cms')" id="nav-cms" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-[#1A1517] hover:bg-[#FAF7F2] transition border border-transparent">
           <i data-lucide="edit-3" class="w-4 h-4"></i>
           <span>Mətnlər & Bannerlər</span>
         </button>
 
-        <button onclick="switchTab('settings')" id="nav-settings" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-black hover:bg-slate-100 transition">
+        <button onclick="switchTab('settings')" id="nav-settings" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-[#1A1517] hover:bg-[#FAF7F2] transition border border-transparent">
           <i data-lucide="sliders" class="w-4 h-4"></i>
           <span>Mağaza Parametrləri</span>
         </button>
@@ -414,7 +426,7 @@
 
             <div class="p-4 rounded-xl bg-slate-900 text-white space-y-2">
               <div class="text-xs font-bold flex items-center gap-2 text-amber-400">
-                <i data-lucide="sparkles" class="w-4 h-4"></i>
+                <i data-lucide="printer" class="w-4 h-4"></i>
                 <span>DTF Çap Avtomatlaşdırması</span>
               </div>
               <p class="text-[11px] text-slate-300 leading-relaxed">
@@ -492,7 +504,7 @@
       <!-- TAB 2: ORDERS & INVOICES (SİFARİŞLƏR VƏ FAKTURASI)       -->
       <!-- ======================================================== -->
       <section id="tab-orders" class="tab-content hidden space-y-6">
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 class="text-lg font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
               <i data-lucide="shopping-bag" class="w-5 h-5 text-emerald-600"></i>
@@ -502,8 +514,12 @@
               Müştərilərin verdiyi bütün sifarişlər, çatdırılma ünvanları, kuryer təlimatları və çap qaimələri.
             </p>
           </div>
-          <div class="flex items-center gap-2">
-            <span class="text-xs font-bold text-slate-500">Cəmi: <strong id="ordersTotalCount" class="text-slate-900">0</strong> sifariş</span>
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200/80">Cəmi: <strong id="ordersTotalCount" class="text-slate-900">0</strong> sifariş</span>
+            <button type="button" onclick="clearAllOrders()" class="px-3.5 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 hover:text-red-800 text-xs font-bold transition flex items-center gap-1.5 border border-red-200 shadow-2xs cursor-pointer active:scale-98" title="Bütün sınaq sifarişlərini birdəfəlik təmizlə və dövriyyəni sıfırla">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5 text-red-600"></i>
+              <span>Sınaq Sifarişlərini Sıfırla</span>
+            </button>
           </div>
         </div>
 
@@ -690,7 +706,7 @@
             </div>
             <div class="space-y-1">
               <label class="text-[11px] font-bold text-slate-500 uppercase">Lookbook Qiymət (₼)</label>
-              <input type="number" id="cmsHeroLookbookPrice" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900" />
+              <input type="number" step="0.01" min="0" id="cmsHeroLookbookPrice" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900" />
             </div>
             <div class="col-span-2 space-y-1">
               <label class="text-[11px] font-bold text-slate-500 uppercase">Lookbook Şəkli</label>
@@ -764,7 +780,7 @@
 
               <div class="space-y-1">
                 <label class="text-xs font-bold text-slate-700">Pulsuz Çatdırılma Limiti (₼)</label>
-                <input type="number" id="settingFreeShip" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900" />
+                <input type="number" step="0.01" min="0" id="settingFreeShip" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900" />
               </div>
             </div>
 
@@ -815,9 +831,12 @@
   <!-- MODAL: PRODUCT EDIT & ADD (Tam Xarakteristikalar)         -->
   <!-- ======================================================== -->
   <div id="productModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-white rounded-3xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl border border-slate-200 my-auto">
+    <div class="bg-white rounded-3xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl border border-slate-200 my-auto">
       <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50 rounded-t-3xl">
-        <h3 id="productModalTitle" class="text-sm font-black uppercase text-slate-900 tracking-wider">MƏHSUL ƏLAVƏ ET / REDAKTƏ</h3>
+        <div>
+          <h3 id="productModalTitle" class="text-sm font-black uppercase text-slate-900 tracking-wider">MƏHSUL ƏLAVƏ ET / REDAKTƏ</h3>
+          <p class="text-[11px] text-slate-500 mt-0.5">Xarakteristikalar, avtomatik SKU və rənglər üzrə fotoları daxil edin</p>
+        </div>
         <button onclick="closeProductModal()" class="p-2 rounded-xl text-slate-400 hover:text-black hover:bg-slate-200 transition">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
@@ -826,21 +845,36 @@
       <form id="productForm" onsubmit="handleProductSubmit(event)" class="p-6 space-y-4 overflow-y-auto flex-1 text-xs">
         <input type="hidden" id="prodId" />
 
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="space-y-1">
             <label class="font-bold text-slate-700">Məhsulun Adı *</label>
-            <input type="text" id="prodName" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-slate-900" />
+            <input type="text" id="prodName" required placeholder="Məs: Klassik Vintage Heavyweight Köynək" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-slate-900" />
           </div>
           <div class="space-y-1">
-            <label class="font-bold text-slate-700">Model Kodu / SKU</label>
-            <input type="text" id="prodRef" placeholder="Məs: HV-SH-001" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:border-slate-900" />
+            <div class="flex items-center justify-between">
+              <label class="font-bold text-slate-700 flex items-center gap-1.5">
+                <span>Model Kodu / SKU</span>
+                <span class="text-[9px] text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded font-bold border border-emerald-200/80">Avtomatik</span>
+              </label>
+              <button type="button" onclick="regenerateSKU()" class="text-[10px] text-slate-500 hover:text-slate-900 font-bold flex items-center gap-1 hover:underline transition cursor-pointer">
+                <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+                <span>Yeni Kod Al</span>
+              </button>
+            </div>
+            <div class="relative">
+              <input type="text" id="prodRef" placeholder="Məs: HV-TSH-2026-101" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-mono font-bold focus:outline-none focus:border-slate-900 pr-10 transition" />
+              <button type="button" onclick="regenerateSKU()" title="Yeni SKU istehsal et" class="absolute right-2 top-2 p-1 text-slate-400 hover:text-amber-600 transition cursor-pointer">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-slate-500"></i>
+              </button>
+            </div>
+            <span class="text-[10px] text-slate-400 block">Sistem kateqoriyaya uyğun unikal kod təyin edir, istəsəniz əl ilə dəyişə bilərsiniz.</span>
           </div>
         </div>
 
-        <div class="grid grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="space-y-1">
             <label class="font-bold text-slate-700">Kateqoriya *</label>
-            <select id="prodCategory" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-bold focus:outline-none focus:border-slate-900">
+            <select id="prodCategory" required onchange="handleCategoryChange()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-bold focus:outline-none focus:border-slate-900 cursor-pointer">
               <option value="koynek">T-Shirt & Köynək</option>
               <option value="hudi">Hudi & Sviter</option>
               <option value="salvar">Şalvar & Şortik</option>
@@ -849,8 +883,26 @@
           </div>
 
           <div class="space-y-1">
-            <label class="font-bold text-slate-700">Kəsim / Fit</label>
-            <input type="text" id="prodFit" placeholder="Məs: Oversize, Slim Chino" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900" />
+            <label class="font-bold text-slate-700">Kəsim / Fit (Rəsmi 16 Model)</label>
+            <input type="text" id="prodFit" list="officialFitsList" placeholder="Seçin və ya yazın (məs: Hody qalın (3iplik))" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900" />
+            <datalist id="officialFitsList">
+              <option value="T-shirt Regular (Süprəm)">
+              <option value="T-shirt Regular (2iplik / TS Parça)">
+              <option value="Oversize T-shirt (Süprəm / 2iplik)">
+              <option value="Polo - qısaqol">
+              <option value="Polo - uzunqol">
+              <option value="Sviter - nazik (2iplik)">
+              <option value="Sviter - qalın (3iplik)">
+              <option value="Hody nazik (2iplik)">
+              <option value="Hody qalın (3iplik)">
+              <option value="Yarımzamok nazik (2iplik)">
+              <option value="Yarımzamok qalın (3iplik)">
+              <option value="Balonka">
+              <option value="Şalvar nazik (2iplik)">
+              <option value="Şalvar qalın (3iplik / TS Parça)">
+              <option value="Kepka - nazik">
+              <option value="Kepka - qalın">
+            </datalist>
           </div>
 
           <div class="space-y-1">
@@ -862,11 +914,11 @@
         <div class="grid grid-cols-2 gap-4">
           <div class="space-y-1">
             <label class="font-bold text-slate-700">Qiymət (₼) *</label>
-            <input type="number" step="0.5" id="prodPrice" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900" />
+            <input type="number" step="0.01" min="0" id="prodPrice" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900" />
           </div>
           <div class="space-y-1">
             <label class="font-bold text-slate-700">Əvvəlki / Çəkilmiş Qiymət (₼)</label>
-            <input type="number" step="0.5" id="prodComparePrice" placeholder="Endirimsiz qiymət" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900" />
+            <input type="number" step="0.01" min="0" id="prodComparePrice" placeholder="Endirimsiz qiymət" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900" />
           </div>
         </div>
 
@@ -968,13 +1020,13 @@
 
           <div class="space-y-1">
             <label class="font-bold text-slate-700">Endirim Dəyəri *</label>
-            <input type="number" step="0.5" id="promoValueInput" required placeholder="Məs: 15" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900" />
+            <input type="number" step="0.01" min="0" id="promoValueInput" required placeholder="Məs: 15" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900" />
           </div>
         </div>
 
         <div class="space-y-1">
           <label class="font-bold text-slate-700">Minimum Səbət Məbləği (₼)</label>
-          <input type="number" id="promoMinAmountInput" placeholder="Məs: 50" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900" />
+          <input type="number" step="0.01" min="0" id="promoMinAmountInput" placeholder="Məs: 50" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900" />
         </div>
 
         <div class="space-y-1">
@@ -1025,16 +1077,297 @@
     let GALLERY_CACHE = [];
     let currentGalleryTargetInput = null;
     let currentCategoryFilter = 'all';
+    let knownOrderIds = new Set();
+    let isInitialFetch = true;
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtxClass) {
+          audioCtx = new AudioCtxClass();
+        }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    // Official Shopify Sale "Cha-Ching" Audio File
+    const shopifyAudio = new Audio('/sounds/shopify-sale.mp3');
+    shopifyAudio.preload = 'auto';
+
+    let lastAdminSoundTimestamp = 0;
+
+    // Play Exact Shopify Cash Register Sound (Single-play guaranteed with multi-tab & concurrency debounce)
+    function playShopifyCashRegisterSound() {
+      const now = Date.now();
+      // Multi-tab and intra-tab deduplication guard (4000ms cooldown)
+      let lastTabSound = 0;
+      try {
+        lastTabSound = parseInt(localStorage.getItem('horvvalle_last_admin_sound_ts') || '0', 10);
+      } catch (e) {}
+
+      if (now - lastAdminSoundTimestamp < 4000 || now - lastTabSound < 4000) {
+        console.log('Bildiriş səsi deduplikasiya edildi (cooldown aktivdir).');
+        return;
+      }
+      lastAdminSoundTimestamp = now;
+      try {
+        localStorage.setItem('horvvalle_last_admin_sound_ts', now.toString());
+      } catch (e) {}
+
+      try {
+        if (shopifyAudio) {
+          shopifyAudio.currentTime = 0;
+          shopifyAudio.volume = 1.0;
+          const playPromise = shopifyAudio.play();
+          if (playPromise !== undefined) {
+            playPromise.then(() => {
+              console.log('Shopify sale MP3 played successfully');
+            }).catch(err => {
+              // Only fallback if not an AbortError from rapid click/tab change
+              if (err && err.name !== 'AbortError') {
+                console.warn('MP3 direct play blocked, falling back to synthesizer:', err);
+                playSynthesizedFallback();
+              }
+            });
+            return;
+          }
+        }
+      } catch (e) {
+        playSynthesizedFallback();
+      }
+    }
+
+    // Web Audio Fallback Synthesizer
+    function playSynthesizedFallback() {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+
+        const now = ctx.currentTime;
+
+        // Mechanical cash register drawer slide & snap
+        const bufferSize = Math.floor(ctx.sampleRate * 0.08);
+        const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          output[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.35));
+        }
+        const noise = ctx.createBufferSource();
+        noise.buffer = noiseBuffer;
+
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(1400, now);
+        filter.Q.setValueAtTime(2.5, now);
+
+        const noiseGain = ctx.createGain();
+        noiseGain.gain.setValueAtTime(0.4, now);
+        noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.075);
+
+        noise.connect(filter);
+        filter.connect(noiseGain);
+        noiseGain.connect(ctx.destination);
+        noise.start(now);
+
+        // High Register Cash Bell Chimes
+        playBellChime(ctx, now + 0.045, 1174.66, 0.45, 0.55); // D6
+        playBellChime(ctx, now + 0.045, 2349.32, 0.20, 0.40); // D7
+        playBellChime(ctx, now + 0.12, 1760.00, 0.65, 1.25); // A6
+        playBellChime(ctx, now + 0.12, 3520.00, 0.30, 0.85); // A7
+        playBellChime(ctx, now + 0.13, 2093.00, 0.40, 1.10); // C7
+      } catch (err) {
+        console.warn('Audio playback error:', err);
+      }
+    }
+
+    function playBellChime(ctx, startTime, freq, gainVal, duration) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, startTime);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.996, startTime + duration);
+
+      gain.gain.setValueAtTime(gainVal, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(startTime);
+      osc.stop(startTime + duration);
+    }
+
+    function testOrderSound() {
+      playShopifyCashRegisterSound();
+      const firstProd = (STORE_DATA?.products && STORE_DATA.products[0]) || null;
+      const testImg = firstProd?.colors?.[0]?.image || firstProd?.image || '/images/uploads/Gemini_Generated_Image_bzg09hb_1792622301541.jpg';
+      const testName = firstProd?.name || '911 GT3 RS Oversize T-Shirt';
+
+      showNewOrderToast({
+        id: 'TEST-ORD-01',
+        customer: { fullName: 'Sınaq Müştəri' },
+        total: 28.00,
+        items: [{
+          name: testName,
+          image: testImg,
+          quantity: 1,
+          price: 28.00
+        }]
+      }, true);
+    }
+
+    function showNewOrderToast(order, isTest = false) {
+      const firstItem = (order.items && order.items[0]) || null;
+      let productImage = firstItem?.image || firstItem?.customData?.previewImage || firstItem?.customDesignPreview || '';
+
+      // If item image not found directly, check by productId in catalog
+      if (!productImage && firstItem?.productId && STORE_DATA?.products) {
+        const found = STORE_DATA.products.find(p => p.id === firstItem.productId);
+        if (found) {
+          productImage = found.colors?.[0]?.image || found.image || '';
+        }
+      }
+
+      // If still not found, check first product from store
+      if (!productImage && STORE_DATA?.products && STORE_DATA.products.length > 0) {
+        const fallbackProd = STORE_DATA.products[0];
+        productImage = fallbackProd.colors?.[0]?.image || fallbackProd.image || '';
+      }
+
+      const toast = document.createElement('div');
+      toast.className = 'fixed bottom-6 right-6 z-50 bg-[#1A1517] text-white p-3.5 sm:p-4 rounded-3xl shadow-2xl border-2 border-[#D4AF37] flex items-center gap-3.5 sm:gap-4 transition-all duration-300 transform translate-y-0';
+      toast.style.boxShadow = '0 10px 35px -5px rgba(212, 175, 55, 0.45), 0 0 20px rgba(0,0,0,0.5)';
+
+      const imageHtml = productImage
+        ? `<div class="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-white border border-[#D4AF37]/50 p-0.5 flex items-center justify-center shrink-0 shadow-md overflow-hidden">
+             <img src="${productImage}" alt="Məhsul" class="w-full h-full object-cover rounded-xl select-none pointer-events-none" onerror="this.src='/images/uploads/Gemini_Generated_Image_bzg09hb_1792622301541.jpg'"/>
+           </div>`
+        : `<div class="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-[#D4AF37] to-[#B08D57] flex items-center justify-center text-xl shrink-0 shadow-sm animate-pulse">
+             🛍
+           </div>`;
+
+      const itemNameHtml = firstItem?.name 
+        ? `<div class="text-[11px] text-[#E6C280] font-semibold truncate max-w-[210px]">${firstItem.name}</div>` 
+        : '';
+
+      toast.innerHTML = `
+        ${imageHtml}
+        <div class="space-y-0.5 min-w-0">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-black text-[#E6C280] uppercase tracking-wider">${isTest ? 'SƏS SINAĞI UĞURLUDUR' : 'YENİ SİFARİŞ GƏLDİ!'}</span>
+            <span class="text-[10px] font-mono font-bold bg-white/10 px-2 py-0.5 rounded-full text-slate-300 shrink-0">${order.id}</span>
+          </div>
+          ${itemNameHtml}
+          <div class="text-xs text-slate-200">
+            <strong>${order.customer?.fullName || 'Müştəri'}</strong> · <span class="font-black text-[#E6C280]">${Number(order.total || 0).toFixed(2)} ₼</span>
+          </div>
+        </div>
+        <button onclick="this.parentElement.remove()" class="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 ml-1.5 cursor-pointer transition shrink-0">✕</button>
+      `;
+      document.body.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(12px)';
+        setTimeout(() => toast.remove(), 400);
+      }, 7000);
+    }
+
+    let isCheckingOrders = false;
+
+    function getPersistentNotifiedOrders() {
+      try {
+        const raw = localStorage.getItem('horvvalle_notified_order_ids');
+        return raw ? new Set(JSON.parse(raw)) : new Set();
+      } catch (e) {
+        return new Set();
+      }
+    }
+
+    function recordNotifiedOrder(orderId) {
+      try {
+        const set = getPersistentNotifiedOrders();
+        set.add(orderId);
+        localStorage.setItem('horvvalle_notified_order_ids', JSON.stringify(Array.from(set).slice(-200)));
+      } catch (e) {}
+    }
 
     async function loadData() {
       try {
         const res = await fetch('/api/admin/data');
-        STORE_DATA = await res.json();
+        const data = await res.json();
+        if (!data) return;
+
+        const orders = data.orders || [];
+        const persistentNotified = getPersistentNotifiedOrders();
+        if (isInitialFetch) {
+          orders.forEach(o => {
+            knownOrderIds.add(o.id);
+            persistentNotified.add(o.id);
+          });
+          try {
+            localStorage.setItem('horvvalle_notified_order_ids', JSON.stringify(Array.from(persistentNotified).slice(-200)));
+          } catch (e) {}
+          isInitialFetch = false;
+        }
+
+        STORE_DATA = data;
         renderAll();
       } catch (err) {
         console.error('Data load error:', err);
       }
     }
+
+    async function checkNewOrdersPeriodically() {
+      if (isCheckingOrders) return;
+      isCheckingOrders = true;
+
+      try {
+        const res = await fetch('/api/admin/data');
+        const data = await res.json();
+        if (!data) return;
+
+        const currentOrders = data.orders || [];
+        const persistentNotified = getPersistentNotifiedOrders();
+
+        // Check for newly arrived orders not in current memory AND not yet notified in localStorage
+        const newlyArrived = currentOrders.filter(o => !knownOrderIds.has(o.id) && !persistentNotified.has(o.id));
+
+        if (newlyArrived.length > 0 && !isInitialFetch) {
+          // Immediately mark as known to prevent race conditions across parallel calls or tabs
+          newlyArrived.forEach(o => {
+            knownOrderIds.add(o.id);
+            recordNotifiedOrder(o.id);
+          });
+
+          STORE_DATA = data;
+          renderAll();
+
+          // Play Shopify cash register Cha-ching sound strictly once!
+          playShopifyCashRegisterSound();
+
+          // Show popup toast banner
+          newlyArrived.forEach(o => showNewOrderToast(o));
+        } else if (newlyArrived.length > 0 && isInitialFetch) {
+          currentOrders.forEach(o => {
+            knownOrderIds.add(o.id);
+            recordNotifiedOrder(o.id);
+          });
+          isInitialFetch = false;
+        }
+      } catch (e) {
+      } finally {
+        isCheckingOrders = false;
+      }
+    }
+
+    // Auto-poll every 3.5 seconds for incoming orders
+    setInterval(checkNewOrdersPeriodically, 3500);
 
     function renderAll() {
       if (!STORE_DATA) return;
@@ -1079,14 +1412,18 @@
     function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('.nav-item').forEach(el => {
-        el.className = 'nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-black hover:bg-slate-100 transition';
+        el.className = 'nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-[#1A1517] hover:bg-[#FAF7F2] transition border border-transparent';
+        const icon = el.querySelector('i, svg');
+        if (icon) icon.classList.remove('text-[#D4AF37]');
       });
 
       const target = document.getElementById('tab-' + tabId);
       const navBtn = document.getElementById('nav-' + tabId);
       if (target) target.classList.remove('hidden');
       if (navBtn) {
-        navBtn.className = 'nav-item active w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition bg-slate-900 text-white shadow-xs';
+        navBtn.className = 'nav-item active w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition bg-[#1A1517] text-[#FAF7F2] border border-[#D4AF37]/40 shadow-xs';
+        const activeIcon = navBtn.querySelector('i, svg');
+        if (activeIcon) activeIcon.classList.add('text-[#D4AF37]');
       }
       lucide.createIcons();
     }
@@ -1183,23 +1520,33 @@
         list = list.filter(p => p.category === currentCategoryFilter);
       }
 
+      if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-slate-400 font-medium">Bu kateqoriyada məhsul tapılmadı.</td></tr>';
+        return;
+      }
+
       list.forEach(p => {
         const tr = document.createElement('tr');
-        tr.className = 'hover:bg-slate-50 transition';
+        tr.className = 'hover:bg-slate-50/80 transition';
         const catLabel = p.category === 'koynek' ? 'Köynək' : p.category === 'salvar' ? 'Şalvar' : p.category === 'hudi' ? 'Hudi' : 'Aksesuar';
         const mainImg = p.colors?.[0]?.image || p.image || '/images/products/vintage-king-of-pop-tee/front.png';
         const inStock = p.inStock !== false;
+        const colorSwatches = (p.colors || []).map(c => 
+          `<span class="inline-block w-3 h-3 rounded-full border border-slate-300 shadow-2xs" style="background-color: ${c.hex || '#111111'}" title="${c.name || 'Rəng'}"></span>`
+        ).join(' ');
 
         tr.innerHTML = `
           <td class="p-4 flex items-center gap-3">
-            <img src="${mainImg}" class="w-12 h-14 object-cover rounded-lg bg-slate-100 border border-slate-200 shrink-0" />
+            <div class="relative w-12 h-14 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0 group">
+              <img src="${mainImg}" class="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+            </div>
             <div>
               <div class="font-bold text-slate-900 text-xs">${p.name}</div>
-              <div class="text-[10px] text-slate-400 font-mono mt-0.5">${p.refCode || p.id}</div>
+              <div class="text-[10px] text-slate-500 font-mono mt-0.5">${p.refCode || p.id}</div>
             </div>
           </td>
-          <td class="p-4 uppercase font-bold text-[#3D1420]">${catLabel}</td>
-          <td class="p-4 text-slate-600">${p.fit || p.composition || '-'}</td>
+          <td class="p-4 uppercase font-bold text-[#3D1420] text-[11px]">${catLabel}</td>
+          <td class="p-4 text-slate-600 text-xs">${p.fit || p.composition || '-'}</td>
           <td class="p-4">
             <span class="font-black text-slate-900">${Number(p.price).toFixed(2)} ₼</span>
             ${p.compareAtPrice ? `<span class="text-[10px] text-slate-400 line-through ml-1">${Number(p.compareAtPrice).toFixed(2)} ₼</span>` : ''}
@@ -1209,17 +1556,99 @@
               <span class="w-1.5 h-1.5 rounded-full ${inStock ? 'bg-emerald-500' : 'bg-red-500'}"></span>
               ${inStock ? 'Stokda Var' : 'Bitib'}
             </span>
-            <div class="text-[10px] text-slate-400 mt-1">${(p.colors || []).length} rəng · ${(p.sizes || []).join(', ')}</div>
+            <div class="flex items-center gap-1 mt-1.5 flex-wrap">
+              ${colorSwatches || '<span class="text-[10px] text-slate-400">1 rəng</span>'}
+            </div>
           </td>
-          <td class="p-4">${p.badge ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-100 text-slate-800">${p.badge}</span>` : '-'}</td>
-          <td class="p-4 text-right space-x-2">
-            <button onclick="editProduct('${p.id}')" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">Düzəliş</button>
-            <button onclick="deleteProduct('${p.id}')" class="px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold transition">Sil</button>
+          <td class="p-4">${p.badge ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-100 text-slate-800 border border-slate-200">${p.badge}</span>` : '<span class="text-slate-300">-</span>'}</td>
+          <td class="p-4 text-right">
+            <div class="flex items-center justify-end gap-1.5">
+              <button onclick="editProduct('${p.id}')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer active:scale-98">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5 text-slate-500"></i>
+                <span>Düzəliş</span>
+              </button>
+              <button onclick="deleteProduct('${p.id}')" class="px-2.5 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold transition flex items-center gap-1 cursor-pointer active:scale-98" title="Məhsulu sil">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                <span>Sil</span>
+              </button>
+            </div>
           </td>
         `;
         tbody.appendChild(tr);
       });
       lucide.createIcons();
+    }
+
+    // ----------------------------------------------------
+    // AUTOMATIC MODEL CODE / SKU GENERATOR
+    // ----------------------------------------------------
+    function generateAutoSKU(category = 'koynek') {
+      const catPrefixes = {
+        'koynek': 'HV-TSH-2026',
+        'hudi': 'HV-HUD-2026',
+        'salvar': 'HV-PNT-2026',
+        'aksesuar': 'HV-ACC-2026'
+      };
+      const prefix = catPrefixes[category] || 'HV-ART-2026';
+      const randomCode = Math.floor(100 + Math.random() * 900);
+      return `${prefix}-${randomCode}`;
+    }
+
+    function regenerateSKU() {
+      const cat = document.getElementById('prodCategory')?.value || 'koynek';
+      const sku = generateAutoSKU(cat);
+      const input = document.getElementById('prodRef');
+      if (input) {
+        input.value = sku;
+        input.classList.add('ring-2', 'ring-emerald-500', 'bg-emerald-50/60');
+        setTimeout(() => input.classList.remove('ring-2', 'ring-emerald-500', 'bg-emerald-50/60'), 600);
+      }
+    }
+
+    function handleCategoryChange() {
+      const cat = document.getElementById('prodCategory').value;
+      const prodId = document.getElementById('prodId').value;
+      
+      // If we are creating a new product or SKU has standard format, auto-refresh prefix
+      if (!prodId) {
+        const refInput = document.getElementById('prodRef');
+        if (!refInput.value || refInput.value.startsWith('HV-')) {
+          refInput.value = generateAutoSKU(cat);
+        }
+
+        // Auto-suggest specifications based on category
+        const compInput = document.getElementById('prodComposition');
+        const fitInput = document.getElementById('prodFit');
+        if (cat === 'koynek') {
+          if (!compInput.value || compInput.value.includes('Pambıq')) compInput.value = '100% Premium Daranmış Pambıq (220 GSM)';
+          if (!fitInput.value || fitInput.value.includes('Kəsim')) fitInput.value = 'Oversize T-shirt (Süprəm / 2iplik)';
+        } else if (cat === 'hudi') {
+          if (!compInput.value || compInput.value.includes('Pambıq')) compInput.value = '3-İplik Qalın Pambıq (380 GSM)';
+          if (!fitInput.value || fitInput.value.includes('Kəsim')) fitInput.value = 'Hody qalın (3iplik)';
+        } else if (cat === 'salvar') {
+          if (!compInput.value || compInput.value.includes('Pambıq')) compInput.value = '100% Pambıq Qabardin & Chino';
+          if (!fitInput.value || fitInput.value.includes('Kəsim')) fitInput.value = 'Şalvar qalın (3iplik / TS Parça)';
+        } else if (cat === 'aksesuar') {
+          if (!compInput.value || compInput.value.includes('Pambıq')) compInput.value = '100% Pambıq Twill & Naxışlı';
+          if (!fitInput.value || fitInput.value.includes('Kəsim')) fitInput.value = 'Kepka - qalın';
+        }
+      }
+    }
+
+    function updateColorPreview(input, previewId) {
+      const preview = document.getElementById(previewId);
+      if (!preview) return;
+      const val = input.value.trim();
+      const fallback = preview.parentElement?.querySelector('.empty-fallback');
+      if (val) {
+        preview.src = val;
+        preview.classList.remove('hidden');
+        if (fallback) fallback.classList.add('hidden');
+      } else {
+        preview.src = '';
+        preview.classList.add('hidden');
+        if (fallback) fallback.classList.remove('hidden');
+      }
     }
 
     let colorRowCounter = 0;
@@ -1229,7 +1658,7 @@
       const container = document.getElementById('productColorsContainer');
       const idx = ++colorRowCounter;
       const card = document.createElement('div');
-      card.className = 'color-item-card p-3.5 bg-white rounded-xl border border-slate-200 shadow-2xs space-y-3';
+      card.className = 'color-item-card p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs space-y-3.5 transition-all hover:border-slate-300';
       card.dataset.colorId = idx;
 
       const name = colorData.name || (colorRowCounter === 1 ? 'Standart' : `Rəng ${colorRowCounter}`);
@@ -1237,50 +1666,145 @@
       const image = colorData.image || '';
       const hoverImage = colorData.hoverImage || '';
 
+      const leftShoulderImage = colorData.leftShoulderImage || '';
+      const rightShoulderImage = colorData.rightShoulderImage || '';
+
       card.innerHTML = `
-        <div class="flex items-center justify-between gap-3 border-b border-slate-100 pb-2.5">
+        <div class="flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
           <div class="flex items-center gap-3 flex-wrap flex-1">
             <div class="flex items-center gap-2">
               <label class="font-bold text-slate-700 text-xs">Rəng Adı:</label>
-              <input type="text" class="color-name-input px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-900 w-36 focus:outline-none focus:border-slate-800" placeholder="Məs: Qara" value="${name}" required />
+              <input type="text" class="color-name-input px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 w-40 focus:outline-none focus:border-slate-800 transition" placeholder="Məs: Qara" value="${name}" required />
             </div>
-            <div class="flex items-center gap-1.5">
-              <label class="font-bold text-slate-700 text-xs">HEX Rəng:</label>
+            <div class="flex items-center gap-2">
+              <label class="font-bold text-slate-700 text-xs">HEX Tonu:</label>
               <input type="color" class="color-picker-input w-8 h-8 rounded-lg border border-slate-200 cursor-pointer p-0.5" value="${hex}" oninput="this.nextElementSibling.value = this.value" />
-              <input type="text" class="color-hex-input px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-800 w-24 focus:outline-none focus:border-slate-800" value="${hex}" oninput="this.previousElementSibling.value = this.value" />
+              <input type="text" class="color-hex-input px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 w-28 focus:outline-none focus:border-slate-800 transition" value="${hex}" oninput="this.previousElementSibling.value = this.value" />
             </div>
           </div>
-          <button type="button" onclick="removeColorRow(this)" class="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 transition cursor-pointer" title="Rəngi sil">
+          <button type="button" onclick="removeColorRow(this)" class="text-red-500 hover:text-red-700 p-2 rounded-xl hover:bg-red-50 transition cursor-pointer" title="Bu rəngi sil">
             <i data-lucide="trash-2" class="w-4 h-4"></i>
           </button>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <!-- Ön Şəkil -->
-          <div class="space-y-1">
-            <div class="flex items-center justify-between">
-              <label class="font-bold text-slate-700 text-[11px]">Ön Şəkil *</label>
-              <span class="text-[9px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-bold">Əsas Görünüş</span>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3.5">
+          <!-- Ön Şəkil Card -->
+          <div class="p-3 bg-slate-50/90 rounded-2xl border border-slate-200/90 flex items-start gap-3.5 shadow-2xs">
+            <div class="relative w-16 h-20 rounded-xl overflow-hidden bg-white border border-slate-200 shadow-2xs flex items-center justify-center shrink-0 group">
+              <img id="color_${idx}_imagePreview" src="${image}" class="w-full h-full object-contain p-1 transition-transform duration-300 group-hover:scale-105 ${image ? '' : 'hidden'}" onerror="this.classList.add('hidden'); if(this.parentElement.querySelector('.empty-fallback')) this.parentElement.querySelector('.empty-fallback').classList.remove('hidden');" onload="this.classList.remove('hidden'); if(this.parentElement.querySelector('.empty-fallback')) this.parentElement.querySelector('.empty-fallback').classList.add('hidden');" />
+              <div class="empty-fallback absolute inset-0 ${image ? 'hidden' : 'flex'} flex-col items-center justify-center text-slate-300 bg-slate-50/50 p-1 text-center pointer-events-none">
+                <i data-lucide="image" class="w-5 h-5 stroke-1 text-slate-300"></i>
+                <span class="text-[8px] font-bold text-slate-400 mt-0.5">Seç</span>
+              </div>
+              <span class="absolute top-1 left-1 bg-emerald-600 text-white text-[7.5px] font-extrabold px-1.5 py-0.5 rounded shadow-2xs tracking-wider uppercase">Ön</span>
             </div>
-            <div class="flex items-center gap-2">
-              <img id="color_${idx}_imagePreview" src="${image}" class="w-10 h-12 rounded-lg object-contain border border-slate-200 bg-slate-50 p-0.5 shrink-0" onerror="this.src=''" />
-              <input type="text" id="color_${idx}_image" class="color-image-input flex-1 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-900" placeholder="Şəkil URL və ya yüklə" value="${image}" required />
-              <button type="button" onclick="openGalleryModal('color_${idx}_image')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold transition">Qalereya</button>
-              <button type="button" onclick="triggerDirectUpload('color_${idx}_image')" class="px-2.5 py-1.5 rounded-lg bg-slate-900 text-white hover:bg-black text-xs font-bold transition">Yüklə</button>
+
+            <div class="flex-1 min-w-0 space-y-1.5">
+              <div class="flex items-center justify-between">
+                <label class="font-bold text-slate-800 text-[11px]">Ön Şəkil *</label>
+                <span class="text-[8.5px] text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-1.5 py-0.5 rounded-full font-bold">Kataloq</span>
+              </div>
+              <input type="text" id="color_${idx}_image" oninput="updateColorPreview(this, 'color_${idx}_imagePreview')" class="color-image-input w-full bg-white border border-slate-200 rounded-xl px-2 py-1 text-xs text-slate-900 focus:outline-none focus:border-slate-800 transition" placeholder="Ön şəkil" value="${image}" required />
+              
+              <div class="flex items-center gap-1.5 pt-0.5">
+                <button type="button" onclick="triggerDirectUpload('color_${idx}_image')" class="flex-1 py-1 px-2 rounded-xl bg-slate-900 hover:bg-black text-white text-[10px] font-bold transition flex items-center justify-center gap-1 shadow-2xs active:scale-98 cursor-pointer">
+                  <i data-lucide="upload" class="w-3 h-3"></i>
+                  <span>Yüklə</span>
+                </button>
+                <button type="button" onclick="openGalleryModal('color_${idx}_image')" class="py-1 px-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-[10px] font-bold transition flex items-center justify-center gap-1 active:scale-98 cursor-pointer">
+                  <i data-lucide="folder-open" class="w-3 h-3 text-slate-500"></i>
+                </button>
+              </div>
             </div>
           </div>
 
-          <!-- Arxa Şəkil -->
-          <div class="space-y-1">
-            <div class="flex items-center justify-between">
-              <label class="font-bold text-slate-700 text-[11px]">Arxa Şəkil (İstəyə bağlı)</label>
-              <span class="text-[9px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded font-bold">Hover / Arxa</span>
+          <!-- Arxa Şəkil Card -->
+          <div class="p-3 bg-slate-50/90 rounded-2xl border border-slate-200/90 flex items-start gap-3.5 shadow-2xs">
+            <div class="relative w-16 h-20 rounded-xl overflow-hidden bg-white border border-slate-200 shadow-2xs flex items-center justify-center shrink-0 group">
+              <img id="color_${idx}_hoverImagePreview" src="${hoverImage}" class="w-full h-full object-contain p-1 transition-transform duration-300 group-hover:scale-105 ${hoverImage ? '' : 'hidden'}" onerror="this.classList.add('hidden'); if(this.parentElement.querySelector('.empty-fallback')) this.parentElement.querySelector('.empty-fallback').classList.remove('hidden');" onload="this.classList.remove('hidden'); if(this.parentElement.querySelector('.empty-fallback')) this.parentElement.querySelector('.empty-fallback').classList.add('hidden');" />
+              <div class="empty-fallback absolute inset-0 ${hoverImage ? 'hidden' : 'flex'} flex-col items-center justify-center text-slate-300 bg-slate-50/50 p-1 text-center pointer-events-none">
+                <i data-lucide="image" class="w-5 h-5 stroke-1 text-slate-300"></i>
+                <span class="text-[8px] font-bold text-slate-400 mt-0.5">Seç</span>
+              </div>
+              <span class="absolute top-1 left-1 bg-indigo-600 text-white text-[7.5px] font-extrabold px-1.5 py-0.5 rounded shadow-2xs tracking-wider uppercase">Arxa</span>
             </div>
-            <div class="flex items-center gap-2">
-              <img id="color_${idx}_hoverImagePreview" src="${hoverImage}" class="w-10 h-12 rounded-lg object-contain border border-slate-200 bg-slate-50 p-0.5 shrink-0" onerror="this.src=''" />
-              <input type="text" id="color_${idx}_hoverImage" class="color-hover-image-input flex-1 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-900" placeholder="Arxa şəkil (boş qala bilər)" value="${hoverImage}" />
-              <button type="button" onclick="openGalleryModal('color_${idx}_hoverImage')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold transition">Qalereya</button>
-              <button type="button" onclick="triggerDirectUpload('color_${idx}_hoverImage')" class="px-2.5 py-1.5 rounded-lg bg-slate-900 text-white hover:bg-black text-xs font-bold transition">Yüklə</button>
+
+            <div class="flex-1 min-w-0 space-y-1.5">
+              <div class="flex items-center justify-between">
+                <label class="font-bold text-slate-800 text-[11px]">Arxa Şəkil</label>
+                <span class="text-[8.5px] text-indigo-700 bg-indigo-50 border border-indigo-200/60 px-1.5 py-0.5 rounded-full font-bold">Hover</span>
+              </div>
+              <input type="text" id="color_${idx}_hoverImage" oninput="updateColorPreview(this, 'color_${idx}_hoverImagePreview')" class="color-hover-image-input w-full bg-white border border-slate-200 rounded-xl px-2 py-1 text-xs text-slate-900 focus:outline-none focus:border-slate-800 transition" placeholder="Arxa şəkil" value="${hoverImage}" />
+              
+              <div class="flex items-center gap-1.5 pt-0.5">
+                <button type="button" onclick="triggerDirectUpload('color_${idx}_hoverImage')" class="flex-1 py-1 px-2 rounded-xl bg-slate-900 hover:bg-black text-white text-[10px] font-bold transition flex items-center justify-center gap-1 shadow-2xs active:scale-98 cursor-pointer">
+                  <i data-lucide="upload" class="w-3 h-3"></i>
+                  <span>Yüklə</span>
+                </button>
+                <button type="button" onclick="openGalleryModal('color_${idx}_hoverImage')" class="py-1 px-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-[10px] font-bold transition flex items-center justify-center gap-1 active:scale-98 cursor-pointer">
+                  <i data-lucide="folder-open" class="w-3 h-3 text-slate-500"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sol Çiyin Şəkil Card -->
+          <div class="p-3 bg-slate-50/90 rounded-2xl border border-slate-200/90 flex items-start gap-3.5 shadow-2xs">
+            <div class="relative w-16 h-20 rounded-xl overflow-hidden bg-white border border-slate-200 shadow-2xs flex items-center justify-center shrink-0 group">
+              <img id="color_${idx}_leftShoulderImagePreview" src="${leftShoulderImage}" class="w-full h-full object-contain p-1 transition-transform duration-300 group-hover:scale-105 ${leftShoulderImage ? '' : 'hidden'}" onerror="this.classList.add('hidden'); if(this.parentElement.querySelector('.empty-fallback')) this.parentElement.querySelector('.empty-fallback').classList.remove('hidden');" onload="this.classList.remove('hidden'); if(this.parentElement.querySelector('.empty-fallback')) this.parentElement.querySelector('.empty-fallback').classList.add('hidden');" />
+              <div class="empty-fallback absolute inset-0 ${leftShoulderImage ? 'hidden' : 'flex'} flex-col items-center justify-center text-slate-300 bg-slate-50/50 p-1 text-center pointer-events-none">
+                <i data-lucide="image" class="w-5 h-5 stroke-1 text-slate-300"></i>
+                <span class="text-[8px] font-bold text-slate-400 mt-0.5">Seç</span>
+              </div>
+              <span class="absolute top-1 left-1 bg-amber-600 text-white text-[7.5px] font-extrabold px-1.5 py-0.5 rounded shadow-2xs tracking-wider uppercase">Sol Çiyin</span>
+            </div>
+
+            <div class="flex-1 min-w-0 space-y-1.5">
+              <div class="flex items-center justify-between">
+                <label class="font-bold text-slate-800 text-[11px]">Sol Çiyin</label>
+                <span class="text-[8.5px] text-amber-700 bg-amber-50 border border-amber-200/60 px-1.5 py-0.5 rounded-full font-bold">Yan</span>
+              </div>
+              <input type="text" id="color_${idx}_leftShoulderImage" oninput="updateColorPreview(this, 'color_${idx}_leftShoulderImagePreview')" class="color-left-shoulder-input w-full bg-white border border-slate-200 rounded-xl px-2 py-1 text-xs text-slate-900 focus:outline-none focus:border-slate-800 transition" placeholder="Sol çiyin / yan" value="${leftShoulderImage}" />
+              
+              <div class="flex items-center gap-1.5 pt-0.5">
+                <button type="button" onclick="triggerDirectUpload('color_${idx}_leftShoulderImage')" class="flex-1 py-1 px-2 rounded-xl bg-slate-900 hover:bg-black text-white text-[10px] font-bold transition flex items-center justify-center gap-1 shadow-2xs active:scale-98 cursor-pointer">
+                  <i data-lucide="upload" class="w-3 h-3"></i>
+                  <span>Yüklə</span>
+                </button>
+                <button type="button" onclick="openGalleryModal('color_${idx}_leftShoulderImage')" class="py-1 px-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-[10px] font-bold transition flex items-center justify-center gap-1 active:scale-98 cursor-pointer">
+                  <i data-lucide="folder-open" class="w-3 h-3 text-slate-500"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sağ Çiyin Şəkil Card -->
+          <div class="p-3 bg-slate-50/90 rounded-2xl border border-slate-200/90 flex items-start gap-3.5 shadow-2xs">
+            <div class="relative w-16 h-20 rounded-xl overflow-hidden bg-white border border-slate-200 shadow-2xs flex items-center justify-center shrink-0 group">
+              <img id="color_${idx}_rightShoulderImagePreview" src="${rightShoulderImage}" class="w-full h-full object-contain p-1 transition-transform duration-300 group-hover:scale-105 ${rightShoulderImage ? '' : 'hidden'}" onerror="this.classList.add('hidden'); if(this.parentElement.querySelector('.empty-fallback')) this.parentElement.querySelector('.empty-fallback').classList.remove('hidden');" onload="this.classList.remove('hidden'); if(this.parentElement.querySelector('.empty-fallback')) this.parentElement.querySelector('.empty-fallback').classList.add('hidden');" />
+              <div class="empty-fallback absolute inset-0 ${rightShoulderImage ? 'hidden' : 'flex'} flex-col items-center justify-center text-slate-300 bg-slate-50/50 p-1 text-center pointer-events-none">
+                <i data-lucide="image" class="w-5 h-5 stroke-1 text-slate-300"></i>
+                <span class="text-[8px] font-bold text-slate-400 mt-0.5">Seç</span>
+              </div>
+              <span class="absolute top-1 left-1 bg-sky-600 text-white text-[7.5px] font-extrabold px-1.5 py-0.5 rounded shadow-2xs tracking-wider uppercase">Sağ Çiyin</span>
+            </div>
+
+            <div class="flex-1 min-w-0 space-y-1.5">
+              <div class="flex items-center justify-between">
+                <label class="font-bold text-slate-800 text-[11px]">Sağ Çiyin</label>
+                <span class="text-[8.5px] text-sky-700 bg-sky-50 border border-sky-200/60 px-1.5 py-0.5 rounded-full font-bold">Yan</span>
+              </div>
+              <input type="text" id="color_${idx}_rightShoulderImage" oninput="updateColorPreview(this, 'color_${idx}_rightShoulderImagePreview')" class="color-right-shoulder-input w-full bg-white border border-slate-200 rounded-xl px-2 py-1 text-xs text-slate-900 focus:outline-none focus:border-slate-800 transition" placeholder="Sağ çiyin / yan" value="${rightShoulderImage}" />
+              
+              <div class="flex items-center gap-1.5 pt-0.5">
+                <button type="button" onclick="triggerDirectUpload('color_${idx}_rightShoulderImage')" class="flex-1 py-1 px-2 rounded-xl bg-slate-900 hover:bg-black text-white text-[10px] font-bold transition flex items-center justify-center gap-1 shadow-2xs active:scale-98 cursor-pointer">
+                  <i data-lucide="upload" class="w-3 h-3"></i>
+                  <span>Yüklə</span>
+                </button>
+                <button type="button" onclick="openGalleryModal('color_${idx}_rightShoulderImage')" class="py-1 px-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-[10px] font-bold transition flex items-center justify-center gap-1 active:scale-98 cursor-pointer">
+                  <i data-lucide="folder-open" class="w-3 h-3 text-slate-500"></i>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1304,13 +1828,24 @@
       const container = document.getElementById('productGalleryContainer');
       const idx = ++galleryRowCounter;
       const row = document.createElement('div');
-      row.className = 'gallery-item-row flex items-center gap-2 p-2 bg-white rounded-xl border border-slate-200 shadow-2xs';
+      row.className = 'gallery-item-row p-3 bg-white rounded-2xl border border-slate-200/90 shadow-2xs flex items-center gap-3 transition-all hover:border-slate-300';
       row.innerHTML = `
-        <img id="gallery_${idx}_imagePreview" src="${url}" class="w-10 h-12 rounded-lg object-contain border border-slate-200 bg-slate-50 p-0.5 shrink-0" onerror="this.src=''" />
-        <input type="text" id="gallery_${idx}_image" class="gallery-image-input flex-1 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-900" placeholder="Əlavə detal şəklinin linki və ya fayl yüklə" value="${url}" />
-        <button type="button" onclick="openGalleryModal('gallery_${idx}_image')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold transition">Qalereya</button>
-        <button type="button" onclick="triggerDirectUpload('gallery_${idx}_image')" class="px-2.5 py-1.5 rounded-lg bg-slate-900 text-white hover:bg-black text-xs font-bold transition">Yüklə</button>
-        <button type="button" onclick="removeGalleryRow(this)" class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition cursor-pointer" title="Şəkli sil">
+        <div class="relative w-14 h-16 rounded-xl overflow-hidden bg-slate-50 border border-slate-200 shadow-2xs flex items-center justify-center shrink-0 group">
+          <img id="gallery_${idx}_imagePreview" src="${url}" class="w-full h-full object-contain p-0.5 transition-transform duration-300 group-hover:scale-105 ${url ? '' : 'hidden'}" onerror="this.classList.add('hidden'); if(this.parentElement.querySelector('.empty-fallback')) this.parentElement.querySelector('.empty-fallback').classList.remove('hidden');" onload="this.classList.remove('hidden'); if(this.parentElement.querySelector('.empty-fallback')) this.parentElement.querySelector('.empty-fallback').classList.add('hidden');" />
+          <div class="empty-fallback absolute inset-0 ${url ? 'hidden' : 'flex'} flex-col items-center justify-center text-slate-300 bg-slate-50 p-1 text-center pointer-events-none">
+            <i data-lucide="image" class="w-5 h-5 stroke-1 text-slate-300"></i>
+          </div>
+        </div>
+        <input type="text" id="gallery_${idx}_image" oninput="updateColorPreview(this, 'gallery_${idx}_imagePreview')" class="gallery-image-input flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-800 transition" placeholder="Əlavə detal şəklinin linki və ya fayl yüklə" value="${url}" />
+        <button type="button" onclick="triggerDirectUpload('gallery_${idx}_image')" class="py-2 px-3 rounded-xl bg-slate-900 text-white hover:bg-black text-xs font-bold transition flex items-center gap-1.5 shrink-0 cursor-pointer shadow-2xs active:scale-98">
+          <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+          <span>Yüklə</span>
+        </button>
+        <button type="button" onclick="openGalleryModal('gallery_${idx}_image')" class="py-2 px-3 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1.5 shrink-0 cursor-pointer active:scale-98">
+          <i data-lucide="folder-open" class="w-3.5 h-3.5 text-slate-500"></i>
+          <span>Qalereya</span>
+        </button>
+        <button type="button" onclick="removeGalleryRow(this)" class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-xl transition cursor-pointer shrink-0" title="Şəkli sil">
           <i data-lucide="trash-2" class="w-4 h-4"></i>
         </button>
       `;
@@ -1327,6 +1862,13 @@
       document.getElementById('prodId').value = '';
       document.getElementById('productModalTitle').textContent = 'YENİ MƏHSUL ƏLAVƏ ET';
       
+      // Auto-assign SKU and default luxury specifications
+      document.getElementById('prodRef').value = generateAutoSKU('koynek');
+      document.getElementById('prodCategory').value = 'koynek';
+      document.getElementById('prodComposition').value = '100% Premium Daranmış Pambıq (220 GSM)';
+      document.getElementById('prodFit').value = 'Oversize / Rahat Kəsim';
+      document.getElementById('prodInStock').value = 'true';
+
       document.getElementById('productColorsContainer').innerHTML = '';
       document.getElementById('productGalleryContainer').innerHTML = '';
       colorRowCounter = 0;
@@ -1336,6 +1878,7 @@
 
       document.getElementById('productModal').classList.remove('hidden');
       document.getElementById('productModal').classList.add('flex');
+      if (window.lucide) lucide.createIcons();
     }
 
     function editProduct(id) {
@@ -1404,6 +1947,8 @@
         const cHex = card.querySelector('.color-hex-input')?.value.trim() || '#111111';
         const cImage = card.querySelector('.color-image-input')?.value.trim();
         const cHover = card.querySelector('.color-hover-image-input')?.value.trim();
+        const cLeftShoulder = card.querySelector('.color-left-shoulder-input')?.value.trim();
+        const cRightShoulder = card.querySelector('.color-right-shoulder-input')?.value.trim();
 
         if (cImage) {
           const hasDistinct = Boolean(cHover && cHover !== cImage);
@@ -1411,7 +1956,9 @@
             name: cName,
             hex: cHex,
             image: cImage,
-            hoverImage: hasDistinct ? cHover : undefined
+            hoverImage: hasDistinct ? cHover : undefined,
+            leftShoulderImage: cLeftShoulder || undefined,
+            rightShoulderImage: cRightShoulder || undefined,
           });
         }
       });
@@ -1430,10 +1977,12 @@
         }
       });
 
-      // Construct gallery for each color (front + optional hover + extras)
+      // Construct gallery for each color (front + optional hover + left shoulder + right shoulder + extras)
       colors.forEach(c => {
         const gal = [c.image];
-        if (c.hoverImage) gal.push(c.hoverImage);
+        if (c.hoverImage && !gal.includes(c.hoverImage)) gal.push(c.hoverImage);
+        if (c.leftShoulderImage && !gal.includes(c.leftShoulderImage)) gal.push(c.leftShoulderImage);
+        if (c.rightShoulderImage && !gal.includes(c.rightShoulderImage)) gal.push(c.rightShoulderImage);
         extraGallery.forEach(ext => {
           if (!gal.includes(ext)) gal.push(ext);
         });
@@ -1581,7 +2130,22 @@
       document.getElementById('ordersTotalCount').textContent = list.length;
 
       if (list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-slate-400">Hələlik sifariş daxil olmayıb.</td></tr>';
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="p-16 text-center">
+              <div class="max-w-sm mx-auto space-y-3">
+                <div class="w-14 h-14 mx-auto rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-200 shadow-2xs">
+                  <i data-lucide="check-circle-2" class="w-7 h-7"></i>
+                </div>
+                <div class="font-black text-slate-800 text-sm uppercase tracking-wide">Bütün Sınaq Sifarişləri Təmizlənib</div>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                  Hazırda heç bir aktiv sifariş yoxdur və dövriyyə statistikası 0.00 ₼ təşkil edir. Yeni real sifariş daxil olduqda burada canlı görünəcək.
+                </p>
+              </div>
+            </td>
+          </tr>
+        `;
+        if (window.lucide) lucide.createIcons();
         return;
       }
 
@@ -1638,14 +2202,18 @@
             </div>
           </td>
           <td class="p-4 text-right">
-            <div class="flex items-center justify-end gap-2">
-              <a href="http://localhost:3000/track?q=${o.id}" target="_blank" class="px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition flex items-center gap-1" title="Müştərinin canlı izləmə ekranı">
+            <div class="flex items-center justify-end gap-1.5">
+              <a href="http://localhost:3000/track?q=${o.id}" target="_blank" class="px-2.5 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition flex items-center gap-1 active:scale-98" title="Müştərinin canlı izləmə ekranı">
                 <i data-lucide="compass" class="w-3.5 h-3.5"></i>
                 <span>İzləmə</span>
               </a>
-              <button onclick="viewInvoice('${o.id}')" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-black text-white text-xs font-bold transition flex items-center gap-1.5">
+              <button onclick="viewInvoice('${o.id}')" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition flex items-center gap-1.5 active:scale-98 cursor-pointer">
                 <i data-lucide="printer" class="w-3.5 h-3.5"></i>
                 <span>Faktura</span>
+              </button>
+              <button onclick="deleteOrder('${o.id}')" class="px-2.5 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 text-xs font-bold transition flex items-center gap-1 active:scale-98 cursor-pointer" title="Bu sifarişi birdəfəlik sil">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                <span>Sil</span>
               </button>
             </div>
           </td>
@@ -1653,6 +2221,56 @@
         tbody.appendChild(tr);
       });
       lucide.createIcons();
+    }
+
+    async function deleteOrder(id) {
+      if (!confirm(`Sifariş #${id} sistemdən birdəfəlik silinsin?`)) return;
+      try {
+        const res = await fetch(`/api/admin/orders/${id}`, { method: 'DELETE' });
+        const result = await res.json();
+        if (result.success) {
+          if (STORE_DATA) {
+            STORE_DATA.orders = (STORE_DATA.orders || []).filter(o => o.id !== id);
+            STORE_DATA.podOrders = (STORE_DATA.podOrders || []).filter(p => p.orderId !== id && p.id !== id);
+          }
+          knownOrderIds.delete(id);
+          try {
+            const set = getPersistentNotifiedOrders();
+            set.delete(id);
+            localStorage.setItem('horvvalle_notified_order_ids', JSON.stringify(Array.from(set)));
+          } catch (e) {}
+          renderAll();
+        } else {
+          alert('Xəta: ' + (result.error || 'Silinə bilmədi'));
+        }
+      } catch (err) {
+        alert('Server xətası: ' + err.message);
+      }
+    }
+
+    async function clearAllOrders() {
+      if (!confirm('DİQQƏT: Bütün sınaq sifarişləri və dövriyyə statistikası tam sıfırlanacaq. Əminsiniz?')) return;
+      try {
+        const res = await fetch('/api/admin/orders/clear-all', { method: 'POST' });
+        const result = await res.json();
+        if (result.success) {
+          if (STORE_DATA) {
+            STORE_DATA.orders = [];
+            STORE_DATA.podOrders = [];
+          }
+          knownOrderIds.clear();
+          try {
+            localStorage.removeItem('horvvalle_notified_order_ids');
+            localStorage.removeItem('horvvalle_last_admin_sound_ts');
+          } catch (e) {}
+          renderAll();
+          alert('✓ Bütün sınaq sifarişləri təmizləndi və dövriyyə 0 ₼ olaraq sıfırlandı.');
+        } else {
+          alert('Xəta: ' + (result.error || 'Sıfırlana bilmədi'));
+        }
+      } catch (err) {
+        alert('Server xətası: ' + err.message);
+      }
     }
 
     async function changeOrderStatus(orderId, status) {
@@ -1684,11 +2302,15 @@
       const body = document.getElementById('invoiceModalBody');
       body.innerHTML = `
         <div class="border-b border-slate-200 pb-6 flex items-start justify-between">
-          <div>
-            <div class="text-2xl font-serif-luxury text-slate-900 font-bold">HORVVALLE</div>
-            <div class="text-[10px] uppercase font-bold tracking-widest text-[#3D1420] mt-0.5">HAUTE COUTURE & BESPOKE ATELIER</div>
-            <div class="text-[11px] text-slate-500 mt-2">Nizami küçəsi 44, Bakı, Azərbaycan</div>
-            <div class="text-[11px] text-slate-500">Tel: +994 50 300 40 50 · www.horvvalle.com</div>
+          <div class="flex items-center gap-3.5">
+            <div class="w-12 h-12 rounded-xl bg-[#1A1517] border border-[#D4AF37]/40 p-2 flex items-center justify-center shrink-0">
+              <img src="/brand/icon-light.png" alt="HORVVALLE" class="w-full h-full object-contain filter drop-shadow-[0_2px_6px_rgba(212,175,55,0.4)]" />
+            </div>
+            <div>
+              <div class="text-2xl font-brand text-[#1A1517] font-bold tracking-[0.2em] uppercase leading-none">HORVVALLE</div>
+              <div class="text-[10px] uppercase font-bold tracking-widest text-[#B08D57] mt-1">HAUTE COUTURE & BESPOKE ATELIER · BAKI</div>
+              <div class="text-[11px] text-slate-500 mt-1">Nizami küçəsi 44, Bakı, Azərbaycan · Tel: +994 50 300 40 50</div>
+            </div>
           </div>
           <div class="text-right">
             <div class="text-xs uppercase font-bold text-slate-400">RƏSMİ SATIŞ QAİMƏSİ</div>
@@ -1728,7 +2350,20 @@
             <tbody class="divide-y divide-slate-100">
               ${items.map(item => `
                 <tr>
-                  <td class="p-3 font-bold text-slate-900">${item.name}</td>
+                  <td class="p-3">
+                    <div class="font-bold text-slate-900">${item.name}</div>
+                    ${item.customData?.placement ? `
+                      <div class="text-[11px] text-blue-700 font-semibold mt-0.5">Çap Hissəsi: ${item.customData.placement}</div>
+                    ` : ''}
+                    ${item.customData?.customerNote ? `
+                      <div class="text-[10.5px] text-amber-800 bg-amber-50 p-1.5 rounded-md mt-1 font-medium">Qeyd: "${item.customData.customerNote}"</div>
+                    ` : ''}
+                    ${(item.customData?.uploadedImage || item.customDesignPreview) ? `
+                      <a href="${item.customData?.uploadedImage || item.customDesignPreview}" download="dizayn_${item.id || 'print'}.png" target="_blank" class="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 hover:underline mt-1">
+                        <i data-lucide="download" class="w-3 h-3"></i> Dizayn Şəklini Yüklə
+                      </a>
+                    ` : ''}
+                  </td>
                   <td class="p-3 text-slate-600">${item.size || 'L'} · ${item.color || 'Standart'}</td>
                   <td class="p-3 text-center font-bold">${item.quantity || 1}</td>
                   <td class="p-3 text-right font-medium">${Number(item.price || 0).toFixed(2)} ₼</td>
@@ -1781,9 +2416,9 @@
       list.forEach(pod => {
         const custName = pod.customerName || pod.customer?.name || 'Müştəri';
         const custPhone = pod.customerPhone || pod.customer?.phone || '-';
-        const cleanPrintImg = pod.processedImage || pod.frontDesign?.uploadedImage || pod.frontDesign?.artworkUrl || pod.backDesign?.uploadedImage || '/images/presets/bmw_gt3_clean.png';
-        const originalCustomerImg = pod.originalImage || pod.frontDesign?.originalImage || pod.backDesign?.originalImage || cleanPrintImg;
-        const previewImg = pod.previewImage || cleanPrintImg;
+        const designImg = pod.originalImage || pod.processedImage || pod.customData?.uploadedImage || pod.frontDesign?.uploadedImage || '/brand/wordmark-dark.png';
+        const placement = pod.placement || pod.customData?.placement || 'Sinə (Mərkəz Böyük)';
+        const customerNote = pod.customerNote || pod.customData?.customerNote || '';
         const podStatus = pod.status || 'Yeni Sifariş';
         const podTheme = getOrderStatusTheme(podStatus);
 
@@ -1802,48 +2437,61 @@
               </span>
             </div>
 
-            <div class="grid grid-cols-2 gap-2 bg-slate-50 p-2.5 rounded-2xl border border-slate-100">
-              <div>
-                <span class="text-[9px] font-bold uppercase text-slate-400 block mb-1">Müştərinin Şəkli</span>
-                <div class="w-full h-28 bg-white rounded-lg border border-slate-200 p-1 flex items-center justify-center overflow-hidden">
-                  <img src="${originalCustomerImg}" class="max-h-full max-w-full object-contain" />
-                </div>
+            <!-- Customer Uploaded Artwork Preview -->
+            <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Müştərinin Çap Dizaynı</span>
+                <a href="${designImg}" download="dizayn_${pod.id}.png" target="_blank" class="text-[10px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                  <i data-lucide="download" class="w-3 h-3"></i>
+                  <span>Yüklə</span>
+                </a>
               </div>
-              <div>
-                <span class="text-[9px] font-bold uppercase text-slate-400 block mb-1">Çap Maketi (Şəffaf)</span>
-                <div class="w-full h-28 bg-[linear-gradient(45deg,#f1eee9_25%,transparent_25%),linear-gradient(-45deg,#f1eee9_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#f1eee9_75%),linear-gradient(-45deg,transparent_75%,#f1eee9_75%)] bg-[size:10px_10px] bg-slate-100 rounded-lg border border-slate-200 p-1 flex items-center justify-center overflow-hidden">
-                  <img src="${cleanPrintImg}" class="max-h-full max-w-full object-contain drop-shadow" />
-                </div>
+              <div class="w-full h-36 bg-white rounded-xl border border-slate-200 p-2 flex items-center justify-center overflow-hidden">
+                <img src="${designImg}" alt="Çap Dizaynı" class="max-h-full max-w-full object-contain" />
               </div>
             </div>
 
-            <div class="text-xs space-y-1 bg-slate-50 p-3 rounded-xl">
-              <div><strong>Müştəri:</strong> ${custName} (${custPhone})</div>
-              <div><strong>Geyim:</strong> ${pod.garmentType || 'T-Shirt Regular'}</div>
-              <div><strong>Ölçü & Rəng:</strong> <span class="font-bold text-slate-900">${pod.size || 'L'}</span> · ${pod.garmentColor || 'Ağ'}</div>
-              <div><strong>Məbləğ:</strong> <span class="font-black text-slate-900">${pod.price || 15} ₼</span></div>
+            <!-- Order & Garment Specifications -->
+            <div class="text-xs space-y-1.5 bg-slate-50 p-3 rounded-2xl border border-slate-100">
+              <div class="flex justify-between">
+                <span class="text-slate-500">Müştəri:</span>
+                <span class="font-bold text-slate-900">${custName} (${custPhone})</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500">Geyim Modeli:</span>
+                <span class="font-bold text-slate-900">${pod.garmentType || 'T-Shirt Regular'}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500">Ölçü & Rəng:</span>
+                <span><strong class="text-slate-900">${pod.size || 'L'}</strong> · ${pod.garmentColor || 'Ağ'}</span>
+              </div>
+              <div class="flex justify-between items-center pt-1 border-t border-slate-200/80">
+                <span class="text-slate-500">Çap Hissəsi:</span>
+                <span class="font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md text-[11px]">${placement}</span>
+              </div>
+              <div class="flex justify-between pt-1 border-t border-slate-200/80">
+                <span class="text-slate-500">Məbləğ:</span>
+                <span class="font-black text-slate-900">${pod.price || 14} ₼</span>
+              </div>
             </div>
+
+            <!-- Customer Special Notes (Highlighted) -->
+            ${customerNote ? `
+              <div class="p-3 rounded-2xl bg-amber-50 border border-amber-200/90 text-amber-950 text-xs space-y-1">
+                <div class="flex items-center gap-1.5 font-bold text-[10.5px] uppercase tracking-wider text-amber-800">
+                  <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
+                  <span>Müştərinin Qeydi:</span>
+                </div>
+                <p class="text-[11.5px] leading-relaxed font-medium">"${customerNote}"</p>
+              </div>
+            ` : ''}
           </div>
 
           <div class="space-y-2 pt-2 border-t border-slate-100">
-            <div class="grid grid-cols-2 gap-1.5">
-              <a href="${originalCustomerImg}" download="original_${pod.id}.png" target="_blank" class="py-1.5 px-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold uppercase tracking-wider transition text-center flex items-center justify-center gap-1 shadow-2xs">
-                <i data-lucide="image" class="w-3 h-3 text-slate-500"></i>
-                <span>Orijinal</span>
-              </a>
-              <a href="${cleanPrintImg}" download="print_${pod.id}.png" target="_blank" class="py-1.5 px-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold uppercase tracking-wider transition text-center flex items-center justify-center gap-1 shadow-xs">
-                <i data-lucide="printer" class="w-3 h-3"></i>
-                <span>Çap Faylı (PNG)</span>
-              </a>
-              <button type="button" onclick="downloadPlacementJson('${pod.id}')" class="py-1.5 px-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold uppercase tracking-wider transition text-center flex items-center justify-center gap-1 shadow-2xs cursor-pointer">
-                <i data-lucide="file-json" class="w-3 h-3 text-slate-500"></i>
-                <span>Yerləşmə (JSON)</span>
-              </button>
-              <a href="${previewImg}" download="preview_${pod.id}.png" target="_blank" class="py-1.5 px-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold uppercase tracking-wider transition text-center flex items-center justify-center gap-1 shadow-2xs">
-                <i data-lucide="eye" class="w-3 h-3 text-slate-500"></i>
-                <span>Önbaxış (PNG)</span>
-              </a>
-            </div>
+            <a href="${designImg}" download="dizayn_${pod.id}.png" target="_blank" class="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold uppercase tracking-wider transition text-center flex items-center justify-center gap-1.5 shadow-xs cursor-pointer">
+              <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+              <span>Çap Faylını Yüklə (Orijinal)</span>
+            </a>
 
             <div class="flex items-center justify-between gap-2 pt-1 overflow-visible">
               <span class="text-[11px] text-slate-500 font-semibold">Status:</span>
@@ -2232,9 +2880,17 @@
 
     function setImageInputValue(inputId, url) {
       const input = document.getElementById(inputId);
-      if (input) input.value = url;
+      if (input) {
+        input.value = url;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      }
       const preview = document.getElementById(inputId + 'Preview');
-      if (preview) preview.src = url;
+      if (preview) {
+        preview.src = url;
+        preview.classList.remove('hidden');
+        const fallback = preview.parentElement?.querySelector('.empty-fallback');
+        if (fallback) fallback.classList.add('hidden');
+      }
     }
 
     function triggerDirectUpload(targetInputId) {

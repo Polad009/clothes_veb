@@ -2,19 +2,24 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Heart, Plus, Check } from "lucide-react";
 import { Product } from "@/data/products";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useCart } from "@/context/CartContext";
+import { useLanguage } from "@/context/LanguageContext";
+import { translateColor, translateBadge } from "@/lib/translations";
 
 interface ProductCardProps {
   product: Product;
   variant?: "light" | "dark";
+  priority?: boolean;
 }
 
-export function ProductCard({ product, variant = "light" }: ProductCardProps) {
+export function ProductCard({ product, variant = "light", priority = false }: ProductCardProps) {
   const { addItem } = useCart();
   const { formatPrice } = useCurrency();
+  const { language, t } = useLanguage();
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [showQuickAdd, setShowQuickAdd] = useState(false);
@@ -28,10 +33,10 @@ export function ProductCard({ product, variant = "light" }: ProductCardProps) {
     activeColor.hoverImage.trim() !== "" &&
     activeColor.hoverImage !== activeColor.image
   );
-  const displayImage =
-    isHovered && hasDistinctHover
-      ? activeColor.hoverImage
-      : activeColor?.image;
+  const displayImage: string =
+    (isHovered && hasDistinctHover
+      ? activeColor?.hoverImage
+      : activeColor?.image) || "/brand/icon-light.png";
 
   const handleQuickAdd = (size: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -71,12 +76,12 @@ export function ProductCard({ product, variant = "light" }: ProductCardProps) {
         setShowQuickAdd(false);
       }}
     >
-      {/* Product Image Frame */}
+      {/* Product Image Frame with warm solid background */}
       <div
         className={
           isDark
-            ? "relative aspect-[3/4] w-full flex flex-col items-center justify-center p-3 sm:p-5 overflow-hidden bg-transparent"
-            : "relative aspect-[3/4] w-full bg-[#F7F6F3] overflow-hidden"
+            ? "relative aspect-[3/4] w-full flex flex-col items-center justify-center p-3 sm:p-5 overflow-hidden bg-neutral-900/60"
+            : "relative aspect-[3/4] w-full bg-[#F5EFE6] overflow-hidden"
         }
       >
         <Link
@@ -91,12 +96,17 @@ export function ProductCard({ product, variant = "light" }: ProductCardProps) {
           {isDark ? (
             <>
               {/* Floating Transparent Cutout Garment */}
-              <img
-                src={displayImage}
-                alt={product.name}
-                className="max-h-[82%] max-w-[88%] w-auto object-contain drop-shadow-[0_18px_30px_rgba(0,0,0,0.55)] transition-all duration-500 ease-out group-hover:-translate-y-2 group-hover:scale-105 pointer-events-none select-none"
-                loading="lazy"
-              />
+              <div className="relative w-full h-full flex items-center justify-center">
+                <Image
+                  src={displayImage}
+                  alt={product.name}
+                  fill
+                  priority={priority}
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                  className="object-contain p-4 drop-shadow-[0_18px_30px_rgba(0,0,0,0.55)] transition-all duration-500 ease-out group-hover:-translate-y-2 group-hover:scale-105 pointer-events-none select-none"
+                  loading={priority ? undefined : "lazy"}
+                />
+              </div>
 
               {/* Oval Soft Blurred Shadow Directly Beneath the Garment */}
               <div
@@ -105,12 +115,17 @@ export function ProductCard({ product, variant = "light" }: ProductCardProps) {
               />
             </>
           ) : (
-            <img
-              src={displayImage}
-              alt={product.name}
-              className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
-              loading="lazy"
-            />
+            <div className="relative w-full h-full bg-[#F5EFE6]">
+              <Image
+                src={displayImage}
+                alt={product.name}
+                fill
+                priority={priority}
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
+                loading={priority ? undefined : "lazy"}
+              />
+            </div>
           )}
         </Link>
 
@@ -124,7 +139,7 @@ export function ProductCard({ product, variant = "light" }: ProductCardProps) {
                   : "px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-white/95 backdrop-blur-md text-stone-800 border border-stone-200/90 rounded-full shadow-2xs"
               }
             >
-              {product.badge}
+              {translateBadge(product.badge, language)}
             </span>
           </div>
         )}
@@ -192,7 +207,7 @@ export function ProductCard({ product, variant = "light" }: ProductCardProps) {
                     : "text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1.5 text-center"
                 }
               >
-                {isDark ? "Ölçünü seçin:" : "Ölçü Seçin:"}
+                {t.product.selectSize}:
               </div>
               <div className="flex items-center justify-center gap-1.5 flex-wrap">
                 {product.sizes.map((size) => {
@@ -264,8 +279,8 @@ export function ProductCard({ product, variant = "light" }: ProductCardProps) {
                       }`
                 }
                 style={{ backgroundColor: c.hex }}
-                title={c.name}
-                aria-label={c.name}
+                title={translateColor(c.name, language)}
+                aria-label={translateColor(c.name, language)}
               />
             ))}
             <span
@@ -275,7 +290,7 @@ export function ProductCard({ product, variant = "light" }: ProductCardProps) {
                   : "text-[11px] text-stone-400 ml-1.5"
               }
             >
-              {product.colors.length} rəng
+              {product.colors.length} {t.product.colorsWord}
             </span>
           </div>
 
@@ -334,24 +349,26 @@ export function ProductCard({ product, variant = "light" }: ProductCardProps) {
               </span>
             )}
           </div>
-          <span
-            className={
-              isDark
-                ? "text-[11px] text-[#E6C280] font-semibold"
-                : "text-[11px] text-amber-600 font-semibold"
-            }
-          >
-            ★ {product.rating}{" "}
+          {Boolean(product.rating && product.reviewCount) && (
             <span
               className={
                 isDark
-                  ? "text-white/40 font-normal"
-                  : "text-stone-400 font-normal"
+                  ? "text-[11px] text-[#E6C280] font-semibold"
+                  : "text-[11px] text-amber-600 font-semibold"
               }
             >
-              ({product.reviewCount})
+              ★ {product.rating}{" "}
+              <span
+                className={
+                  isDark
+                    ? "text-white/40 font-normal"
+                    : "text-stone-400 font-normal"
+                }
+              >
+                ({product.reviewCount})
+              </span>
             </span>
-          </span>
+          )}
         </div>
       </div>
     </div>

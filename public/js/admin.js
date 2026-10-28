@@ -211,11 +211,11 @@ const Admin = {
           <div class="form-grid-2">
             <div class="form-field">
               <label>Qiymət (AZN)</label>
-              <input type="number" id="newProdPrice" placeholder="320" required>
+              <input type="number" step="0.01" min="0" id="newProdPrice" placeholder="320" required>
             </div>
             <div class="form-field">
               <label>Əvvəlki Qiymət (Endirim varsa)</label>
-              <input type="number" id="newProdOldPrice" placeholder="390">
+              <input type="number" step="0.01" min="0" id="newProdOldPrice" placeholder="390">
             </div>
           </div>
 

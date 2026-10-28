@@ -9,7 +9,7 @@ const {
 } = require('./seedData');
 
 const DB_DIR = path.join(__dirname, '..', 'data');
-const DB_PATH = path.join(DB_DIR, 'db.json');
+const DB_PATH = path.join(DB_DIR, 'storeData.json');
 
 class Database {
   constructor() {
@@ -23,42 +23,18 @@ class Database {
 
     if (!fs.existsSync(DB_PATH)) {
       const defaultState = {
+        settings: {
+          storeName: "HORVVALLE",
+          tagline: "LÜKS MODA & FƏRDİ DƏRZİLİK ATELYESİ",
+          currency: "AZN",
+          currencySymbol: "₼"
+        },
         products: initialProducts,
         categories: initialCategories,
         studioMaterials: studioMaterials,
         studioColors: studioColors,
         promoCodes: promoCodes,
-        orders: [
-          {
-            id: "ORD-1092",
-            createdAt: new Date(Date.now() - 86400000).toISOString(),
-            customer: {
-              fullName: "Murad Həsənov",
-              phone: "+994 50 111 22 33",
-              email: "murad@example.com",
-              city: "Bakı",
-              address: "Nizami küçəsi 14"
-            },
-            items: [
-              {
-                id: "classic-tee",
-                name: "Classic Tee",
-                price: 35,
-                quantity: 2,
-                size: "L",
-                color: "Qara"
-              }
-            ],
-            subtotal: 70,
-            discount: 7,
-            promoCode: "ATELIER10",
-            total: 63,
-            paymentMethod: "card",
-            paymentStatus: "Ödənilib",
-            status: "Hazırlanır",
-            trackingCode: "AZ-EXP-109245"
-          }
-        ],
+        orders: [],
         reviews: {},
         customDesigns: []
       };
@@ -72,7 +48,7 @@ class Database {
       return JSON.parse(data);
     } catch (err) {
       console.error('Database read error:', err);
-      return { products: initialProducts, orders: [], customDesigns: [] };
+      return { products: [], orders: [], customDesigns: [] };
     }
   }
 
@@ -93,24 +69,45 @@ class Database {
 
     if (query.category && query.category !== 'all') {
       const cat = query.category.toLowerCase();
-      products = products.filter(p => p.category.toLowerCase() === cat || (p.subcategory && p.subcategory.toLowerCase().includes(cat)));
+      products = products.filter(p => 
+        (p.category && p.category.toLowerCase() === cat) || 
+        (p.gender && p.gender.toLowerCase() === cat) ||
+        (p.subcategory && p.subcategory.toLowerCase().includes(cat))
+      );
     }
 
     if (query.search) {
       const s = query.search.toLowerCase();
       products = products.filter(p => 
-        p.name.toLowerCase().includes(s) || 
-        p.description.toLowerCase().includes(s) || 
-        p.category.toLowerCase().includes(s)
+        (p.name && p.name.toLowerCase().includes(s)) || 
+        (p.description && p.description.toLowerCase().includes(s)) || 
+        (p.category && p.category.toLowerCase().includes(s)) ||
+        (p.slug && p.slug.toLowerCase().includes(s))
       );
     }
 
-    return products;
+    return products.map(p => ({
+      ...p,
+      id: p.id || p.slug,
+      currency: "₼",
+      image: p.image || (p.colors && p.colors[0] && p.colors[0].image) || "/images/hero/lookbook.webp"
+    }));
   }
 
   getProductById(id) {
     const db = this.read();
-    return (db.products || []).find(p => p.id === id);
+    const target = (id || '').toString().toLowerCase();
+    const p = (db.products || []).find(prod => 
+      (prod.id && prod.id.toString().toLowerCase() === target) ||
+      (prod.slug && prod.slug.toString().toLowerCase() === target)
+    );
+    if (!p) return null;
+    return {
+      ...p,
+      id: p.id || p.slug,
+      currency: "₼",
+      image: p.image || (p.colors && p.colors[0] && p.colors[0].image) || "/images/hero/lookbook.webp"
+    };
   }
 
   addProduct(productData) {
@@ -263,8 +260,11 @@ class Database {
     }
 
     let discount = 0;
-    if (promo.discountPercent) {
-      discount = Math.round((subtotal * promo.discountPercent) / 100);
+    const percent = promo.discountPercent || (promo.type === 'percent' ? promo.value : 0);
+    if (percent) {
+      discount = Math.round((subtotal * percent) / 100);
+    } else if (promo.type === 'fixed' || promo.discountAmount) {
+      discount = promo.value || promo.discountAmount || 0;
     }
 
     return {

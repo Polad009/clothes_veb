@@ -1,16 +1,20 @@
 "use client";
 
 import React, { Suspense, useState, useMemo, useEffect } from "react";
+import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { MOCK_PRODUCTS } from "@/data/products";
+import { useStoreData } from "@/context/StoreDataContext";
 import { ProductCard } from "@/components/ProductCard";
 import { CustomDropdown } from "@/components/ui/CustomDropdown";
 import { SlidersHorizontal, Filter, X, Check } from "lucide-react";
+import CollectionsLoading from "./loading";
 
 function CollectionsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { products } = useStoreData();
   const selectedCategory = searchParams.get("category") || "all";
 
   const [selectedFit, setSelectedFit] = useState<string>("all");
@@ -52,24 +56,37 @@ function CollectionsContent() {
 
   const fits = [
     "all",
-    "Oversized Fit",
-    "Regular Fit",
-    "Slim Fit",
-    "Relaxed Fit",
-    "Straight Fit",
-    "Slim Tapered",
-    "Utility Fit",
+    "T-shirt Regular (Süprəm)",
+    "T-shirt Regular (2iplik / TS Parça)",
+    "Oversize T-shirt (Süprəm / 2iplik)",
+    "Polo - qısaqol",
+    "Polo - uzunqol",
+    "Sviter - nazik (2iplik)",
+    "Sviter - qalın (3iplik)",
+    "Hody nazik (2iplik)",
+    "Hody qalın (3iplik)",
+    "Yarımzamok nazik (2iplik)",
+    "Yarımzamok qalın (3iplik)",
+    "Balonka",
+    "Şalvar nazik (2iplik)",
+    "Şalvar qalın (3iplik / TS Parça)",
+    "Kepka - nazik",
+    "Kepka - qalın",
   ];
 
   const sizes = ["all", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "30", "32", "34", "36"];
 
   const filteredProducts = useMemo(() => {
-    return MOCK_PRODUCTS.filter((product) => {
+    return products.filter((product) => {
       if (selectedCategory !== "all" && product.category !== selectedCategory) {
         return false;
       }
-      if (selectedFit !== "all" && product.fit !== selectedFit) {
-        return false;
+      if (selectedFit !== "all") {
+        const pFit = (product.fit || "").toLowerCase();
+        const sFit = selectedFit.toLowerCase();
+        if (pFit !== sFit && !pFit.includes(sFit) && !sFit.includes(pFit)) {
+          return false;
+        }
       }
       if (selectedSize !== "all" && !product.sizes.includes(selectedSize)) {
         return false;
@@ -81,7 +98,7 @@ function CollectionsContent() {
       if (sortBy === "rating") return b.rating - a.rating;
       return b.reviewCount - a.reviewCount;
     });
-  }, [selectedCategory, selectedFit, selectedSize, sortBy]);
+  }, [products, selectedCategory, selectedFit, selectedSize, sortBy]);
 
   const clearFilters = () => {
     handleCategoryChange("all");
@@ -204,11 +221,13 @@ function CollectionsContent() {
           <div className="flex items-center gap-1.5 p-1 rounded-full bg-stone-100/90 border border-stone-200/80 shadow-2xs">
             {categories.map((c) => {
               const isActive = selectedCategory === c.id;
+              const catHref = c.id === "all" ? "/collections" : `/collections?category=${c.id}`;
               return (
-                <button
+                <Link
                   key={c.id}
-                  type="button"
-                  onClick={() => handleCategoryChange(c.id)}
+                  href={catHref}
+                  scroll={false}
+                  prefetch={true}
                   className={`relative px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-medium transition-colors shrink-0 cursor-pointer select-none active:scale-95 ${
                     isActive
                       ? "text-white font-semibold"
@@ -223,7 +242,7 @@ function CollectionsContent() {
                     />
                   )}
                   <span className="relative z-10">{c.label}</span>
-                </button>
+                </Link>
               );
             })}
           </div>
@@ -306,10 +325,21 @@ function CollectionsContent() {
 
               {/* Siluet & Kəsim (Fits) */}
               <div className="space-y-2.5">
-                <label className="text-xs font-bold text-stone-600 uppercase tracking-wider block">
-                  Siluet & Kəsim
-                </label>
-                <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-stone-600 uppercase tracking-wider block">
+                    Siluet & Kəsim
+                  </label>
+                  {selectedFit !== "all" && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedFit("all")}
+                      className="text-[10px] text-amber-700 hover:underline font-semibold"
+                    >
+                      Sıfırla
+                    </button>
+                  )}
+                </div>
+                <div data-lenis-prevent className="space-y-1 max-h-64 overflow-y-auto pr-1 scrollbar-thin overscroll-contain">
                   {fits.map((f) => {
                     const isActive = selectedFit === f;
                     return (
@@ -317,13 +347,14 @@ function CollectionsContent() {
                         key={f}
                         type="button"
                         onClick={() => setSelectedFit(f)}
-                        className={`w-full py-1.5 px-3 rounded-xl text-xs transition cursor-pointer text-left ${
+                        className={`w-full py-1.5 px-3 rounded-xl text-xs transition cursor-pointer text-left truncate ${
                           isActive
-                            ? "bg-stone-100 text-stone-900 font-semibold border border-stone-200"
-                            : "text-stone-600 hover:text-stone-900 hover:bg-stone-50"
+                            ? "bg-stone-900 text-white font-semibold shadow-xs"
+                            : "text-stone-600 hover:text-stone-900 hover:bg-stone-100/70"
                         }`}
+                        title={f === "all" ? "Bütün modellər" : f}
                       >
-                        {f === "all" ? "Bütün kəsimlər" : f}
+                        {f === "all" ? "Bütün modellər" : f}
                       </button>
                     );
                   })}
@@ -364,9 +395,9 @@ function CollectionsContent() {
                 animate="show"
                 className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6"
               >
-                {filteredProducts.map((product) => (
+                {filteredProducts.map((product, idx) => (
                   <motion.div key={product.id} variants={cardItemVariants}>
-                    <ProductCard product={product} variant="light" />
+                    <ProductCard product={product} variant="light" priority={idx < 4} />
                   </motion.div>
                 ))}
               </motion.div>
@@ -431,11 +462,14 @@ function CollectionsContent() {
                   <div className="grid grid-cols-2 gap-2">
                     {categories.map((c) => {
                       const isActive = selectedCategory === c.id;
+                      const catHref = c.id === "all" ? "/collections" : `/collections?category=${c.id}`;
                       return (
-                        <button
+                        <Link
                           key={c.id}
-                          type="button"
-                          onClick={() => handleCategoryChange(c.id)}
+                          href={catHref}
+                          scroll={false}
+                          prefetch={true}
+                          onClick={() => setMobileFilterOpen(false)}
                           className={`py-2 px-3 rounded-full text-xs font-medium transition text-center cursor-pointer ${
                             isActive
                               ? "bg-stone-900 text-white font-semibold shadow-sm"
@@ -443,7 +477,7 @@ function CollectionsContent() {
                           }`}
                         >
                           {c.label}
-                        </button>
+                        </Link>
                       );
                     })}
                   </div>
@@ -545,13 +579,7 @@ function CollectionsContent() {
 
 export default function CollectionsPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-[#FAF7F2] flex items-center justify-center text-stone-500 text-sm">
-          Yüklənir...
-        </div>
-      }
-    >
+    <Suspense fallback={<CollectionsLoading />}>
       <CollectionsContent />
     </Suspense>
   );

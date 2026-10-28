@@ -1,248 +1,156 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef } from "react";
 import { useCart } from "@/context/CartContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { playAddToCartSound } from "@/lib/soundEffects";
-import dynamic from "next/dynamic";
-import { GarmentCanvas, StudioSurface, getStudioGarmentCategory, getStudioGarmentImage } from "@/components/studio/GarmentCanvas";
-
-const LiveModelPreviewModal = dynamic(
-  () => import("@/components/studio/LiveModelPreviewModal").then((mod) => mod.LiveModelPreviewModal),
-  { ssr: false }
-);
-
-const PhotoRoom3DPreviewModal = dynamic(
-  () => import("@/components/studio/PhotoRoom3DPreviewModal").then((mod) => mod.PhotoRoom3DPreviewModal),
-  { ssr: false }
-);
-import {
-  autoTrimCanvas,
-  removeBackgroundWithISNet,
-  applyMaskWithAntiHalo,
-  calculateAutoFitScale,
-} from "@/lib/studio/image-preprocessor";
-import { CustomDropdown } from "@/components/ui/CustomDropdown";
 import {
   Upload,
   RotateCcw,
-  Palette,
   ShoppingBag,
   Check,
   Trash2,
   CheckCircle2,
-  Eye,
-  Loader2,
-  Sparkles,
-  X,
-  Wand2,
-  ChevronUp,
-  ChevronDown,
-  Paintbrush,
-  Eraser,
-  Undo2,
-  Redo2,
+  Info,
+  ArrowRight,
+  Layers,
+  FileText,
+  Move,
+  ZoomIn,
+  ZoomOut,
+  Maximize2,
 } from "lucide-react";
 
-export interface GarmentOption {
+interface GarmentOption {
   id: string;
   name: string;
-  category: "tshirt" | "oversize" | "polo" | "polo-long" | "sweatshirt" | "hoodie" | "yarimzamok" | "salvar" | "kepka";
-  basePrice: number;        // Çapsız
-  smallPrintPrice: number;  // Kiçik çap (10cm)
-  oneSidePrice: number;     // Tək tərəf
-  twoSidePrice: number;     // İki tərəf
-  sleevePrice: number;      // Qol / boyun
+  category: "tshirt" | "oversize" | "polo" | "polo-long" | "sweatshirt" | "hoodie" | "yarimzamok" | "balonka" | "salvar" | "kepka";
+  basePrice: number;
   description: string;
 }
 
-// Focused catalog containing ONLY apparel: T-shirt, Oversize, Polo, Hody, Yarımzamok, Sviter, Şalvar, Kepka
 const GARMENTS: GarmentOption[] = [
   {
     id: "tshirt-regular-suprem",
     name: "T-shirt Regular (Süprəm)",
     category: "tshirt",
-    basePrice: 8,
-    smallPrintPrice: 12,
-    oneSidePrice: 14,
-    twoSidePrice: 15,
-    sleevePrice: 1,
-    description: "100% daranmış təbii süprəm pambıq, yüngül və nəfəs alan parça.",
+    basePrice: 14,
+    description: "Klassik rahat kəsim, 100% daranmış incə süprəm pambıq toxuma.",
   },
   {
     id: "tshirt-regular-2iplik",
     name: "T-shirt Regular (2iplik / TS Parça)",
     category: "tshirt",
-    basePrice: 9,
-    smallPrintPrice: 13,
-    oneSidePrice: 15,
-    twoSidePrice: 16,
-    sleevePrice: 1,
-    description: "Daha sıx və davamlı 2iplik pambıq toxunuşu.",
+    basePrice: 16,
+    description: "Formasını möhkəm saxlayan, sıx toxunuşlu premium 2-iplik TS parça.",
   },
   {
-    id: "tshirt-oversize",
+    id: "tshirt-oversize-suprem-2iplik",
     name: "Oversize T-shirt (Süprəm / 2iplik)",
     category: "oversize",
-    basePrice: 11,
-    smallPrintPrice: 15,
-    oneSidePrice: 17,
-    twoSidePrice: 18,
-    sleevePrice: 1,
-    description: "Trend enli çiyin kəsimi, premium xalis pambıq.",
+    basePrice: 18,
+    description: "Düşük çiyinli boxy kəsim, ağır və dayanıqlı pambıq toxunuşu.",
   },
   {
-    id: "polo-short",
-    name: "Polo — Qısaqol Pambıq",
+    id: "polo-qisaqol",
+    name: "Polo - qısaqol",
     category: "polo",
-    basePrice: 14,
-    smallPrintPrice: 15,
-    oneSidePrice: 16,
-    twoSidePrice: 17,
-    sleevePrice: 1,
-    description: "Klassik yaxalıqlı, möhkəm pambıq piké parçası.",
+    basePrice: 19,
+    description: "Klassik qatlanan polo yaxalıq, düyməli ön kəsim və zərif manjetlər.",
   },
   {
-    id: "polo-long",
-    name: "Polo — Uzunqol Pambıq",
+    id: "polo-uzunqol",
+    name: "Polo - uzunqol",
     category: "polo-long",
-    basePrice: 18,
-    smallPrintPrice: 19,
-    oneSidePrice: 20,
-    twoSidePrice: 21,
-    sleevePrice: 1,
-    description: "Payız-qış üçün uzunqollu klassik piké polo köynək.",
+    basePrice: 22,
+    description: "Mövsümi uzunqol zərif polo kəsimi, elastik bilək manjetləri.",
   },
   {
-    id: "sviter-thin",
-    name: "Sviter — Nazik (2iplik)",
+    id: "sviter-nazik-2iplik",
+    name: "Sviter - nazik (2iplik)",
     category: "sweatshirt",
-    basePrice: 14,
-    smallPrintPrice: 18,
-    oneSidePrice: 20,
-    twoSidePrice: 21,
-    sleevePrice: 1,
-    description: "Yüngül və elastik 2iplik toxunuş, gündəlik rahat stil.",
+    basePrice: 24,
+    description: "Yüngül və nəfəs alan 2-iplik pambıq toxunuşlu yumru yaxa sviter.",
   },
   {
-    id: "sviter-thick",
-    name: "Sviter — Qalın (3iplik)",
+    id: "sviter-qalin-3iplik",
+    name: "Sviter - qalın (3iplik)",
     category: "sweatshirt",
-    basePrice: 17,
-    smallPrintPrice: 21,
-    oneSidePrice: 23,
-    twoSidePrice: 24,
-    sleevePrice: 1,
-    description: "İçi isti tüklü premium 3iplik pambıq sviter.",
+    basePrice: 28,
+    description: "Qalın 3-iplik isti şardonlu astar, payız-qış üçün ideal sweatshirt.",
   },
   {
-    id: "hoodie-thin",
-    name: "Hody Nazik (2iplik)",
+    id: "hody-nazik-2iplik",
+    name: "Hody nazik (2iplik)",
     category: "hoodie",
-    basePrice: 18,
-    smallPrintPrice: 22,
-    oneSidePrice: 24,
-    twoSidePrice: 25,
-    sleevePrice: 1,
-    description: "Kapüşonlu 2iplik yüngül pambıq hudi.",
+    basePrice: 26,
+    description: "Mövsümlük yüngül 2-iplik kapüşonlu hudi, kordonlu başlıq və kenquru cib.",
   },
   {
-    id: "hoodie-thick",
-    name: "Hody Qalın (3iplik)",
+    id: "hody-qalin-3iplik",
+    name: "Hody qalın (3iplik)",
     category: "hoodie",
-    basePrice: 19,
-    smallPrintPrice: 23,
-    oneSidePrice: 25,
-    twoSidePrice: 26,
-    sleevePrice: 1,
-    description: "380 GSM isti və möhkəm kapüşonlu 3iplik heavyweight hudi.",
+    basePrice: 32,
+    description: "Ağır 380 GSM 3-iplik isti şardonlu fleece, geniş kapüşon və möhkəm cib.",
   },
   {
-    id: "yarimzamok-thin",
-    name: "Yarımzamok Nazik (2iplik)",
+    id: "yarimzamok-nazik-2iplik",
+    name: "Yarımzamok nazik (2iplik)",
     category: "yarimzamok",
-    basePrice: 19,
-    smallPrintPrice: 23,
-    oneSidePrice: 25,
-    twoSidePrice: 26,
-    sleevePrice: 1,
-    description: "Yaxalıqlı yarımzamok kəsimli yüngül 2iplik sviter.",
+    basePrice: 28,
+    description: "Yarım boyun fermuarlı (half-zip) zərif 2-iplik idman və şəhər stili.",
   },
   {
-    id: "yarimzamok-thick",
-    name: "Yarımzamok Qalın (3iplik)",
+    id: "yarimzamok-qalin-3iplik",
+    name: "Yarımzamok qalın (3iplik)",
     category: "yarimzamok",
-    basePrice: 20,
-    smallPrintPrice: 24,
-    oneSidePrice: 26,
-    twoSidePrice: 27,
-    sleevePrice: 1,
-    description: "Qalın 3iplik isti yarımzamoklu üst geyim.",
+    basePrice: 34,
+    description: "Qalın 3-iplik şardonlu yarımzamok, möhkəm metal fermuar və dik yaxa.",
   },
   {
     id: "balonka",
     name: "Balonka",
-    category: "hoodie",
-    basePrice: 22,
-    smallPrintPrice: 24,
-    oneSidePrice: 25,
-    twoSidePrice: 26,
-    sleevePrice: 1,
-    description: "Külək keçirməyən müasir kəsimli balonka gödəkcə.",
+    category: "balonka",
+    basePrice: 38,
+    description: "Külək və nəmdən qoruyan xüsusi izolyasiyalı, suya davamlı premium parça.",
   },
   {
-    id: "salvar-thin",
-    name: "Şalvar Nazik (2iplik)",
+    id: "salvar-nazik-2iplik",
+    name: "Şalvar nazik (2iplik)",
     category: "salvar",
-    basePrice: 17,
-    smallPrintPrice: 21,
-    oneSidePrice: 22,
-    twoSidePrice: 23,
-    sleevePrice: 1,
-    description: "Yüngül və rahat gündəlik idman şalvarı.",
+    basePrice: 24,
+    description: "Rahat elastik belli, kordonlu və cibli yüngül 2-iplik pambıq şalvar.",
   },
   {
-    id: "salvar-thick",
-    name: "Şalvar Qalın (3iplik / TS Parça)",
+    id: "salvar-qalin-3iplik",
+    name: "Şalvar qalın (3iplik / TS Parça)",
     category: "salvar",
-    basePrice: 18,
-    smallPrintPrice: 22,
-    oneSidePrice: 23,
-    twoSidePrice: 24,
-    sleevePrice: 1,
-    description: "İçi tüklü isti qalın qış idman şalvarı.",
+    basePrice: 28,
+    description: "Qalın 3-iplik TS toxuma, isti astar və möhkəmləndirilmiş tikişli şalvar.",
   },
   {
-    id: "kepka-thin",
-    name: "Kepka — Nazik",
+    id: "kepka-nazik",
+    name: "Kepka - nazik",
     category: "kepka",
-    basePrice: 4,
-    smallPrintPrice: 6,
-    oneSidePrice: 6.5,
-    twoSidePrice: 6.5,
-    sleevePrice: 1,
-    description: "Yüngül yay kepkası, tənzimlənən kəmərli.",
+    basePrice: 10,
+    description: "Yüngül yay kepkası, nəfəs alan panellər və tənzimlənən kəmər.",
   },
   {
-    id: "kepka-thick",
-    name: "Kepka — Qalın",
+    id: "kepka-qalin",
+    name: "Kepka - qalın",
     category: "kepka",
-    basePrice: 6,
-    smallPrintPrice: 7,
-    oneSidePrice: 7.5,
-    twoSidePrice: 7.5,
-    sleevePrice: 1,
-    description: "Qalın panelli snapback kepka.",
+    basePrice: 14,
+    description: "Qalın sərt panelli snapback / beysbol kepkası, premium toxuma.",
   },
 ];
 
-interface StudioColorDef {
+interface ColorOption {
   key: string;
   name: string;
   hex: string;
 }
 
-const COLORS: StudioColorDef[] = [
+const COLORS: ColorOption[] = [
   { key: "white", name: "Ağ", hex: "#FFFFFF" },
   { key: "black", name: "Qara", hex: "#18181B" },
   { key: "sand", name: "Qum Beji", hex: "#D7CEC7" },
@@ -252,28 +160,9 @@ const COLORS: StudioColorDef[] = [
   { key: "red", name: "Qırmızı", hex: "#A32C2C" },
 ];
 
-const PRESETS = [
-  {
-    name: "BMW M4 Streetwear",
-    url: "/images/presets/bmw-m4-clean.png?v=3",
-    originalUrl: "/images/presets/bmw-m4-original.jpg",
-  },
-  {
-    name: "Qurd Modeli (Wolf)",
-    url: "/images/presets/wolf_feathers.png",
-    originalUrl: "/images/presets/wolf_feathers.png",
-  },
-  {
-    name: "Alovlu Qurd",
-    url: "/images/presets/wolf_flame.png",
-    originalUrl: "/images/presets/wolf_flame.png",
-  },
-  {
-    name: "Minimalist Loqo",
-    url: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=500&auto=format&fit=crop",
-    originalUrl: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=500&auto=format&fit=crop",
-  },
-];
+const SIZES = ["S", "M", "L", "XL", "2XL", "3XL"];
+
+export type StudioSide = "front" | "back" | "left" | "right";
 
 export interface SideDesignState {
   uploadedImage: string | null;
@@ -291,655 +180,274 @@ export interface SideDesignState {
   textRotation?: number;
 }
 
-export default function StudioPage() {
+interface PlacementOption {
+  id: string;
+  label: string;
+  sublabel: string;
+  side: StudioSide;
+  extraPrice: number;
+}
+
+const PLACEMENTS: PlacementOption[] = [
+  {
+    id: "front-center",
+    label: "Ön — Sinə (Mərkəz Böyük)",
+    sublabel: "A4 / A3 standart əsas çap",
+    side: "front",
+    extraPrice: 0,
+  },
+  {
+    id: "front-left",
+    label: "Ön — Sol Sinə (Kiçik Loqo)",
+    sublabel: "10x10 sm zərif brend loqosu",
+    side: "front",
+    extraPrice: 0,
+  },
+  {
+    id: "back-center",
+    label: "Arxa — Kürək (Böyük)",
+    sublabel: "Bütün kürəyi əhatə edən böyük çap",
+    side: "back",
+    extraPrice: 0,
+  },
+  {
+    id: "back-neck",
+    label: "Arxa — Boyun Altı",
+    sublabel: "Kiçik simvol və ya yazı",
+    side: "back",
+    extraPrice: 0,
+  },
+  {
+    id: "sleeve-left",
+    label: "Sol Qol",
+    sublabel: "Sol qol kənarında loqo və ya yazı çapı",
+    side: "left",
+    extraPrice: 0,
+  },
+  {
+    id: "sleeve-right",
+    label: "Sağ Qol",
+    sublabel: "Sağ qol kənarında loqo və ya yazı çapı",
+    side: "right",
+    extraPrice: 0,
+  },
+  {
+    id: "both-sides",
+    label: "İkitərəfli (Həm Ön, Həm Arxa)",
+    sublabel: "Öndə loqo + Arxada böyük çap (+3 ₼)",
+    side: "front",
+    extraPrice: 3,
+  },
+];
+
+// Helper to get garment mockup image path
+function getGarmentMockupUrl(garmentCategory: string, colorKey: string, side: StudioSide): string {
+  let cat = garmentCategory;
+  if (cat === "polo-long") cat = "polo";
+  if (cat === "balonka") cat = "hoodie";
+
+  // Use crisp sleeve view mockups available for all colors
+  if (side === "left" || side === "right") {
+    return `/images/studio/tshirt/${colorKey}-${side}-shirt.png`;
+  }
+
+  let noun = cat;
+  if (noun === "tshirt") noun = "shirt";
+  if (noun === "oversize") noun = "oversize";
+  if (noun === "hoodie") noun = "hoodie";
+  if (noun === "polo") noun = "polo";
+  if (noun === "sweatshirt") noun = "sweatshirt";
+  if (noun === "salvar") noun = "salvar";
+  if (noun === "kepka") noun = "kepka";
+  if (noun === "yarimzamok") noun = "yarimzamok";
+
+  return `/images/studio/${cat}/${colorKey}-${side}-${noun}.png`;
+}
+
+export default function SimpleStudioPage() {
   const { addItem, openCart } = useCart();
   const { formatPrice } = useCurrency();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewBoxRef = useRef<HTMLDivElement>(null);
 
-  // Studio Selection
+  // Selections
   const [selectedGarment, setSelectedGarment] = useState<GarmentOption>(GARMENTS[0]);
-  const [selectedColor, setSelectedColor] = useState<StudioColorDef>(COLORS[0]);
-  const [viewSide, setViewSide] = useState<StudioSurface>("front");
-  const [selectedSize, setSelectedSize] = useState("L");
-  const [isAdding, setIsAdding] = useState(false);
-  const [isLiveModelOpen, setIsLiveModelOpen] = useState(false);
-  const [isPhotoRoom3DOpen, setIsPhotoRoom3DOpen] = useState(false);
-  const [showMobileMiniPreview, setShowMobileMiniPreview] = useState(false);
-  const [isMobilePreviewCollapsed, setIsMobilePreviewCollapsed] = useState(false);
+  const [selectedColor, setSelectedColor] = useState<ColorOption>(COLORS[0]);
+  const [selectedSize, setSelectedSize] = useState<string>("L");
+  const [selectedPlacement, setSelectedPlacement] = useState<PlacementOption>(PLACEMENTS[0]);
+  const [activeSide, setActiveSide] = useState<StudioSide>("front");
 
-  // Monitor scroll for mobile real-time sticky preview
-  useEffect(() => {
-    const handleScroll = () => {
-      if (typeof window !== "undefined") {
-        setShowMobileMiniPreview(window.scrollY > 280);
-      }
+  // Uploaded Design State
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [uploadedFileSize, setUploadedFileSize] = useState<string | null>(null);
+
+  // Interactive transforms per side (drag, scale, position)
+  const [transforms, setTransforms] = useState<Record<StudioSide, { posX: number; posY: number; scale: number; rotation: number }>>({
+    front: { posX: 0, posY: 0, scale: 1, rotation: 0 },
+    back: { posX: 0, posY: 0, scale: 1, rotation: 0 },
+    left: { posX: 0, posY: 0, scale: 1, rotation: 0 },
+    right: { posX: 0, posY: 0, scale: 1, rotation: 0 },
+  });
+
+  const currentTransform = transforms[activeSide];
+
+  const updateTransform = (updates: Partial<{ posX: number; posY: number; scale: number; rotation: number }>) => {
+    setTransforms((prev) => ({
+      ...prev,
+      [activeSide]: {
+        ...prev[activeSide],
+        ...updates,
+      },
+    }));
+  };
+
+  // Dragging state
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef<{ clientX: number; clientY: number; startPosX: number; startPosY: number }>({ clientX: 0, clientY: 0, startPosX: 0, startPosY: 0 });
+
+  // Resizing state
+  const [isResizing, setIsResizing] = useState(false);
+  const resizeStartRef = useRef<{ clientX: number; clientY: number; startScale: number }>({ clientX: 0, clientY: 0, startScale: 1 });
+
+  // Pointer drag handlers
+  const handlePointerDownDrag = (e: React.PointerEvent) => {
+    e.stopPropagation();
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    setIsDragging(true);
+    dragStartRef.current = {
+      clientX: e.clientX,
+      clientY: e.clientY,
+      startPosX: currentTransform.posX,
+      startPosY: currentTransform.posY,
     };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  };
 
-  // Upload Preview Modal State
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [uploadedFileName, setUploadedFileName] = useState<string>("");
-  const [previewRawImage, setPreviewRawImage] = useState<string | null>(null);
-  const [trimmedBaseImage, setTrimmedBaseImage] = useState<string | null>(null);
-  const [previewCleanImage, setPreviewCleanImage] = useState<string | null>(null);
-  const [aiCutoutImage, setAiCutoutImage] = useState<string | null>(null);
-  const [compareTab, setCompareTab] = useState<"cutout" | "original">("cutout");
-  const [imageDims, setImageDims] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
-  const [isLowDpi, setIsLowDpi] = useState(false);
-  const [autoFittedScale, setAutoFittedScale] = useState(1.0);
-  const [isCleaningBg, setIsCleaningBg] = useState(false);
-  const [bgCleaned, setBgCleaned] = useState(false);
-  const [cleaningStatusText, setCleaningStatusText] = useState("Süni intellekt hazırlanır…");
-  const [downloadProgress, setDownloadProgress] = useState(0);
+  const handlePointerMoveDrag = (e: React.PointerEvent) => {
+    if (!isDragging || !previewBoxRef.current) return;
+    const rect = previewBoxRef.current.getBoundingClientRect();
+    const deltaX = ((e.clientX - dragStartRef.current.clientX) / rect.width) * 100;
+    const deltaY = ((e.clientY - dragStartRef.current.clientY) / rect.height) * 100;
+    const newX = Math.max(-35, Math.min(35, Math.round(dragStartRef.current.startPosX + deltaX)));
+    const newY = Math.max(-35, Math.min(35, Math.round(dragStartRef.current.startPosY + deltaY)));
+    updateTransform({ posX: newX, posY: newY });
+  };
 
-  // Manual Brush Refinement State
-  const [isBrushMode, setIsBrushMode] = useState(false);
-  const [brushTool, setBrushTool] = useState<"restore" | "erase">("restore");
-  const [brushSize, setBrushSize] = useState(25);
-  const maskBytesRef = useRef<Uint8ClampedArray | null>(null);
-  const originalCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  const brushHistoryRef = useRef<Uint8ClampedArray[]>([]);
-  const brushFutureRef = useRef<Uint8ClampedArray[]>([]);
-  const isPaintingRef = useRef(false);
-  const brushCanvasRef = useRef<HTMLCanvasElement | null>(null);
-
-  // Lock body scroll completely while upload modal is open so it stays locked dead-center
-  useEffect(() => {
-    if (isUploadModalOpen) {
-      const prevOverflow = document.body.style.overflow;
-      const prevTouchAction = document.body.style.touchAction;
-      document.body.style.overflow = "hidden";
-      document.body.style.touchAction = "none";
-      return () => {
-        document.body.style.overflow = prevOverflow;
-        document.body.style.touchAction = prevTouchAction;
-      };
+  const handlePointerUpDrag = (e: React.PointerEvent) => {
+    if (isDragging) {
+      try {
+        (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+      } catch (err) {}
+      setIsDragging(false);
     }
-  }, [isUploadModalOpen]);
-
-  // Independent Designs for ALL 4 SURFACES
-  const [designs, setDesigns] = useState<Record<StudioSurface, SideDesignState>>({
-    front: {
-      uploadedImage: "/images/presets/bmw-m4-clean.png?v=3",
-      originalImage: PRESETS[0].originalUrl,
-      customText: "NOVA STUDIO",
-      textColor: "#111827",
-      fontFamily: "Inter",
-      scale: 1.0,
-      posX: 0,
-      posY: -35,
-      rotation: 0,
-      textScale: 1.0,
-      textPosX: 0,
-      textPosY: 55,
-      textRotation: 0,
-    },
-    back: {
-      uploadedImage: null,
-      originalImage: null,
-      customText: "",
-      textColor: "#111827",
-      fontFamily: "Inter",
-      scale: 1.0,
-      posX: 0,
-      posY: -30,
-      rotation: 0,
-      textScale: 1.0,
-      textPosX: 0,
-      textPosY: 55,
-      textRotation: 0,
-    },
-    leftSleeve: {
-      uploadedImage: null,
-      originalImage: null,
-      customText: "",
-      textColor: "#111827",
-      fontFamily: "Inter",
-      scale: 0.8,
-      posX: 0,
-      posY: -20,
-      rotation: 0,
-      textScale: 0.8,
-      textPosX: 0,
-      textPosY: 35,
-      textRotation: 0,
-    },
-    rightSleeve: {
-      uploadedImage: null,
-      originalImage: null,
-      customText: "",
-      textColor: "#111827",
-      fontFamily: "Inter",
-      scale: 0.8,
-      posX: 0,
-      posY: -20,
-      rotation: 0,
-      textScale: 0.8,
-      textPosX: 0,
-      textPosY: 35,
-      textRotation: 0,
-    },
-  });
-
-  const currentDesign = designs[viewSide];
-
-  // Per-tab History Stacks for Undo/Redo (Ctrl+Z / Ctrl+Y)
-  const [history, setHistory] = useState<Record<StudioSurface, SideDesignState[]>>({
-    front: [],
-    back: [],
-    leftSleeve: [],
-    rightSleeve: [],
-  });
-
-  const [future, setFuture] = useState<Record<StudioSurface, SideDesignState[]>>({
-    front: [],
-    back: [],
-    leftSleeve: [],
-    rightSleeve: [],
-  });
-
-  const updateCurrentDesign = (partial: Partial<SideDesignState>, recordHistory = true) => {
-    setDesigns((prev) => {
-      const current = prev[viewSide];
-      if (recordHistory) {
-        setHistory((prevHist) => ({
-          ...prevHist,
-          [viewSide]: [...prevHist[viewSide].slice(-30), current],
-        }));
-        setFuture((prevFut) => ({
-          ...prevFut,
-          [viewSide]: [],
-        }));
-      }
-      return {
-        ...prev,
-        [viewSide]: { ...current, ...partial },
-      };
-    });
   };
 
-  const handleUndo = useCallback(() => {
-    setHistory((prevHist) => {
-      const sideHist = prevHist[viewSide];
-      if (!sideHist || sideHist.length === 0) return prevHist;
-      const prevItem = sideHist[sideHist.length - 1];
-      const newSideHist = sideHist.slice(0, -1);
-
-      setDesigns((prevDesigns) => {
-        const current = prevDesigns[viewSide];
-        setFuture((prevFut) => ({
-          ...prevFut,
-          [viewSide]: [current, ...prevFut[viewSide]],
-        }));
-        return {
-          ...prevDesigns,
-          [viewSide]: prevItem,
-        };
-      });
-
-      return {
-        ...prevHist,
-        [viewSide]: newSideHist,
-      };
-    });
-  }, [viewSide]);
-
-  const handleRedo = useCallback(() => {
-    setFuture((prevFut) => {
-      const sideFut = prevFut[viewSide];
-      if (!sideFut || sideFut.length === 0) return prevFut;
-      const nextItem = sideFut[0];
-      const newSideFut = sideFut.slice(1);
-
-      setDesigns((prevDesigns) => {
-        const current = prevDesigns[viewSide];
-        setHistory((prevHist) => ({
-          ...prevHist,
-          [viewSide]: [...prevHist[viewSide], current],
-        }));
-        return {
-          ...prevDesigns,
-          [viewSide]: nextItem,
-        };
-      });
-
-      return {
-        ...prevFut,
-        [viewSide]: newSideFut,
-      };
-    });
-  }, [viewSide]);
-
-  // Garment category logic
-  const garmentCategory = getStudioGarmentCategory(selectedGarment.id);
-
-  // Downscale large image for 2D canvas preview (max 2048px) while preserving original for orders
-  const downscaleForPreview = async (dataUrl: string, maxDim = 2048): Promise<string> => {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => {
-        if (img.width <= maxDim && img.height <= maxDim) {
-          resolve(dataUrl);
-          return;
-        }
-        const scale = Math.min(maxDim / img.width, maxDim / img.height);
-        const targetW = Math.round(img.width * scale);
-        const targetH = Math.round(img.height * scale);
-        const canvas = document.createElement("canvas");
-        canvas.width = targetW;
-        canvas.height = targetH;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
-          resolve(dataUrl);
-          return;
-        }
-        ctx.drawImage(img, 0, 0, targetW, targetH);
-        resolve(canvas.toDataURL("image/png"));
-      };
-      img.onerror = () => resolve(dataUrl);
-      img.src = dataUrl;
-    });
+  // Pointer resize handlers (Corner handle)
+  const handlePointerDownResize = (e: React.PointerEvent) => {
+    e.stopPropagation();
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    setIsResizing(true);
+    resizeStartRef.current = {
+      clientX: e.clientX,
+      clientY: e.clientY,
+      startScale: currentTransform.scale,
+    };
   };
 
-  // File Upload Initiator -> Auto-EXIF, Auto-Trim, DPI Check, Auto-Fit Scale ~75%
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePointerMoveResize = (e: React.PointerEvent) => {
+    if (!isResizing || !previewBoxRef.current) return;
+    const rect = previewBoxRef.current.getBoundingClientRect();
+    const delta = ((e.clientX - resizeStartRef.current.clientX) + (e.clientY - resizeStartRef.current.clientY)) / (rect.width * 0.45);
+    const newScale = Math.max(0.4, Math.min(1.8, Number((resizeStartRef.current.startScale + delta).toFixed(2))));
+    updateTransform({ scale: newScale });
+  };
+
+  const handlePointerUpResize = (e: React.PointerEvent) => {
+    if (isResizing) {
+      try {
+        (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+      } catch (err) {}
+      setIsResizing(false);
+    }
+  };
+
+  // Wheel zoom
+  const handleWheelZoom = (e: React.WheelEvent) => {
+    if (!uploadedImage) return;
+    const delta = e.deltaY < 0 ? 0.05 : -0.05;
+    const newScale = Math.max(0.4, Math.min(1.8, Number((currentTransform.scale + delta).toFixed(2))));
+    updateTransform({ scale: newScale });
+  };
+
+  // Customer Note
+  const [customerNote, setCustomerNote] = useState<string>("");
+
+  // UI status
+  const [isAdding, setIsAdding] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  // Handle File Upload
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const fileName = file.name;
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === "string") {
-          const rawOriginal = reader.result;
-          const img = new Image();
-          img.onload = () => {
-            // Draw to canvas to respect EXIF orientation and allow pixel manipulation
-            const canvas = document.createElement("canvas");
-            canvas.width = img.width;
-            canvas.height = img.height;
-            const ctx = canvas.getContext("2d");
-            if (ctx) ctx.drawImage(img, 0, 0);
+    if (!file) return;
 
-            // Auto-trim empty / uniform border pixels
-            const trimmedCanvas = autoTrimCanvas(canvas);
-            const trimmedDataUrl = trimmedCanvas.toDataURL("image/png");
+    setUploadError(null);
 
-            // DPI / quality check
-            const isLow = img.width < 700 || img.height < 700;
-
-            // Auto-scale ~75% of printable chest area
-            const autoScale = calculateAutoFitScale(trimmedCanvas.width, trimmedCanvas.height, 200, 200, 0.75);
-
-            setUploadedFileName(fileName);
-            setPreviewRawImage(rawOriginal);
-            setTrimmedBaseImage(trimmedDataUrl);
-            setPreviewCleanImage(trimmedDataUrl);
-            setAiCutoutImage(null);
-            setCompareTab("cutout");
-            setBgCleaned(false);
-            setIsBrushMode(false);
-            maskBytesRef.current = null;
-            originalCanvasRef.current = canvas;
-            brushHistoryRef.current = [];
-            brushFutureRef.current = [];
-            setImageDims({ width: img.width, height: img.height });
-            setIsLowDpi(isLow);
-            setAutoFittedScale(autoScale);
-            setIsCleaningBg(false);
-            setIsUploadModalOpen(true);
-          };
-          img.src = rawOriginal;
-        }
-      };
-      reader.readAsDataURL(file);
-      e.target.value = "";
-    }
-  };
-
-  // Run IS-Net AI Background Removal (100% in-browser, WebWorker + WebGPU/WASM)
-  const handleRunISNetBgRemoval = async () => {
-    if (!previewRawImage) return;
-    setIsCleaningBg(true);
-    setCleaningStatusText("Model hazırlanır…");
-    setDownloadProgress(0);
-
-    try {
-      const result = await removeBackgroundWithISNet(previewRawImage, (pct, status) => {
-        setDownloadProgress(pct);
-        setCleaningStatusText(status);
-      });
-
-      maskBytesRef.current = new Uint8ClampedArray(result.maskBytes);
-      originalCanvasRef.current = result.originalCanvas;
-      brushHistoryRef.current = [new Uint8ClampedArray(result.maskBytes)];
-      brushFutureRef.current = [];
-
-      setAiCutoutImage(result.processedDataUrl);
-      setPreviewCleanImage(result.processedDataUrl);
-      setBgCleaned(true);
-      setCompareTab("cutout");
-    } catch (err: any) {
-      console.error("IS-Net bg removal error:", err);
-      alert("Fon silinmədi. Yenidən cəhd edin və ya fırça ilə əl ilə təmizləyin");
-    } finally {
-      setIsCleaningBg(false);
-    }
-  };
-
-  // Reset to original image
-  const handleResetBg = () => {
-    setPreviewCleanImage(trimmedBaseImage || previewRawImage);
-    setAiCutoutImage(null);
-    setBgCleaned(false);
-    setCompareTab("original");
-    setIsBrushMode(false);
-    maskBytesRef.current = null;
-    brushHistoryRef.current = [];
-    brushFutureRef.current = [];
-  };
-
-  // Manual Brush Refinement Helpers
-  const renderBrushCanvas = useCallback(() => {
-    const canvas = brushCanvasRef.current;
-    const origCanvas = originalCanvasRef.current;
-    const mask = maskBytesRef.current;
-    if (!canvas || !origCanvas || !mask) return;
-
-    const w = origCanvas.width;
-    const h = origCanvas.height;
-    if (canvas.width !== w || canvas.height !== h) {
-      canvas.width = w;
-      canvas.height = h;
-    }
-
-    const ctx = canvas.getContext("2d", { willReadFrequently: true });
-    if (!ctx) return;
-
-    const origCtx = origCanvas.getContext("2d");
-    if (!origCtx) return;
-    const imgData = origCtx.getImageData(0, 0, w, h);
-    const data = imgData.data;
-
-    for (let i = 0; i < mask.length; i++) {
-      data[i * 4 + 3] = mask[i];
-    }
-
-    ctx.putImageData(imgData, 0, 0);
-  }, []);
-
-  const applyBrushStrokeAt = (clientX: number, clientY: number) => {
-    const canvas = brushCanvasRef.current;
-    const mask = maskBytesRef.current;
-    if (!canvas || !mask) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-
-    const imgX = (clientX - rect.left) * scaleX;
-    const imgY = (clientY - rect.top) * scaleY;
-    const radius = Math.max(2, brushSize * (canvas.width / 400));
-    const r2 = radius * radius;
-
-    const w = canvas.width;
-    const h = canvas.height;
-    const minX = Math.max(0, Math.floor(imgX - radius));
-    const maxX = Math.min(w - 1, Math.ceil(imgX + radius));
-    const minY = Math.max(0, Math.floor(imgY - radius));
-    const maxY = Math.min(h - 1, Math.ceil(imgY + radius));
-
-    const targetVal = brushTool === "restore" ? 255 : 0;
-
-    for (let py = minY; py <= maxY; py++) {
-      for (let px = minX; px <= maxX; px++) {
-        const d2 = (px - imgX) * (px - imgX) + (py - imgY) * (py - imgY);
-        if (d2 <= r2) {
-          mask[py * w + px] = targetVal;
-        }
-      }
-    }
-
-    renderBrushCanvas();
-  };
-
-  const handleBrushMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    isPaintingRef.current = true;
-    if (maskBytesRef.current) {
-      brushHistoryRef.current.push(new Uint8ClampedArray(maskBytesRef.current));
-      if (brushHistoryRef.current.length > 20) brushHistoryRef.current.shift();
-      brushFutureRef.current = [];
-    }
-    applyBrushStrokeAt(e.clientX, e.clientY);
-  };
-
-  const handleBrushMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isPaintingRef.current) return;
-    applyBrushStrokeAt(e.clientX, e.clientY);
-  };
-
-  const handleBrushMouseUp = () => {
-    isPaintingRef.current = false;
-  };
-
-  const handleBrushTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
-    if (e.touches.length !== 1) return;
-    isPaintingRef.current = true;
-    if (maskBytesRef.current) {
-      brushHistoryRef.current.push(new Uint8ClampedArray(maskBytesRef.current));
-      if (brushHistoryRef.current.length > 20) brushHistoryRef.current.shift();
-      brushFutureRef.current = [];
-    }
-    const touch = e.touches[0];
-    applyBrushStrokeAt(touch.clientX, touch.clientY);
-  };
-
-  const handleBrushTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
-    if (!isPaintingRef.current || e.touches.length !== 1) return;
-    const touch = e.touches[0];
-    applyBrushStrokeAt(touch.clientX, touch.clientY);
-  };
-
-  const handleBrushTouchEnd = () => {
-    isPaintingRef.current = false;
-  };
-
-  const handleOpenBrushMode = () => {
-    if (!maskBytesRef.current || !originalCanvasRef.current) return;
-    setIsBrushMode(true);
-    setTimeout(() => {
-      renderBrushCanvas();
-    }, 50);
-  };
-
-  const handleApplyBrushChanges = () => {
-    if (!originalCanvasRef.current || !maskBytesRef.current) {
-      setIsBrushMode(false);
+    // Max 30MB
+    if (file.size > 30 * 1024 * 1024) {
+      setUploadError("Fayl ölçüsü maksimum 30MB ola bilər.");
       return;
     }
-    const finalCanvas = applyMaskWithAntiHalo(originalCanvasRef.current, maskBytesRef.current, true);
-    const updatedUrl = finalCanvas.toDataURL("image/png");
-    setPreviewCleanImage(updatedUrl);
-    setAiCutoutImage(updatedUrl);
-    setCompareTab("cutout");
-    setIsBrushMode(false);
-  };
 
-  const handleUndoBrush = () => {
-    if (brushHistoryRef.current.length === 0 || !maskBytesRef.current) return;
-    const prev = brushHistoryRef.current.pop()!;
-    brushFutureRef.current.push(new Uint8ClampedArray(maskBytesRef.current));
-    maskBytesRef.current = prev;
-    renderBrushCanvas();
-  };
+    const sizeInMB = (file.size / (1024 * 1024)).toFixed(1);
+    setUploadedFileName(file.name);
+    setUploadedFileSize(`${sizeInMB} MB`);
 
-  const handleRedoBrush = () => {
-    if (brushFutureRef.current.length === 0 || !maskBytesRef.current) return;
-    const next = brushFutureRef.current.pop()!;
-    brushHistoryRef.current.push(new Uint8ClampedArray(maskBytesRef.current));
-    maskBytesRef.current = next;
-    renderBrushCanvas();
-  };
-
-  // Confirm image placement from modal onto the garment (Auto-fit ~75% centered at posX: 0, posY: -30)
-  const handleConfirmImageUpload = () => {
-    const finalImage = previewCleanImage || previewRawImage;
-    if (finalImage) {
-      updateCurrentDesign({
-        uploadedImage: finalImage,
-        originalImage: previewRawImage,
-        scale: autoFittedScale || 1.0,
-        posX: 0,
-        posY: -30,
-        textScale: 1.0,
-        textPosX: 0,
-        textPosY: 55,
-      });
-    }
-    setIsUploadModalOpen(false);
-  };
-
-  const hasFront = Boolean(designs.front.uploadedImage || designs.front.customText.trim());
-  const hasBack = Boolean(designs.back.uploadedImage || designs.back.customText.trim());
-  const hasLeftSleeve = Boolean(designs.leftSleeve.uploadedImage || designs.leftSleeve.customText.trim());
-  const hasRightSleeve = Boolean(designs.rightSleeve.uploadedImage || designs.rightSleeve.customText.trim());
-
-  let printTypeLabel = "Çapsız (Sadə)";
-  let totalPrice = selectedGarment.basePrice;
-
-  if (hasFront && hasBack) {
-    printTypeLabel = "İki Tərəf DTF Çap";
-    totalPrice = selectedGarment.twoSidePrice;
-  } else if (hasFront || hasBack) {
-    printTypeLabel = "Tək Tərəf DTF Çap";
-    totalPrice = selectedGarment.oneSidePrice;
-  }
-
-  // Sleeve extra pricing
-  const sleeveUnitCost = selectedGarment.sleevePrice || 1;
-  if (hasLeftSleeve) totalPrice += sleeveUnitCost;
-  if (hasRightSleeve) totalPrice += sleeveUnitCost;
-
-  const printServiceCost = totalPrice - selectedGarment.basePrice;
-
-  const resetPosition = () => {
-    updateCurrentDesign({
-      scale: 1.0,
-      posX: 0,
-      posY: -35,
-      rotation: 0,
-      textScale: 1.0,
-      textPosX: 0,
-      textPosY: 55,
-      textRotation: 0,
-    });
-  };
-
-  // Add to Bag
-  const handleAddToCart = async () => {
-    setIsAdding(true);
-    playAddToCartSound();
-
-    const placementData = {
-      productId: selectedGarment.id,
-      productName: selectedGarment.name,
-      category: selectedGarment.category,
-      color: selectedColor.name,
-      colorHex: selectedColor.hex,
-      size: selectedSize,
-      price: totalPrice,
-      printType: printTypeLabel,
-      printArea: { widthCm: 30, heightCm: 40 },
-      surfaces: {
-        front: hasFront ? {
-          view: "front",
-          posX: designs.front.posX,
-          posY: designs.front.posY,
-          scale: designs.front.scale,
-          rotation: designs.front.rotation,
-          customText: designs.front.customText,
-          textColor: designs.front.textColor,
-          fontFamily: designs.front.fontFamily,
-          hasArtwork: Boolean(designs.front.uploadedImage),
-        } : null,
-        back: hasBack ? {
-          view: "back",
-          posX: designs.back.posX,
-          posY: designs.back.posY,
-          scale: designs.back.scale,
-          rotation: designs.back.rotation,
-          customText: designs.back.customText,
-          textColor: designs.back.textColor,
-          fontFamily: designs.back.fontFamily,
-          hasArtwork: Boolean(designs.back.uploadedImage),
-        } : null,
-        leftSleeve: hasLeftSleeve ? {
-          view: "leftSleeve",
-          posX: designs.leftSleeve.posX,
-          posY: designs.leftSleeve.posY,
-          scale: designs.leftSleeve.scale,
-          rotation: designs.leftSleeve.rotation,
-          customText: designs.leftSleeve.customText,
-          hasArtwork: Boolean(designs.leftSleeve.uploadedImage),
-        } : null,
-        rightSleeve: hasRightSleeve ? {
-          view: "rightSleeve",
-          posX: designs.rightSleeve.posX,
-          posY: designs.rightSleeve.posY,
-          scale: designs.rightSleeve.scale,
-          rotation: designs.rightSleeve.rotation,
-          customText: designs.rightSleeve.customText,
-          hasArtwork: Boolean(designs.rightSleeve.uploadedImage),
-        } : null,
-      },
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        setUploadedImage(reader.result);
+      }
     };
+    reader.readAsDataURL(file);
+  };
 
-    const originalImg =
-      designs.front.originalImage ||
-      designs.back.originalImage ||
-      designs.leftSleeve.originalImage ||
-      designs.rightSleeve.originalImage ||
-      "";
+  const handleSelectPlacement = (placement: PlacementOption) => {
+    setSelectedPlacement(placement);
+    setActiveSide(placement.side);
+  };
 
-    const processedImg =
-      designs.front.uploadedImage ||
-      designs.back.uploadedImage ||
-      designs.leftSleeve.uploadedImage ||
-      designs.rightSleeve.uploadedImage ||
-      "";
+  // Price Calculation
+  const totalPrice = selectedGarment.basePrice + selectedPlacement.extraPrice;
 
-    const previewImage =
-      designs.front.uploadedImage ||
-      designs.back.uploadedImage ||
-      designs.leftSleeve.uploadedImage ||
-      designs.rightSleeve.uploadedImage ||
-      "/images/studio/tshirt/white-front-shirt.png";
+  // Add to Bag / Order
+  const handleAddToCart = async () => {
+    if (!uploadedImage) {
+      setUploadError("Zəhmət olmasa çap olunacaq dizayn şəklinizi yükləyin.");
+      if (fileInputRef.current) {
+        fileInputRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      return;
+    }
+
+    setIsAdding(true);
+    try {
+      playAddToCartSound();
+    } catch (e) {}
+
+    const mockupUrl = getGarmentMockupUrl(selectedGarment.category, selectedColor.key, activeSide);
 
     const customData = {
       garmentType: selectedGarment.name,
       garmentColor: selectedColor.name,
       size: selectedSize,
+      placement: selectedPlacement.label,
+      placementKey: selectedPlacement.id,
+      customerNote: customerNote.trim(),
+      transform: currentTransform,
+      uploadedImage: uploadedImage,
+      previewImage: mockupUrl,
       price: totalPrice,
-      originalImage: originalImg,
-      processedImage: processedImg,
-      previewImage: previewImage,
-      placementData: placementData,
-      frontDesign: {
-        hasDesign: hasFront,
-        ...designs.front,
-      },
-      backDesign: {
-        hasDesign: hasBack,
-        ...designs.back,
-      },
-      leftSleeveDesign: {
-        hasDesign: hasLeftSleeve,
-        ...designs.leftSleeve,
-      },
-      rightSleeveDesign: {
-        hasDesign: hasRightSleeve,
-        ...designs.rightSleeve,
-      },
     };
 
     addItem({
@@ -949,1126 +457,612 @@ export default function StudioPage() {
       price: totalPrice,
       size: selectedSize,
       color: selectedColor.name,
-      image: previewImage,
+      image: mockupUrl,
       type: "custom",
-      customDesignPreview: previewImage,
+      customDesignPreview: uploadedImage,
       customData: customData,
       stockQuantity: 99,
     });
 
-    try {
-      await fetch("/api/store/pod-orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          garmentType: selectedGarment.name,
-          garmentColor: selectedColor.name,
-          size: selectedSize,
-          price: totalPrice,
-          originalImage: originalImg,
-          processedImage: processedImg,
-          placementData: placementData,
-          previewImage: previewImage,
-          customData,
-        }),
-      });
-    } catch (e) {
-      console.warn("POD save notification:", e);
-    }
-
     setTimeout(() => {
       setIsAdding(false);
       openCart();
-    }, 400);
+    }, 350);
   };
 
-  // Surfaces definition
-  const surfacesList: { id: StudioSurface; label: string; icon: string }[] = [
-    { id: "front", label: "Ön", icon: "/images/studio/thumb-front.png" },
-    { id: "back", label: "Arxa", icon: "/images/studio/thumb-back.png" },
-    { id: "leftSleeve", label: "Sol qol", icon: "/images/studio/thumb-left.png" },
-    { id: "rightSleeve", label: "Sağ qol", icon: "/images/studio/thumb-right.png" },
-  ];
+  // Compute CSS placement for realistic overlay
+  // Natural chest position (starting well below collar)
+  const getOverlayBase = () => {
+    // Left Sleeve view
+    if (activeSide === "left") {
+      return {
+        top: 48,
+        left: 54,
+        width: 25,
+        maxHeight: 30,
+      };
+    }
+
+    // Right Sleeve view
+    if (activeSide === "right") {
+      return {
+        top: 48,
+        left: 46,
+        width: 25,
+        maxHeight: 30,
+      };
+    }
+
+    // Back view
+    if (activeSide === "back") {
+      if (selectedPlacement.id === "back-neck") {
+        return {
+          top: 25,
+          left: 50,
+          width: 20,
+          maxHeight: 16,
+        };
+      }
+      return {
+        top: 48,
+        left: 50,
+        width: 40,
+        maxHeight: 44,
+      };
+    }
+
+    // Front view
+    if (selectedPlacement.id === "front-left") {
+      return {
+        top: 36,
+        left: 60,
+        width: 18,
+        maxHeight: 18,
+      };
+    }
+
+    // Front Center (Chest - well below collar)
+    return {
+      top: 48,
+      left: 50,
+      width: 38,
+      maxHeight: 44,
+    };
+  };
+
+  const getOverlayStyle = (): React.CSSProperties => {
+    const base = getOverlayBase();
+    const t = currentTransform;
+    return {
+      top: `${base.top + t.posY}%`,
+      left: `${base.left + t.posX}%`,
+      width: `${base.width}%`,
+      maxHeight: `${base.maxHeight}%`,
+      transform: `translate(-50%, -50%) scale(${t.scale}) rotate(${t.rotation}deg)`,
+      transformOrigin: "center center",
+      touchAction: "none",
+    };
+  };
+
+  const garmentMockup = getGarmentMockupUrl(selectedGarment.category, selectedColor.key, activeSide);
 
   return (
-    <div className="w-full min-h-screen bg-[#FAF7F2] text-[#111827] pt-8 pb-24">
+    <div className="w-full min-h-screen bg-[#FAF7F2] text-[#111827] pt-6 pb-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Header (Clean Luxury Store Branding) */}
-        <div className="py-6 border-b border-stone-200/80 flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-stone-100 border border-stone-200 text-stone-800 text-xs font-semibold uppercase tracking-wider mb-3">
-              <Palette size={14} />
-              <span>Fərdi Dizayn Studiyası</span>
-            </div>
-            <h1 className="font-eb-garamond text-3xl sm:text-5xl font-normal text-stone-900 tracking-wide">
-              Öz dizaynını <span className="italic font-normal">yarat</span>
-            </h1>
-            <p className="text-xs text-stone-600 mt-2 max-w-xl">
-              İstədiyiniz loqo, qrafika və ya mətni seçin. Xalis pambıq geyimlər üzərinə yüksək dəqiqlikli DTG çap edərək çatdıraq.
-            </p>
+        {/* Header */}
+        <div className="py-6 border-b border-stone-200/80 mb-8">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-stone-100 border border-stone-200 text-stone-800 text-[11px] font-bold uppercase tracking-wider mb-2.5">
+            <span>Fərdi Çap Atelyesi</span>
           </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={resetPosition}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-white border border-stone-200 text-xs font-semibold text-stone-700 hover:text-stone-900 hover:border-stone-400 transition active:scale-95 shadow-2xs"
-            >
-              <RotateCcw size={14} className="text-stone-600" />
-              <span>Tənzimləmələri Sıfırla</span>
-            </button>
-          </div>
+          <h1 className="font-eb-garamond text-3xl sm:text-5xl font-normal text-stone-900 tracking-wide">
+            Öz dizaynını <span className="italic font-normal">yarat</span>
+          </h1>
+          <p className="text-xs sm:text-sm text-stone-600 mt-2 max-w-2xl leading-relaxed">
+            İstədiyiniz şəkli, loqonu və ya qrafikanı yükləyin və geyimin hansı hissəsinə vurmaq istədiyinizi seçin. Atelye ustalarımız xüsusi proqramla rəng və ölçüləri dəqiqləşdirib geyiminizə yüksək dəqiqliklə çap edəcək.
+          </p>
         </div>
 
-        {/* Studio Workspace Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-8">
+        {/* 2-Column Main Workspace (Stretches full height so left preview remains sticky during scrolling) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
           
-          {/* Left Canvas Column: Stretches full vertical height so sticky remains pinned during entire scroll */}
-          <div id="garment-canvas-section" className="lg:col-span-7 relative">
-            <div className="lg:sticky lg:top-24 flex flex-col items-center w-full">
-              
-              {/* View Switcher: Equal-width single-line tabs + horizontal scroll on mobile */}
-              <div className="w-full max-w-[500px] flex items-center justify-between gap-2 mb-3">
-                <div className="flex-1 flex items-stretch gap-1 bg-stone-200/80 p-1 rounded-2xl border border-stone-300/80 overflow-x-auto scrollbar-none">
-                  {surfacesList.map((s) => {
-                    const isSleeve = s.id === "leftSleeve" || s.id === "rightSleeve";
-                    const isAvailable = (garmentCategory === "tshirt" || garmentCategory === "oversize") || !isSleeve;
-                    if (!isAvailable) return null;
+          {/* LEFT: Garment & Placement Visual Preview (Stabil / Sticky) */}
+          <div className="lg:col-span-5 relative">
+            <div className="lg:sticky lg:top-24 space-y-4">
+              <div
+                ref={previewBoxRef}
+                onWheel={handleWheelZoom}
+                className="relative w-full aspect-square bg-white rounded-3xl border border-stone-200/90 p-4 sm:p-6 shadow-sm flex items-center justify-center overflow-hidden select-none"
+              >
+                {/* Garment Base Mockup */}
+                <img
+                  src={garmentMockup}
+                  alt={selectedGarment.name}
+                  className="w-full h-full object-contain pointer-events-none select-none transition-opacity duration-300"
+                  onError={(e) => {
+                    // Fallback to basic t-shirt if specific mockup file is missing
+                    e.currentTarget.src = `/images/studio/tshirt/${selectedColor.key}-${activeSide}-shirt.png`;
+                  }}
+                />
 
-                    const isActive = viewSide === s.id;
-                    const hasSurfaceDesign = Boolean(
-                      designs[s.id].uploadedImage || designs[s.id].customText.trim()
-                    );
+                {/* Uploaded Design Placement Overlay with Direct Interactive Manipulation */}
+                {uploadedImage ? (
+                  <div
+                    onPointerDown={handlePointerDownDrag}
+                    onPointerMove={handlePointerMoveDrag}
+                    onPointerUp={handlePointerUpDrag}
+                    style={getOverlayStyle()}
+                    className={`absolute z-10 flex items-center justify-center transition-shadow group ${
+                      isDragging ? "cursor-grabbing" : "cursor-grab"
+                    }`}
+                  >
+                    {/* Active Bounding Box with micro-animations */}
+                    <div className="relative w-full h-full flex items-center justify-center border-2 border-dashed border-amber-500/80 rounded-xl p-1 bg-amber-500/5 group-hover:border-amber-600 transition-all">
+                      <img
+                        src={uploadedImage}
+                        alt="Müştəri Dizaynı"
+                        draggable={false}
+                        className="max-w-full max-h-full object-contain drop-shadow-md pointer-events-none select-none"
+                      />
 
-                    return (
-                      <button
-                        key={s.id}
-                        type="button"
-                        onClick={() => setViewSide(s.id)}
-                        className={`flex-1 min-w-[70px] sm:min-w-0 py-2 px-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 flex items-center justify-center gap-1.5 ${
-                          isActive
-                            ? "bg-stone-900 text-white shadow-xs font-bold ring-1 ring-stone-900"
-                            : "text-stone-700 hover:text-stone-900 hover:bg-white/50"
-                        }`}
+                      {/* Four Corner Indicator Dots */}
+                      <span className="absolute -top-1.5 -left-1.5 w-3 h-3 rounded-full bg-white border-2 border-amber-600 shadow-2xs pointer-events-none" />
+                      <span className="absolute -top-1.5 -right-1.5 w-3 h-3 rounded-full bg-white border-2 border-amber-600 shadow-2xs pointer-events-none" />
+                      <span className="absolute -bottom-1.5 -left-1.5 w-3 h-3 rounded-full bg-white border-2 border-amber-600 shadow-2xs pointer-events-none" />
+                      
+                      {/* Interactive Bottom-Right Resize Handle */}
+                      <div
+                        onPointerDown={handlePointerDownResize}
+                        onPointerMove={handlePointerMoveResize}
+                        onPointerUp={handlePointerUpResize}
+                        className="absolute -bottom-2.5 -right-2.5 w-6 h-6 rounded-full bg-amber-600 hover:bg-amber-700 text-white shadow-md flex items-center justify-center cursor-nwse-resize active:scale-110 transition z-20"
+                        title="Dartaraq ölçünü böyüdün və ya kiçildin"
                       >
-                        <img src={s.icon} alt="" className="w-4 h-4 object-contain shrink-0 opacity-90" />
-                        <span className="truncate leading-none">{s.label}</span>
-                        {hasSurfaceDesign && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-sky-400 shrink-0" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
+                        <Maximize2 size={11} className="rotate-90 pointer-events-none" />
+                      </div>
 
-                <div className="shrink-0 flex items-center">
+                      {/* Floating Tooltip Pill */}
+                      <span className="absolute -top-7 left-1/2 -translate-x-1/2 bg-stone-900/90 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none">
+                        Toxunub sürüşdürün
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    className="absolute pointer-events-none border-2 border-dashed border-stone-400/60 rounded-xl flex items-center justify-center p-2 transition-all duration-300"
+                    style={getOverlayStyle()}
+                  >
+                    <span className="text-[10px] font-bold text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-1 rounded-md shadow-2xs">
+                      Çap Sahəsi ({selectedPlacement.label.split(" ")[0]})
+                    </span>
+                  </div>
+                )}
+
+                {/* Side Switcher (Ön / Arxa / Sol qol / Sağ qol) */}
+                <div className="absolute top-4 left-4 z-10 flex items-center gap-1 bg-stone-900/85 backdrop-blur-md p-1 rounded-xl shadow-md">
                   <button
                     type="button"
-                    onClick={() => setIsPhotoRoom3DOpen(true)}
-                    className="flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-xl bg-stone-900 hover:bg-black text-white text-xs font-bold uppercase tracking-wider transition-all shadow-xs active:scale-95 group cursor-pointer"
-                    title="3D Canlı Baxış pəncərəsini aç"
+                    onClick={() => setActiveSide("front")}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                      activeSide === "front"
+                        ? "bg-white text-stone-950 shadow-xs"
+                        : "text-stone-300 hover:text-white"
+                    }`}
                   >
-                    <Eye size={15} className="text-[#e8c98a]" />
-                    <span className="hidden sm:inline">3D Canlı Baxış</span>
-                    <span className="sm:hidden">3D</span>
+                    Ön
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveSide("back")}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                      activeSide === "back"
+                        ? "bg-white text-stone-950 shadow-xs"
+                        : "text-stone-300 hover:text-white"
+                    }`}
+                  >
+                    Arxa
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveSide("left")}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                      activeSide === "left"
+                        ? "bg-white text-stone-950 shadow-xs"
+                        : "text-stone-300 hover:text-white"
+                    }`}
+                  >
+                    Sol qol
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveSide("right")}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                      activeSide === "right"
+                        ? "bg-white text-stone-950 shadow-xs"
+                        : "text-stone-300 hover:text-white"
+                    }`}
+                  >
+                    Sağ qol
+                  </button>
+                </div>
+
+                {/* Color & Size badge */}
+                <div className="absolute bottom-4 right-4 z-10 px-3 py-1 rounded-full bg-white/90 backdrop-blur-md border border-stone-200 text-[11px] font-bold text-stone-800 shadow-2xs">
+                  {selectedColor.name} · {selectedSize}
                 </div>
               </div>
 
-              {/* Realistic Interactive Photorealistic Mockup Canvas with Dashed Print Area */}
-              <GarmentCanvas
-                garmentId={selectedGarment.id}
-                side={viewSide}
-                colorKey={selectedColor.key}
-                colorHex={selectedColor.hex}
-                uploadedImage={currentDesign.uploadedImage}
-                customText={currentDesign.customText}
-                textColor={currentDesign.textColor}
-                fontFamily={currentDesign.fontFamily}
-                scale={currentDesign.scale}
-                posX={currentDesign.posX}
-                posY={currentDesign.posY}
-                rotation={currentDesign.rotation}
-                textScale={currentDesign.textScale ?? 1.0}
-                textPosX={currentDesign.textPosX ?? 0}
-                textPosY={currentDesign.textPosY ?? 55}
-                textRotation={currentDesign.textRotation ?? 0}
-                onChangeTransform={(newTransform) => updateCurrentDesign(newTransform)}
-                onClearImage={() => updateCurrentDesign({ uploadedImage: null })}
-                onClearText={() => updateCurrentDesign({ customText: "" })}
-                onRequestUpload={() => fileInputRef.current?.click()}
-                onUndo={handleUndo}
-                onRedo={handleRedo}
-                canUndo={(history[viewSide] || []).length > 0}
-                canRedo={(future[viewSide] || []).length > 0}
-              />
+              {/* Interactive Precision Control Bar (Scale, Nudge, Center Reset) */}
+              {uploadedImage && (
+                <div className="bg-white rounded-3xl p-4 border border-stone-200/90 shadow-2xs space-y-3">
+                  <div className="flex items-center justify-between border-b border-stone-100 pb-2">
+                    <span className="font-bold text-xs text-stone-900 flex items-center gap-1.5">
+                      <Move size={14} className="text-amber-700" />
+                      <span>Dizaynın Ölçü və Mövqeyi</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => updateTransform({ posX: 0, posY: 0, scale: 1, rotation: 0 })}
+                      className="text-[11px] font-bold text-stone-500 hover:text-stone-900 flex items-center gap-1 hover:underline transition cursor-pointer"
+                    >
+                      <RotateCcw size={12} />
+                      <span>Mərkəzə Qaytar</span>
+                    </button>
+                  </div>
 
-              {/* Helper Hint */}
-              <p className="text-[11px] text-stone-500 mt-3 text-center">
-                💡 <em>Həm şəkli, həm də mətni köynəyin üzərində birbaşa siçanla istədiyiniz yerə sərbəst sürüşdürə bilərsiniz.</em>
-              </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* Scale Slider & +/- */}
+                    <div className="bg-stone-50/80 p-2.5 rounded-2xl border border-stone-200/80 flex items-center gap-2">
+                      <span className="text-[11px] font-bold text-stone-600 shrink-0">Ölçü:</span>
+                      <button
+                        type="button"
+                        onClick={() => updateTransform({ scale: Math.max(0.4, Number((currentTransform.scale - 0.1).toFixed(2))) })}
+                        className="w-7 h-7 rounded-lg bg-white border border-stone-200 text-stone-800 font-bold hover:bg-stone-100 transition active:scale-95 flex items-center justify-center cursor-pointer shadow-2xs"
+                        title="Kiçilt"
+                      >
+                        -
+                      </button>
+                      <input
+                        type="range"
+                        min="0.4"
+                        max="1.8"
+                        step="0.05"
+                        value={currentTransform.scale}
+                        onChange={(e) => updateTransform({ scale: parseFloat(e.target.value) })}
+                        className="flex-1 accent-stone-900 cursor-pointer h-1.5"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => updateTransform({ scale: Math.min(1.8, Number((currentTransform.scale + 0.1).toFixed(2))) })}
+                        className="w-7 h-7 rounded-lg bg-white border border-stone-200 text-stone-800 font-bold hover:bg-stone-100 transition active:scale-95 flex items-center justify-center cursor-pointer shadow-2xs"
+                        title="Böyüt"
+                      >
+                        +
+                      </button>
+                      <span className="text-[11px] font-mono font-bold text-stone-900 w-10 text-right">
+                        {Math.round(currentTransform.scale * 100)}%
+                      </span>
+                    </div>
 
-              {/* Garment Details & Quality Assurance Note */}
-              <div className="w-full max-w-[500px] mt-3 flex items-center justify-between text-xs text-stone-600 px-2">
-                <div className="flex items-center gap-2">
-                  <span
-                    className="w-3.5 h-3.5 rounded-full border border-stone-300 shadow-2xs"
-                    style={{ backgroundColor: selectedColor.hex }}
-                  />
-                  <span className="font-semibold text-stone-900">
-                    {selectedGarment.name} ({selectedColor.name}) ·{" "}
-                    {surfacesList.find((s) => s.id === viewSide)?.label}
-                  </span>
+                    {/* Position Nudge Arrows */}
+                    <div className="bg-stone-50/80 p-2.5 rounded-2xl border border-stone-200/80 flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-stone-600 shrink-0">Sürüşdür:</span>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => updateTransform({ posX: Math.max(-35, currentTransform.posX - 4) })}
+                          className="w-7 h-7 rounded-lg bg-white border border-stone-200 text-stone-800 font-bold hover:bg-stone-100 transition active:scale-95 flex items-center justify-center cursor-pointer shadow-2xs text-xs"
+                          title="Sola"
+                        >
+                          ←
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => updateTransform({ posY: Math.max(-35, currentTransform.posY - 4) })}
+                          className="w-7 h-7 rounded-lg bg-white border border-stone-200 text-stone-800 font-bold hover:bg-stone-100 transition active:scale-95 flex items-center justify-center cursor-pointer shadow-2xs text-xs"
+                          title="Yuxarı"
+                        >
+                          ↑
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => updateTransform({ posY: Math.min(35, currentTransform.posY + 4) })}
+                          className="w-7 h-7 rounded-lg bg-white border border-stone-200 text-stone-800 font-bold hover:bg-stone-100 transition active:scale-95 flex items-center justify-center cursor-pointer shadow-2xs text-xs"
+                          title="Aşağı"
+                        >
+                          ↓
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => updateTransform({ posX: Math.min(35, currentTransform.posX + 4) })}
+                          className="w-7 h-7 rounded-lg bg-white border border-stone-200 text-stone-800 font-bold hover:bg-stone-100 transition active:scale-95 flex items-center justify-center cursor-pointer shadow-2xs text-xs"
+                          title="Sağa"
+                        >
+                          →
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-[10px] text-stone-500 leading-relaxed text-center">
+                    💡 <strong>İpucu:</strong> Şəkli həmçinin birbaşa köynəyin üzərində tutub istədiyiniz yerə çəkə və küncündəki düyməni dartaraq ölçüsünü dəyişə bilərsiniz.
+                  </p>
                 </div>
-                <div className="flex items-center gap-1.5 text-stone-800 font-semibold">
-                  <CheckCircle2 size={15} />
-                  <span>Ultra HD DTG Çap</span>
-                </div>
+              )}
+
+              {/* Quick Assurance Notice */}
+              <div className="p-3.5 rounded-2xl bg-stone-100/80 border border-stone-200/80 text-xs text-stone-600 flex items-start gap-2.5">
+                <Info size={16} className="text-stone-700 shrink-0 mt-0.5" />
+                <p className="text-[11px] leading-relaxed text-stone-600">
+                  Göstərilən şəkil vizual önbaxış üçündür. Çap prosesində dəqiqlik, rəng balansı və ölçülər atelye mütəxəssislərimiz tərəfindən xüsusi çap proqramı ilə tənzimlənir.
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Right Controls Panel (SCROLL OLUNAN HİSSƏ) */}
-          <div className="lg:col-span-5 space-y-6">
+          {/* RIGHT: Simplified Studio Configurator */}
+          <div className="lg:col-span-7 space-y-7">
             
-            {/* 1. Base Garment Selector (Only Real Apparel: T-shirt, Oversize, Polo, Hody, Yarımzamok, Sviter, Şalvar, Kepka) */}
-            <div className="bg-white border border-stone-200/90 rounded-3xl p-5 space-y-3 shadow-xs">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold uppercase tracking-wider text-stone-700 block">
-                  1. Baza Geyim Modelini Seçin
-                </label>
-                <span className="text-[10px] text-stone-500 font-medium">{GARMENTS.length} Model</span>
-              </div>
-
-              <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
-                {GARMENTS.map((g) => (
-                  <button
-                    key={g.id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedGarment(g);
-                      if (g.category !== "tshirt" && g.category !== "oversize" && (viewSide === "leftSleeve" || viewSide === "rightSleeve")) {
-                        setViewSide("front");
-                      }
-                    }}
-                    className={`w-full p-3 rounded-2xl border text-left transition-all flex items-center justify-between ${
-                      selectedGarment.id === g.id
-                        ? "border-stone-900 bg-stone-50 text-stone-900 shadow-xs ring-1 ring-stone-900/10"
-                        : "border-stone-200 bg-white text-stone-700 hover:text-stone-900 hover:border-stone-300"
-                    }`}
-                  >
-                    <div className="pr-2">
-                      <div className="text-xs font-bold text-stone-900">{g.name}</div>
-                      <div className="text-[10px] text-stone-500 mt-0.5">{g.description}</div>
-                      <div className="text-[10px] text-stone-600 font-medium mt-1 flex flex-wrap gap-x-2">
-                        <span>Çapsız: {formatPrice(g.basePrice)}</span>
-                        <span>·</span>
-                        <span>Kiçik çap: {formatPrice(g.smallPrintPrice)}</span>
-                        <span>·</span>
-                        <span>İki tərəf: {formatPrice(g.twoSidePrice)}</span>
-                      </div>
-                    </div>
-                    <div className="text-right pl-2 shrink-0">
-                      <span className="text-xs font-extrabold text-stone-900 block">
-                        {formatPrice(g.oneSidePrice)}
-                      </span>
-                      <span className="text-[9px] text-stone-500 block uppercase">1 tərəf çap</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 2. Color Selector (Correct Visual Matching for All Colors) */}
-            <div className="bg-white border border-stone-200/90 rounded-3xl p-5 space-y-3 shadow-xs">
-              <label className="text-xs font-semibold uppercase tracking-wider text-stone-700 block">
-                2. Geyimin Rəngi: <strong className="text-stone-900">{selectedColor.name}</strong>
-              </label>
-              <div className="flex items-center gap-3 flex-wrap">
-                {COLORS.map((c) => (
-                  <button
-                    key={c.name}
-                    type="button"
-                    onClick={() => {
-                      setSelectedColor(c);
-                      const isDark = c.key === "black" || c.key === "darkblue" || c.key === "green";
-                      if (isDark) {
-                        setDesigns((prev) => ({
-                          ...prev,
-                          [viewSide]: {
-                            ...prev[viewSide],
-                            textColor: prev[viewSide].textColor === "#111827" ? "#FFFFFF" : prev[viewSide].textColor,
-                          },
-                        }));
-                      }
-                    }}
-                    className={`w-9 h-9 rounded-xl border-2 transition-all flex items-center justify-center ${
-                      selectedColor.name === c.name
-                        ? "border-stone-900 ring-2 ring-stone-900/20 scale-105"
-                        : "border-stone-300 opacity-80 hover:opacity-100 hover:border-stone-500"
-                    }`}
-                    style={{ backgroundColor: c.hex }}
-                    title={c.name}
-                  >
-                    {selectedColor.name === c.name && (
-                      <Check
-                        size={14}
-                        className={
-                          c.hex === "#FFFFFF" || c.hex === "#93C5FD" || c.hex === "#D7CEC7"
-                            ? "text-black"
-                            : "text-white"
-                        }
-                      />
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 3. Upload Artwork or Select Preset */}
-            <div className="bg-white border border-stone-200/90 rounded-3xl p-5 space-y-4 shadow-xs">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold uppercase tracking-wider text-stone-700">
-                  3. Şəkli və ya Loqonu Yüklə ({surfacesList.find((s) => s.id === viewSide)?.label})
-                </label>
-                {currentDesign.uploadedImage && (
-                  <button
-                    type="button"
-                    onClick={() => updateCurrentDesign({ uploadedImage: null })}
-                    className="text-[11px] text-red-600 hover:underline flex items-center gap-1 font-semibold"
-                  >
-                    <Trash2 size={12} />
-                    <span>Şəkli Sil</span>
-                  </button>
-                )}
-              </div>
-
-              {/* Upload Input Box */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/png, image/jpeg, image/svg+xml, image/webp"
-                onChange={handleFileInputChange}
-                className="hidden"
-              />
-
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-stone-300 hover:border-stone-900 bg-stone-50 hover:bg-stone-100/70 rounded-2xl p-5 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2 group relative overflow-hidden"
-              >
-                <div className="p-2.5 rounded-full bg-white text-stone-700 group-hover:text-stone-900 border border-stone-200 transition-all">
-                  <Upload size={18} />
+            {/* STEP 1: Garment Selection */}
+            <div data-lenis-prevent className="bg-white rounded-3xl p-5 sm:p-6 border border-stone-200/90 shadow-2xs space-y-4">
+              <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-stone-900 text-white text-[11px] font-bold flex items-center justify-center">1</span>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">Geyim Növü və Rəngi</h3>
                 </div>
-                <div className="text-xs font-bold text-stone-900">
-                  Şəkil və ya Loqo faylını bura atın və ya klikləyin
-                </div>
-                <div className="text-[10px] text-stone-500 flex items-center gap-1">
-                  <Sparkles size={11} className="text-stone-700" />
-                  <span>Seçdikdən sonra önbaxış və AI fon təmizləmə açılacaq</span>
-                </div>
+                <span className="text-xs font-mono font-bold text-stone-900">{formatPrice(selectedGarment.basePrice)}</span>
               </div>
 
-              {/* Preset Graphics */}
-              <div>
-                <span className="text-[11px] uppercase tracking-wider text-stone-500 font-semibold block mb-2">
-                  Və ya hazır qrafiklərdən seç:
-                </span>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {PRESETS.map((p) => (
+              {/* Garment Type Dropdown/Buttons */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <label className="font-semibold text-stone-700 uppercase">Geyim Modeli ({GARMENTS.length} Çeşid)</label>
+                  <span className="text-stone-500 text-[11px]">Seçilmiş: <strong className="text-stone-900">{selectedGarment.name}</strong></span>
+                </div>
+                <div
+                  data-lenis-prevent
+                  onWheel={(e) => e.stopPropagation()}
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-80 sm:max-h-96 overflow-y-auto pr-1 scrollbar-thin overscroll-contain"
+                  style={{ overscrollBehavior: "contain", WebkitOverflowScrolling: "touch" }}
+                >
+                  {GARMENTS.map((g) => (
                     <button
-                      key={p.name}
+                      key={g.id}
                       type="button"
-                      onClick={() => updateCurrentDesign({ uploadedImage: p.url, originalImage: p.originalUrl })}
-                      className={`p-2 rounded-xl bg-stone-50 hover:bg-stone-100 border transition flex flex-col items-center gap-1.5 ${
-                        currentDesign.uploadedImage === p.url
-                          ? "border-stone-900 ring-2 ring-stone-900/20"
-                          : "border-stone-200"
+                      onClick={() => setSelectedGarment(g)}
+                      className={`p-3 rounded-2xl border text-left transition cursor-pointer flex flex-col justify-between ${
+                        selectedGarment.id === g.id
+                          ? "bg-stone-900 text-white border-stone-900 shadow-sm ring-2 ring-stone-900/20"
+                          : "bg-stone-50/70 text-stone-800 border-stone-200 hover:border-stone-400 hover:bg-stone-100/60"
                       }`}
                     >
-                      <img src={p.url} alt={p.name} className="w-12 h-12 object-contain rounded-lg" />
-                      <span className="text-[9px] font-semibold text-stone-800 truncate w-full text-center">
-                        {p.name}
-                      </span>
+                      <div className="text-xs font-bold leading-snug">{g.name}</div>
+                      <div className="text-[10px] opacity-70 mt-1 line-clamp-1">{g.description}</div>
+                      <div className="flex items-center justify-between mt-2 pt-1 border-t border-current/10">
+                        <span className="text-[9.5px] opacity-75 uppercase font-mono">{g.category}</span>
+                        <span className="text-xs font-black">{formatPrice(g.basePrice)}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Color Selection */}
+              <div className="space-y-2 pt-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-semibold text-stone-700 uppercase">Rəng: <strong>{selectedColor.name}</strong></span>
+                </div>
+                <div className="flex flex-wrap items-center gap-2.5">
+                  {COLORS.map((c) => (
+                    <button
+                      key={c.key}
+                      type="button"
+                      onClick={() => setSelectedColor(c)}
+                      className={`w-9 h-9 rounded-xl border-2 transition-all flex items-center justify-center cursor-pointer ${
+                        selectedColor.key === c.key
+                          ? "border-stone-900 ring-2 ring-stone-900/20 scale-105"
+                          : "border-stone-200 opacity-80 hover:opacity-100 hover:border-stone-400"
+                      }`}
+                      style={{ backgroundColor: c.hex }}
+                      title={c.name}
+                    >
+                      {selectedColor.key === c.key && (
+                        <Check size={14} className={c.hex === "#FFFFFF" || c.hex === "#D7CEC7" ? "text-black" : "text-white"} />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Size Selection */}
+              <div className="space-y-2 pt-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-semibold text-stone-700 uppercase">Ölçü</span>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  {SIZES.map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setSelectedSize(s)}
+                      className={`w-11 h-9 rounded-xl border text-xs font-bold transition cursor-pointer ${
+                        selectedSize === s
+                          ? "bg-stone-900 text-white border-stone-900 shadow-xs"
+                          : "bg-stone-50 text-stone-700 border-stone-200 hover:border-stone-400"
+                      }`}
+                    >
+                      {s}
                     </button>
                   ))}
                 </div>
               </div>
             </div>
 
-            {/* 4. Custom Text Generator */}
-            <div className="bg-white border border-stone-200/90 rounded-3xl p-5 space-y-3.5 shadow-xs">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold uppercase tracking-wider text-stone-700 block">
-                  4. Xüsusi Mətn Əlavə Et ({surfacesList.find((s) => s.id === viewSide)?.label})
-                </label>
-                {currentDesign.customText.trim() && (
-                  <button
-                    type="button"
-                    onClick={() => updateCurrentDesign({ customText: "" })}
-                    className="text-[10px] text-red-600 hover:text-red-700 font-semibold transition"
-                  >
-                    Mətni sil
-                  </button>
-                )}
+            {/* STEP 2: File Upload (Müştərinin Dizaynı) */}
+            <div className="bg-white rounded-3xl p-5 sm:p-6 border border-stone-200/90 shadow-2xs space-y-4">
+              <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-stone-900 text-white text-[11px] font-bold flex items-center justify-center">2</span>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">Dizayn Şəklini Yükləyin *</h3>
+                </div>
+                <span className="text-[11px] text-stone-500 font-medium">Bütün formatlar dəstəklənir</span>
               </div>
-              <input
-                type="text"
-                value={currentDesign.customText}
-                onChange={(e) => updateCurrentDesign({ customText: e.target.value })}
-                placeholder="Məs: HORVVALLE ATELIER..."
-                className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 text-xs text-stone-900 placeholder-stone-400 focus:outline-none focus:border-stone-900 focus:bg-white font-medium"
-              />
 
-              {/* Text Positioning Quick Nudge Toolbar */}
-              {currentDesign.customText.trim() && (
-                <div className="p-3 bg-stone-50/90 rounded-2xl border border-stone-200/90 space-y-2">
-                  <div className="flex items-center justify-between text-[11px] font-semibold text-stone-700">
-                    <span>Mətnin Mövqeyi & Ölçüsü:</span>
-                    <span className="text-[10px] text-stone-400 font-normal">
-                      (və ya köynək üzərində birbaşa sürüşdürün)
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        updateCurrentDesign({
-                          textPosY: (currentDesign.textPosY ?? 55) - 15,
-                        })
-                      }
-                      className="px-2.5 py-1.5 rounded-lg bg-white border border-stone-200 hover:border-stone-400 text-stone-800 text-[11px] font-semibold transition active:scale-95 shadow-2xs flex items-center gap-1"
-                      title="Mətni yuxarıya, şəklə daha yaxın çək"
-                    >
-                      <span>⬆️ Şəklə yaxınlaşdır</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        updateCurrentDesign({
-                          textPosY: (currentDesign.textPosY ?? 55) + 15,
-                        })
-                      }
-                      className="px-2.5 py-1.5 rounded-lg bg-white border border-stone-200 hover:border-stone-400 text-stone-800 text-[11px] font-semibold transition active:scale-95 shadow-2xs flex items-center gap-1"
-                      title="Mətni aşağıya çək"
-                    >
-                      <span>⬇️ Aşağı çək</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        updateCurrentDesign({
-                          textPosX: (currentDesign.textPosX ?? 0) - 15,
-                        })
-                      }
-                      className="px-2 py-1.5 rounded-lg bg-white border border-stone-200 hover:border-stone-400 text-stone-800 text-[11px] font-semibold transition active:scale-95 shadow-2xs"
-                      title="Sola sürüşdür"
-                    >
-                      ⬅️
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        updateCurrentDesign({
-                          textPosX: (currentDesign.textPosX ?? 0) + 15,
-                        })
-                      }
-                      className="px-2 py-1.5 rounded-lg bg-white border border-stone-200 hover:border-stone-400 text-stone-800 text-[11px] font-semibold transition active:scale-95 shadow-2xs"
-                      title="Sağa sürüşdür"
-                    >
-                      ➡️
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        updateCurrentDesign({
-                          textPosX: 0,
-                          textPosY: currentDesign.uploadedImage ? 55 : 0,
-                          textScale: 1.0,
-                          textRotation: 0,
-                        })
-                      }
-                      className="px-2.5 py-1.5 rounded-lg bg-white border border-stone-200 hover:border-stone-400 text-stone-800 text-[11px] font-semibold transition active:scale-95 shadow-2xs"
-                      title="Mərkəzə sıfırla"
-                    >
-                      Mərkəz
-                    </button>
-                    <div className="ml-auto flex items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          updateCurrentDesign({
-                            textScale: Math.max(0.4, (currentDesign.textScale ?? 1.0) - 0.1),
-                          })
-                        }
-                        className="w-7 h-7 rounded-lg bg-white border border-stone-200 hover:border-stone-400 text-stone-800 text-xs font-bold transition flex items-center justify-center shadow-2xs"
-                        title="Yazını kiçilt"
-                      >
-                        -
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          updateCurrentDesign({
-                            textScale: Math.min(2.5, (currentDesign.textScale ?? 1.0) + 0.1),
-                          })
-                        }
-                        className="w-7 h-7 rounded-lg bg-white border border-stone-200 hover:border-stone-400 text-stone-800 text-xs font-bold transition flex items-center justify-center shadow-2xs"
-                        title="Yazını böyüt"
-                      >
-                        +
-                      </button>
+              {uploadedImage ? (
+                <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-14 h-14 rounded-xl bg-white border border-emerald-200 p-1 flex items-center justify-center shrink-0 overflow-hidden">
+                      <img src={uploadedImage} alt="Yüklənmiş Dizayn" className="max-h-full max-w-full object-contain" />
                     </div>
+                    <div className="min-w-0">
+                      <div className="text-xs font-bold text-stone-900 truncate">{uploadedFileName}</div>
+                      <div className="text-[11px] text-emerald-800 flex items-center gap-1 mt-0.5">
+                        <CheckCircle2 size={13} />
+                        <span>Fayl uğurla yükləndi ({uploadedFileSize})</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-3 py-1.5 rounded-xl bg-white hover:bg-stone-100 border border-stone-200 text-stone-800 text-xs font-semibold transition cursor-pointer"
+                    >
+                      Dəyiş
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUploadedImage(null);
+                        setUploadedFileName(null);
+                        setUploadedFileSize(null);
+                      }}
+                      className="p-2 rounded-xl text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                      title="Sil"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="border-2 border-dashed border-stone-300 hover:border-stone-500 rounded-3xl p-8 text-center cursor-pointer transition-all duration-200 bg-stone-50/50 hover:bg-stone-50 flex flex-col items-center justify-center space-y-3 group"
+                >
+                  <div className="w-14 h-14 rounded-2xl bg-white border border-stone-200 flex items-center justify-center text-stone-700 shadow-2xs group-hover:scale-105 transition">
+                    <Upload size={24} />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-stone-900 group-hover:text-black">Dizayn faylını seçmək üçün bura klikləyin</span>
+                    <p className="text-[11px] text-stone-500 mt-1">PNG, JPG, WEBP, PDF, SVG, AI formatları (Maksimum 30MB)</p>
                   </div>
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-3 pt-1">
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-stone-500 block mb-1">Şrift:</span>
-                  <CustomDropdown
-                    options={[
-                      { id: "Inter", label: "Inter (Sadə & Təmiz)" },
-                      { id: "Bebas Neue", label: "Bebas Neue (Böyük Hərflər)" },
-                      { id: "serif", label: "Serif (Klassik Eleqant)" },
-                    ]}
-                    value={currentDesign.fontFamily}
-                    onChange={(val) => updateCurrentDesign({ fontFamily: val })}
-                    className="w-full"
-                  />
-                </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*,.pdf,.svg,.ai"
+                onChange={handleFileChange}
+                className="hidden"
+              />
 
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-stone-500 block mb-1">Mətn Rəngi:</span>
-                  <div className="flex items-center gap-2 pt-1">
-                    {["#FFFFFF", "#E6C280", "#111827", "#2563EB", "#DC2626"].map((c) => (
-                      <button
-                        key={c}
-                        type="button"
-                        onClick={() => updateCurrentDesign({ textColor: c })}
-                        className={`w-6 h-6 rounded-full border transition-all ${
-                          currentDesign.textColor === c ? "ring-2 ring-stone-900 scale-110" : "border-stone-300"
-                        }`}
-                        style={{ backgroundColor: c }}
-                      />
-                    ))}
-                  </div>
+              {uploadError && (
+                <div className="text-[11px] text-rose-600 font-medium flex items-center gap-1.5 bg-rose-50 border border-rose-200 rounded-xl px-3 py-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
+                  <span>{uploadError}</span>
                 </div>
-              </div>
+              )}
             </div>
 
-            {/* 5. Size Selection & Action */}
-            <div className="bg-white border border-stone-200/90 rounded-3xl p-5 space-y-4 shadow-xs">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold uppercase tracking-wider text-stone-700">
-                  Ölçü Seçin:
-                </label>
-                <span className="text-xs text-stone-600">
-                  Seçilmiş: <strong className="text-stone-900">{selectedSize}</strong>
-                </span>
+            {/* STEP 3: Placement Selection (Dizaynı hansı hissəyə vurmaq istəyirsiniz?) */}
+            <div className="bg-white rounded-3xl p-5 sm:p-6 border border-stone-200/90 shadow-2xs space-y-4">
+              <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-stone-900 text-white text-[11px] font-bold flex items-center justify-center">3</span>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">Çapın Vurulacağı Hissə</h3>
+                </div>
+                <span className="text-[11px] text-stone-500 font-medium">Hissəni seçin</span>
               </div>
 
-              <div className="grid grid-cols-5 gap-2">
-                {["S", "M", "L", "XL", "XXL"].map((sz) => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {PLACEMENTS.map((p) => (
                   <button
-                    key={sz}
+                    key={p.id}
                     type="button"
-                    onClick={() => setSelectedSize(sz)}
-                    className={`py-2.5 rounded-xl text-xs font-bold uppercase transition-all ${
-                      selectedSize === sz
-                        ? "bg-stone-900 text-white shadow-xs scale-105"
-                        : "bg-stone-50 border border-stone-200 text-stone-700 hover:border-stone-400 hover:text-stone-900"
+                    onClick={() => handleSelectPlacement(p)}
+                    className={`p-3.5 rounded-2xl border text-left transition cursor-pointer flex flex-col justify-between ${
+                      selectedPlacement.id === p.id
+                        ? "bg-stone-900 text-white border-stone-900 shadow-sm"
+                        : "bg-stone-50/70 text-stone-800 border-stone-200 hover:border-stone-400 hover:bg-stone-100/50"
                     }`}
                   >
-                    {sz}
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold">{p.label}</span>
+                      {selectedPlacement.id === p.id && <Check size={14} className="text-white" />}
+                    </div>
+                    <span className="text-[10px] opacity-75 mt-1">{p.sublabel}</span>
                   </button>
                 ))}
               </div>
-
-              {/* Pricing Breakdown */}
-              <div className="pt-3 border-t border-stone-100 space-y-1.5 text-xs">
-                <div className="flex justify-between text-stone-600">
-                  <span>Baza Geyim (Çapsız):</span>
-                  <span className="font-bold text-stone-900">{formatPrice(selectedGarment.basePrice)}</span>
-                </div>
-                <div className="flex justify-between text-stone-600">
-                  <span>DTF Çap ({printTypeLabel}):</span>
-                  <span className="font-bold text-stone-900">
-                    {printServiceCost > 0 ? `+${formatPrice(printServiceCost)}` : "Çapsız (0 ₼)"}
-                  </span>
-                </div>
-                <div className="flex justify-between text-base font-normal text-stone-900 pt-2 border-t border-stone-100">
-                  <span>Ümumi Qiymət:</span>
-                  <span className="text-lg font-normal text-stone-900">{formatPrice(totalPrice)}</span>
-                </div>
-              </div>
-
-              {/* Add to Cart Button */}
-              <button
-                type="button"
-                onClick={handleAddToCart}
-                disabled={isAdding}
-                className="w-full py-4 rounded-full bg-stone-900 hover:bg-black text-white font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-md active:scale-98 disabled:opacity-50"
-              >
-                {isAdding ? (
-                  <span>Səbətə Əlavə Edilir...</span>
-                ) : (
-                  <>
-                    <ShoppingBag size={16} />
-                    <span>Fərdi Geyimi Səbətə At — {formatPrice(totalPrice)}</span>
-                  </>
-                )}
-              </button>
             </div>
 
-          </div>
+            {/* STEP 4: Customer Note & Special Instructions */}
+            <div className="bg-white rounded-3xl p-5 sm:p-6 border border-stone-200/90 shadow-2xs space-y-3">
+              <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-stone-900 text-white text-[11px] font-bold flex items-center justify-center">4</span>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">Əlavə Qeyd və İstəkləriniz</h3>
+                </div>
+                <span className="text-[10px] text-stone-400 font-semibold uppercase">İstəyə bağlı</span>
+              </div>
 
-        </div>
-
-      </div>
-
-      {/* ========================================================================= */}
-      {/* ŞƏKLİ YOXLA MODAL — HORVVALLE ATELIER LUXURY BESPOKE DESIGN */}
-      {/* ========================================================================= */}
-      {isUploadModalOpen && (
-        <div
-          className="fixed inset-0 z-[100] bg-stone-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-200"
-          onClick={() => {
-            if (!isCleaningBg) setIsUploadModalOpen(false);
-          }}
-        >
-          <div
-            className="bg-[#FCFAF7] rounded-3xl max-w-lg w-full p-4 sm:p-5 shadow-2xl border border-stone-200/90 space-y-3 relative overflow-hidden my-auto max-h-[94vh] flex flex-col justify-between"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Ambient gold glow */}
-            <div className="absolute -top-20 -right-20 w-44 h-44 bg-amber-400/10 rounded-full blur-3xl pointer-events-none" />
-
-            {/* Modal Header */}
-            <div className="text-center space-y-1 relative pr-6">
-              {!isCleaningBg && (
-                <button
-                  type="button"
-                  onClick={() => setIsUploadModalOpen(false)}
-                  className="absolute -top-1 -right-1 p-1.5 rounded-full text-stone-400 hover:text-stone-800 hover:bg-stone-200/60 transition cursor-pointer"
-                  title="Bağla"
-                >
-                  <X size={16} />
-                </button>
-              )}
-
-              <h2 className="text-xl sm:text-2xl font-bold text-stone-900 tracking-tight">
-                {isBrushMode ? "Əl ilə dəqiqləşdirmə" : "Şəkli yoxla"}
-              </h2>
-              <p className="text-xs text-stone-500 max-w-sm mx-auto leading-tight">
-                {isBrushMode
-                  ? "Fırça ilə silinən hissələri bərpa edin və ya qalan fonu silin"
-                  : imageDims.width > 0
-                  ? `${imageDims.width}×${imageDims.height}px • ${uploadedFileName || "Dizayn"}`
-                  : "Kənarlar avtomatik kəsildi. Çap üçün fonu AI ilə silə bilərsiniz."}
+              <p className="text-[11px] text-stone-500">
+                Çapın dəqiq ölçüsü, yerləşməsi və ya xüsusi istəyiniz varsa qeyd edin. Atelye ustalarımız çapdan öncə bunu mütləq nəzərə alacaq.
               </p>
+
+              <textarea
+                rows={3}
+                value={customerNote}
+                onChange={(e) => setCustomerNote(e.target.value)}
+                placeholder="Məs: Çap sinənin bir qədər yuxarısında olsun, ölçüsü təxminən 25 sm olsun, arxada əlavə ad/nömrə yazılsın..."
+                className="w-full rounded-2xl p-3.5 text-xs text-stone-900 bg-stone-50 border border-stone-200 placeholder-stone-400 focus:outline-none focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900 transition"
+              />
             </div>
 
-            {/* BRUSH MODE INTERFACE */}
-            {isBrushMode ? (
-              <div className="space-y-3">
-                {/* Brush Toolbar */}
-                <div className="bg-stone-100 p-2.5 rounded-2xl border border-stone-200/90 flex flex-wrap items-center justify-between gap-2">
-                  {/* Tool Selection */}
-                  <div className="flex items-center gap-1 bg-stone-200/80 p-1 rounded-xl">
-                    <button
-                      type="button"
-                      onClick={() => setBrushTool("restore")}
-                      className={`px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition ${
-                        brushTool === "restore"
-                          ? "bg-emerald-600 text-white shadow-xs"
-                          : "text-stone-700 hover:text-stone-900"
-                      }`}
-                    >
-                      <Paintbrush size={14} />
-                      <span>Bərpa et</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setBrushTool("erase")}
-                      className={`px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition ${
-                        brushTool === "erase"
-                          ? "bg-rose-600 text-white shadow-xs"
-                          : "text-stone-700 hover:text-stone-900"
-                      }`}
-                    >
-                      <Eraser size={14} />
-                      <span>Sil</span>
-                    </button>
-                  </div>
-
-                  {/* Brush Size Slider */}
-                  <div className="flex items-center gap-2 flex-1 min-w-[130px] px-2">
-                    <span className="text-[11px] text-stone-600 font-medium shrink-0">Ölçü: {brushSize}px</span>
-                    <input
-                      type="range"
-                      min={6}
-                      max={70}
-                      value={brushSize}
-                      onChange={(e) => setBrushSize(Number(e.target.value))}
-                      className="w-full accent-stone-900 h-1.5 bg-stone-300 rounded-lg cursor-pointer"
-                    />
-                  </div>
-
-                  {/* Undo / Redo */}
-                  <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      onClick={handleUndoBrush}
-                      className="p-1.5 rounded-lg bg-white border border-stone-300 text-stone-700 hover:text-stone-900 hover:bg-stone-50 transition cursor-pointer"
-                      title="Geri al"
-                    >
-                      <Undo2 size={15} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleRedoBrush}
-                      className="p-1.5 rounded-lg bg-white border border-stone-300 text-stone-700 hover:text-stone-900 hover:bg-stone-50 transition cursor-pointer"
-                      title="İrəli al"
-                    >
-                      <Redo2 size={15} />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Canvas Work Area */}
-                <div className="relative w-full h-56 sm:h-64 rounded-2xl border border-stone-200 bg-[linear-gradient(45deg,#f1eee9_25%,transparent_25%),linear-gradient(-45deg,#f1eee9_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#f1eee9_75%),linear-gradient(-45deg,transparent_75%,#f1eee9_75%)] bg-[size:16px_16px] bg-[#faf8f5] p-2 flex items-center justify-center overflow-hidden shadow-inner">
-                  <canvas
-                    ref={brushCanvasRef}
-                    onMouseDown={handleBrushMouseDown}
-                    onMouseMove={handleBrushMouseMove}
-                    onMouseUp={handleBrushMouseUp}
-                    onMouseLeave={handleBrushMouseUp}
-                    onTouchStart={handleBrushTouchStart}
-                    onTouchMove={handleBrushTouchMove}
-                    onTouchEnd={handleBrushTouchEnd}
-                    className="max-h-full max-w-full object-contain cursor-crosshair touch-none select-none drop-shadow-md"
-                  />
-                </div>
-
-                {/* Brush Mode Action Buttons */}
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                  <button
-                    type="button"
-                    onClick={handleApplyBrushChanges}
-                    className="py-2.5 rounded-2xl bg-stone-900 hover:bg-black text-white font-bold text-xs uppercase tracking-wider transition shadow-md flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <Check size={14} />
-                    <span>Tətbiq et</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsBrushMode(false)}
-                    className="py-2.5 rounded-2xl bg-stone-200 hover:bg-stone-300 text-stone-800 font-semibold text-xs transition flex items-center justify-center cursor-pointer"
-                  >
-                    <span>Ləğv et</span>
-                  </button>
-                </div>
-              </div>
-            ) : (
-              /* STANDARD PREVIEW & AI CONTROL INTERFACE */
-              <div className="space-y-3">
-                {/* Before/After Comparison Tabs (Visible once cutout is created) */}
-                {bgCleaned && (
-                  <div className="flex items-center justify-center gap-2 bg-stone-100 p-1 rounded-2xl border border-stone-200">
-                    <button
-                      type="button"
-                      onClick={() => setCompareTab("cutout")}
-                      className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                        compareTab === "cutout"
-                          ? "bg-white text-stone-900 shadow-xs border border-stone-200/80"
-                          : "text-stone-500 hover:text-stone-800"
-                      }`}
-                    >
-                      <Sparkles size={13} className="text-amber-600" />
-                      <span>Fonsuz (AI)</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setCompareTab("original")}
-                      className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                        compareTab === "original"
-                          ? "bg-white text-stone-900 shadow-xs border border-stone-200/80"
-                          : "text-stone-500 hover:text-stone-800"
-                      }`}
-                    >
-                      <Eye size={13} />
-                      <span>Orijinal</span>
-                    </button>
-                  </div>
-                )}
-
-                {/* Preview Box */}
-                <div
-                  className={`relative w-full h-44 sm:h-52 rounded-2xl border border-stone-200 p-2 flex items-center justify-center overflow-hidden shadow-inner ${
-                    compareTab === "cutout" && bgCleaned
-                      ? "bg-[linear-gradient(45deg,#f1eee9_25%,transparent_25%),linear-gradient(-45deg,#f1eee9_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#f1eee9_75%),linear-gradient(-45deg,transparent_75%,#f1eee9_75%)] bg-[size:16px_16px] bg-[#faf8f5]"
-                      : "bg-stone-50"
-                  }`}
-                >
-                  {/* Corner Accents */}
-                  <div className="absolute top-2 left-2 w-2.5 h-2.5 border-t-2 border-l-2 border-amber-600/40 pointer-events-none" />
-                  <div className="absolute top-2 right-2 w-2.5 h-2.5 border-t-2 border-r-2 border-amber-600/40 pointer-events-none" />
-                  <div className="absolute bottom-2 left-2 w-2.5 h-2.5 border-b-2 border-l-2 border-amber-600/40 pointer-events-none" />
-                  <div className="absolute bottom-2 right-2 w-2.5 h-2.5 border-b-2 border-r-2 border-amber-600/40 pointer-events-none" />
-
-                  {/* Status Badge */}
-                  <div className="absolute top-2.5 right-2.5 z-10">
-                    {bgCleaned ? (
-                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-700 text-white text-[10px] font-bold tracking-wider uppercase shadow-xs flex items-center gap-1">
-                        <Check size={11} /> {compareTab === "cutout" ? "Şəffaf Fon" : "Orijinal"}
-                      </span>
-                    ) : (
-                      <span className="px-2.5 py-0.5 rounded-full bg-stone-900/80 text-white text-[10px] font-semibold tracking-wider uppercase shadow-xs">
-                        Avto-Kəsilmiş
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Display Image */}
-                  {(compareTab === "cutout" && previewCleanImage) ? (
-                    <img
-                      src={previewCleanImage}
-                      alt="Preview"
-                      className="max-h-full max-w-full object-contain drop-shadow-md select-none transition-all duration-300"
-                    />
-                  ) : previewRawImage ? (
-                    <img
-                      src={previewRawImage}
-                      alt="Original"
-                      className="max-h-full max-w-full object-contain drop-shadow-md select-none transition-all duration-300"
-                    />
-                  ) : (
-                    <div className="text-xs text-stone-400">Şəkil tapılmadı</div>
-                  )}
-
-                  {/* Processing Overlay with Progress Bar */}
-                  {isCleaningBg && (
-                    <div className="absolute inset-0 bg-stone-950/75 backdrop-blur-sm z-20 flex flex-col items-center justify-center p-4 text-center text-white space-y-2.5 animate-in fade-in duration-200">
-                      <Loader2 size={32} className="animate-spin text-amber-400" />
-                      <div className="space-y-1">
-                        <p className="text-xs font-bold tracking-wide">{cleaningStatusText}</p>
-                        <p className="text-[10px] text-stone-300">İntellektual IS-Net neyron şəbəkəsi işləyir</p>
-                      </div>
-
-                      {/* Progress bar */}
-                      <div className="w-48 bg-stone-800 rounded-full h-1.5 overflow-hidden border border-stone-700">
-                        <div
-                          className="bg-amber-400 h-full rounded-full transition-all duration-300"
-                          style={{ width: `${Math.max(5, downloadProgress)}%` }}
-                        />
-                      </div>
-                      <span className="text-[10px] font-mono text-amber-300">{downloadProgress}%</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* DPI / Image Quality Warning (Does NOT block background removal or confirmation) */}
-                {isLowDpi && (
-                  <div className="p-2.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-amber-900 text-[11px] flex items-center gap-2 font-medium">
-                    <span className="text-base shrink-0">⚠️</span>
-                    <span>Şəkil ölçüsü kiçikdir ({imageDims.width}×{imageDims.height}px). Çapda dənəvərlik ola bilər (tövsiyə min. 1000px).</span>
-                  </div>
-                )}
-
-                {/* AI Background Removal Control Box */}
-                {!bgCleaned ? (
-                  <div className="bg-stone-100/90 p-3 rounded-2xl border border-stone-200 space-y-2">
-                    <button
-                      type="button"
-                      onClick={handleRunISNetBgRemoval}
-                      disabled={isCleaningBg}
-                      className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                    >
-                      <Wand2 size={15} />
-                      <span>Fonu AI ilə sil</span>
-                    </button>
-                    <p className="text-[10px] text-stone-500 text-center leading-tight">
-                      Süni intellekt əsas obyekti tanıyır və fonu avtomatik şəffaf edir (100% cihazınızda işləyir).
-                    </p>
-                  </div>
-                ) : (
-                  <div className="bg-emerald-50 border border-emerald-200/80 p-2.5 rounded-2xl flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 text-emerald-800 text-xs font-semibold">
-                      <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
-                      <span>Fon uğurla təmizləndi</span>
-                    </div>
-
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={handleOpenBrushMode}
-                        className="px-2.5 py-1.5 rounded-xl bg-white border border-emerald-300 text-stone-800 hover:bg-emerald-100/60 font-bold text-xs transition flex items-center gap-1 cursor-pointer shadow-xs"
-                      >
-                        <Paintbrush size={13} className="text-stone-700" />
-                        <span>Fırça</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleResetBg}
-                        className="px-2.5 py-1.5 rounded-xl bg-white border border-stone-300 text-stone-700 hover:text-stone-900 hover:bg-stone-100 font-bold text-xs transition flex items-center gap-1 cursor-pointer shadow-xs"
-                      >
-                        <RotateCcw size={13} />
-                        <span>Geri qaytar</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Final Action Buttons Stack */}
-                <div className="space-y-2 pt-0.5">
-                  <button
-                    type="button"
-                    onClick={handleConfirmImageUpload}
-                    disabled={isCleaningBg}
-                    className="w-full py-2.5 sm:py-3 rounded-2xl bg-stone-900 hover:bg-black active:scale-98 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
-                  >
-                    <span>Davam et</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setIsUploadModalOpen(false)}
-                    disabled={isCleaningBg}
-                    className="w-full py-2 rounded-2xl bg-stone-100 hover:bg-stone-200 active:scale-98 text-stone-700 font-semibold text-xs transition-all flex items-center justify-center cursor-pointer"
-                  >
-                    <span>Ləğv et</span>
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Realistic Live Model Preview Modal (Torso e-commerce mockup) */}
-      <LiveModelPreviewModal
-        isOpen={isLiveModelOpen}
-        onClose={() => setIsLiveModelOpen(false)}
-        frontDesign={designs.front}
-        backDesign={designs.back}
-        initialSide={viewSide === "back" ? "back" : "front"}
-        colorHex={selectedColor.hex}
-        garmentName={selectedGarment.name}
-        onApplyCorrection={(side, corrected) => {
-          setDesigns((prev) => ({
-            ...prev,
-            [side]: { ...prev[side], ...corrected },
-          }));
-        }}
-        onSwitchStudioSide={(side) => {
-          setViewSide(side);
-        }}
-      />
-
-      {/* 3D Canlı Baxış (360° Fəza) */}
-      <PhotoRoom3DPreviewModal
-        isOpen={isPhotoRoom3DOpen}
-        onClose={() => setIsPhotoRoom3DOpen(false)}
-        garmentId={selectedGarment.id}
-        garmentName={selectedGarment.name}
-        garmentCategory={garmentCategory}
-        colorKey={selectedColor.key}
-        colorHex={selectedColor.hex}
-        designs={designs}
-        currentSide={viewSide}
-      />
-
-      {/* ========================================================================= */}
-      {/* MOBİL REAL-TIME DAİMİ GÖRÜNƏN GEYİM PREVIEW BAR (Mobile Sticky Top Stage) */}
-      {/* ========================================================================= */}
-      {showMobileMiniPreview && (
-        <div className="fixed top-[56px] left-0 right-0 z-30 lg:hidden animate-in fade-in slide-in-from-top-3 duration-300 shadow-xl border-b border-stone-200/90 bg-[#FCFAF7]/95 backdrop-blur-md">
-          {!isMobilePreviewCollapsed ? (
-            <div className="p-2.5 sm:p-3 flex items-center gap-3">
-              {/* Left: High-Clarity Live Garment Preview Stage */}
-              <div
-                onClick={() => {
-                  document.getElementById("garment-canvas-section")?.scrollIntoView({ behavior: "smooth" });
-                }}
-                className="relative w-28 h-28 xs:w-32 xs:h-32 sm:w-36 sm:h-36 aspect-square rounded-2xl bg-gradient-to-b from-[#F3F0EB] via-[#E8E5DC] to-[#DDD9CF] border border-stone-300/90 p-1 flex items-center justify-center overflow-hidden shrink-0 shadow-inner cursor-pointer active:scale-98 transition-transform group"
-                title="Geyim kətanına qayıt"
-              >
-                {/* Stage ambient glow */}
-                <div className="absolute inset-0 bg-radial from-white/70 via-transparent to-stone-400/20 pointer-events-none" />
-
-                {/* Garment Base Mockup */}
-                <img
-                  src={getStudioGarmentImage(selectedGarment.id, selectedColor.key, viewSide)}
-                  alt="Garment Preview"
-                  className="w-full h-full object-contain pointer-events-none drop-shadow-md transition-all duration-300"
-                />
-
-                {/* Live Overlay Graphic */}
-                {currentDesign.uploadedImage && (
-                  <img
-                    src={currentDesign.uploadedImage}
-                    alt="Custom Artwork"
-                    className="absolute pointer-events-none object-contain drop-shadow-sm transition-transform duration-200"
-                    style={{
-                      maxWidth: "48%",
-                      maxHeight: "48%",
-                      transform: `translate(${currentDesign.posX * 0.28}px, ${(currentDesign.posY - 10) * 0.28}px) scale(${currentDesign.scale}) rotate(${currentDesign.rotation}deg)`,
-                    }}
-                  />
-                )}
-
-                {/* Live Overlay Text */}
-                {currentDesign.customText.trim() && (
-                  <div
-                    className="absolute pointer-events-none text-[8px] xs:text-[9px] font-bold uppercase truncate max-w-[80px] text-center drop-shadow-sm transition-transform duration-200"
-                    style={{
-                      color: currentDesign.textColor,
-                      fontFamily: currentDesign.fontFamily,
-                      transform: `translate(${(currentDesign.textPosX ?? 0) * 0.28}px, ${((currentDesign.textPosY ?? 55) - 10) * 0.28}px) scale(${currentDesign.textScale ?? 1.0}) rotate(${currentDesign.textRotation ?? 0}deg)`,
-                    }}
-                  >
-                    {currentDesign.customText}
-                  </div>
-                )}
-
-                {/* Tap to edit badge */}
-                <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded-full bg-stone-900/80 text-[8px] font-semibold text-white tracking-wider uppercase flex items-center gap-0.5 shadow-xs">
-                  🔍 Kətan
+            {/* SUMMARY & ORDER BUTTON */}
+            <div className="bg-stone-900 text-white rounded-3xl p-6 space-y-4 shadow-xl">
+              <div className="flex items-center justify-between text-xs text-stone-300 pb-3 border-b border-stone-800">
+                <span>Geyim & Çap Xülasəsi:</span>
+                <span className="font-semibold text-white">
+                  {selectedGarment.name} · {selectedColor.name} · {selectedSize}
                 </span>
               </div>
 
-              {/* Right: Live Info & Quick Side Switcher */}
-              <div className="flex-1 min-w-0 flex flex-col justify-between h-28 xs:h-32 sm:h-36 py-0.5">
-                {/* Garment Info & Price */}
+              <div className="flex items-center justify-between">
                 <div>
-                  <div className="flex items-center justify-between gap-1">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <span
-                        className="w-3 h-3 rounded-full border border-stone-300 shadow-2xs shrink-0"
-                        style={{ backgroundColor: selectedColor.hex }}
-                      />
-                      <span className="text-xs font-bold text-stone-900 truncate">
-                        {selectedGarment.name}
-                      </span>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => setIsMobilePreviewCollapsed(true)}
-                      className="p-1 text-stone-400 hover:text-stone-700 shrink-0"
-                      title="Yığcam rejimə keç"
-                    >
-                      <ChevronUp size={16} />
-                    </button>
-                  </div>
-
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs font-bold text-amber-700 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
-                      {formatPrice(totalPrice)}
-                    </span>
-                    <span className="text-[10px] text-stone-500 font-medium">
-                      {selectedColor.name} · {selectedSize}
-                    </span>
-                  </div>
+                  <span className="text-xs text-stone-400 block">Yekun Qiymət:</span>
+                  <span className="font-eb-garamond text-3xl font-light text-white tracking-tight">
+                    {formatPrice(totalPrice)}
+                  </span>
                 </div>
 
-                {/* Surface Switcher Pills (Ön / Arxa / Sol / Sağ) */}
-                <div className="flex items-center gap-1 bg-stone-200/80 p-1 rounded-full border border-stone-300/80 w-fit">
-                  {surfacesList.map((s) => {
-                    const isSleeve = s.id === "leftSleeve" || s.id === "rightSleeve";
-                    const isAvailable = (garmentCategory === "tshirt" || garmentCategory === "oversize") || !isSleeve;
-                    if (!isAvailable) return null;
-
-                    const isActive = viewSide === s.id;
-                    const hasSurfaceDesign = Boolean(
-                      designs[s.id].uploadedImage || designs[s.id].customText.trim()
-                    );
-
-                    return (
-                      <button
-                        key={s.id}
-                        type="button"
-                        onClick={() => setViewSide(s.id)}
-                        className={`px-2 xs:px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1 ${
-                          isActive
-                            ? "bg-stone-900 text-white shadow-xs"
-                            : "text-stone-700 hover:text-stone-900"
-                        }`}
-                      >
-                        <span>{s.id === "front" ? "Ön" : s.id === "back" ? "Arxa" : s.id === "leftSleeve" ? "Sol" : "Sağ"}</span>
-                        {hasSurfaceDesign && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Quick Actions Bar */}
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      document.getElementById("garment-canvas-section")?.scrollIntoView({ behavior: "smooth" });
-                    }}
-                    className="flex-1 py-1.5 px-2.5 rounded-xl bg-stone-900 hover:bg-black text-white text-[10px] font-bold uppercase tracking-wider transition active:scale-95 text-center shadow-xs"
-                  >
-                    Kətana Qayıt
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setIsPhotoRoom3DOpen(true)}
-                    className="py-1.5 px-2.5 rounded-xl bg-stone-900 hover:bg-black text-[#e8c98a] border border-[#3d3228] text-[10px] font-bold active:scale-95 transition flex items-center gap-1 shadow-xs cursor-pointer"
-                    title="3D Canlı Baxış"
-                  >
-                    <Eye size={12} />
-                    <span>3D Baxış</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          ) : (
-            /* Collapsed mini-strip mode */
-            <div className="px-3 py-2 flex items-center justify-between gap-2">
-              <div
-                onClick={() => {
-                  document.getElementById("garment-canvas-section")?.scrollIntoView({ behavior: "smooth" });
-                }}
-                className="flex items-center gap-2 min-w-0 cursor-pointer"
-              >
-                <div className="relative w-8 h-8 rounded-lg bg-stone-200 border border-stone-300 p-0.5 overflow-hidden shrink-0">
-                  <img
-                    src={getStudioGarmentImage(selectedGarment.id, selectedColor.key, viewSide)}
-                    alt=""
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-xs font-bold text-stone-900 truncate">
-                    {selectedGarment.name} · {selectedColor.name}
-                  </div>
-                  <div className="text-[10px] text-amber-700 font-semibold">
-                    {formatPrice(totalPrice)} · {viewSide === "front" ? "Ön tərəf" : "Arxa tərəf"}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setIsMobilePreviewCollapsed(false)}
-                  className="px-2.5 py-1 rounded-full bg-stone-900 text-white text-[10px] font-bold uppercase tracking-wider flex items-center gap-1"
+                  onClick={handleAddToCart}
+                  disabled={isAdding}
+                  className="px-6 py-3.5 rounded-full bg-white hover:bg-stone-100 text-stone-900 font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 shadow-md active:scale-98 cursor-pointer disabled:opacity-50"
                 >
-                  <ChevronDown size={12} />
-                  <span>Paltarı Göstər</span>
+                  <ShoppingBag size={16} />
+                  <span>{isAdding ? "Əlavə edilir..." : "Səbətə Əlavə Et"}</span>
+                  <ArrowRight size={15} />
                 </button>
               </div>
             </div>
-          )}
+
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

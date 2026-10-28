@@ -33,9 +33,11 @@ export async function POST(req: NextRequest) {
       status: 'Pending Print',
       createdAt: new Date().toISOString(),
       originalImage: body.originalImage || body.customData?.originalImage || body.customData?.frontDesign?.originalImage || body.customData?.backDesign?.originalImage || '',
-      processedImage: body.processedImage || body.customData?.processedImage || body.customData?.frontDesign?.uploadedImage || body.customData?.backDesign?.uploadedImage || '',
+      placement: body.placement || body.customData?.placement || 'Sinə (Mərkəz)',
+      customerNote: body.customerNote || body.customData?.customerNote || '',
       placementData: body.placementData || body.customData?.placementData || null,
       previewImage: body.previewImage || body.customData?.previewImage || '',
+      customData: body.customData || null,
     };
 
     if (!db.podOrders) db.podOrders = [];

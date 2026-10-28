@@ -13,7 +13,7 @@ export function AdminVisualBridge() {
 
     // 1. Inject Styles for Inspection & Hover Highlights
     const styleEl = document.createElement("style");
-    styleEl.id = "nova-admin-bridge-styles";
+    styleEl.id = "horvvalle-admin-bridge-styles";
     styleEl.innerHTML = `
       [data-cms-section] {
         position: relative !important;
@@ -42,13 +42,13 @@ export function AdminVisualBridge() {
         pointer-events: none;
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
       }
-      .nova-selected-section {
+      .hv-selected-section {
         outline: 3.5px solid #2563eb !important;
         outline-offset: 5px !important;
         box-shadow: 0 0 35px -2px rgba(37, 99, 235, 0.6) !important;
-        animation: novaPulse 1.5s infinite alternate !important;
+        animation: hvPulse 1.5s infinite alternate !important;
       }
-      @keyframes novaPulse {
+      @keyframes hvPulse {
         from { outline-color: #2563eb; }
         to { outline-color: #7c3aed; }
       }
@@ -68,18 +68,18 @@ export function AdminVisualBridge() {
       const sectionTitle = sectionEl?.getAttribute("data-cms-title") || "Bölmə";
 
       // Visual pulse on clicked element
-      document.querySelectorAll(".nova-selected-section").forEach((el) => {
-        el.classList.remove("nova-selected-section");
+      document.querySelectorAll(".hv-selected-section").forEach((el) => {
+        el.classList.remove("hv-selected-section");
       });
       if (sectionEl) {
-        sectionEl.classList.add("nova-selected-section");
+        sectionEl.classList.add("hv-selected-section");
       }
 
       // Send to Admin Portal (parent window)
       try {
         window.parent.postMessage(
           {
-            type: "NOVA_CMS_SELECT",
+            type: "HORVVALLE_CMS_SELECT",
             section: sectionKey,
             title: sectionTitle,
             tagName: target.tagName,
@@ -99,13 +99,13 @@ export function AdminVisualBridge() {
       const data = event.data;
       if (!data || typeof data !== "object") return;
 
-      if (data.type === "NOVA_CMS_SCROLL_TO" && data.section) {
+      if (data.type === "HORVVALLE_CMS_SCROLL_TO" && data.section) {
         const target = document.querySelector(`[data-cms-section="${data.section}"]`);
         if (target) {
-          document.querySelectorAll(".nova-selected-section").forEach((el) => {
-            el.classList.remove("nova-selected-section");
+          document.querySelectorAll(".hv-selected-section").forEach((el) => {
+            el.classList.remove("hv-selected-section");
           });
-          target.classList.add("nova-selected-section");
+          target.classList.add("hv-selected-section");
           target.scrollIntoView({ behavior: "smooth", block: "center" });
         }
       }
@@ -116,7 +116,7 @@ export function AdminVisualBridge() {
     return () => {
       window.removeEventListener("click", handleGlobalClick, true);
       window.removeEventListener("message", handleParentMessage);
-      const injected = document.getElementById("nova-admin-bridge-styles");
+      const injected = document.getElementById("horvvalle-admin-bridge-styles");
       if (injected) injected.remove();
     };
   }, []);

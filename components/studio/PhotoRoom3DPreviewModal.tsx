@@ -8,7 +8,6 @@ import {
   Play,
   Pause,
   Download,
-  Sparkles,
   Sun,
   Flame,
   Zap,
@@ -1144,7 +1143,6 @@ export function PhotoRoom3DPreviewModal({
                 }`}
                 title="Studiya işıqlandırması"
               >
-                <Sparkles size={11} />
                 <span>Studiya</span>
               </button>
               <button

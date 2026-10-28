@@ -18,10 +18,29 @@ const nextConfig = {
   },
   images: {
     formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 31536000,
     remotePatterns: [
       {
         protocol: "https",
         hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "5000",
+      },
+      {
+        protocol: "http",
+        hostname: "127.0.0.1",
+        port: "5000",
+      },
+      {
+        protocol: "https",
+        hostname: "horvvalle.com",
+      },
+      {
+        protocol: "https",
+        hostname: "*.horvvalle.com",
       },
     ],
   },

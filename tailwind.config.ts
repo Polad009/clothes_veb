@@ -27,16 +27,6 @@ const config: Config = {
           muted: "rgba(255, 255, 255, 0.75)",
           subtle: "rgba(255, 255, 255, 0.55)",
         },
-        nova: {
-          bg: "#ffffff",
-          subtle: "#fbfbfd",
-          card: "#ffffff",
-          muted: "#6b7280",
-          border: "#e5e7eb",
-          dark: "#111827",
-          blue: "#0071e3",
-          accent: "#2563eb",
-        },
       },
       borderRadius: {
         pill: "9999px",

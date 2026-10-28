@@ -2,8 +2,10 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Search, X, ArrowRight, Sparkles, Box, ArrowUpRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Search, X, ArrowRight, Box, ArrowUpRight } from "lucide-react";
 import { MOCK_PRODUCTS } from "@/data/products";
+import { useStoreData } from "@/context/StoreDataContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import gsap from "gsap";
 
@@ -13,7 +15,9 @@ interface SearchModalProps {
 }
 
 export function SearchModal({ isOpen, onClose }: SearchModalProps) {
+  const router = useRouter();
   const { formatPrice } = useCurrency();
+  const { products } = useStoreData();
   const [query, setQuery] = useState("");
   const modalBoxRef = useRef<HTMLDivElement>(null);
 
@@ -55,7 +59,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   if (!isOpen) return null;
 
   const filtered = query.trim()
-    ? MOCK_PRODUCTS.filter(
+    ? (products.length > 0 ? products : MOCK_PRODUCTS).filter(
         (p) =>
           p.name.toLowerCase().includes(query.toLowerCase()) ||
           p.category.toLowerCase().includes(query.toLowerCase()) ||
@@ -117,7 +121,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
               onClick={() => {
                 if (tag.isStudio) {
                   onClose();
-                  window.location.href = "/studio";
+                  router.push("/studio");
                 } else {
                   setQuery(tag.query);
                 }
@@ -131,7 +135,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
         </div>
 
         {/* Results Area */}
-        <div className="p-4 sm:p-6 max-h-[55vh] overflow-y-auto">
+        <div data-lenis-prevent className="p-4 sm:p-6 max-h-[55vh] overflow-y-auto overscroll-contain">
           {query.trim() === "" ? (
             <div className="py-10 text-center space-y-2">
               <span className="text-xs sm:text-sm text-white/60 block">
@@ -151,7 +155,6 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 onClick={onClose}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-black text-xs font-semibold tracking-wider uppercase transition shadow-md hover:bg-white/90"
               >
-                <Sparkles size={13} className="text-black" />
                 <span>3D Studiyada Fərdi Dizayn Et</span>
                 <ArrowRight size={13} />
               </Link>

@@ -23,6 +23,12 @@ function writeDb(data) {
 
 // Serve Admin UI Static Files
 app.use(express.static(path.join(__dirname, 'public')));
+// Serve main store public assets (brand icons, logos, uploaded images)
+app.use(express.static(path.join(__dirname, '..', 'public')));
+
+app.get('/favicon.ico', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'favicon.ico'));
+});
 
 // API: Get Full Store Data
 app.get('/api/admin/data', (req, res) => {
@@ -100,6 +106,34 @@ app.patch('/api/admin/orders/:id', (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// API: Delete Single Order
+app.delete('/api/admin/orders/:id', (req, res) => {
+  try {
+    const db = readDb();
+    const id = req.params.id;
+    db.orders = (db.orders || []).filter(o => o.id !== id);
+    db.podOrders = (db.podOrders || []).filter(p => p.orderId !== id && p.id !== id);
+    writeDb(db);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// API: Clear All Orders
+app.post('/api/admin/orders/clear-all', (req, res) => {
+  try {
+    const db = readDb();
+    db.orders = [];
+    db.podOrders = [];
+    writeDb(db);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 // API: Update Print-on-Demand Order Status
 app.patch('/api/admin/pod-orders/:id', (req, res) => {

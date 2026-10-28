@@ -28,12 +28,15 @@ yarn-error.log*
 
 # vercel
 .vercel
+.agent
+
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
 
 # scratch images
+*.orig
 scratch_*.png
 test_*.png
 hoodie_modal_*.png
@@ -43,3 +46,4 @@ thumb-front-test.png
 # AI Model Files (large binaries downloaded via script)
 public/models/*.onnx
 public/models/*.bin
+

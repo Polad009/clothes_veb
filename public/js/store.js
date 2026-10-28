@@ -70,18 +70,23 @@ const Store = {
     const container = document.getElementById('featuredProductsGrid');
     if (!container) return;
 
-    const featuredList = this.products.filter(p => p.isFeatured).slice(0, 4);
+    const featuredList = this.products.filter(p => p.isFeatured || p.badge).slice(0, 4);
+    const listToRender = featuredList.length > 0 ? featuredList : this.products.slice(0, 4);
 
-    container.innerHTML = featuredList.map(p => {
-      const svg = this.getGarmentSvg(p.silhouetteType, p.silhouetteColor);
+    container.innerHTML = listToRender.map(p => {
+      const img = p.image || (p.colors && p.colors[0] && p.colors[0].image);
+      const mediaHtml = img
+        ? `<img src="${img}" alt="${p.name}" style="width:100%; height:100%; object-fit:cover; border-radius:12px;" />`
+        : this.getGarmentSvg(p.silhouetteType, p.silhouetteColor);
+
       return `
-        <div class="minimal-card" onclick="Store.openProductPage('${p.id}')">
-          <div class="card-silhouette-box">
-            ${svg}
+        <div class="minimal-card" onclick="window.location.href='http://localhost:3000/products/${p.slug || p.id}'">
+          <div class="card-silhouette-box" style="overflow:hidden; background:#f4f1ea;">
+            ${mediaHtml}
           </div>
-          <div class="card-meta-row">
-            <span class="card-title">${p.name}</span>
-            <span class="card-price">${p.price} ${p.currency}</span>
+          <div class="card-meta-row" style="margin-top:10px;">
+            <span class="card-title" style="font-weight:600;">${p.name}</span>
+            <span class="card-price" style="font-weight:700;">${p.price} ${p.currency || '₼'}</span>
           </div>
         </div>
       `;
@@ -93,15 +98,19 @@ const Store = {
     if (!container) return;
 
     container.innerHTML = this.products.map(p => {
-      const svg = this.getGarmentSvg(p.silhouetteType, p.silhouetteColor);
+      const img = p.image || (p.colors && p.colors[0] && p.colors[0].image);
+      const mediaHtml = img
+        ? `<img src="${img}" alt="${p.name}" style="width:100%; height:100%; object-fit:cover; border-radius:12px;" />`
+        : this.getGarmentSvg(p.silhouetteType, p.silhouetteColor);
+
       return `
-        <div class="minimal-card" onclick="Store.openProductPage('${p.id}')">
-          <div class="card-silhouette-box">
-            ${svg}
+        <div class="minimal-card" onclick="window.location.href='http://localhost:3000/products/${p.slug || p.id}'">
+          <div class="card-silhouette-box" style="overflow:hidden; background:#f4f1ea;">
+            ${mediaHtml}
           </div>
-          <div class="card-meta-row">
-            <span class="card-title">${p.name}</span>
-            <span class="card-price">${p.price} ${p.currency}</span>
+          <div class="card-meta-row" style="margin-top:10px;">
+            <span class="card-title" style="font-weight:600;">${p.name}</span>
+            <span class="card-price" style="font-weight:700;">${p.price} ${p.currency || '₼'}</span>
           </div>
         </div>
       `;

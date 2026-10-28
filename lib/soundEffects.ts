@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * High-End Luxury Audio Engine for NOVA & CO.
+ * High-End Luxury Audio Engine for Horvvalle Atelier.
  * Synthesizes ultra-pure, zero-latency (0ms) acoustic chimes using native Web Audio API.
  * Requires NO external network requests, works 100% offline, never fails with 404 or CORS.
  */
@@ -89,11 +89,46 @@ export function playAddToCartSound() {
   osc3.stop(now + 0.7);
 }
 
+let shopifySaleAudioInstance: HTMLAudioElement | null = null;
+
+let lastPurchaseSoundTime = 0;
+
 /**
- * Celebratory luxury Apple Pay / Purchase Complete chime
- * Triumphant harmonious chord progression that makes the customer feel accomplished
+ * Celebratory Shopify Sale ("Cha-Ching!") Sound
+ * Plays the official Shopify sale audio file from /sounds/shopify-sale.mp3
+ * with synthesizer fallback and cooldown lock to prevent duplicate playback.
  */
 export function playPurchaseSuccessSound() {
+  if (typeof window !== "undefined") {
+    const now = Date.now();
+    if (now - lastPurchaseSoundTime < 4000) {
+      return;
+    }
+    lastPurchaseSoundTime = now;
+
+    try {
+      if (!shopifySaleAudioInstance) {
+        shopifySaleAudioInstance = new Audio("/sounds/shopify-sale.mp3");
+        shopifySaleAudioInstance.preload = "auto";
+      }
+      shopifySaleAudioInstance.currentTime = 0;
+      shopifySaleAudioInstance.volume = 1.0;
+      const playPromise = shopifySaleAudioInstance.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          if (err && err.name !== "AbortError") {
+            playFallbackPurchaseChime();
+          }
+        });
+        return;
+      }
+    } catch (e) {
+      playFallbackPurchaseChime();
+    }
+  }
+}
+
+function playFallbackPurchaseChime() {
   const ctx = getAudioContext();
   if (!ctx) return;
 

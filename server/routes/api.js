@@ -4,10 +4,15 @@ const db = require('../db');
 
 // --- Məhsullar ---
 router.get('/products', (req, res) => {
+  const startTime = Date.now();
   try {
     const products = db.getProducts(req.query);
-    res.json({ success: true, count: products.length, data: products });
+    const durationMs = Date.now() - startTime;
+    console.log(`[API Timing] GET /api/products - ${durationMs}ms (${products.length} items returned)`);
+    res.json({ success: true, count: products.length, timingMs: durationMs, data: products });
   } catch (err) {
+    const durationMs = Date.now() - startTime;
+    console.error(`[API Timing Error] GET /api/products failed in ${durationMs}ms:`, err.message);
     res.status(500).json({ success: false, error: err.message });
   }
 });

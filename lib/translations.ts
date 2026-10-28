@@ -79,6 +79,22 @@ export interface Translations {
     cartTitle: string;
     continueShopping: string;
   };
+  // Product Detail & Card
+  product: {
+    color: string;
+    size: string;
+    selectSize: string;
+    sizeGuide: string;
+    addToBag: string;
+    addedToBag: string;
+    buyNow: string;
+    choices: string;
+    colorsWord: string;
+    inStock: string;
+    freeShipping: string;
+    securePayment: string;
+    easyReturn: string;
+  };
 }
 
 export const TRANSLATIONS: Record<LanguageCode, Translations> = {
@@ -98,11 +114,11 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       language: "Dil",
     },
     announcements: {
-      freeShipping: "60 ₼ VƏ ÜZƏRİ BÜTÜN SİFARİŞLƏRƏ PULSUZ ÇATDIRILMA",
+      freeShipping: "BAKI VƏ SUMQAYIT ƏRAZİSİNƏ ÇATDIRILMA PULSUZDUR",
       customStudio: "FƏRDİ ÇAP STUDİYASI — ÖZ DİZAYNINI KÖYNƏYƏ ÇAP ET",
       cottonLinen: "100% PREMİUM DARANMIŞ PAMBIQ VƏ TƏBİİ KƏTAN KOLLEKSİYASI",
       guaranteedReturns: "14 GÜN ƏRZİNDƏ ASAN VƏ ZƏMANƏTLİ QAYTARILMA",
-      expressDelivery: "BAKI VƏ BÜTÜN AZƏRBAYCANA SÜRƏTLİ KURYER ÇATDIRILMASI",
+      expressDelivery: "BAKI, SUMQAYIT VƏ BÜTÜN AZƏRBAYCANA SÜRƏTLİ ÇATDIRILMA",
     },
     hero: {
       tag: "HORVVALLE ATELIER · 2026 COUTURE",
@@ -114,7 +130,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       studioBtn: "Öz Dizaynını Yarat",
       featureCotton: "100% Xalis Pambıq",
       featureDtg: "Ultra HD DTG Çap",
-      featureShipping: "60 ₼-dən Pulsuz Çatdırılma",
+      featureShipping: "Bakı və Sumqayıtda Pulsuz Çatdırılma",
       featureReturn: "14 Günlük Qaytarılma",
     },
     studio: {
@@ -156,6 +172,21 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       cartTitle: "Səbətiniz",
       continueShopping: "Alış-verişə Davam Et",
     },
+    product: {
+      color: "Rəng",
+      size: "Ölçü",
+      selectSize: "Ölçü Seçin",
+      sizeGuide: "Ölçü Cədvəli",
+      addToBag: "Səbətə Əlavə Et",
+      addedToBag: "Səbətə Əlavə Olundu!",
+      buyNow: "Birbaşa Sifariş Et",
+      choices: "seçim",
+      colorsWord: "rəng",
+      inStock: "Mövcuddur",
+      freeShipping: "Bakı və Sumqayıt Pulsuz Çatdırılma",
+      securePayment: "100% Zəmanətli Təhlükəsiz Ödəniş",
+      easyReturn: "14 Günlük Asan Qaytarılma",
+    },
   },
 
   en: {
@@ -174,7 +205,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       language: "Language",
     },
     announcements: {
-      freeShipping: "FREE EXPRESS DELIVERY ON ALL ORDERS OVER $35 / 60 ₼",
+      freeShipping: "FREE EXPRESS DELIVERY IN BAKU & SUMGAYIT",
       customStudio: "CUSTOM PRINT ATELIER — PRINT YOUR OWN GRAPHIC ON TEES",
       cottonLinen: "100% PREMIUM COMBED COTTON & NATURAL LINEN COLLECTION",
       guaranteedReturns: "14 DAYS EASY & GUARANTEED RETURNS",
@@ -232,6 +263,21 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       cartTitle: "Shopping Bag",
       continueShopping: "Continue Shopping",
     },
+    product: {
+      color: "Color",
+      size: "Size",
+      selectSize: "Select Size",
+      sizeGuide: "Size Guide",
+      addToBag: "Add to Bag",
+      addedToBag: "Added to Bag!",
+      buyNow: "Buy Now",
+      choices: "choices",
+      colorsWord: "colors",
+      inStock: "In Stock",
+      freeShipping: "Free Delivery in Baku and Sumgayit",
+      securePayment: "100% Guaranteed Secure Checkout",
+      easyReturn: "14-Day Free and Easy Returns",
+    },
   },
 
   ru: {
@@ -250,7 +296,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       language: "Язык",
     },
     announcements: {
-      freeShipping: "БЕСПЛАТНАЯ ДОСТАВКА ДЛЯ ВСЕХ ЗАКАЗОВ ОТ 60 ₼",
+      freeShipping: "БЕСПЛАТНАЯ ДОСТАВКА ПО БАКУ И СУМГАИТУ",
       customStudio: "СТУДИЯ ПЕЧАТИ — СОЗДАЙ СВОЙ ДИЗАЙН НА ФУТБОЛКЕ",
       cottonLinen: "КОЛЛЕКЦИЯ ИЗ 100% ПРЕМИАЛЬНОГО ХЛОПКА И НАТУРАЛЬНОГО ЛЬНА",
       guaranteedReturns: "14 ДНЕЙ ЛЕГКИЙ И ГАРАНТИРОВАННЫЙ ВОЗВРАТ",
@@ -308,6 +354,21 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       cartTitle: "Корзина",
       continueShopping: "Продолжить Покупки",
     },
+    product: {
+      color: "Цвет",
+      size: "Размер",
+      selectSize: "Выберите размер",
+      sizeGuide: "Таблица размеров",
+      addToBag: "В Корзину",
+      addedToBag: "Добавлено в корзину!",
+      buyNow: "Купить Сейчас",
+      choices: "варианта",
+      colorsWord: "цветов",
+      inStock: "В наличии",
+      freeShipping: "Бесплатная доставка по Баку и Сумгаиту",
+      securePayment: "100% Безопасная Оплата",
+      easyReturn: "Легкий возврат в течение 14 дней",
+    },
   },
 
   tr: {
@@ -326,7 +387,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       language: "Dil",
     },
     announcements: {
-      freeShipping: "60 ₼ VE ÜZERİ TÜM SİPARİŞLERDE ÜCRETSİZ HIZLI KARGO",
+      freeShipping: "BAKÜ VE SUMGAYIT İÇİN ÜCRETSİZ HIZLI KARGO",
       customStudio: "ÖZEL BASKI ATÖLYESİ — KENDİ TASARIMINI TİŞÖRTE BAS",
       cottonLinen: "%100 BİRİNCİ SINIF PENYE PAMUK VE DOĞAL KETEN KOLEKSİYONU",
       guaranteedReturns: "14 GÜN İÇİNDE KOLAY VE GARANTİLİ İADE",
@@ -384,5 +445,78 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       cartTitle: "Sepetiniz",
       continueShopping: "Alışverişe Devam Et",
     },
+    product: {
+      color: "Renk",
+      size: "Beden",
+      selectSize: "Beden Seçin",
+      sizeGuide: "Beden Tablosu",
+      addToBag: "Sepete Ekle",
+      addedToBag: "Sepete Eklendi!",
+      buyNow: "Hemen Satın Al",
+      choices: "seçenek",
+      colorsWord: "renk",
+      inStock: "Stokta Var",
+      freeShipping: "Bakü ve Sumgayıt Ücretsiz Teslimat",
+      securePayment: "100% Güvenli Ödeme",
+      easyReturn: "14 Gün Kolay İade",
+    },
   },
 };
+
+export function translateColor(colorName: string, lang: LanguageCode): string {
+  if (!colorName) return colorName;
+  const lower = colorName.trim().toLowerCase();
+
+  const map: Record<string, Record<LanguageCode, string>> = {
+    "sand beige": { az: "Qum Beji", en: "Sand Beige", ru: "Песочно-бежевый", tr: "Kum Beji" },
+    "sand": { az: "Qum Beji", en: "Sand", ru: "Песочный", tr: "Kum Beji" },
+    "qum beji": { az: "Qum Beji", en: "Sand Beige", ru: "Песочно-бежевый", tr: "Kum Beji" },
+    "clean white": { az: "Xalis Ağ", en: "Clean White", ru: "Белый", tr: "Temiz Beyaz" },
+    "ağ": { az: "Ağ", en: "White", ru: "Белый", tr: "Beyaz" },
+    "white": { az: "Ağ", en: "White", ru: "Белый", tr: "Beyaz" },
+    "washed black": { az: "Yuyulmuş Qara", en: "Washed Black", ru: "Выстиранный черный", tr: "Yıkanmış Siyah" },
+    "qara": { az: "Qara", en: "Black", ru: "Черный", tr: "Siyah" },
+    "black": { az: "Qara", en: "Black", ru: "Черный", tr: "Siyah" },
+    "heather grey": { az: "Melanj Boz", en: "Heather Grey", ru: "Меланж Серый", tr: "Melanj Gri" },
+    "boz": { az: "Boz", en: "Grey", ru: "Серый", tr: "Gri" },
+    "grey": { az: "Boz", en: "Grey", ru: "Серый", tr: "Gri" },
+    "off-white": { az: "Süd Ağ", en: "Off-White", ru: "Молочный", tr: "Kırık Beyaz" },
+    "standart": { az: "Standart", en: "Standard", ru: "Стандарт", tr: "Standart" },
+  };
+
+  if (map[lower]) {
+    return map[lower][lang] || map[lower].en;
+  }
+  return colorName;
+}
+
+export function translateBadge(badge: string | undefined, lang: LanguageCode): string | undefined {
+  if (!badge) return badge;
+  const lower = badge.trim().toLowerCase();
+
+  const map: Record<string, Record<LanguageCode, string>> = {
+    "limited motorsport edition": {
+      az: "MƏHDUD MOTORSPORT NƏŞRİ",
+      en: "LIMITED MOTORSPORT EDITION",
+      ru: "ЛИМИТИРОВАННАЯ MOTORSPORT СЕРИЯ",
+      tr: "SINIRLI MOTORSPORT EDİSYONU",
+    },
+    "yeni sezon · 2026": {
+      az: "YENİ SEZON · 2026",
+      en: "NEW SEASON · 2026",
+      ru: "НОВЫЙ СЕЗОН · 2026",
+      tr: "YENİ SEZON · 2026"
+    },
+    "limited edition": {
+      az: "MƏHDUD BURAXILIŞ",
+      en: "LIMITED EDITION",
+      ru: "ЛИМИТИРОВАННАЯ СЕРИЯ",
+      tr: "SINIRLI SAYIDA",
+    },
+  };
+
+  if (map[lower]) {
+    return map[lower][lang] || map[lower].en;
+  }
+  return badge;
+}
