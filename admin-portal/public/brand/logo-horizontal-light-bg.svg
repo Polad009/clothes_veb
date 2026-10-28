@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 50" fill="none">
+  <!-- Circular Seal -->
+  <g transform="translate(0, 0)">
+    <circle cx="25" cy="25" r="23" fill="#FAF6EF"/>
+    <circle cx="25" cy="25" r="22" stroke="#9A7B4F" stroke-width="1.2" fill="none"/>
+    <circle cx="25" cy="25" r="20" stroke="#9A7B4F" stroke-width="0.8" stroke-dasharray="2 2" fill="none" opacity="0.85"/>
+    <circle cx="25" cy="3" r="1.2" fill="#9A7B4F"/>
+    <circle cx="47" cy="25" r="1.2" fill="#9A7B4F"/>
+    <circle cx="25" cy="47" r="1.2" fill="#9A7B4F"/>
+    <circle cx="3" cy="25" r="1.2" fill="#9A7B4F"/>
+    <path d="M 15.7 18.5 C 16.4 23.2 19.1 29.1 20.5 31.9 C 21.7 29.0 23.4 24.3 24.8 21.3 C 26.2 24.1 28.1 29.3 29.4 32.1 C 30.6 28.9 33.4 23.1 34.4 18.4" stroke="#9A7B4F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </g>
+  <!-- Wordmark for Light Background -->
+  <text x="60" y="28" font-family="'Fraunces', serif" font-size="18" font-weight="700" letter-spacing="0.34em" fill="#2E1A22">HORVVALLE</text>
+  <text x="62" y="42" font-family="'Instrument Sans', sans-serif" font-size="8.5" font-weight="600" letter-spacing="0.24em" fill="#9A7B4F">— FƏRDİ ATELYE —</text>
+</svg>
