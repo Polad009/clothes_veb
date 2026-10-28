@@ -37,30 +37,40 @@ export async function notifyNewOrder(order: any) {
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `⏰ ${new Date().toLocaleString("az-AZ")}`;
 
+    const promises: Promise<any>[] = [];
+
     // 1. Send via Telegram Bot (if configured)
     if (telegramToken && telegramChatId) {
-      fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: telegramChatId,
-          text: messageText,
-          parse_mode: "Markdown",
-        }),
-      }).catch((e) => console.warn("Telegram notification error:", e.message));
+      promises.push(
+        fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: telegramChatId,
+            text: messageText,
+            parse_mode: "Markdown",
+          }),
+        }).catch((e) => console.warn("Telegram notification error:", e.message))
+      );
     }
 
     // 2. Send via NTFY free push service
     if (ntfyTopic) {
-      fetch(`https://ntfy.sh/${encodeURIComponent(ntfyTopic)}`, {
-        method: "POST",
-        headers: {
-          Title: `🛍 Yeni Sifaris: ${order.id} (${Number(order.total || 0).toFixed(2)} AZN)`,
-          Priority: "urgent",
-          Tags: "shopping_bags,moneybag,bell",
-        },
-        body: `Müştəri: ${order.customer?.fullName || "Müştəri"} (${order.customer?.phone || ""})\nÜnvan: ${order.customer?.city || "Bakı"}, ${order.customer?.address || ""}\nMəbləğ: ${Number(order.total || 0).toFixed(2)} AZN\n${(order.items || []).map((i: any) => `${i.quantity}x ${i.name}`).join(", ")}`,
-      }).catch((e) => console.warn("NTFY push notification error:", e.message));
+      promises.push(
+        fetch(`https://ntfy.sh/${encodeURIComponent(ntfyTopic)}`, {
+          method: "POST",
+          headers: {
+            Title: `🛍 Yeni Sifaris: ${order.id} (${Number(order.total || 0).toFixed(2)} AZN)`,
+            Priority: "urgent",
+            Tags: "shopping_bags,moneybag,bell",
+          },
+          body: `Müştəri: ${order.customer?.fullName || "Müştəri"} (${order.customer?.phone || ""})\nÜnvan: ${order.customer?.city || "Bakı"}, ${order.customer?.address || ""}\nMəbləğ: ${Number(order.total || 0).toFixed(2)} AZN\n${(order.items || []).map((i: any) => `${i.quantity}x ${i.name}`).join(", ")}`,
+        }).catch((e) => console.warn("NTFY push notification error:", e.message))
+      );
+    }
+
+    if (promises.length > 0) {
+      await Promise.allSettled(promises);
     }
   } catch (error) {
     console.warn("Order notification error:", error);

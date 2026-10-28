@@ -71,7 +71,11 @@ export async function POST(req: NextRequest) {
     writeStoreDb(db);
 
     // Send instant free mobile notification (Telegram / NTFY)
-    notifyNewOrder(newOrder).catch(() => {});
+    try {
+      await notifyNewOrder(newOrder);
+    } catch (e) {
+      console.warn('Notification failed:', e);
+    }
 
     return NextResponse.json({ success: true, order: newOrder });
   } catch (error: any) {

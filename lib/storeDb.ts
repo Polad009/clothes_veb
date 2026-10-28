@@ -1,7 +1,12 @@
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 
-const DB_PATH = path.join(process.cwd(), 'data', 'storeData.json');
+const BUNDLED_DB_PATH = path.join(process.cwd(), 'data', 'storeData.json');
+const TMP_DB_PATH = path.join(os.tmpdir(), 'storeData.json');
+
+// In-memory cache across serverless warm requests
+let cachedDb: StoreData | null = null;
 
 export interface ProductColor {
   name: string;
@@ -144,12 +149,29 @@ export interface StoreData {
 }
 
 export function readStoreDb(): StoreData {
-  try {
-    if (!fs.existsSync(DB_PATH)) {
-      throw new Error(`DB file not found at ${DB_PATH}`);
+  if (cachedDb) {
+    return cachedDb;
+  }
+
+  // 1. If /tmp/storeData.json exists (from recent writes in this serverless environment), use it
+  if (fs.existsSync(TMP_DB_PATH)) {
+    try {
+      const raw = fs.readFileSync(TMP_DB_PATH, 'utf-8');
+      cachedDb = JSON.parse(raw);
+      return cachedDb!;
+    } catch (e) {
+      console.warn('Error reading from tmp DB, falling back to bundled DB:', e);
     }
-    const raw = fs.readFileSync(DB_PATH, 'utf-8');
-    return JSON.parse(raw);
+  }
+
+  // 2. Otherwise read from bundled storeData.json
+  try {
+    if (fs.existsSync(BUNDLED_DB_PATH)) {
+      const raw = fs.readFileSync(BUNDLED_DB_PATH, 'utf-8');
+      cachedDb = JSON.parse(raw);
+      return cachedDb!;
+    }
+    throw new Error(`DB file not found at ${BUNDLED_DB_PATH}`);
   } catch (error) {
     console.error('Error reading store database:', error);
     throw error;
@@ -157,10 +179,26 @@ export function readStoreDb(): StoreData {
 }
 
 export function writeStoreDb(data: StoreData): void {
+  // Always update in-memory cache first
+  cachedDb = data;
+
+  const jsonStr = JSON.stringify(data, null, 2);
+
+  // 1. Try writing to bundled path (works in local dev)
   try {
-    fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2), 'utf-8');
-  } catch (error) {
-    console.error('Error writing store database:', error);
-    throw error;
+    fs.writeFileSync(BUNDLED_DB_PATH, jsonStr, 'utf-8');
+    return;
+  } catch (error: any) {
+    // If read-only filesystem (e.g. Vercel / AWS Lambda EROFS)
+    if (error.code === 'EROFS' || error.message?.includes('read-only')) {
+      try {
+        fs.writeFileSync(TMP_DB_PATH, jsonStr, 'utf-8');
+        return;
+      } catch (tmpError) {
+        console.warn('Failed to write to tmp DB:', tmpError);
+      }
+    } else {
+      console.warn('Warning writing store database:', error.message);
+    }
   }
 }
