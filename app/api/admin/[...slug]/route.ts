@@ -117,6 +117,52 @@ export async function POST(
       return NextResponse.json({ success: true, url: dataUrl });
     }
 
+    // 6. Categories Management
+    if (route === 'categories') {
+      const cat = body;
+      if (!db.content) db.content = {} as any;
+      if (!db.content.categories) {
+        db.content.categories = [
+          { id: 'koynek', title: 'T-Shirt & Köynək', desc: 'Streetwear & Oxford', image: '/images/products/vintage-king-of-pop-tee/mockup.jpg', active: true },
+          { id: 'hudi', title: 'Hudi & Sviter', desc: '3iplik Qalın & İsti', image: '/images/products/heavyweight-hoodie-black/mockup.jpg', active: true },
+          { id: 'salvar', title: 'Şalvar & Cins', desc: 'Kargo & Chino', image: '/images/products/modern-utility-cargo-pants/mockup.jpg', active: true },
+          { id: 'aksesuar', title: 'Aksessuarlar', desc: 'Snapback & Çanta', image: '/images/products/snapback-cap-heavy/mockup.jpg', active: true }
+        ];
+      }
+      const existingIdx = db.content.categories.findIndex((c: any) => c.id === cat.id);
+      if (existingIdx >= 0) {
+        db.content.categories[existingIdx] = { ...db.content.categories[existingIdx], ...cat };
+      } else {
+        cat.id = cat.id || 'cat-' + Date.now();
+        db.content.categories.push(cat);
+      }
+      writeStoreDb(db);
+      return NextResponse.json({ success: true, category: cat, categories: db.content.categories });
+    }
+
+    // 7. Loyalty Terminal Balance Update
+    if (route === 'loyalty') {
+      const { phone, points, tier, fullName } = body;
+      if (!phone) return NextResponse.json({ error: 'Phone required' }, { status: 400 });
+      if (!(db as any).loyalty) (db as any).loyalty = [];
+      const list = (db as any).loyalty;
+      const idx = list.findIndex((l: any) => l.phone === phone);
+      if (idx >= 0) {
+        list[idx].points = (Number(list[idx].points) || 0) + Number(points || 0);
+        if (tier) list[idx].tier = tier;
+        if (fullName) list[idx].fullName = fullName;
+      } else {
+        list.push({
+          phone,
+          fullName: fullName || 'Müştəri',
+          points: Number(points || 0),
+          tier: tier || 'Bronze'
+        });
+      }
+      writeStoreDb(db);
+      return NextResponse.json({ success: true, loyalty: (db as any).loyalty });
+    }
+
     return NextResponse.json({ error: 'Endpoint not found' }, { status: 404 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -194,6 +240,15 @@ export async function DELETE(
     if (route === 'promos' && id) {
       db.promoCodes = (db.promoCodes || []).filter((p: any) => p.id !== id && p.code !== id);
       writeStoreDb(db);
+      return NextResponse.json({ success: true });
+    }
+
+    // 4. Delete Category
+    if (route === 'categories' && id) {
+      if (db.content?.categories) {
+        db.content.categories = db.content.categories.filter((c: any) => c.id !== id);
+        writeStoreDb(db);
+      }
       return NextResponse.json({ success: true });
     }
 

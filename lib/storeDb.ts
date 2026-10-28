@@ -64,6 +64,7 @@ export interface StoreContent {
     ctaLink: string;
     image: string;
   };
+  categories?: any[];
 }
 
 export interface StoreSettings {
@@ -146,6 +147,7 @@ export interface StoreData {
   orders: StoreOrder[];
   podOrders: PodOrder[];
   promoCodes?: StorePromoCode[];
+  loyalty?: any[];
 }
 
 export function readStoreDb(): StoreData {

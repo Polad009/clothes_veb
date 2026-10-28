@@ -25,7 +25,7 @@
     }
     .font-brand {
       font-family: 'EB Garamond', Georgia, serif;
-      letter-spacing: 0.18em;
+      letter-spacing: 0.22em;
     }
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: #f1f5f9; }
@@ -39,7 +39,7 @@
     }
     .shake-anim { animation: shake 0.4s ease-in-out; }
 
-    /* Custom Accent Card Stripes matching screenshot */
+    /* Exact Accent Stripes matching JANAB / Yusif Babazada Design */
     .stripe-top-green { border-top: 4px solid #10b981; }
     .stripe-top-navy { border-top: 4px solid #1e3a8a; }
     .stripe-top-amber { border-top: 4px solid #f59e0b; }
@@ -48,11 +48,30 @@
     .stripe-left-green { border-left: 5px solid #10b981; }
     .stripe-left-navy { border-left: 5px solid #1e3a8a; }
 
+    /* Barcode lines styling */
+    .barcode-lines {
+      background: repeating-linear-gradient(
+        90deg,
+        #000 0px,
+        #000 2px,
+        transparent 2px,
+        transparent 4px,
+        #000 4px,
+        #000 7px,
+        transparent 7px,
+        transparent 9px,
+        #000 9px,
+        #000 12px,
+        transparent 12px,
+        transparent 13px
+      );
+    }
+
     /* Print styles for invoices */
     @media print {
       body * { visibility: hidden; }
-      #invoiceModal, #invoiceModal * { visibility: visible; }
-      #invoiceModal { position: absolute; left: 0; top: 0; width: 100%; background: white; padding: 0; }
+      #printableInvoice, #printableInvoice * { visibility: visible; }
+      #printableInvoice { position: absolute; left: 0; top: 0; width: 100%; background: white; padding: 20px; }
       .no-print { display: none !important; }
     }
   </style>
@@ -66,8 +85,8 @@
     <div id="loginCard" class="w-full max-w-md bg-white rounded-3xl p-8 sm:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.08)] border border-slate-100 flex flex-col items-center text-center">
       <!-- Brand Logo -->
       <div class="mb-5">
-        <h1 class="font-brand text-3xl font-bold tracking-[0.2em] text-black">HORVVALLE</h1>
-        <p class="text-[10px] tracking-[0.25em] text-slate-400 font-semibold uppercase mt-0.5">Atelier Couture</p>
+        <h1 class="font-brand text-3xl font-bold tracking-[0.25em] text-black">HORVVALLE</h1>
+        <p class="text-[10px] tracking-[0.28em] text-slate-400 font-semibold uppercase mt-0.5">Atelier Couture</p>
       </div>
 
       <div class="w-12 h-1 bg-neutral-900 rounded-full mb-6"></div>
@@ -109,7 +128,7 @@
             <button 
               type="button" 
               onclick="togglePasswordVisibility()" 
-              class="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-700"
+              class="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-700 cursor-pointer"
             >
               <i id="passwordEyeIcon" data-lucide="eye" class="w-4 h-4"></i>
             </button>
@@ -148,39 +167,39 @@
 
 
   <!-- ============================================================ -->
-  <!-- 2. MAIN APPLICATION (Şəkildəki Struktur ilə Eyniləşdirilmiş) -->
+  <!-- 2. MAIN APPLICATION (Şəkildəki Bütün 10 Ekran ilə Eyniləşdirilmiş) -->
   <!-- ============================================================ -->
   <div id="mainApp" class="hidden flex-1 flex flex-col md:flex-row w-full min-h-screen">
     
     <!-- ---------------------------------------------------- -->
-    <!-- LEFT SIDEBAR (Şəkildəki sol menyu) -->
+    <!-- LEFT SIDEBAR (Şəkildəki 10 menyu bəndi ilə) -->
     <!-- ---------------------------------------------------- -->
     <aside class="w-full md:w-64 bg-white border-r border-[#EEEEEE] flex flex-col shrink-0">
       
       <!-- Logo Header -->
       <div class="h-20 flex items-center justify-center border-b border-[#F0F0F0] px-6">
         <div class="text-center">
-          <h1 class="font-brand text-2xl font-bold tracking-[0.2em] text-black">HORVVALLE</h1>
-          <p class="text-[9px] tracking-[0.25em] text-slate-400 font-semibold uppercase">Atelier Couture</p>
+          <h1 class="font-brand text-2xl font-bold tracking-[0.25em] text-black">HORVVALLE</h1>
+          <p class="text-[9px] tracking-[0.28em] text-slate-400 font-semibold uppercase">Atelier Couture</p>
         </div>
       </div>
 
       <!-- Navigation Links -->
       <div class="p-4 flex-1 space-y-6 overflow-y-auto">
         
-        <!-- DASHBOARD (Primary Active Tab) -->
+        <!-- 1. DASHBOARD (Primary Active Tab) -->
         <div>
           <button 
             onclick="switchTab('dashboard')" 
             id="nav-dashboard"
-            class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition bg-black text-white shadow-xs"
+            class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition bg-black text-white shadow-xs cursor-pointer"
           >
             <i data-lucide="layout-grid" class="w-4 h-4"></i>
             <span>DASHBOARD</span>
           </button>
         </div>
 
-        <!-- KATALOQ İDARƏETMƏSİ -->
+        <!-- 2 & 3. KATALOQ İDARƏETMƏSİ -->
         <div class="space-y-1">
           <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">
             KATALOQ İDARƏETMƏSİ
@@ -188,7 +207,7 @@
           <button 
             onclick="switchTab('products')" 
             id="nav-products"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition"
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer"
           >
             <i data-lucide="package" class="w-4 h-4 text-slate-400"></i>
             <span>Məhsul Portfeli</span>
@@ -197,37 +216,37 @@
           <button 
             onclick="switchTab('categories')" 
             id="nav-categories"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition"
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer"
           >
             <i data-lucide="layers" class="w-4 h-4 text-slate-400"></i>
             <span>Kateqoriyalar</span>
           </button>
         </div>
 
-        <!-- MƏZMUN -->
+        <!-- 4 & 5. MƏZMUN -->
         <div class="space-y-1">
           <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">
             MƏZMUN
           </div>
           <button 
-            onclick="switchTab('content')" 
-            id="nav-content"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition"
+            onclick="switchTab('staticPages')" 
+            id="nav-staticPages"
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer"
           >
             <i data-lucide="file-text" class="w-4 h-4 text-slate-400"></i>
             <span>Statik Səhifələr</span>
           </button>
           <button 
-            onclick="switchTab('settings')" 
-            id="nav-settings"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition"
+            onclick="switchTab('about')" 
+            id="nav-about"
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer"
           >
             <i data-lucide="info" class="w-4 h-4 text-slate-400"></i>
-            <span>Haqqımızda & Parametrlər</span>
+            <span>Haqqımızda</span>
           </button>
         </div>
 
-        <!-- SATIŞ & LOYALLIQ -->
+        <!-- 6, 7, 8, 9. SATIŞ & LOYALLIQ -->
         <div class="space-y-1">
           <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">
             SATIŞ & LOYALLIQ
@@ -235,7 +254,7 @@
           <button 
             onclick="switchTab('orders')" 
             id="nav-orders"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition"
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer"
           >
             <i data-lucide="shopping-bag" class="w-4 h-4 text-slate-400"></i>
             <span>Onlayn Sifarişlər</span>
@@ -244,52 +263,72 @@
           <button 
             onclick="switchTab('customers')" 
             id="nav-customers"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition"
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer"
           >
             <i data-lucide="users" class="w-4 h-4 text-slate-400"></i>
             <span>Müştəri Bazası</span>
           </button>
           <button 
-            onclick="switchTab('podOrders')" 
-            id="nav-podOrders"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition"
+            onclick="switchTab('loyalty')" 
+            id="nav-loyalty"
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer"
           >
-            <i data-lucide="sparkles" class="w-4 h-4 text-slate-400"></i>
-            <span>Fərdi Çap (POD)</span>
-            <span id="badge-pod-count" class="ml-auto text-[10px] font-bold bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full">0</span>
+            <i data-lucide="gem" class="w-4 h-4 text-slate-400"></i>
+            <span>Loyallıq Terminalı</span>
           </button>
           <button 
             onclick="switchTab('promos')" 
             id="nav-promos"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition"
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer"
           >
             <i data-lucide="tag" class="w-4 h-4 text-slate-400"></i>
             <span>Reklam Kodları</span>
           </button>
         </div>
 
-        <!-- OFLAYN MAĞAZA / HESABAT -->
+        <!-- 10. OFLAYN MAĞAZA -->
         <div class="space-y-1">
           <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">
             OFLAYN MAĞAZA
           </div>
           <button 
-            onclick="switchTab('invoices')" 
-            id="nav-invoices"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition"
+            onclick="switchTab('posBarcode')" 
+            id="nav-posBarcode"
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer"
           >
             <i data-lucide="scan-barcode" class="w-4 h-4 text-slate-400"></i>
-            <span>Barkod / Qəbzlər</span>
+            <span>Barkod Skaner</span>
+          </button>
+          <button 
+            onclick="switchTab('posReceipt')" 
+            id="nav-posReceipt"
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer"
+          >
+            <i data-lucide="receipt" class="w-4 h-4 text-slate-400"></i>
+            <span>Satış Təsdiqi</span>
+          </button>
+        </div>
+
+        <!-- ƏLAVƏ: FƏRDİ ÇAP STUDİYASI (POD) -->
+        <div class="space-y-1 pt-2 border-t border-slate-100">
+          <button 
+            onclick="switchTab('podOrders')" 
+            id="nav-podOrders"
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer"
+          >
+            <i data-lucide="sparkles" class="w-4 h-4 text-indigo-500"></i>
+            <span>Fərdi Çap (POD)</span>
+            <span id="badge-pod-count" class="ml-auto text-[10px] font-bold bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full">0</span>
           </button>
         </div>
 
       </div>
 
-      <!-- SİSTEMDƏN ÇIXIŞ BUTTON (Şəkildəki sol ən aşağı düymə) -->
+      <!-- SİSTEMDƏN ÇIXIŞ BUTTON (Şəkildəki sol ən aşağı qırmızı düymə) -->
       <div class="p-4 border-t border-[#F0F0F0]">
         <button 
           onclick="handleLogout()" 
-          class="w-full py-2.5 px-4 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
+          class="w-full py-2.5 px-4 rounded-xl border border-rose-300 text-rose-600 hover:bg-rose-50 font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
         >
           <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
           <span>SİSTEMDƏN ÇIXIŞ</span>
@@ -307,24 +346,24 @@
       <!-- TOP BAR (Şəkildəki yuxarı zolaq) -->
       <header class="h-20 bg-white border-b border-[#EEEEEE] px-8 flex items-center justify-between sticky top-0 z-20">
         <div>
-          <h2 class="text-base sm:text-lg font-bold text-slate-900 tracking-tight uppercase">ANALİTİK PANEL</h2>
+          <h2 class="text-base sm:text-lg font-black text-slate-900 tracking-wider uppercase">ANALİTİK PANEL</h2>
         </div>
 
         <!-- Admin Profile Pill -->
         <div class="flex items-center gap-4">
-          <a href="/" target="_blank" class="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-black bg-slate-50 hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-full transition">
-            <i data-lucide="external-link" class="w-3 h-3"></i>
+          <a href="/" target="_blank" class="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-black bg-slate-50 hover:bg-slate-100 border border-slate-200 px-3.5 py-1.5 rounded-full transition cursor-pointer">
+            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
             <span>Mağazaya Keç</span>
           </a>
 
-          <div class="flex items-center gap-2.5 bg-slate-50 border border-slate-200/80 rounded-full px-3 py-1.5">
+          <div class="flex items-center gap-2.5 bg-slate-50 border border-slate-200/80 rounded-full px-3.5 py-1.5">
             <div class="w-7 h-7 rounded-full bg-black text-white flex items-center justify-center font-bold text-xs">
               <i data-lucide="user" class="w-3.5 h-3.5"></i>
             </div>
             <div class="text-left pr-1">
               <div class="text-xs font-bold text-slate-900 leading-tight">Polad · Baş Admin</div>
               <div class="text-[9.5px] font-bold text-emerald-600 flex items-center gap-1 leading-none mt-0.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> AKTİV
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> AKTİV
               </div>
             </div>
           </div>
@@ -332,7 +371,9 @@
       </header>
 
 
-      <!-- TAB 1: DASHBOARD (ŞƏKİLDƏKİ ƏSAS İDARƏETMƏ PANELİ) -->
+      <!-- ============================================================ -->
+      <!-- SLIDE 1: DASHBOARD (ŞƏKİLDƏKİ ƏSAS İDARƏETMƏ PANELİ) -->
+      <!-- ============================================================ -->
       <section id="tab-dashboard" class="tab-pane p-6 sm:p-8 space-y-6 max-w-7xl w-full">
         
         <!-- Header & Date Filter Toolbar (Şəkildəki başlıq və filtirlər) -->
@@ -346,9 +387,9 @@
           <div class="flex flex-wrap items-center gap-2 text-xs">
             <!-- GÜN / HƏFTƏ / AY Pills -->
             <div class="bg-slate-100 p-1 rounded-xl flex items-center gap-1 border border-slate-200/60">
-              <button onclick="setDateRange('gun')" id="filter-gun" class="filter-range-btn px-3 py-1.5 rounded-lg font-bold text-slate-600 hover:text-black transition">GÜN</button>
-              <button onclick="setDateRange('hefte')" id="filter-hefte" class="filter-range-btn px-3 py-1.5 rounded-lg font-bold text-slate-600 hover:text-black transition">HƏFTƏ</button>
-              <button onclick="setDateRange('ay')" id="filter-ay" class="filter-range-btn px-3 py-1.5 rounded-lg font-bold bg-white text-black shadow-2xs border border-slate-200/80">AY</button>
+              <button onclick="setDateRange('gun')" id="filter-gun" class="filter-range-btn px-3 py-1.5 rounded-lg font-bold text-slate-600 hover:text-black transition cursor-pointer">GÜN</button>
+              <button onclick="setDateRange('hefte')" id="filter-hefte" class="filter-range-btn px-3 py-1.5 rounded-lg font-bold text-slate-600 hover:text-black transition cursor-pointer">HƏFTƏ</button>
+              <button onclick="setDateRange('ay')" id="filter-ay" class="filter-range-btn px-3 py-1.5 rounded-lg font-bold bg-white text-black shadow-2xs border border-slate-200/80 cursor-pointer">AY</button>
             </div>
 
             <!-- Date range pickers -->
@@ -366,13 +407,13 @@
         </div>
 
 
-        <!-- ROW 1: 4 STATUS / CASH FLOW CARDS (Şəkildəki 4 zolaqlı kart) -->
+        <!-- ROW 1: 4 STATUS / CASH FLOW CARDS (Şəkildəki 4 rəngli zolaqlı kart) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           
           <!-- Card 1: Kassa (Tamamlanmış) -->
           <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs stripe-top-green flex flex-col justify-between">
             <div>
-              <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">KASSA (TAMAMLANMIŞ)</div>
+              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">KASSA (TAMAMLANMIŞ)</div>
               <div id="stat-kassa-val" class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">0.00 ₼</div>
             </div>
             <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-emerald-600 tracking-wider uppercase">
@@ -384,7 +425,7 @@
           <!-- Card 2: Kuryerdə (Yolda) -->
           <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs stripe-top-navy flex flex-col justify-between">
             <div>
-              <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">KURYERDƏ (YOLDA)</div>
+              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">KURYERDƏ (YOLDA)</div>
               <div id="stat-kuryer-val" class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">0.00 ₼</div>
             </div>
             <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-indigo-700 tracking-wider uppercase">
@@ -396,7 +437,7 @@
           <!-- Card 3: Gözləmədə (Yeni) -->
           <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs stripe-top-amber flex flex-col justify-between">
             <div>
-              <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">GÖZLƏMƏDƏ (YENİ)</div>
+              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">GÖZLƏMƏDƏ (YENİ)</div>
               <div id="stat-gozleme-val" class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">0.00 ₼</div>
             </div>
             <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-amber-600 tracking-wider uppercase">
@@ -408,7 +449,7 @@
           <!-- Card 4: Ümumi Aktiv Dövriyyə -->
           <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs stripe-top-dark flex flex-col justify-between">
             <div>
-              <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">ÜMUMİ AKTİV DÖVRİYYƏ</div>
+              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">ÜMUMİ AKTİV DÖVRİYYƏ</div>
               <div id="stat-dovriyye-val" class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">0.00 ₼</div>
             </div>
             <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-slate-400 tracking-wider uppercase">
@@ -496,7 +537,7 @@
               <h3 class="font-bold text-sm text-slate-900 uppercase tracking-wider">Son Gələn Sifarişlər</h3>
               <p class="text-xs text-slate-400">Canlı sifariş axını və dərhal status təyini</p>
             </div>
-            <button onclick="switchTab('orders')" class="text-xs font-bold text-slate-900 hover:underline flex items-center gap-1">
+            <button onclick="switchTab('orders')" class="text-xs font-bold text-slate-900 hover:underline flex items-center gap-1 cursor-pointer">
               <span>Hamısına bax</span>
               <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
             </button>
@@ -504,15 +545,15 @@
 
           <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
-              <thead class="bg-slate-50 text-slate-400 uppercase font-bold text-[10px] tracking-wider">
+              <thead class="bg-slate-50 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-slate-100">
                 <tr>
-                  <th class="p-3 rounded-l-xl">Sifariş №</th>
+                  <th class="p-3">Sifariş №</th>
                   <th class="p-3">Müştəri</th>
                   <th class="p-3">Məhsullar</th>
                   <th class="p-3">Məbləğ</th>
                   <th class="p-3">Ödəniş</th>
                   <th class="p-3">Status</th>
-                  <th class="p-3 rounded-r-xl text-right">Əməliyyat</th>
+                  <th class="p-3 text-right">Əməliyyat</th>
                 </tr>
               </thead>
               <tbody id="dashboardRecentOrders" class="divide-y divide-slate-100">
@@ -525,17 +566,21 @@
       </section>
 
 
-      <!-- TAB 2: PRODUCTS (MƏHSUL PORTFELİ) -->
+      <!-- ============================================================ -->
+      <!-- SLIDE 2: MƏHSUL PORTFELİ (PRODUCTS) -->
+      <!-- ============================================================ -->
       <section id="tab-products" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-7xl w-full">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 class="text-2xl font-black text-slate-900 tracking-tight">MƏHSUL PORTFELİ</h1>
             <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Bütün Geyim Və Aksesuarların İdarə Edilməsi</p>
           </div>
-          <button onclick="openProductModal()" class="px-5 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 cursor-pointer shadow-xs transition">
-            <i data-lucide="plus-circle" class="w-4 h-4"></i>
-            <span>Yeni Məhsul Əlavə Et</span>
-          </button>
+          <div class="flex items-center gap-2">
+            <button onclick="openProductModal()" class="px-5 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 cursor-pointer shadow-xs transition">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i>
+              <span>Yeni Məhsul Əlavə Et</span>
+            </button>
+          </div>
         </div>
 
         <!-- Filter bar -->
@@ -577,35 +622,177 @@
       </section>
 
 
-      <!-- TAB 3: CATEGORIES (KATEQORİYALAR) -->
+      <!-- ============================================================ -->
+      <!-- SLIDE 3: KATEQORİYALAR (CATEGORIES) -->
+      <!-- ============================================================ -->
       <section id="tab-categories" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-7xl w-full">
-        <div>
-          <h1 class="text-2xl font-black text-slate-900 tracking-tight">KATEQORİYALAR</h1>
-          <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Mağaza Bölmələri Və Başlıqları</p>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 class="text-2xl font-black text-slate-900 tracking-tight">KATEQORİYALAR</h1>
+            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Mağaza Bölmələri Və Başlıqları</p>
+          </div>
+          <button onclick="openCategoryModal()" class="px-5 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 cursor-pointer shadow-xs transition">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Yeni Kateqoriya</span>
+          </button>
         </div>
-        <div id="categoriesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div id="categoriesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           <!-- Dynamically populated -->
         </div>
       </section>
 
 
-      <!-- TAB 4: ORDERS (ONLAYN SİFARİŞLƏR) -->
+      <!-- ============================================================ -->
+      <!-- SLIDE 4: STATİK SƏHİFƏLƏR (CMS CONTENT) -->
+      <!-- ============================================================ -->
+      <section id="tab-staticPages" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-5xl w-full">
+        <div>
+          <h1 class="text-2xl font-black text-slate-900 tracking-tight">STATİK SƏHİFƏLƏR VƏ MƏZMUN</h1>
+          <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Ana Səhifə Başlıqları, Bannerlər Və Elan Zolaqları</p>
+        </div>
+
+        <!-- Hero Settings Card -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+          <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center gap-2">
+            <i data-lucide="layout" class="w-4 h-4"></i>
+            <span>Ana Səhifə Hero Bölməsi</span>
+          </h3>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Əsas Şüar (Headline)</label>
+              <input type="text" id="heroHeadlineInput" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-black">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Alt Şüar (Subheadline)</label>
+              <textarea id="heroSubheadlineInput" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs focus:bg-white focus:outline-none focus:border-black"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Announcement Bar Card -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+          <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center gap-2">
+            <i data-lucide="megaphone" class="w-4 h-4"></i>
+            <span>Yuxarı Elan Zolağı (Announcement Bar)</span>
+          </h3>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Elan Mətni</label>
+            <input type="text" id="announcementTextInput" placeholder="Bakı daxili 60₼ üzəri sifarişlərə PULSUZ çatdırılma!" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-black">
+          </div>
+        </div>
+
+        <!-- Policy Rules Card -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+          <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center gap-2">
+            <i data-lucide="shield-check" class="w-4 h-4"></i>
+            <span>Çatdırılma Və Geri Qaytarma Şərtləri</span>
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Çatdırılma Müddəti & Qaydası</label>
+              <textarea id="shippingPolicyInput" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs">Bakı daxili 24 saat ərzində sürətli kuryer çatdırılması. Rayonlara poçtla 2-3 iş günü.</textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Qaytarma & Dəyişdirmə</label>
+              <textarea id="returnPolicyInput" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs">Məhsul çatdırıldıqdan sonra 14 gün ərzində etiketləri zədələnmədən dəyişdirmə və ya qaytarma imkanı.</textarea>
+            </div>
+          </div>
+        </div>
+
+        <button onclick="saveCmsContent()" class="px-6 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs transition cursor-pointer">
+          Məzmun Dəyişikliklərini Yadda Saxla
+        </button>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <!-- SLIDE 5: HAQQIMIZDA (ABOUT US & SETTINGS) -->
+      <!-- ============================================================ -->
+      <section id="tab-about" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-5xl w-full">
+        <div>
+          <h1 class="text-2xl font-black text-slate-900 tracking-tight">HAQQIMIZDA VƏ BREND PARAMETRLƏRİ</h1>
+          <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Atelier Manifesti, Əlaqə Rekvizitləri Və Kuryer Şərtləri</p>
+        </div>
+
+        <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-5">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Brendin Adı</label>
+              <input type="text" id="settingStoreName" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Şüar (Tagline)</label>
+              <input type="text" id="settingTagline" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Əlaqə Telefonu (Kassa / Dəstək)</label>
+              <input type="text" id="settingContactPhone" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Rəsmi Email</label>
+              <input type="email" id="settingContactEmail" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Pulsuz Çatdırılma Limiti (₼)</label>
+              <input type="number" id="settingShippingThreshold" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Standart Kuryer Haqqı (₼)</label>
+              <input type="number" id="settingCourierRate" value="4.00" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+            </div>
+          </div>
+
+          <!-- Telegram Bot Status Pill -->
+          <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 p-4 rounded-xl">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-blue-500 text-white flex items-center justify-center">
+                <i data-lucide="send" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <div class="text-xs font-bold text-slate-900">Telegram Sifariş Bildirişləri</div>
+                <div class="text-[10px] text-slate-500">Yeni sifariş daxil olduqda dərhal kuryer qrupuna çatdırılır</div>
+              </div>
+            </div>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> BOT AKTİVDİR
+            </span>
+          </div>
+
+          <button onclick="saveGeneralSettings()" class="px-6 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs transition cursor-pointer">
+            Parametrləri Yenilə
+          </button>
+        </div>
+      </section>
+
+
+      <!-- ============================================================ -->
+      <!-- SLIDE 6: ONLAYN SİFARİŞLƏR (ONLINE ORDERS) -->
+      <!-- ============================================================ -->
       <section id="tab-orders" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-7xl w-full">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 class="text-2xl font-black text-slate-900 tracking-tight">ONLAYN SİFARİŞLƏR</h1>
-            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Daxil Olan Sifarişlərin Çatdırılma Və Qəbz İdarəetməsi</p>
+            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Daxil Olan Sifarişlərin Çatdırılma Və Status İdarəetməsi</p>
           </div>
           <div class="flex items-center gap-2">
-            <button onclick="clearAllOrders()" class="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl font-bold text-xs flex items-center gap-1.5 transition">
+            <button onclick="clearAllOrders()" class="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
               <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
               <span>Sınaq Sifarişlərini Sıfırla</span>
             </button>
-            <button onclick="loadData()" class="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl font-bold text-xs flex items-center gap-1.5 transition">
+            <button onclick="loadData()" class="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
               <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
               <span>Yenilə</span>
             </button>
           </div>
+        </div>
+
+        <!-- Orders Status Tabs Filter -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs font-bold">
+          <button onclick="filterOrdersByStatus('all')" id="order-pill-all" class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-black text-white cursor-pointer">Hamısı</button>
+          <button onclick="filterOrdersByStatus('yeni')" id="order-pill-yeni" class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Yeni Sifarişlər</button>
+          <button onclick="filterOrdersByStatus('kuryer')" id="order-pill-kuryer" class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Kuryerdə (Yolda)</button>
+          <button onclick="filterOrdersByStatus('catdirildi')" id="order-pill-catdirildi" class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Çatdırıldı</button>
+          <button onclick="filterOrdersByStatus('legv')" id="order-pill-legv" class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Ləğv Edildi</button>
         </div>
 
         <!-- Orders Table -->
@@ -632,12 +819,53 @@
       </section>
 
 
-      <!-- TAB 5: CUSTOMERS (MÜŞTƏRİ BAZASI) -->
+      <!-- ============================================================ -->
+      <!-- SLIDE 7: MÜŞTƏRİ BAZASI (CUSTOMERS CRM) -->
+      <!-- ============================================================ -->
       <section id="tab-customers" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-7xl w-full">
         <div>
           <h1 class="text-2xl font-black text-slate-900 tracking-tight">MÜŞTƏRİ BAZASI</h1>
           <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Sifarişçilərin Əlaqə Məlumatları Və Alış Statistikası</p>
         </div>
+
+        <!-- 3 KPI Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs flex items-center justify-between">
+            <div>
+              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">CƏMİ MÜŞTƏRİ</div>
+              <div id="crm-total-customers" class="text-2xl font-black text-slate-900 mt-1">0</div>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
+              <i data-lucide="users" class="w-5 h-5"></i>
+            </div>
+          </div>
+          <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs flex items-center justify-between">
+            <div>
+              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">ORTA ALIŞ ÇEKİ</div>
+              <div id="crm-avg-order" class="text-2xl font-black text-slate-900 mt-1">0.00 ₼</div>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
+              <i data-lucide="badge-percent" class="w-5 h-5"></i>
+            </div>
+          </div>
+          <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs flex items-center justify-between">
+            <div>
+              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">VIP MÜŞTƏRİLƏR</div>
+              <div id="crm-vip-count" class="text-2xl font-black text-amber-600 mt-1">0</div>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+              <i data-lucide="crown" class="w-5 h-5"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-2">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 ml-2"></i>
+          <input type="text" id="customerSearchInput" oninput="filterCustomersTable()" placeholder="Müştəri adı, telefon nömrəsi və ya ünvanı ilə axtarış..." class="w-full bg-transparent text-xs outline-none">
+        </div>
+
+        <!-- Table -->
         <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
@@ -648,6 +876,7 @@
                   <th class="p-3.5">Email</th>
                   <th class="p-3.5">Şəhər / Ünvan</th>
                   <th class="p-3.5">Sifariş Sayı</th>
+                  <th class="p-3.5">Status</th>
                   <th class="p-3.5 text-right">Ümumi Xərclədiyi</th>
                 </tr>
               </thead>
@@ -660,32 +889,96 @@
       </section>
 
 
-      <!-- TAB 6: POD ORDERS (FƏRDİ ÇAP STUDİYASI) -->
-      <section id="tab-podOrders" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-7xl w-full">
-        <div class="flex items-center justify-between">
-          <div>
-            <h1 class="text-2xl font-black text-slate-900 tracking-tight">FƏRDİ ÇAP STUDİYASI (POD)</h1>
-            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">3D Studiyadan Hazırlanmış Xüsusi Dizayn Sifarişləri</p>
+      <!-- ============================================================ -->
+      <!-- SLIDE 8: LOYALLIQ TERMİNALI (LOYALTY & REWARDS) -->
+      <!-- ============================================================ -->
+      <section id="tab-loyalty" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-7xl w-full">
+        <div>
+          <h1 class="text-2xl font-black text-slate-900 tracking-tight">LOYALLIQ TERMİNALI</h1>
+          <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Müştəri Keşbeki, Bonus Xalları Və VIP Tiers</p>
+        </div>
+
+        <!-- 3 Tier Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Bronze -->
+          <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs flex flex-col justify-between">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+              <span class="text-xs font-black tracking-wider text-slate-800 uppercase">BRONZE / GÜMÜŞ</span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">3% Keşbek</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-3">0 — 200 ₼ arası alış edən bütün ilkin alıcılar üçün standart dərəcə.</p>
+            <div class="mt-4 pt-3 border-t border-slate-100 text-[10px] text-slate-400">Standart çatdırılma imtiyazı</div>
+          </div>
+
+          <!-- Gold -->
+          <div class="bg-white rounded-2xl p-5 border border-amber-200 bg-amber-50/20 shadow-xs flex flex-col justify-between">
+            <div class="flex items-center justify-between pb-3 border-b border-amber-100">
+              <span class="text-xs font-black tracking-wider text-amber-800 uppercase">GOLD TIER</span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">7% Keşbek</span>
+            </div>
+            <p class="text-xs text-slate-600 mt-3">200 ₼ — 500 ₼ arası alış edən aktiv daimi müştərilər üçün imtiyaz.</p>
+            <div class="mt-4 pt-3 border-t border-amber-100 text-[10px] text-amber-700 font-bold">Prioritet qablaşdırma & Hədiyyələr</div>
+          </div>
+
+          <!-- Platinum VIP -->
+          <div class="bg-white rounded-2xl p-5 border border-purple-200 bg-purple-50/20 shadow-xs flex flex-col justify-between">
+            <div class="flex items-center justify-between pb-3 border-b border-purple-100">
+              <span class="text-xs font-black tracking-wider text-purple-900 uppercase">PLATINUM VIP</span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-800">12% Keşbek</span>
+            </div>
+            <p class="text-xs text-slate-600 mt-3">500 ₼-dən yuxarı alış-veriş edən fərdi Couture müştəriləri.</p>
+            <div class="mt-4 pt-3 border-t border-purple-100 text-[10px] text-purple-800 font-bold">Həmişə PULSUZ ekspress kuryer</div>
           </div>
         </div>
-        <div id="podOrdersGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          <!-- Dynamically populated -->
+
+        <!-- Loyalty Balances Table -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+          <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+            <div>
+              <h3 class="font-bold text-sm text-slate-900 uppercase tracking-wider">Müştəri Keşbek & Xal Balansları</h3>
+              <p class="text-xs text-slate-400">Hər müştərinin cari toplanmış balansı və səviyyəsi</p>
+            </div>
+            <button onclick="openAddBonusModal()" class="px-4 py-2 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>Bonus Xalı Əlavə Et</span>
+            </button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-slate-100">
+                <tr>
+                  <th class="p-3.5">Müştəri</th>
+                  <th class="p-3.5">Telefon</th>
+                  <th class="p-3.5">Keşbek Balansı</th>
+                  <th class="p-3.5">VIP Tier</th>
+                  <th class="p-3.5 text-right">Əməliyyat</th>
+                </tr>
+              </thead>
+              <tbody id="loyaltyTableBody" class="divide-y divide-slate-100">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
 
-      <!-- TAB 7: PROMOS (REKLAM VƏ ENDİRİM KODLARI) -->
+      <!-- ============================================================ -->
+      <!-- SLIDE 9: REKLAM KODLARI (PROMO CODES) -->
+      <!-- ============================================================ -->
       <section id="tab-promos" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-7xl w-full">
         <div class="flex items-center justify-between">
           <div>
             <h1 class="text-2xl font-black text-slate-900 tracking-tight">REKLAM KODLARI</h1>
-            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Promokodlar Və Xüsusi Kampaniyalar</p>
+            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Endirim Kampaniyaları Və Kuponlar</p>
           </div>
           <button onclick="openPromoModal()" class="px-5 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 transition cursor-pointer">
             <i data-lucide="plus" class="w-4 h-4"></i>
             <span>Yeni Promokod</span>
           </button>
         </div>
+
         <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
@@ -709,71 +1002,159 @@
       </section>
 
 
-      <!-- TAB 8: CONTENT & SETTINGS (MƏZMUN VƏ PARAMETRLƏR) -->
-      <section id="tab-content" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-5xl w-full">
+      <!-- ============================================================ -->
+      <!-- SLIDE 10: BARKOD SKANER (OFLAYN MAĞAZA) -->
+      <!-- ============================================================ -->
+      <section id="tab-posBarcode" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-7xl w-full">
         <div>
-          <h1 class="text-2xl font-black text-slate-900 tracking-tight">STATİK SƏHİFƏLƏR VƏ MƏZMUN</h1>
-          <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Ana Səhifə Başlıqları Və Elan Zolaqları</p>
+          <h1 class="text-2xl font-black text-slate-900 tracking-tight">BARKOD SKANER (OFLAYN MAĞAZA)</h1>
+          <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Sürətli Məhsul Və Ya Sifariş Axtarışı</p>
         </div>
-        <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-5">
-          <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Hero Başlığı (Ana Şüar)</label>
-            <input type="text" id="heroHeadlineInput" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-black">
+
+        <!-- Scanner Input Box -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Barkod və ya Kodu Daxil Edin</label>
+          <div class="flex items-center gap-3">
+            <div class="relative flex-1">
+              <i data-lucide="scan-barcode" class="w-5 h-5 text-slate-400 absolute left-3.5 top-3"></i>
+              <input 
+                type="text" 
+                id="posBarcodeQuery" 
+                onkeydown="if(event.key === 'Enter') handleBarcodeLookup()"
+                placeholder="Barkod skanerini oxudun və ya nömrəni daxil edin (məs: VTX-ORD-9064 və ya koynek)..." 
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3 text-xs focus:bg-white focus:outline-none focus:border-black"
+              >
+            </div>
+            <button onclick="handleBarcodeLookup()" class="px-6 py-3 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs transition cursor-pointer">
+              Axtar
+            </button>
           </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Hero Alt Başlığı</label>
-            <textarea id="heroSubheadlineInput" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs focus:bg-white focus:outline-none focus:border-black"></textarea>
+
+          <div class="flex items-center gap-2 pt-2 text-[11px] text-slate-500">
+            <span class="font-bold text-slate-700">Sınaq üçün nümunələr:</span>
+            <button onclick="document.getElementById('posBarcodeQuery').value='koynek'; handleBarcodeLookup()" class="underline hover:text-black cursor-pointer">koynek</button>
+            <span>·</span>
+            <button onclick="document.getElementById('posBarcodeQuery').value='hudi'; handleBarcodeLookup()" class="underline hover:text-black cursor-pointer">hudi</button>
+            <span>·</span>
+            <button onclick="setSampleOrderBarcode()" class="underline hover:text-black cursor-pointer">Sonuncu Sifariş</button>
           </div>
-          <button onclick="saveCmsContent()" class="px-6 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs transition">
-            Dəyişiklikləri Yadda Saxla
-          </button>
+        </div>
+
+        <!-- Lookup Result Card -->
+        <div id="barcodeResultContainer" class="hidden">
+          <!-- Dynamically inserted -->
         </div>
       </section>
 
 
-      <!-- TAB 9: SETTINGS -->
-      <section id="tab-settings" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-5xl w-full">
-        <div>
-          <h1 class="text-2xl font-black text-slate-900 tracking-tight">HAQQIMIZDA VƏ ƏSAS PARAMETRLƏR</h1>
-          <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Mağaza Əlaqə Məlumatları Və Çatdırılma Şərtləri</p>
+      <!-- ============================================================ -->
+      <!-- SLIDE 11 / 10B: SATIŞ TƏSDİQİ (FAKTURA / ÇEK ÇIXARIŞI) -->
+      <!-- ============================================================ -->
+      <section id="tab-posReceipt" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-5xl w-full">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 class="text-2xl font-black text-slate-900 tracking-tight">SATIŞ TƏSDİQİ VƏ FAKTURA</h1>
+            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">POS Qəbzi Və Rəsmi Çap Formatı</p>
+          </div>
+          <div class="flex items-center gap-2 no-print">
+            <button onclick="window.print()" class="px-5 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 transition cursor-pointer">
+              <i data-lucide="printer" class="w-4 h-4"></i>
+              <span>Çap Et (Print)</span>
+            </button>
+          </div>
         </div>
-        <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-5">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Mağaza Adı</label>
-              <input type="text" id="settingStoreName" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Şüar (Tagline)</label>
-              <input type="text" id="settingTagline" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Əlaqə Telefonu</label>
-              <input type="text" id="settingContactPhone" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Pulsuz Çatdırılma Limiti (₼)</label>
-              <input type="number" id="settingShippingThreshold" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+
+        <!-- Receipt Card (Printable) -->
+        <div id="printableInvoice" class="bg-white rounded-3xl p-8 sm:p-10 border border-slate-200/90 shadow-sm space-y-6 max-w-2xl mx-auto">
+          <!-- Receipt Header -->
+          <div class="text-center pb-6 border-b border-dashed border-slate-300">
+            <h2 class="font-brand text-3xl font-bold tracking-[0.25em] text-black">HORVVALLE</h2>
+            <p class="text-[10px] tracking-[0.28em] text-slate-400 font-semibold uppercase mt-0.5">Atelier Couture · Rəsmi Satış Fakturası</p>
+            <div class="mt-4 flex items-center justify-center gap-4 text-[11px] text-slate-500 font-mono">
+              <span id="posReceiptOrderNo">SİFARİŞ: VTX-ORD-9064</span>
+              <span>·</span>
+              <span id="posReceiptDate">2026-10-28 22:30</span>
             </div>
           </div>
-          <button onclick="saveGeneralSettings()" class="px-6 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs transition">
-            Parametrləri Yenilə
-          </button>
+
+          <!-- Customer Info -->
+          <div class="grid grid-cols-2 gap-4 text-xs">
+            <div>
+              <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">MÜŞTƏRİ MƏLUMATLARI</div>
+              <div id="posReceiptCustName" class="font-bold text-slate-900 mt-1">Polad Balakişiyev</div>
+              <div id="posReceiptCustPhone" class="text-slate-600">+994 50 000 00 00</div>
+            </div>
+            <div class="text-right">
+              <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">ÇATDIRILMA ÜNVANI</div>
+              <div id="posReceiptAddress" class="font-bold text-slate-900 mt-1">Bakı, Nəsimi ray.</div>
+              <div id="posReceiptPayment" class="text-emerald-600 font-bold">Ödəniş: Qapıda Nəğd</div>
+            </div>
+          </div>
+
+          <!-- Items Table -->
+          <div class="border-t border-b border-slate-100 py-3">
+            <table class="w-full text-left text-xs">
+              <thead class="text-[10px] font-bold text-slate-400 uppercase">
+                <tr>
+                  <th class="py-1">Məhsul</th>
+                  <th class="py-1 text-center">Say</th>
+                  <th class="py-1 text-right">Qiymət</th>
+                  <th class="py-1 text-right">Cəm</th>
+                </tr>
+              </thead>
+              <tbody id="posReceiptItemsBody" class="divide-y divide-slate-100">
+                <tr>
+                  <td class="py-2.5 font-bold">Horvvalle Heavyweight T-Shirt (L / Qara)</td>
+                  <td class="py-2.5 text-center">1</td>
+                  <td class="py-2.5 text-right font-medium">45.00 ₼</td>
+                  <td class="py-2.5 text-right font-black">45.00 ₼</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Financial Breakdown -->
+          <div class="space-y-1.5 text-xs text-right">
+            <div class="flex justify-between text-slate-500">
+              <span>Ara Cəm:</span>
+              <span id="posReceiptSubtotal" class="font-bold text-slate-800">45.00 ₼</span>
+            </div>
+            <div class="flex justify-between text-slate-500">
+              <span>Çatdırılma:</span>
+              <span id="posReceiptShipping" class="font-bold text-emerald-600">PULSUZ (0.00 ₼)</span>
+            </div>
+            <div class="flex justify-between text-slate-500">
+              <span>Endirim:</span>
+              <span id="posReceiptDiscount" class="font-bold text-slate-800">0.00 ₼</span>
+            </div>
+            <div class="flex justify-between text-base font-black text-slate-900 pt-2 border-t border-slate-200">
+              <span>YEKUN ÖDƏNİŞ:</span>
+              <span id="posReceiptTotal">45.00 ₼</span>
+            </div>
+          </div>
+
+          <!-- Barcode SVG graphic -->
+          <div class="pt-6 border-t border-dashed border-slate-300 flex flex-col items-center justify-center space-y-2">
+            <div class="w-64 h-12 barcode-lines rounded"></div>
+            <div id="posReceiptBarcodeText" class="font-mono text-xs tracking-[0.25em] text-slate-700">VTX-ORD-9064</div>
+            <div class="text-[9.5px] text-slate-400 uppercase tracking-widest pt-1">Təşəkkür edirik! Horvvalle Atelier Couture.</div>
+          </div>
         </div>
       </section>
 
 
-      <!-- TAB 10: INVOICES & QUICK SEARCH (BARKOD / QƏBZLƏR) -->
-      <section id="tab-invoices" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-7xl w-full">
-        <div>
-          <h1 class="text-2xl font-black text-slate-900 tracking-tight">BARKOD VƏ SÜRƏTLİ QƏBZ AXTARIŞI</h1>
-          <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Sifariş Nömrəsi Və Ya Telefon İlə Dərhal Faktura Çıxarışı</p>
+      <!-- ============================================================ -->
+      <!-- ƏLAVƏ TAB: FƏRDİ ÇAP STUDİYASI (POD ORDERS) -->
+      <!-- ============================================================ -->
+      <section id="tab-podOrders" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-7xl w-full">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl font-black text-slate-900 tracking-tight">FƏRDİ ÇAP STUDİYASI (POD)</h1>
+            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">3D Studiyadan Hazırlanmış Xüsusi Dizayn Sifarişləri</p>
+          </div>
         </div>
-        <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs flex items-center gap-3">
-          <input type="text" id="barcodeSearchInput" placeholder="Sifariş nömrəsi yazın (məs: VTX-ORD-9064)..." class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs focus:bg-white focus:outline-none focus:border-black">
-          <button onclick="searchInvoiceById()" class="px-6 py-2.5 bg-black text-white rounded-xl font-bold text-xs transition">
-            Fakturanı Aç
-          </button>
+        <div id="podOrdersGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- Dynamically populated -->
         </div>
       </section>
 
@@ -785,28 +1166,12 @@
   <!-- MODALS -->
   <!-- ============================================================ -->
 
-  <!-- INVOICE MODAL -->
-  <div id="invoiceModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-2xl w-full p-8 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
-      <div id="invoiceContent"></div>
-      <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-end gap-3 no-print">
-        <button onclick="window.print()" class="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold flex items-center gap-1.5">
-          <i data-lucide="printer" class="w-3.5 h-3.5"></i> Çap Et
-        </button>
-        <button onclick="closeInvoiceModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold">
-          Bağla
-        </button>
-      </div>
-    </div>
-  </div>
-
-
   <!-- PRODUCT ADD/EDIT MODAL -->
   <div id="productModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-2xl w-full p-7 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto space-y-4">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100">
         <h3 id="productModalTitle" class="font-bold text-base text-slate-900">Məhsul Əlavə Et</h3>
-        <button onclick="closeProductModal()" class="text-slate-400 hover:text-black">
+        <button onclick="closeProductModal()" class="text-slate-400 hover:text-black cursor-pointer">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -850,8 +1215,123 @@
         </div>
 
         <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-          <button type="button" onclick="closeProductModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold">Ləğv Et</button>
-          <button type="submit" class="px-5 py-2 bg-black text-white rounded-xl font-bold">Yadda Saxla</button>
+          <button type="button" onclick="closeProductModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold cursor-pointer">Ləğv Et</button>
+          <button type="submit" class="px-5 py-2 bg-black text-white rounded-xl font-bold cursor-pointer">Yadda Saxla</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- CATEGORY ADD/EDIT MODAL -->
+  <div id="categoryModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 class="font-bold text-base text-slate-900">Kateqoriya Əlavə Et</h3>
+        <button onclick="closeCategoryModal()" class="text-slate-400 hover:text-black cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="categoryForm" onsubmit="handleCategorySubmit(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Kateqoriya Adı *</label>
+          <input type="text" id="catTitle" required placeholder="Məs: Hudi & Sviter" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Qısa Təsvir</label>
+          <input type="text" id="catDesc" placeholder="Məs: Qalın & İsti Streetwear" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Banner Şəkli URL *</label>
+          <input type="text" id="catImage" required placeholder="/images/products/..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeCategoryModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold cursor-pointer">Ləğv Et</button>
+          <button type="submit" class="px-5 py-2 bg-black text-white rounded-xl font-bold cursor-pointer">Əlavə Et</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- PROMO MODAL -->
+  <div id="promoModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 class="font-bold text-base text-slate-900">Yeni Promokod Əlavə Et</h3>
+        <button onclick="closePromoModal()" class="text-slate-400 hover:text-black cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="promoForm" onsubmit="handlePromoSubmit(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Promokod Kodu (Böyük hərflərlə) *</label>
+          <input type="text" id="promoCode" required placeholder="HORVVALLE20" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs uppercase font-mono">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Növ</label>
+            <select id="promoType" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+              <option value="percent">Faiz (%)</option>
+              <option value="fixed">Sabit Məbləğ (₼)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Dəyər *</label>
+            <input type="number" id="promoValue" required placeholder="15" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+          </div>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Minimum Səbət Məbləği (₼)</label>
+          <input type="number" id="promoMinAmount" placeholder="50" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closePromoModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold cursor-pointer">Ləğv Et</button>
+          <button type="submit" class="px-5 py-2 bg-black text-white rounded-xl font-bold cursor-pointer">Yadda Saxla</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- ADD BONUS MODAL (Loyallıq) -->
+  <div id="bonusModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 class="font-bold text-base text-slate-900">Müştəriyə Bonus Xalı Əlavə Et</h3>
+        <button onclick="closeAddBonusModal()" class="text-slate-400 hover:text-black cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="bonusForm" onsubmit="handleBonusSubmit(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Müştərinin Telefon Nömrəsi *</label>
+          <input type="text" id="bonusPhone" required placeholder="+994 50 123 45 67" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Müştərinin Tam Adı</label>
+          <input type="text" id="bonusFullName" placeholder="Ad Soyad" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Əlavə Ediləcək Xal (₼) *</label>
+            <input type="number" step="0.5" id="bonusPoints" required placeholder="10.00" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">VIP Tier</label>
+            <select id="bonusTier" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+              <option value="Bronze">Bronze (3%)</option>
+              <option value="Gold">Gold (7%)</option>
+              <option value="Platinum VIP">Platinum VIP (12%)</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeAddBonusModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold cursor-pointer">Ləğv Et</button>
+          <button type="submit" class="px-5 py-2 bg-black text-white rounded-xl font-bold cursor-pointer">Balansa Əlavə Et</button>
         </div>
       </form>
     </div>
@@ -863,6 +1343,7 @@
   <!-- ============================================================ -->
   <script>
     let STORE_DATA = null;
+    let CURRENT_ORDER_FILTER = 'all';
     const AUTH_KEY = 'horvvalle_admin_session';
 
     // ----------------------------------------------------
@@ -950,8 +1431,9 @@
       renderCategories();
       renderOrdersTable();
       renderCustomersTable();
-      renderPodOrders();
+      renderLoyaltyTable();
       renderPromosTable();
+      renderPodOrders();
       populateSettingsForm();
       lucide.createIcons();
     }
@@ -1045,22 +1527,22 @@
         const cust = o.customer?.fullName || 'Müştəri';
         return `
           <tr class="hover:bg-slate-50/60 transition">
-            <td class="p-3.5 font-bold text-slate-900">${o.id}</td>
-            <td class="p-3.5">
+            <td class="p-3 font-bold text-slate-900">${o.id}</td>
+            <td class="p-3">
               <div class="font-bold text-slate-900">${cust}</div>
               <div class="text-[10px] text-slate-400">${o.customer?.phone || '-'}</div>
             </td>
-            <td class="p-3.5 text-slate-600">${(o.items || []).map(i => `${i.quantity}x ${i.name}`).join(', ') || 'Məhsul'}</td>
-            <td class="p-3.5 font-black text-slate-900">${Number(o.total || 0).toFixed(2)} ₼</td>
-            <td class="p-3.5"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">${o.paymentMethod || 'Kart'}</span></td>
-            <td class="p-3.5">
+            <td class="p-3 text-slate-600 truncate max-w-[180px]">${(o.items || []).map(i => `${i.quantity}x ${i.name}`).join(', ') || 'Məhsul'}</td>
+            <td class="p-3 font-black text-slate-900">${Number(o.total || 0).toFixed(2)} ₼</td>
+            <td class="p-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">${o.paymentMethod || 'Kart'}</span></td>
+            <td class="p-3">
               <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${theme.badgeClass}">
                 <span class="w-1.5 h-1.5 rounded-full ${theme.dotClass}"></span>
                 ${theme.label}
               </span>
             </td>
-            <td class="p-3.5 text-right">
-              <button onclick="viewInvoice('${o.id}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[10px] transition">
+            <td class="p-3 text-right">
+              <button onclick="displayOrderInReceipt('${o.id}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[10px] transition cursor-pointer">
                 Faktura
               </button>
             </td>
@@ -1094,7 +1576,10 @@
               <div class="text-[10px] text-slate-400">${p.refCode || p.id}</div>
             </td>
             <td class="p-3.5 font-medium text-slate-600 uppercase text-[10px]">${p.category || 'Geyim'}</td>
-            <td class="p-3.5 font-bold text-slate-900">${Number(p.price || 0).toFixed(2)} ₼</td>
+            <td class="p-3.5 font-bold text-slate-900">
+              ${Number(p.price || 0).toFixed(2)} ₼
+              ${p.compareAtPrice ? `<span class="line-through text-slate-400 text-[10px] ml-1">${Number(p.compareAtPrice).toFixed(2)} ₼</span>` : ''}
+            </td>
             <td class="p-3.5">
               <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${p.inStock !== false ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
                 ${p.inStock !== false ? 'Stokda Var' : 'Bitib'}
@@ -1106,10 +1591,10 @@
               </div>
             </td>
             <td class="p-3.5 text-right space-x-1">
-              <button onclick="editProduct('${p.id}')" class="p-1.5 text-slate-600 hover:text-black rounded-lg hover:bg-slate-100">
+              <button onclick="editProduct('${p.id}')" class="p-1.5 text-slate-600 hover:text-black rounded-lg hover:bg-slate-100 cursor-pointer">
                 <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
               </button>
-              <button onclick="deleteProduct('${p.id}')" class="p-1.5 text-rose-500 hover:text-rose-700 rounded-lg hover:bg-rose-50">
+              <button onclick="deleteProduct('${p.id}')" class="p-1.5 text-rose-500 hover:text-rose-700 rounded-lg hover:bg-rose-50 cursor-pointer">
                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
               </button>
             </td>
@@ -1144,30 +1629,118 @@
         { id: 'aksesuar', title: 'Aksesuarlar', desc: 'Snapback & Çanta', image: '/images/products/snapback-cap-heavy/mockup.jpg' }
       ];
 
-      container.innerHTML = cats.map(c => `
-        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs group">
-          <div class="h-36 overflow-hidden relative">
-            <img src="${c.image}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-            <div class="absolute bottom-3 left-3 text-white">
-              <h4 class="font-bold text-sm">${c.title}</h4>
-              <p class="text-[10px] text-slate-200">${c.desc}</p>
+      const products = STORE_DATA.products || [];
+
+      container.innerHTML = cats.map(c => {
+        const count = products.filter(p => (p.category || '').toLowerCase() === (c.id || '').toLowerCase() || (p.category || '').toLowerCase().includes((c.id || '').toLowerCase())).length;
+        return `
+          <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs group flex flex-col justify-between">
+            <div class="h-40 overflow-hidden relative">
+              <img src="${c.image}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='/images/hero/black-tee.jpg'" />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent"></div>
+              <div class="absolute bottom-3 left-3 text-white">
+                <span class="text-[9.5px] uppercase font-bold tracking-widest text-slate-300 bg-white/20 px-2 py-0.5 rounded-full backdrop-blur-xs">${count} Məhsul</span>
+                <h4 class="font-bold text-base mt-1">${c.title}</h4>
+                <p class="text-[10px] text-slate-200">${c.desc || 'Premium Kolleksiya'}</p>
+              </div>
+            </div>
+            <div class="p-3 bg-white flex items-center justify-between border-t border-slate-100 text-xs">
+              <span class="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Aktiv
+              </span>
+              <button onclick="deleteCategory('${c.id}')" class="text-rose-500 hover:text-rose-700 text-[11px] font-bold cursor-pointer">
+                Sil
+              </button>
             </div>
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
+    }
+
+    function openCategoryModal() {
+      document.getElementById('catTitle').value = '';
+      document.getElementById('catDesc').value = '';
+      document.getElementById('catImage').value = '';
+      document.getElementById('categoryModal').classList.remove('hidden');
+      document.getElementById('categoryModal').classList.add('flex');
+    }
+
+    function closeCategoryModal() {
+      document.getElementById('categoryModal').classList.add('hidden');
+      document.getElementById('categoryModal').classList.remove('flex');
+    }
+
+    async function handleCategorySubmit(e) {
+      e.preventDefault();
+      const title = document.getElementById('catTitle').value.trim();
+      const desc = document.getElementById('catDesc').value.trim();
+      const image = document.getElementById('catImage').value.trim();
+      const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
+      try {
+        const res = await fetch('/api/admin/categories', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, title, desc, image, active: true })
+        });
+        const result = await res.json();
+        if (result.success) {
+          closeCategoryModal();
+          await loadData();
+          alert('✓ Kateqoriya əlavə edildi!');
+        }
+      } catch (err) {
+        alert('Xəta: ' + err.message);
+      }
+    }
+
+    async function deleteCategory(id) {
+      if (!confirm('Bu kateqoriyanı silmək istədiyinizdən əminsiniz?')) return;
+      try {
+        const res = await fetch(`/api/admin/categories/${id}`, { method: 'DELETE' });
+        const result = await res.json();
+        if (result.success) await loadData();
+      } catch (err) {
+        alert('Xəta: ' + err.message);
+      }
     }
 
 
     // ----------------------------------------------------
     // ORDERS TABLE & STATUS CHANGE
     // ----------------------------------------------------
+    function filterOrdersByStatus(status) {
+      CURRENT_ORDER_FILTER = status;
+      document.querySelectorAll('.order-filter-pill').forEach(p => {
+        p.classList.remove('bg-black', 'text-white');
+        p.classList.add('bg-slate-100', 'text-slate-600');
+      });
+      const activePill = document.getElementById(`order-pill-${status}`);
+      if (activePill) {
+        activePill.classList.remove('bg-slate-100', 'text-slate-600');
+        activePill.classList.add('bg-black', 'text-white');
+      }
+      renderOrdersTable();
+    }
+
     function renderOrdersTable() {
       const container = document.getElementById('ordersTableBody');
-      const orders = STORE_DATA.orders || [];
+      let orders = STORE_DATA.orders || [];
+
+      // Filter by status pill
+      if (CURRENT_ORDER_FILTER !== 'all') {
+        orders = orders.filter(o => {
+          const s = (o.orderStatus || '').toLowerCase();
+          if (CURRENT_ORDER_FILTER === 'yeni') return s.includes('yeni') || s.includes('təsdiq') || !s;
+          if (CURRENT_ORDER_FILTER === 'kuryer') return s.includes('kuryer') || s.includes('yolda');
+          if (CURRENT_ORDER_FILTER === 'catdirildi') return s.includes('çatdır') || s.includes('catdir') || s.includes('tamam');
+          if (CURRENT_ORDER_FILTER === 'legv') return s.includes('ləğv') || s.includes('cancel');
+          return true;
+        });
+      }
 
       if (orders.length === 0) {
-        container.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400">Heç bir sifariş yoxdur.</td></tr>`;
+        container.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400">Heç bir sifariş tapılmadı.</td></tr>`;
         return;
       }
 
@@ -1194,17 +1767,16 @@
               <select onchange="updateOrderStatus('${o.id}', this.value)" class="text-[10px] font-bold px-2 py-1 rounded-full border border-slate-200 outline-none cursor-pointer ${theme.badgeClass}">
                 <option value="Yeni Sifariş" ${o.orderStatus === 'Yeni Sifariş' ? 'selected' : ''}>Yeni Sifariş</option>
                 <option value="Təsdiqləndi" ${o.orderStatus === 'Təsdiqləndi' ? 'selected' : ''}>Təsdiqləndi</option>
-                <option value="Çapdadır / Dərzidə" ${o.orderStatus === 'Çapdadır / Dərzidə' ? 'selected' : ''}>Çapdadır / Dərzidə</option>
                 <option value="Kuryerdədir" ${o.orderStatus === 'Kuryerdədir' ? 'selected' : ''}>Kuryerdədir</option>
                 <option value="Çatdırıldı" ${o.orderStatus === 'Çatdırıldı' ? 'selected' : ''}>Çatdırıldı</option>
                 <option value="Ləğv edildi" ${o.orderStatus === 'Ləğv edildi' ? 'selected' : ''}>Ləğv edildi</option>
               </select>
             </td>
             <td class="p-3.5 text-right space-x-1">
-              <button onclick="viewInvoice('${o.id}')" class="px-2.5 py-1 bg-slate-900 text-white rounded-lg text-[10px] font-bold hover:bg-black transition">
+              <button onclick="displayOrderInReceipt('${o.id}')" class="px-2.5 py-1 bg-slate-900 text-white rounded-lg text-[10px] font-bold hover:bg-black transition cursor-pointer">
                 Faktura
               </button>
-              <button onclick="deleteOrder('${o.id}')" class="p-1 text-rose-500 hover:text-rose-700 rounded-lg hover:bg-rose-50">
+              <button onclick="deleteOrder('${o.id}')" class="p-1 text-rose-500 hover:text-rose-700 rounded-lg hover:bg-rose-50 cursor-pointer">
                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
               </button>
             </td>
@@ -1256,7 +1828,7 @@
 
 
     // ----------------------------------------------------
-    // CUSTOMERS TABLE
+    // CUSTOMERS TABLE (CRM)
     // ----------------------------------------------------
     function renderCustomersTable() {
       const container = document.getElementById('customersTableBody');
@@ -1282,21 +1854,346 @@
       });
 
       const list = Array.from(map.values());
+      
+      // Update KPI
+      document.getElementById('crm-total-customers').innerText = list.length;
+      const totalRev = list.reduce((acc, c) => acc + c.totalSpent, 0);
+      document.getElementById('crm-avg-order').innerText = list.length ? `${(totalRev / list.length).toFixed(2)} ₼` : '0.00 ₼';
+      const vipCount = list.filter(c => c.totalSpent > 200 || c.orderCount >= 3).length;
+      document.getElementById('crm-vip-count').innerText = vipCount;
+
       if (list.length === 0) {
-        container.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400">Heç bir müştəri tapılmadı.</td></tr>`;
+        container.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400">Heç bir müştəri tapılmadı.</td></tr>`;
         return;
       }
 
-      container.innerHTML = list.map(c => `
+      container.innerHTML = list.map(c => {
+        const isVip = c.totalSpent >= 500 ? 'Platinum VIP' : (c.totalSpent >= 200 ? 'Gold' : 'Aktiv');
+        const badgeColor = isVip === 'Platinum VIP' ? 'bg-purple-100 text-purple-800' : (isVip === 'Gold' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700');
+        return `
+          <tr class="hover:bg-slate-50/60 transition">
+            <td class="p-3.5 flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center text-xs">
+                ${(c.fullName || 'M')[0].toUpperCase()}
+              </div>
+              <span class="font-bold text-slate-900">${c.fullName}</span>
+            </td>
+            <td class="p-3.5 text-slate-600 font-mono">${c.phone}</td>
+            <td class="p-3.5 text-slate-400">${c.email}</td>
+            <td class="p-3.5 text-slate-600">${c.city}, ${c.address}</td>
+            <td class="p-3.5 font-bold">${c.orderCount}</td>
+            <td class="p-3.5">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeColor}">
+                ${isVip}
+              </span>
+            </td>
+            <td class="p-3.5 font-black text-slate-900 text-right">${c.totalSpent.toFixed(2)} ₼</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filterCustomersTable() {
+      const q = document.getElementById('customerSearchInput').value.toLowerCase();
+      const rows = document.querySelectorAll('#customersTableBody tr');
+      rows.forEach(r => {
+        r.style.display = !q || r.innerText.toLowerCase().includes(q) ? '' : 'none';
+      });
+    }
+
+
+    // ----------------------------------------------------
+    // LOYALTY TERMINAL
+    // ----------------------------------------------------
+    function renderLoyaltyTable() {
+      const container = document.getElementById('loyaltyTableBody');
+      const orders = STORE_DATA.orders || [];
+      const savedLoyalty = (STORE_DATA.loyalty || []);
+
+      const map = new Map();
+      orders.forEach(o => {
+        if (!o.customer || !o.customer.phone) return;
+        const key = o.customer.phone;
+        const spent = Number(o.total || 0);
+        const existing = map.get(key) || {
+          phone: key,
+          fullName: o.customer.fullName || 'Müştəri',
+          points: (spent * 0.05), // standard 5%
+          tier: spent > 500 ? 'Platinum VIP' : (spent > 200 ? 'Gold' : 'Bronze')
+        };
+        map.set(key, existing);
+      });
+
+      // Merge with custom added loyalty points
+      savedLoyalty.forEach(s => {
+        if (map.has(s.phone)) {
+          const item = map.get(s.phone);
+          item.points += Number(s.points || 0);
+          if (s.tier) item.tier = s.tier;
+        } else {
+          map.set(s.phone, s);
+        }
+      });
+
+      const list = Array.from(map.values());
+      if (list.length === 0) {
+        container.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400">Müştəri loyallıq qeydi tapılmadı.</td></tr>`;
+        return;
+      }
+
+      container.innerHTML = list.map(l => `
         <tr class="hover:bg-slate-50/60 transition">
-          <td class="p-3.5 font-bold text-slate-900">${c.fullName}</td>
-          <td class="p-3.5 text-slate-600">${c.phone}</td>
-          <td class="p-3.5 text-slate-400">${c.email}</td>
-          <td class="p-3.5 text-slate-600">${c.city}, ${c.address}</td>
-          <td class="p-3.5 font-bold">${c.orderCount}</td>
-          <td class="p-3.5 font-black text-slate-900 text-right">${c.totalSpent.toFixed(2)} ₼</td>
+          <td class="p-3.5 font-bold text-slate-900">${l.fullName}</td>
+          <td class="p-3.5 font-mono text-slate-600">${l.phone}</td>
+          <td class="p-3.5 font-black text-emerald-600 text-sm">${Number(l.points || 0).toFixed(2)} ₼</td>
+          <td class="p-3.5">
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${l.tier === 'Platinum VIP' ? 'bg-purple-100 text-purple-800' : (l.tier === 'Gold' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700')}">
+              ${l.tier}
+            </span>
+          </td>
+          <td class="p-3.5 text-right">
+            <button onclick="quickAddBonusToPhone('${l.phone}', '${l.fullName}')" class="px-3 py-1 bg-black hover:bg-neutral-800 text-white text-[10px] font-bold rounded-lg cursor-pointer">
+              + Bonus Yüklə
+            </button>
+          </td>
         </tr>
       `).join('');
+    }
+
+    function openAddBonusModal() {
+      document.getElementById('bonusPhone').value = '';
+      document.getElementById('bonusFullName').value = '';
+      document.getElementById('bonusPoints').value = '10.00';
+      document.getElementById('bonusModal').classList.remove('hidden');
+      document.getElementById('bonusModal').classList.add('flex');
+    }
+
+    function quickAddBonusToPhone(phone, name) {
+      document.getElementById('bonusPhone').value = phone;
+      document.getElementById('bonusFullName').value = name;
+      document.getElementById('bonusPoints').value = '15.00';
+      document.getElementById('bonusModal').classList.remove('hidden');
+      document.getElementById('bonusModal').classList.add('flex');
+    }
+
+    function closeAddBonusModal() {
+      document.getElementById('bonusModal').classList.add('hidden');
+      document.getElementById('bonusModal').classList.remove('flex');
+    }
+
+    async function handleBonusSubmit(e) {
+      e.preventDefault();
+      const phone = document.getElementById('bonusPhone').value.trim();
+      const fullName = document.getElementById('bonusFullName').value.trim();
+      const points = Number(document.getElementById('bonusPoints').value) || 0;
+      const tier = document.getElementById('bonusTier').value;
+
+      try {
+        const res = await fetch('/api/admin/loyalty', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone, fullName, points, tier })
+        });
+        const result = await res.json();
+        if (result.success) {
+          closeAddBonusModal();
+          await loadData();
+          alert(`✓ ${points} ₼ bonus uğurla müştərinin balansına əlavə edildi!`);
+        }
+      } catch (err) {
+        alert('Xəta: ' + err.message);
+      }
+    }
+
+
+    // ----------------------------------------------------
+    // PROMO CODES
+    // ----------------------------------------------------
+    function renderPromosTable() {
+      const container = document.getElementById('promosTableBody');
+      const promos = STORE_DATA.promoCodes || [];
+
+      if (promos.length === 0) {
+        container.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400">Heç bir promokod yoxdur.</td></tr>`;
+        return;
+      }
+
+      container.innerHTML = promos.map(p => `
+        <tr class="hover:bg-slate-50/60 transition">
+          <td class="p-3.5 font-bold text-slate-900 font-mono tracking-wider">${p.code}</td>
+          <td class="p-3.5 uppercase text-[10px] font-bold text-slate-500">${p.type}</td>
+          <td class="p-3.5 font-black text-slate-900">${p.type === 'percent' ? `${p.value}%` : `${p.value} ₼`}</td>
+          <td class="p-3.5 text-slate-600">${p.minAmount ? `${p.minAmount} ₼` : 'Limitsiz'}</td>
+          <td class="p-3.5 font-bold">${p.uses || 0}</td>
+          <td class="p-3.5">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${p.active !== false ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'}">
+              ${p.active !== false ? 'Aktiv' : 'Deaktiv'}
+            </span>
+          </td>
+          <td class="p-3.5 text-right">
+            <button onclick="deletePromo('${p.id || p.code}')" class="p-1 text-rose-500 hover:text-rose-700 rounded-lg hover:bg-rose-50 cursor-pointer">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openPromoModal() {
+      document.getElementById('promoCode').value = '';
+      document.getElementById('promoValue').value = '';
+      document.getElementById('promoMinAmount').value = '';
+      document.getElementById('promoModal').classList.remove('hidden');
+      document.getElementById('promoModal').classList.add('flex');
+    }
+
+    function closePromoModal() {
+      document.getElementById('promoModal').classList.add('hidden');
+      document.getElementById('promoModal').classList.remove('flex');
+    }
+
+    async function handlePromoSubmit(e) {
+      e.preventDefault();
+      const code = document.getElementById('promoCode').value.trim().toUpperCase();
+      const type = document.getElementById('promoType').value;
+      const value = Number(document.getElementById('promoValue').value) || 0;
+      const minAmount = Number(document.getElementById('promoMinAmount').value) || 0;
+
+      try {
+        const res = await fetch('/api/admin/promos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code, type, value, minAmount, active: true, uses: 0 })
+        });
+        const r = await res.json();
+        if (r.success) {
+          closePromoModal();
+          await loadData();
+          alert('✓ Promokod yaradıldı!');
+        }
+      } catch (err) {
+        alert('Xəta: ' + err.message);
+      }
+    }
+
+    async function deletePromo(id) {
+      if (!confirm('Bu promokodu silmək istəyirsiniz?')) return;
+      try {
+        const res = await fetch(`/api/admin/promos/${id}`, { method: 'DELETE' });
+        const result = await res.json();
+        if (result.success) await loadData();
+      } catch (err) {
+        alert('Silinmə xətası: ' + err.message);
+      }
+    }
+
+
+    // ----------------------------------------------------
+    // BARCODE SCANNER (OFLAYN MAĞAZA)
+    // ----------------------------------------------------
+    function handleBarcodeLookup() {
+      const q = document.getElementById('posBarcodeQuery').value.trim().toLowerCase();
+      const resContainer = document.getElementById('barcodeResultContainer');
+      if (!q) return;
+
+      const products = STORE_DATA.products || [];
+      const orders = STORE_DATA.orders || [];
+
+      // 1. Check if matches Order ID
+      const order = orders.find(o => o.id.toLowerCase() === q || (o.customer?.phone && o.customer.phone.includes(q)));
+      if (order) {
+        displayOrderInReceipt(order.id);
+        resContainer.innerHTML = `
+          <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs flex items-center justify-between">
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Sifariş Tapıldı</span>
+              <h3 class="text-base font-black text-slate-900 mt-1">${order.id} · ${order.customer?.fullName || 'Müştəri'}</h3>
+              <p class="text-xs text-slate-500">${order.customer?.phone || ''} · Məbləğ: ${Number(order.total || 0).toFixed(2)} ₼</p>
+            </div>
+            <button onclick="switchTab('posReceipt')" class="px-5 py-2.5 bg-black text-white rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer">
+              <i data-lucide="receipt" class="w-4 h-4"></i>
+              <span>Fakturanı Aç və Çap Et</span>
+            </button>
+          </div>
+        `;
+        resContainer.classList.remove('hidden');
+        lucide.createIcons();
+        return;
+      }
+
+      // 2. Check if matches Product
+      const product = products.find(p => p.id.toLowerCase() === q || p.name.toLowerCase().includes(q) || (p.refCode && p.refCode.toLowerCase().includes(q)) || (p.category && p.category.toLowerCase().includes(q)));
+      if (product) {
+        resContainer.innerHTML = `
+          <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs flex flex-col sm:flex-row items-center gap-5">
+            <img src="${product.image || '/images/hero/black-tee.jpg'}" class="w-24 h-28 object-cover rounded-xl border border-slate-200" onerror="this.src='/images/hero/black-tee.jpg'">
+            <div class="flex-1 space-y-1">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full">${product.category || 'Geyim'}</span>
+              <h3 class="text-base font-black text-slate-900">${product.name}</h3>
+              <div class="text-xs text-slate-500">Artikul / Barkod: <span class="font-mono font-bold text-slate-700">${product.refCode || product.id}</span></div>
+              <div class="text-lg font-black text-slate-900 pt-1">${Number(product.price || 0).toFixed(2)} ₼</div>
+            </div>
+            <div class="flex flex-col gap-2 w-full sm:w-auto">
+              <button onclick="alert('✓ Məhsul oflayn kassa səbətinə əlavə edildi!')" class="px-5 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-xs">
+                <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                <span>Kassaya Əlavə Et</span>
+              </button>
+              <button onclick="editProduct('${product.id}')" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs cursor-pointer">
+                Redaktə Et
+              </button>
+            </div>
+          </div>
+        `;
+        resContainer.classList.remove('hidden');
+        lucide.createIcons();
+        return;
+      }
+
+      resContainer.innerHTML = `<div class="bg-rose-50 text-rose-700 p-4 rounded-xl border border-rose-200 text-xs">"${q}" kodu ilə heç bir məhsul və ya sifariş tapılmadı.</div>`;
+      resContainer.classList.remove('hidden');
+    }
+
+    function setSampleOrderBarcode() {
+      const orders = STORE_DATA.orders || [];
+      if (orders.length > 0) {
+        document.getElementById('posBarcodeQuery').value = orders[0].id;
+        handleBarcodeLookup();
+      } else {
+        alert('Heç bir sifariş yoxdur.');
+      }
+    }
+
+
+    // ----------------------------------------------------
+    // SATIŞ TƏSDİQİ / INVOICE DISPLAY
+    // ----------------------------------------------------
+    function displayOrderInReceipt(orderId) {
+      const o = (STORE_DATA.orders || []).find(x => x.id === orderId);
+      if (!o) return;
+
+      document.getElementById('posReceiptOrderNo').innerText = `SİFARİŞ: ${o.id}`;
+      document.getElementById('posReceiptDate').innerText = new Date(o.date || Date.now()).toLocaleString('az-AZ');
+      document.getElementById('posReceiptCustName').innerText = o.customer?.fullName || 'Müştəri';
+      document.getElementById('posReceiptCustPhone').innerText = o.customer?.phone || '-';
+      document.getElementById('posReceiptAddress').innerText = `${o.customer?.city || 'Bakı'}, ${o.customer?.address || '-'}`;
+      document.getElementById('posReceiptPayment').innerText = `Ödəniş: ${o.paymentMethod || 'Kart'}`;
+
+      const items = o.items || [];
+      document.getElementById('posReceiptItemsBody').innerHTML = items.map(i => `
+        <tr>
+          <td class="py-2.5 font-bold">${i.name} (${i.size || 'L'} · ${i.color || 'Standart'})</td>
+          <td class="py-2.5 text-center">${i.quantity || 1}</td>
+          <td class="py-2.5 text-right font-medium">${Number(i.price || 0).toFixed(2)} ₼</td>
+          <td class="py-2.5 text-right font-black">${((Number(i.price) || 0) * (i.quantity || 1)).toFixed(2)} ₼</td>
+        </tr>
+      `).join('');
+
+      const total = Number(o.total || 0);
+      document.getElementById('posReceiptSubtotal').innerText = `${total.toFixed(2)} ₼`;
+      document.getElementById('posReceiptTotal').innerText = `${total.toFixed(2)} ₼`;
+      document.getElementById('posReceiptBarcodeText').innerText = o.id;
+
+      switchTab('posReceipt');
     }
 
 
@@ -1359,140 +2256,6 @@
         if (result.success) await loadData();
       } catch (err) {
         alert('POD Status yenilənmədi: ' + err.message);
-      }
-    }
-
-
-    // ----------------------------------------------------
-    // PROMO CODES
-    // ----------------------------------------------------
-    function renderPromosTable() {
-      const container = document.getElementById('promosTableBody');
-      const promos = STORE_DATA.promoCodes || [];
-
-      if (promos.length === 0) {
-        container.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400">Heç bir promokod yoxdur.</td></tr>`;
-        return;
-      }
-
-      container.innerHTML = promos.map(p => `
-        <tr class="hover:bg-slate-50/60 transition">
-          <td class="p-3.5 font-bold text-slate-900 font-mono tracking-wider">${p.code}</td>
-          <td class="p-3.5 uppercase text-[10px] font-bold text-slate-500">${p.type}</td>
-          <td class="p-3.5 font-black text-slate-900">${p.type === 'percent' ? `${p.value}%` : `${p.value} ₼`}</td>
-          <td class="p-3.5 text-slate-600">${p.minAmount ? `${p.minAmount} ₼` : 'Limitsiz'}</td>
-          <td class="p-3.5 font-bold">${p.uses || 0}</td>
-          <td class="p-3.5">
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${p.active !== false ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'}">
-              ${p.active !== false ? 'Aktiv' : 'Deaktiv'}
-            </span>
-          </td>
-          <td class="p-3.5 text-right">
-            <button onclick="deletePromo('${p.id || p.code}')" class="p-1 text-rose-500 hover:text-rose-700 rounded-lg hover:bg-rose-50">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-            </button>
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    async function deletePromo(id) {
-      if (!confirm('Bu promokodu silmək istəyirsiniz?')) return;
-      try {
-        const res = await fetch(`/api/admin/promos/${id}`, { method: 'DELETE' });
-        const result = await res.json();
-        if (result.success) await loadData();
-      } catch (err) {
-        alert('Silinmə xətası: ' + err.message);
-      }
-    }
-
-
-    // ----------------------------------------------------
-    // INVOICE VIEW
-    // ----------------------------------------------------
-    function viewInvoice(orderId) {
-      const o = (STORE_DATA.orders || []).find(x => x.id === orderId);
-      if (!o) return;
-
-      const custName = o.customer?.fullName || 'Müştəri';
-      const custPhone = o.customer?.phone || '-';
-      const address = `${o.customer?.city || 'Bakı'}, ${o.customer?.address || '-'}`;
-      const items = o.items || [];
-
-      document.getElementById('invoiceContent').innerHTML = `
-        <div class="flex items-start justify-between pb-6 border-b border-slate-200">
-          <div>
-            <h2 class="font-brand text-2xl font-bold tracking-[0.2em] text-black">HORVVALLE</h2>
-            <p class="text-[9px] uppercase tracking-widest text-slate-400 font-semibold">Rəsmi Qəbz & Sifariş Fakturası</p>
-          </div>
-          <div class="text-right text-xs">
-            <div class="font-mono font-bold text-slate-900">${o.id}</div>
-            <div class="text-slate-400 text-[10px]">${new Date(o.date || Date.now()).toLocaleString('az-AZ')}</div>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4 py-4 text-xs">
-          <div>
-            <div class="text-slate-400 font-bold uppercase text-[9px]">Müştəri:</div>
-            <div class="font-bold text-slate-900">${custName}</div>
-            <div class="text-slate-600">${custPhone}</div>
-          </div>
-          <div class="text-right">
-            <div class="text-slate-400 font-bold uppercase text-[9px]">Ünvan:</div>
-            <div class="font-bold text-slate-900">${address}</div>
-            <div class="text-slate-600">Ödəniş: ${o.paymentMethod || 'Kart'}</div>
-          </div>
-        </div>
-
-        <table class="w-full text-left text-xs my-3 divide-y divide-slate-100">
-          <thead class="bg-slate-50 font-bold text-slate-500 text-[10px] uppercase">
-            <tr>
-              <th class="p-2">Məhsul</th>
-              <th class="p-2">Ölçü / Rəng</th>
-              <th class="p-2 text-center">Say</th>
-              <th class="p-2 text-right">Məbləğ</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${items.map(i => `
-              <tr>
-                <td class="p-2 font-bold">${i.name}</td>
-                <td class="p-2 text-slate-500">${i.size || 'L'} · ${i.color || 'Standart'}</td>
-                <td class="p-2 text-center font-bold">${i.quantity || 1}</td>
-                <td class="p-2 text-right font-black">${((Number(i.price) || 0) * (i.quantity || 1)).toFixed(2)} ₼</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-
-        <div class="pt-4 border-t border-slate-200 flex justify-between items-center text-xs">
-          <div class="text-slate-400 text-[10px]">Təşəkkür edirik! Horvvalle Lüks Moda.</div>
-          <div class="text-right">
-            <div class="text-slate-500">Cəm: <span class="font-bold text-slate-900">${Number(o.total || 0).toFixed(2)} ₼</span></div>
-            <div class="text-base font-black text-slate-900">Yekun: ${Number(o.total || 0).toFixed(2)} ₼</div>
-          </div>
-        </div>
-      `;
-
-      document.getElementById('invoiceModal').classList.remove('hidden');
-      document.getElementById('invoiceModal').classList.add('flex');
-      lucide.createIcons();
-    }
-
-    function closeInvoiceModal() {
-      document.getElementById('invoiceModal').classList.add('hidden');
-      document.getElementById('invoiceModal').classList.remove('flex');
-    }
-
-    function searchInvoiceById() {
-      const q = document.getElementById('barcodeSearchInput').value.trim();
-      if (!q) return;
-      const order = (STORE_DATA.orders || []).find(o => o.id.toLowerCase() === q.toLowerCase() || (o.customer?.phone && o.customer.phone.includes(q)));
-      if (order) {
-        viewInvoice(order.id);
-      } else {
-        alert('Bu nömrəyə uyğun heç bir sifariş tapılmadı.');
       }
     }
 
@@ -1591,7 +2354,7 @@
 
 
     // ----------------------------------------------------
-    // TAB SWITCHING
+    // TAB SWITCHING (Exact Active Styling)
     // ----------------------------------------------------
     function switchTab(tabId) {
       document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
@@ -1622,13 +2385,17 @@
       const c = STORE_DATA.content || {};
 
       document.getElementById('settingStoreName').value = s.storeName || 'HORVVALLE';
-      document.getElementById('settingTagline').value = s.tagline || '';
-      document.getElementById('settingContactPhone').value = s.contactPhone || '';
+      document.getElementById('settingTagline').value = s.tagline || 'Lüks Dərzi & Streetwear';
+      document.getElementById('settingContactPhone').value = s.contactPhone || '+994 50 827 00 26';
+      document.getElementById('settingContactEmail').value = s.contactEmail || 'concierge@horvvalle.com';
       document.getElementById('settingShippingThreshold').value = s.freeShippingThreshold || 60;
 
       if (c.hero) {
         document.getElementById('heroHeadlineInput').value = c.hero.headline || '';
         document.getElementById('heroSubheadlineInput').value = c.hero.subheadline || '';
+      }
+      if (c.announcements && c.announcements.length > 0) {
+        document.getElementById('announcementTextInput').value = c.announcements[0];
       }
     }
 
@@ -1636,13 +2403,14 @@
       const storeName = document.getElementById('settingStoreName').value;
       const tagline = document.getElementById('settingTagline').value;
       const contactPhone = document.getElementById('settingContactPhone').value;
+      const contactEmail = document.getElementById('settingContactEmail').value;
       const freeShippingThreshold = Number(document.getElementById('settingShippingThreshold').value) || 60;
 
       try {
         const res = await fetch('/api/admin/content', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ settings: { storeName, tagline, contactPhone, freeShippingThreshold } })
+          body: JSON.stringify({ settings: { storeName, tagline, contactPhone, contactEmail, freeShippingThreshold } })
         });
         const r = await res.json();
         if (r.success) alert('✓ Parametrlər yeniləndi!');
@@ -1654,12 +2422,18 @@
     async function saveCmsContent() {
       const headline = document.getElementById('heroHeadlineInput').value;
       const subheadline = document.getElementById('heroSubheadlineInput').value;
+      const ann = document.getElementById('announcementTextInput').value;
 
       try {
         const res = await fetch('/api/admin/content', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ content: { hero: { ...(STORE_DATA.content?.hero || {}), headline, subheadline } } })
+          body: JSON.stringify({
+            content: {
+              hero: { ...(STORE_DATA.content?.hero || {}), headline, subheadline },
+              announcements: ann ? [ann] : []
+            }
+          })
         });
         const r = await res.json();
         if (r.success) alert('✓ Məzmun yeniləndi!');
@@ -1683,13 +2457,10 @@
       if (s.includes('kuryer') || s.includes('yolda')) {
         return { badgeClass: 'bg-indigo-50 text-indigo-700 border-indigo-200', dotClass: 'bg-indigo-600', label: 'Kuryerdədir' };
       }
-      if (s.includes('çap') || s.includes('dərzi')) {
-        return { badgeClass: 'bg-amber-50 text-amber-700 border-amber-200', dotClass: 'bg-amber-500', label: 'Çapdadır / Dərzidə' };
-      }
       if (s.includes('təsdiq')) {
         return { badgeClass: 'bg-blue-50 text-blue-700 border-blue-200', dotClass: 'bg-blue-500', label: 'Təsdiqləndi' };
       }
-      return { badgeClass: 'bg-sky-50 text-sky-700 border-sky-200', dotClass: 'bg-sky-500', label: 'Yeni Sifariş' };
+      return { badgeClass: 'bg-amber-50 text-amber-700 border-amber-200', dotClass: 'bg-amber-500', label: 'Yeni Sifariş' };
     }
 
     function setDateRange(range) {
@@ -1725,12 +2496,12 @@
       alert('✓ Tarix filtri tətbiq edildi.');
     }
 
-    // Auto-polling for new orders every 12 seconds
+    // Auto-polling for new orders every 10 seconds
     setInterval(() => {
       if (document.getElementById('mainApp') && !document.getElementById('mainApp').classList.contains('hidden')) {
         loadData();
       }
-    }, 12000);
+    }, 10000);
 
     // Initial load
     window.addEventListener('DOMContentLoaded', () => {
