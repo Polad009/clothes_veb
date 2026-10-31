@@ -278,6 +278,7 @@ export default function CheckoutPage() {
           shipping: shippingCost,
           discount: discountAmount,
           promoCode: appliedPromoCode || null,
+          orderStatus: "Yeni Sifariş",
           total: finalTotal,
         }),
       });

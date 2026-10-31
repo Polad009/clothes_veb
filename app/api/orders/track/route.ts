@@ -21,14 +21,14 @@ function getStepIndex(status: string): { step: number; isCancelled: boolean; lab
   if (s.includes("kuryer") || s.includes("yoldadır") || s.includes("yoldadir") || s.includes("courier") || s.includes("shipped")) {
     return { step: 4, isCancelled: false, label: "Kuryerdədir (Yoldadır)", color: "teal" };
   }
-  if (s.includes("çap") || s.includes("cap") || s.includes("dərzi") || s.includes("derzi") || s.includes("hazır") || s.includes("processing") || s.includes("production")) {
-    return { step: 3, isCancelled: false, label: "Dərzidə / Çapdadır", color: "amber" };
+  if (s.includes("çap") || s.includes("cap") || s.includes("dərzi") || s.includes("derzi")) {
+    return { step: 3, isCancelled: false, label: "Çapda / Dərzidə", color: "amber" };
   }
   if (s.includes("təsdiq") || s.includes("tesdiq") || s.includes("confirmed")) {
     return { step: 2, isCancelled: false, label: "Təsdiqləndi", color: "indigo" };
   }
-  // Default: Yeni Sifariş / Qəbul edildi
-  return { step: 1, isCancelled: false, label: "Qəbul edildi", color: "sky" };
+  // Default: Yeni Sifariş / Qəbul edildi (STEP 1)
+  return { step: 1, isCancelled: false, label: "Yeni Sifariş (Qəbul edildi)", color: "sky" };
 }
 
 export async function GET(req: NextRequest) {

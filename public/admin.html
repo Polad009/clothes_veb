@@ -882,16 +882,17 @@
           <button onclick="filterOrdersByStatus('all')" id="order-pill-all"
             class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-black text-white cursor-pointer">Hamısı</button>
           <button onclick="filterOrdersByStatus('yeni')" id="order-pill-yeni"
-            class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Yeni
-            Sifarişlər</button>
+            class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Yeni Sifarişlər</button>
+          <button onclick="filterOrdersByStatus('tesdiq')" id="order-pill-tesdiq"
+            class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Təsdiqləndi</button>
+          <button onclick="filterOrdersByStatus('capda')" id="order-pill-capda"
+            class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Çapda / Dərzidə</button>
           <button onclick="filterOrdersByStatus('kuryer')" id="order-pill-kuryer"
-            class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Kuryerdə
-            (Yolda)</button>
+            class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Kuryerdə (Yolda)</button>
           <button onclick="filterOrdersByStatus('catdirildi')" id="order-pill-catdirildi"
             class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Çatdırıldı</button>
           <button onclick="filterOrdersByStatus('legv')" id="order-pill-legv"
-            class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Ləğv
-            Edildi</button>
+            class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Ləğv Edildi</button>
         </div>
 
         <!-- Orders Table -->
@@ -1886,7 +1887,9 @@
       if (CURRENT_ORDER_FILTER !== 'all') {
         orders = orders.filter(o => {
           const s = (o.orderStatus || '').toLowerCase();
-          if (CURRENT_ORDER_FILTER === 'yeni') return s.includes('yeni') || s.includes('təsdiq') || !s;
+          if (CURRENT_ORDER_FILTER === 'yeni') return s.includes('yeni') || s === 'processing' || !s;
+          if (CURRENT_ORDER_FILTER === 'tesdiq') return s.includes('təsdiq') || s.includes('tesdiq');
+          if (CURRENT_ORDER_FILTER === 'capda') return s.includes('çap') || s.includes('cap') || s.includes('dərzi') || s.includes('derzi');
           if (CURRENT_ORDER_FILTER === 'kuryer') return s.includes('kuryer') || s.includes('yolda');
           if (CURRENT_ORDER_FILTER === 'catdirildi') return s.includes('çatdır') || s.includes('catdir') || s.includes('tamam');
           if (CURRENT_ORDER_FILTER === 'legv') return s.includes('ləğv') || s.includes('cancel');
@@ -1920,9 +1923,10 @@
             <td class="p-3.5 font-bold text-slate-700 text-[11px]">${o.paymentMethod || 'Kart'}</td>
             <td class="p-3.5">
               <select onchange="updateOrderStatus('${o.id}', this.value)" class="text-[10px] font-bold px-2 py-1 rounded-full border border-slate-200 outline-none cursor-pointer ${theme.badgeClass}">
-                <option value="Yeni Sifariş" ${o.orderStatus === 'Yeni Sifariş' ? 'selected' : ''}>Yeni Sifariş</option>
+                <option value="Yeni Sifariş" ${o.orderStatus === 'Yeni Sifariş' || o.orderStatus === 'Processing' ? 'selected' : ''}>Yeni Sifariş</option>
                 <option value="Təsdiqləndi" ${o.orderStatus === 'Təsdiqləndi' ? 'selected' : ''}>Təsdiqləndi</option>
-                <option value="Kuryerdədir" ${o.orderStatus === 'Kuryerdədir' ? 'selected' : ''}>Kuryerdədir</option>
+                <option value="Çapda / Dərzidə" ${o.orderStatus === 'Çapda / Dərzidə' ? 'selected' : ''}>Çapda / Dərzidə</option>
+                <option value="Kuryerdədir" ${o.orderStatus === 'Kuryerdədir' ? 'selected' : ''}>Kuryerdədir (Yolda)</option>
                 <option value="Çatdırıldı" ${o.orderStatus === 'Çatdırıldı' ? 'selected' : ''}>Çatdırıldı</option>
                 <option value="Ləğv edildi" ${o.orderStatus === 'Ləğv edildi' ? 'selected' : ''}>Ləğv edildi</option>
               </select>
@@ -1942,6 +1946,14 @@
 
     async function updateOrderStatus(orderId, status) {
       try {
+        const idx = (STORE_DATA.orders || []).findIndex(o => o.id === orderId);
+        if (idx >= 0) {
+          STORE_DATA.orders[idx].orderStatus = status;
+          renderOrdersTable();
+          renderStats();
+          renderRecentOrders();
+        }
+
         const res = await fetch(`/api/admin/orders/${orderId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
@@ -1950,6 +1962,8 @@
         const result = await res.json();
         if (result.success) {
           await loadData();
+        } else {
+          alert('Status yenilənmədi: ' + (result.error || 'Xəta baş verdi'));
         }
       } catch (err) {
         alert('Status yenilənə bilmədi: ' + err.message);
@@ -2606,16 +2620,19 @@
       if (s.includes('ləğv') || s.includes('cancel')) {
         return { badgeClass: 'bg-rose-50 text-rose-700 border-rose-200', dotClass: 'bg-rose-500', label: 'Ləğv edildi' };
       }
-      if (s.includes('çatdır') || s.includes('tamam')) {
+      if (s.includes('çatdır') || s.includes('catdir') || s.includes('tamam') || s.includes('delivered')) {
         return { badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200', dotClass: 'bg-emerald-500', label: 'Çatdırıldı' };
       }
-      if (s.includes('kuryer') || s.includes('yolda')) {
-        return { badgeClass: 'bg-indigo-50 text-indigo-700 border-indigo-200', dotClass: 'bg-indigo-600', label: 'Kuryerdədir' };
+      if (s.includes('kuryer') || s.includes('yolda') || s.includes('courier') || s.includes('shipped')) {
+        return { badgeClass: 'bg-teal-50 text-teal-700 border-teal-200', dotClass: 'bg-teal-600', label: 'Kuryerdədir' };
       }
-      if (s.includes('təsdiq')) {
-        return { badgeClass: 'bg-blue-50 text-blue-700 border-blue-200', dotClass: 'bg-blue-500', label: 'Təsdiqləndi' };
+      if (s.includes('çap') || s.includes('cap') || s.includes('dərzi') || s.includes('derzi')) {
+        return { badgeClass: 'bg-amber-50 text-amber-800 border-amber-200', dotClass: 'bg-amber-600', label: 'Çapda / Dərzidə' };
       }
-      return { badgeClass: 'bg-amber-50 text-amber-700 border-amber-200', dotClass: 'bg-amber-500', label: 'Yeni Sifariş' };
+      if (s.includes('təsdiq') || s.includes('tesdiq') || s.includes('confirmed')) {
+        return { badgeClass: 'bg-indigo-50 text-indigo-700 border-indigo-200', dotClass: 'bg-indigo-500', label: 'Təsdiqləndi' };
+      }
+      return { badgeClass: 'bg-sky-50 text-sky-700 border-sky-200', dotClass: 'bg-sky-500', label: 'Yeni Sifariş' };
     }
 
     function setDateRange(range) {

@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
       items,
       paymentMethod: paymentMethod || 'Card',
       paymentStatus: body.paymentStatus || 'Paid',
-      orderStatus: body.orderStatus || 'Processing',
+      orderStatus: body.orderStatus || 'Yeni Sifariş',
       subtotal: Number(subtotal) || 0,
       shipping: Number(shipping) || 0,
       discount: Number(discount) || 0,
