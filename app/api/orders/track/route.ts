@@ -3,7 +3,7 @@ import { readStoreDb, writeStoreDb, StoreOrder } from "@/lib/storeDb";
 
 export const dynamic = "force-dynamic";
 
-// Helper to normalize phone numbers for searching
+// Helper to normalize phone numbers for searching (digits only)
 function normalizePhone(phone: string): string {
   return (phone || "").replace(/[^0-9]/g, "");
 }
@@ -34,91 +34,86 @@ function getStepIndex(status: string): { step: number; isCancelled: boolean; lab
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const query = searchParams.get("q") || searchParams.get("orderId") || "";
+    const query = (searchParams.get("q") || searchParams.get("orderId") || "").trim();
+    const searchType = searchParams.get("type") || ""; // "phone" or "code"
 
-    if (!query.trim()) {
+    if (!query) {
       return NextResponse.json(
-        { success: false, error: "Axtarış üçün Sifariş nömrəsi və ya Telefon daxil edin" },
+        { success: false, error: "Axtarış üçün Sifariş nömrəsi və ya Telefon nömrənizi daxil edin" },
         { status: 400 }
       );
     }
 
-    const cleanQuery = query.trim().toUpperCase().replace(/^#/, "");
-    const cleanPhoneQuery = normalizePhone(query);
-    const lowerQuery = query.trim().toLowerCase();
+    const cleanQuery = query.toUpperCase().replace(/^#/, "");
+    const cleanDigits = normalizePhone(query);
 
-    // Read store database via persistent store helper (supports in-memory & /tmp serverless fallbacks)
+    // Strict detection: Is this a phone number search?
+    const isPhoneSearch = searchType === "phone" || (cleanDigits.length >= 7 && !/[A-Z]/i.test(query));
+
+    // Read store database via persistent store helper
     const db = readStoreDb();
     const orders = db.orders || [];
     const podOrders = db.podOrders || [];
 
-    // Match all standard orders matching query by ID, Tracking Code, Phone, Email, or Name
+    // Match orders based on exact mode
     const matchedOrders = orders.filter((o: any) => {
+      const customerPhone = normalizePhone(o.customer?.phone || "");
       const orderId = (o.id || "").toUpperCase().replace(/^#/, "");
       const orderRef = (o.trackingCode || "").toUpperCase();
-      const customerPhone = normalizePhone(o.customer?.phone || "");
-      const customerEmail = (o.customer?.email || "").toLowerCase();
-      const customerName = (o.customer?.fullName || (o.customer as any)?.name || "").toLowerCase();
 
-      // 1. Order ID or Tracking Reference Exact & Partial Match
-      if (orderId === cleanQuery || orderId.includes(cleanQuery) || cleanQuery.includes(orderId)) return true;
-      if (orderRef && (orderRef === cleanQuery || orderRef.includes(cleanQuery) || cleanQuery.includes(orderRef))) return true;
+      if (isPhoneSearch) {
+        // STRICT PHONE MATCHING ONLY:
+        // Do NOT match order IDs or other random fields.
+        if (!customerPhone || cleanDigits.length < 7) return false;
 
-      // Extract numeric components for digits matching (e.g. 5374 matching VTX-ORD-5374 or AZ-EXP-5374)
-      const queryDigits = cleanPhoneQuery;
-      const orderDigits = orderId.replace(/\D/g, "");
-      const trackDigits = orderRef.replace(/\D/g, "");
+        // Exactly identical digits
+        if (customerPhone === cleanDigits) return true;
 
-      if (queryDigits.length >= 4) {
-        if (orderDigits === queryDigits || trackDigits === queryDigits) return true;
-        if (orderDigits.includes(queryDigits) || queryDigits.includes(orderDigits)) return true;
-        if (trackDigits && (trackDigits.includes(queryDigits) || queryDigits.includes(trackDigits))) return true;
-      }
-
-      // 2. Email Address
-      if (customerEmail && (customerEmail === lowerQuery || (lowerQuery.includes("@") && customerEmail.includes(lowerQuery)))) {
-        return true;
-      }
-
-      // 3. Phone Number (comparing normalized numeric strings)
-      if (cleanPhoneQuery.length >= 6) {
-        if (customerPhone.includes(cleanPhoneQuery) || cleanPhoneQuery.includes(customerPhone)) return true;
-        // Last 7 digits match (Azerbaijani subscriber number match e.g. 1234567 vs +994501234567 vs 0501234567)
-        if (cleanPhoneQuery.length >= 7 && customerPhone.length >= 7) {
-          if (customerPhone.slice(-7) === cleanPhoneQuery.slice(-7)) return true;
+        // Match by last 9 digits (operator prefix + 7 subscriber digits e.g. 501234567)
+        if (cleanDigits.length >= 9 && customerPhone.length >= 9) {
+          return customerPhone.slice(-9) === cleanDigits.slice(-9);
         }
-        // Last 9 digits match (Operator + subscriber e.g. 501234567 vs 0501234567)
-        if (cleanPhoneQuery.length >= 9 && customerPhone.length >= 9) {
-          if (customerPhone.slice(-9) === cleanPhoneQuery.slice(-9)) return true;
+
+        // Match by last 7 subscriber digits if user entered only 7 digits
+        if (cleanDigits.length === 7 && customerPhone.length >= 7) {
+          return customerPhone.slice(-7) === cleanDigits;
         }
+
+        return false;
       }
 
-      // 4. Customer Name (if query is at least 3 chars and not purely digits)
-      if (lowerQuery.length >= 3 && isNaN(Number(query.trim())) && !lowerQuery.includes("-")) {
-        if (customerName.includes(lowerQuery)) return true;
+      // ORDER CODE MATCHING:
+      if (orderId === cleanQuery || orderRef === cleanQuery) return true;
+      if (cleanQuery.length >= 4 && (orderId.includes(cleanQuery) || orderRef.includes(cleanQuery))) return true;
+
+      // Pure 4+ digit numeric code (e.g. user entered "9064")
+      if (cleanDigits.length >= 4 && cleanDigits.length <= 6) {
+        const orderDigits = orderId.replace(/\D/g, "");
+        const trackDigits = orderRef.replace(/\D/g, "");
+        if (orderDigits === cleanDigits || trackDigits === cleanDigits) return true;
       }
 
       return false;
     });
 
-    // Match POD orders by ID, Phone, or Email
+    // Also match POD orders if any
     const matchedPods = podOrders.filter((p: any) => {
+      const custPhone = normalizePhone(p.customerPhone || (p as any).customer?.phone || "");
       const podId = (p.id || "").toUpperCase().replace(/^#/, "");
-      const custPhone = normalizePhone(p.customerPhone || p.customer?.phone || "");
-      const custEmail = (p.customerEmail || p.customer?.email || "").toLowerCase();
-      const custName = (p.customerName || p.customer?.name || "").toLowerCase();
 
-      if (podId === cleanQuery || podId.includes(cleanQuery) || cleanQuery.includes(podId)) return true;
-      if (custEmail && (custEmail === lowerQuery || (lowerQuery.includes("@") && custEmail.includes(lowerQuery)))) return true;
-      
-      if (cleanPhoneQuery.length >= 6) {
-        if (custPhone.includes(cleanPhoneQuery) || cleanPhoneQuery.includes(custPhone)) return true;
-        if (cleanPhoneQuery.length >= 7 && custPhone.length >= 7 && custPhone.slice(-7) === cleanPhoneQuery.slice(-7)) return true;
-        if (cleanPhoneQuery.length >= 9 && custPhone.length >= 9 && custPhone.slice(-9) === cleanPhoneQuery.slice(-9)) return true;
+      if (isPhoneSearch) {
+        if (!custPhone || cleanDigits.length < 7) return false;
+        if (custPhone === cleanDigits) return true;
+        if (cleanDigits.length >= 9 && custPhone.length >= 9) {
+          return custPhone.slice(-9) === cleanDigits.slice(-9);
+        }
+        if (cleanDigits.length === 7 && custPhone.length >= 7) {
+          return custPhone.slice(-7) === cleanDigits;
+        }
+        return false;
       }
-      if (lowerQuery.length >= 3 && isNaN(Number(query.trim())) && !lowerQuery.includes("-")) {
-        if (custName.includes(lowerQuery)) return true;
-      }
+
+      if (podId === cleanQuery || (cleanQuery.length >= 4 && podId.includes(cleanQuery))) return true;
       return false;
     });
 
@@ -131,7 +126,7 @@ export async function GET(req: NextRequest) {
       // Look for related POD design if any
       const relatedPod = podOrders.find((p: any) => p.orderId === matchedOrder.id);
 
-      // Lightweight list of all matching orders (if multiple orders found for this phone/email)
+      // Lightweight list of all matching orders (if multiple orders found for this phone)
       const allMatches = matchedOrders.map((o: any) => ({
         id: o.id,
         date: o.date,
@@ -177,7 +172,6 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Also allow searching directly by POD ID or customer details in POD orders
     if (matchedPods.length > 0) {
       const matchedPod = matchedPods[0];
       const statusMeta = getStepIndex(matchedPod.status);
@@ -218,10 +212,14 @@ export async function GET(req: NextRequest) {
       });
     }
 
+    const notFoundMsg = isPhoneSearch
+      ? `"${query}" telefon nömrəsi ilə heç bir sifariş tapılmadı. Zəhmət olmasa sifariş zamanı qeyd etdiyiniz mobil nömrənizi düzgün daxil edin.`
+      : `"${query}" kodlu heç bir sifariş tapılmadı. Sifariş kodunuzu bilmirsinizsə, telefon nömrənizlə axtarış edə bilərsiniz.`;
+
     return NextResponse.json(
       {
         success: false,
-        error: `"${query}" üzrə heç bir sifariş tapılmadı. Əgər izləmə kodunu unutmusunuzsa, zəhmət olmasa sifariş zamanı qeyd etdiyiniz telefon nömrənizi (+994...) və ya e-poçt ünvanınızı daxil edin.`,
+        error: notFoundMsg,
       },
       { status: 404 }
     );

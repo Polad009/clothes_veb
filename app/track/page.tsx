@@ -72,7 +72,7 @@ function OrderTrackerContent() {
   const initialQuery = searchParams.get("q") || searchParams.get("orderId") || "";
 
   const [query, setQuery] = useState(initialQuery);
-  const [searchMode, setSearchMode] = useState<"code" | "recovery">("code");
+  const [searchMode, setSearchMode] = useState<"code" | "phone">("code");
   const [loading, setLoading] = useState(false);
   const [order, setOrder] = useState<OrderTrackingData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -116,7 +116,7 @@ function OrderTrackerContent() {
   };
 
   // Search local orders fallback (Bulletproof client-side recovery)
-  const searchLocalOrders = (searchVal: string): OrderTrackingData | null => {
+  const searchLocalOrders = (searchVal: string, isPhoneMode: boolean): OrderTrackingData | null => {
     if (typeof window === "undefined") return null;
     try {
       const raw = localStorage.getItem("horvvalle_saved_orders");
@@ -141,40 +141,30 @@ function OrderTrackerContent() {
 
       const cleanQ = searchVal.trim().toUpperCase().replace(/^#/, "");
       const qDigits = searchVal.replace(/\D/g, "");
-      const lowerQ = searchVal.trim().toLowerCase();
 
       const matched = list.find((o) => {
         const oId = (o.id || "").toUpperCase().replace(/^#/, "");
         const oTrack = (o.trackingCode || "").toUpperCase();
         const oPhoneDigits = (o.customer?.phone || o.phone || "").replace(/\D/g, "");
-        const oEmail = (o.customer?.email || "").toLowerCase();
-        const oName = (o.customer?.fullName || "").toLowerCase();
 
-        // 1. Order ID or Tracking Reference
-        if (oId === cleanQ || oId.includes(cleanQ) || cleanQ.includes(oId)) return true;
-        if (oTrack && (oTrack === cleanQ || oTrack.includes(cleanQ) || cleanQ.includes(oTrack))) return true;
+        if (isPhoneMode) {
+          // STRICT PHONE MATCHING: Do NOT match random order numbers
+          if (!oPhoneDigits || qDigits.length < 7) return false;
+          if (oPhoneDigits === qDigits) return true;
+          if (qDigits.length >= 9 && oPhoneDigits.length >= 9 && oPhoneDigits.slice(-9) === qDigits.slice(-9)) return true;
+          if (qDigits.length === 7 && oPhoneDigits.length >= 7 && oPhoneDigits.slice(-7) === qDigits) return true;
+          return false;
+        }
 
-        // 2. Numeric parts
+        // ORDER CODE MATCHING
+        if (oId === cleanQ || oTrack === cleanQ) return true;
+        if (cleanQ.length >= 4 && (oId.includes(cleanQ) || oTrack.includes(cleanQ))) return true;
+
         const oIdDigits = oId.replace(/\D/g, "");
         const oTrackDigits = oTrack.replace(/\D/g, "");
-        if (qDigits.length >= 4) {
+        if (qDigits.length >= 4 && qDigits.length <= 6) {
           if (oIdDigits === qDigits || oTrackDigits === qDigits) return true;
-          if (oIdDigits.includes(qDigits) || qDigits.includes(oIdDigits)) return true;
-          if (oTrackDigits && (oTrackDigits.includes(qDigits) || qDigits.includes(oTrackDigits))) return true;
         }
-
-        // 3. Phone Number
-        if (qDigits.length >= 6) {
-          if (oPhoneDigits.includes(qDigits) || qDigits.includes(oPhoneDigits)) return true;
-          if (qDigits.length >= 7 && oPhoneDigits.length >= 7 && oPhoneDigits.slice(-7) === qDigits.slice(-7)) return true;
-          if (qDigits.length >= 9 && oPhoneDigits.length >= 9 && oPhoneDigits.slice(-9) === qDigits.slice(-9)) return true;
-        }
-
-        // 4. Email
-        if (oEmail && (oEmail === lowerQ || (lowerQ.includes("@") && oEmail.includes(lowerQ)))) return true;
-
-        // 5. Name
-        if (lowerQ.length >= 3 && isNaN(Number(searchVal.trim())) && oName.includes(lowerQ)) return true;
 
         return false;
       });
@@ -208,7 +198,7 @@ function OrderTrackerContent() {
           relatedPod: null,
         };
 
-        // Try background sync with server to resurrect order in server DB
+        // Background sync with server
         fetch("/api/orders/track", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -222,16 +212,20 @@ function OrderTrackerContent() {
   };
 
   // Search function
-  const handleSearch = async (searchVal: string) => {
+  const handleSearch = async (searchVal: string, forcedMode?: "code" | "phone") => {
     const val = searchVal.trim();
     if (!val) return;
+
+    const currentMode = forcedMode || searchMode;
+    const isPhoneSearch = currentMode === "phone" || (val.replace(/\D/g, "").length >= 7 && !/[A-Z]/i.test(val));
 
     setLoading(true);
     setError(null);
     setAllMatches(null);
 
     try {
-      const res = await fetch(`/api/orders/track?q=${encodeURIComponent(val)}`);
+      const typeParam = isPhoneSearch ? "phone" : "code";
+      const res = await fetch(`/api/orders/track?q=${encodeURIComponent(val)}&type=${typeParam}`);
       const data = await res.json();
 
       if (data.success && data.order) {
@@ -242,18 +236,23 @@ function OrderTrackerContent() {
         return;
       }
 
-      // If server returned 404 / not found, check client local backup storage
-      const localFound = searchLocalOrders(val);
+      // If server returned 404 / not found, check client local backup storage with STRICT phone check
+      const localFound = searchLocalOrders(val, isPhoneSearch);
       if (localFound) {
         setOrder(localFound);
         return;
       }
 
       setOrder(null);
-      setError(data.error || `"${val}" üzrə heç bir sifariş tapılmadı.`);
+      setError(
+        data.error ||
+          (isPhoneSearch
+            ? `"${val}" telefon nömrəsi ilə heç bir sifariş tapılmadı.`
+            : `"${val}" kodlu heç bir sifariş tapılmadı.`)
+      );
     } catch (err: any) {
-      // Network failure: fallback to local device storage
-      const localFound = searchLocalOrders(val);
+      // Network failure: fallback to local device storage with strict phone check
+      const localFound = searchLocalOrders(val, isPhoneSearch);
       if (localFound) {
         setOrder(localFound);
       } else {
@@ -302,7 +301,7 @@ function OrderTrackerContent() {
           </h1>
 
           <p className="text-xs sm:text-sm text-stone-600 max-w-md mx-auto leading-relaxed">
-            Sifariş nömrənizi və ya <strong>yalnız telefon nömrənizi / e-poçtunuzu</strong> daxil edərək cari çatdırılma mərhələsini canlı izləyin.
+            Sifariş nömrənizi və ya <strong>yalnız telefon nömrənizi</strong> daxil edərək cari çatdırılma mərhələsini canlı izləyin.
           </p>
         </div>
 
@@ -323,7 +322,8 @@ function OrderTrackerContent() {
                   type="button"
                   onClick={() => {
                     setQuery(rec.id);
-                    handleSearch(rec.id);
+                    setSearchMode("code");
+                    handleSearch(rec.id, "code");
                   }}
                   className="px-3 py-1.5 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-200 text-stone-900 font-semibold text-xs flex items-center gap-2 transition shadow-2xs active:scale-95"
                 >
@@ -360,19 +360,19 @@ function OrderTrackerContent() {
             <button
               type="button"
               onClick={() => {
-                setSearchMode("recovery");
+                setSearchMode("phone");
                 setQuery("");
                 setError(null);
               }}
               className={`flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
-                searchMode === "recovery"
+                searchMode === "phone"
                   ? "bg-stone-900 text-white shadow-xs"
                   : "text-stone-500 hover:text-stone-900"
               }`}
             >
-              <Smartphone size={14} />
-              <span>Telefon və ya E-poçt ilə</span>
-              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-400 text-stone-950 font-black">YENİ</span>
+              <Phone size={14} />
+              <span>Telefon Nömrəsi İlə</span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-400 text-stone-950 font-black">CANLI</span>
             </button>
           </div>
 
@@ -390,13 +390,13 @@ function OrderTrackerContent() {
                 <Phone className="w-4 h-4 text-emerald-600 absolute left-3.5 top-3.5" />
               )}
               <input
-                type="text"
+                type={searchMode === "phone" ? "tel" : "text"}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={
                   searchMode === "code"
                     ? "Sifariş № (məs: VTX-ORD-5374)..."
-                    : "Əlaqə nömrəniz (+994 50 ...) və ya e-poçt..."
+                    : "Əlaqə nömrəniz (məs: +994 50 123 45 67)..."
                 }
                 className="w-full bg-stone-50 border border-stone-200 rounded-2xl pl-10 pr-4 py-3 text-xs sm:text-sm font-semibold text-stone-900 placeholder-stone-400 focus:outline-none focus:border-stone-900 focus:bg-white transition"
               />
@@ -424,18 +424,18 @@ function OrderTrackerContent() {
               <button
                 type="button"
                 onClick={() => {
-                  setSearchMode("recovery");
+                  setSearchMode("phone");
                   setError(null);
                 }}
                 className="text-stone-700 hover:text-black font-semibold flex items-center gap-1.5 transition text-left"
               >
                 <HelpCircle size={13} className="text-amber-600 shrink-0" />
-                <span>İzləmə kodunuzu unutmusunuz? <strong>Telefon və ya e-poçtla tapın →</strong></span>
+                <span>İzləmə kodunuzu unutmusunuz? <strong>Telefon nömrənizlə tapın →</strong></span>
               </button>
             ) : (
               <div className="text-emerald-700 flex items-center gap-1.5 font-medium">
                 <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
-                <span>Kodu bilməsəniz belə, sifariş zamanı yazdığınız nömrə və ya e-poçtla dərhal tapılacaq.</span>
+                <span>Kodu bilməsəniz belə, sifariş zamanı yazdığınız nömrə ilə dərhal tapılacaq.</span>
               </div>
             )}
 
@@ -516,7 +516,7 @@ function OrderTrackerContent() {
               <button
                 type="button"
                 onClick={() => {
-                  setSearchMode("recovery");
+                  setSearchMode("phone");
                   setQuery("");
                   setError(null);
                 }}

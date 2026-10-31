@@ -171,7 +171,7 @@ function CheckoutSuccessContent() {
           <span>🛡️ İzləmə kodunu qeyd etmək yaddan çıxsa nə etməli?</span>
         </div>
         <p className="text-amber-800/90 leading-relaxed text-[11px]">
-          Narahat olmayın! İzləmə kodunu itirsəniz belə, <strong>«Sifarişi İzlə»</strong> səhifəsində sadəcə sifariş zamanı daxil etdiyiniz <strong>telefon nömrənizi</strong> və ya <strong>e-poçt ünvanınızı</strong> yazaraq sifarişinizi istənilən vaxt dərhal bərpa edib canlı izləyə bilərsiniz.
+          Narahat olmayın! İzləmə kodunu itirsəniz belə, <strong>«Sifarişi İzlə»</strong> səhifəsində sadəcə sifariş zamanı daxil etdiyiniz <strong>telefon nömrənizi</strong> yazaraq sifarişinizi istənilən vaxt dərhal bərpa edib canlı izləyə bilərsiniz.
         </p>
       </div>
 
