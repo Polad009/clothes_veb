@@ -66,7 +66,7 @@ export default function Home() {
       title: "T-Shirt & Köynək",
       desc: "Streetwear & Oxford",
       fabric: "100% Xalis Pambıq · 220-240 GSM",
-      image: "/images/products/vintage-king-of-pop-tee/mockup.jpg",
+      image: "/images/categories/tshirt-and-shirt-showcase.webp",
       link: "/collections?category=koynek",
       count: "6 Model",
       tag: "240 GSM COUTURE",
@@ -88,7 +88,7 @@ export default function Home() {
       title: "Şalvar & Şortik",
       desc: "Chino & Denim & Kargo",
       fabric: "Pambıq Twill & 12.5 oz İndiqo",
-      image: "/images/products/classic-straight-indigo-jeans/mockup.jpg",
+      image: "/images/categories/salvar-and-shortik-showcase.webp",
       link: "/collections?category=salvar",
       count: "5 Model",
       tag: "DƏQİQ ATELYE KƏSİMİ",
@@ -175,14 +175,14 @@ export default function Home() {
                   <Link
                     href={cat.link}
                     prefetch={true}
-                    className="block relative aspect-[4/3] rounded-2xl overflow-hidden bg-stone-100 my-4 cursor-pointer"
+                    className="block relative aspect-[4/3] rounded-2xl overflow-hidden bg-[#FAF7F2] my-4 cursor-pointer"
                   >
                     <Image
                       src={cat.image}
                       alt={cat.title}
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                      className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-108"
+                      className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-108"
                       loading="lazy"
                     />
                     <div className="absolute inset-0 bg-stone-900/0 group-hover:bg-stone-900/10 transition-colors" />
