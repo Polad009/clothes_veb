@@ -26,6 +26,22 @@ export async function POST(req: NextRequest) {
     const orderId = body.id || ('VTX-ORD-' + Math.floor(1000 + Math.random() * 9000));
     const trackingCode = body.trackingCode || (`AZ-EXP-${orderId.replace(/[^0-9]/g, '') || Math.floor(100000 + Math.random() * 900000)}`);
 
+    // Duplicate order prevention: if exact same order was submitted within last 20 seconds
+    const custPhoneClean = (customer?.phone || '').replace(/\D/g, '');
+    const recentDuplicate = (db.orders || []).find((o: any) => {
+      if (o.id === orderId) return true;
+      const orderPhoneClean = (o.customer?.phone || '').replace(/\D/g, '');
+      const isSamePhone = custPhoneClean.length >= 7 && custPhoneClean === orderPhoneClean;
+      const orderTime = new Date(o.date).getTime();
+      const isRecent = !isNaN(orderTime) && (Date.now() - orderTime) < 20000;
+      const isSameTotal = Math.abs((Number(o.total) || 0) - (Number(total) || 0)) < 0.01;
+      return isSamePhone && isRecent && isSameTotal;
+    });
+
+    if (recentDuplicate) {
+      return NextResponse.json({ success: true, order: recentDuplicate, duplicatePrevented: true });
+    }
+
     const newOrder: StoreOrder = {
       id: orderId,
       trackingCode: trackingCode,

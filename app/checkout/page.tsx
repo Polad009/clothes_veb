@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
@@ -235,6 +235,8 @@ export default function CheckoutPage() {
     setPromoSuccessMsg(null);
   };
 
+  const isSubmittingRef = useRef(false);
+
   const processOrder = async (chosenMethod: string) => {
     setErrorMsg(null);
 
@@ -243,13 +245,20 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (isSubmittingRef.current || isProcessing) {
+      return;
+    }
+    isSubmittingRef.current = true;
     setIsProcessing(true);
 
     try {
+      const clientOrderId = `VTX-ORD-${Math.floor(1000 + Math.random() * 9000)}`;
+
       const res = await fetch("/api/store/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          id: clientOrderId,
           customer: {
             fullName,
             phone,
@@ -337,6 +346,7 @@ export default function CheckoutPage() {
     } catch (err: any) {
       setErrorMsg(err.message || "Xəta baş verdi");
       setIsProcessing(false);
+      isSubmittingRef.current = false;
     }
   };
 

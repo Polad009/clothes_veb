@@ -1944,13 +1944,18 @@
       }).join('');
     }
 
+    function renderStats() {
+      if (typeof renderDashboardMetrics === 'function') {
+        renderDashboardMetrics();
+      }
+    }
+
     async function updateOrderStatus(orderId, status) {
       try {
         const idx = (STORE_DATA.orders || []).findIndex(o => o.id === orderId);
         if (idx >= 0) {
           STORE_DATA.orders[idx].orderStatus = status;
-          renderOrdersTable();
-          renderStats();
+          renderDashboardMetrics();
           renderRecentOrders();
         }
 
@@ -1964,6 +1969,7 @@
           await loadData();
         } else {
           alert('Status yenilənmədi: ' + (result.error || 'Xəta baş verdi'));
+          await loadData();
         }
       } catch (err) {
         alert('Status yenilənə bilmədi: ' + err.message);

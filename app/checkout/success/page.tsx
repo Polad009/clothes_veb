@@ -19,19 +19,21 @@ function CheckoutSuccessContent() {
       playPurchaseSuccessSound();
     } catch (e) {}
 
-    // Automatically persist recent order to localStorage for instant 1-click recovery
+    // Automatically persist recent order to localStorage for instant 1-click recovery (preserve full details if already saved)
     if (typeof window !== "undefined" && orderId) {
       try {
         const raw = localStorage.getItem("horvvalle_saved_orders");
         const list = raw ? JSON.parse(raw) : [];
-        const filtered = list.filter((item: any) => item.id !== orderId);
-        filtered.unshift({
-          id: orderId,
-          date: new Date().toISOString(),
-          total,
-          method,
-        });
-        localStorage.setItem("horvvalle_saved_orders", JSON.stringify(filtered.slice(0, 5)));
+        const existingIdx = list.findIndex((item: any) => item.id === orderId);
+        if (existingIdx === -1) {
+          list.unshift({
+            id: orderId,
+            date: new Date().toISOString(),
+            total,
+            method,
+          });
+          localStorage.setItem("horvvalle_saved_orders", JSON.stringify(list.slice(0, 10)));
+        }
       } catch (e) {}
     }
   }, [orderId, total, method]);
