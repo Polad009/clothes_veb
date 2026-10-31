@@ -23,22 +23,26 @@ export async function POST(req: NextRequest) {
     }
 
     const db = readStoreDb();
-    const orderId = 'VTX-ORD-' + Math.floor(1000 + Math.random() * 9000);
+    const orderId = body.id || ('VTX-ORD-' + Math.floor(1000 + Math.random() * 9000));
+    const trackingCode = body.trackingCode || (`AZ-EXP-${orderId.replace(/[^0-9]/g, '') || Math.floor(100000 + Math.random() * 900000)}`);
 
     const newOrder: StoreOrder = {
       id: orderId,
-      date: new Date().toISOString(),
+      trackingCode: trackingCode,
+      date: body.date || new Date().toISOString(),
       customer,
       items,
       paymentMethod: paymentMethod || 'Card',
-      paymentStatus: 'Paid',
-      orderStatus: 'Processing',
+      paymentStatus: body.paymentStatus || 'Paid',
+      orderStatus: body.orderStatus || 'Processing',
       subtotal: Number(subtotal) || 0,
       shipping: Number(shipping) || 0,
       discount: Number(discount) || 0,
       total: Number(total) || 0,
     };
 
+    // Remove if already exists with this ID (for idempotent sync)
+    db.orders = (db.orders || []).filter(o => o.id !== orderId);
     db.orders.unshift(newOrder);
 
     // If any items are custom print on demand items, automatically record them in podOrders as well!

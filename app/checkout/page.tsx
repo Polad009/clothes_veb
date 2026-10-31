@@ -293,15 +293,41 @@ export default function CheckoutPage() {
           const raw = localStorage.getItem("horvvalle_saved_orders");
           const list = raw ? JSON.parse(raw) : [];
           const filtered = list.filter((item: any) => item.id !== data.order.id);
-          filtered.unshift({
+          
+          const fullOrderRecord = {
             id: data.order.id,
             trackingCode: data.order.trackingCode || `AZ-EXP-${data.order.id.replace(/[^0-9]/g, "") || "8841"}`,
             date: data.order.date || new Date().toISOString(),
             total: finalTotal,
-            phone: fullName ? phone : "",
-            itemsCount: items.length,
-          });
-          localStorage.setItem("horvvalle_saved_orders", JSON.stringify(filtered.slice(0, 5)));
+            subtotal: totalPrice,
+            shipping: shippingCost,
+            discount: discountAmount,
+            paymentMethod: data.order.paymentMethod || chosenMethod,
+            paymentStatus: data.order.paymentStatus || "Ödənilib",
+            orderStatus: data.order.orderStatus || "Yeni Sifariş",
+            customer: {
+              fullName: fullName || "Müştəri",
+              phone: phone || "",
+              email: email || "musteri@horvvalle.com",
+              address: address || "",
+              city: city || "Bakı",
+            },
+            items: items.map((i) => ({
+              productId: i.productId,
+              name: i.name,
+              size: i.size,
+              color: i.color,
+              price: i.price,
+              quantity: i.quantity,
+              image: i.image,
+              isCustom: i.type === "custom",
+              customData: i.customData || null,
+            })),
+          };
+
+          filtered.unshift(fullOrderRecord);
+          localStorage.setItem("horvvalle_saved_orders", JSON.stringify(filtered.slice(0, 10)));
+          localStorage.setItem("horvvalle_last_order", JSON.stringify(fullOrderRecord));
         } catch (e) {}
       }
 

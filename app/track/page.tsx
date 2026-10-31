@@ -94,6 +94,133 @@ function OrderTrackerContent() {
     }
   }, []);
 
+  // Helper to map textual order status to stepper index
+  const getLocalStepIndex = (status: string) => {
+    const s = (status || "").toLowerCase();
+    if (s.includes("ləğv") || s.includes("legv") || s.includes("cancel")) {
+      return { step: 0, isCancelled: true, label: "Ləğv edildi", color: "rose" };
+    }
+    if (s.includes("çatdırıldı") || s.includes("catdirildi") || s.includes("tamam") || s.includes("delivered")) {
+      return { step: 5, isCancelled: false, label: "Çatdırıldı", color: "emerald" };
+    }
+    if (s.includes("kuryer") || s.includes("yoldadır") || s.includes("yoldadir") || s.includes("courier") || s.includes("shipped")) {
+      return { step: 4, isCancelled: false, label: "Kuryerdədir (Yoldadır)", color: "teal" };
+    }
+    if (s.includes("çap") || s.includes("cap") || s.includes("dərzi") || s.includes("derzi") || s.includes("hazır") || s.includes("processing") || s.includes("production")) {
+      return { step: 3, isCancelled: false, label: "Dərzidə / Çapdadır", color: "amber" };
+    }
+    if (s.includes("təsdiq") || s.includes("tesdiq") || s.includes("confirmed")) {
+      return { step: 2, isCancelled: false, label: "Təsdiqləndi", color: "indigo" };
+    }
+    return { step: 1, isCancelled: false, label: "Qəbul edildi", color: "sky" };
+  };
+
+  // Search local orders fallback (Bulletproof client-side recovery)
+  const searchLocalOrders = (searchVal: string): OrderTrackingData | null => {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = localStorage.getItem("horvvalle_saved_orders");
+      const lastRaw = localStorage.getItem("horvvalle_last_order");
+      const list: any[] = [];
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) list.push(...parsed);
+        } catch (e) {}
+      }
+      if (lastRaw) {
+        try {
+          const parsedLast = JSON.parse(lastRaw);
+          if (parsedLast && !list.some((item) => item.id === parsedLast.id)) {
+            list.unshift(parsedLast);
+          }
+        } catch (e) {}
+      }
+
+      if (list.length === 0) return null;
+
+      const cleanQ = searchVal.trim().toUpperCase().replace(/^#/, "");
+      const qDigits = searchVal.replace(/\D/g, "");
+      const lowerQ = searchVal.trim().toLowerCase();
+
+      const matched = list.find((o) => {
+        const oId = (o.id || "").toUpperCase().replace(/^#/, "");
+        const oTrack = (o.trackingCode || "").toUpperCase();
+        const oPhoneDigits = (o.customer?.phone || o.phone || "").replace(/\D/g, "");
+        const oEmail = (o.customer?.email || "").toLowerCase();
+        const oName = (o.customer?.fullName || "").toLowerCase();
+
+        // 1. Order ID or Tracking Reference
+        if (oId === cleanQ || oId.includes(cleanQ) || cleanQ.includes(oId)) return true;
+        if (oTrack && (oTrack === cleanQ || oTrack.includes(cleanQ) || cleanQ.includes(oTrack))) return true;
+
+        // 2. Numeric parts
+        const oIdDigits = oId.replace(/\D/g, "");
+        const oTrackDigits = oTrack.replace(/\D/g, "");
+        if (qDigits.length >= 4) {
+          if (oIdDigits === qDigits || oTrackDigits === qDigits) return true;
+          if (oIdDigits.includes(qDigits) || qDigits.includes(oIdDigits)) return true;
+          if (oTrackDigits && (oTrackDigits.includes(qDigits) || qDigits.includes(oTrackDigits))) return true;
+        }
+
+        // 3. Phone Number
+        if (qDigits.length >= 6) {
+          if (oPhoneDigits.includes(qDigits) || qDigits.includes(oPhoneDigits)) return true;
+          if (qDigits.length >= 7 && oPhoneDigits.length >= 7 && oPhoneDigits.slice(-7) === qDigits.slice(-7)) return true;
+          if (qDigits.length >= 9 && oPhoneDigits.length >= 9 && oPhoneDigits.slice(-9) === qDigits.slice(-9)) return true;
+        }
+
+        // 4. Email
+        if (oEmail && (oEmail === lowerQ || (lowerQ.includes("@") && oEmail.includes(lowerQ)))) return true;
+
+        // 5. Name
+        if (lowerQ.length >= 3 && isNaN(Number(searchVal.trim())) && oName.includes(lowerQ)) return true;
+
+        return false;
+      });
+
+      if (matched) {
+        const statusMeta = getLocalStepIndex(matched.orderStatus || "Qəbul edildi");
+        const formatted: OrderTrackingData = {
+          id: matched.id,
+          date: matched.date || new Date().toISOString(),
+          customer: {
+            fullName: matched.customer?.fullName || "Müştəri",
+            phone: matched.customer?.phone || matched.phone || "-",
+            city: matched.customer?.city || "Bakı",
+            address: matched.customer?.address || "Ünvan qeyd olunub",
+          },
+          items: matched.items && matched.items.length > 0 ? matched.items : [
+            {
+              name: "HORVVALLE Məhsulu",
+              quantity: matched.itemsCount || 1,
+              price: matched.total,
+            }
+          ],
+          paymentMethod: matched.paymentMethod || "Bank Kartı",
+          paymentStatus: matched.paymentStatus || "Ödənilib",
+          subtotal: matched.subtotal || matched.total,
+          shipping: matched.shipping || 0,
+          total: matched.total,
+          orderStatus: matched.orderStatus || "Yeni Sifariş",
+          trackingCode: matched.trackingCode || `AZ-EXP-${(matched.id || "").replace(/[^0-9]/g, "") || "8841"}`,
+          statusMeta,
+          relatedPod: null,
+        };
+
+        // Try background sync with server to resurrect order in server DB
+        fetch("/api/orders/track", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ order: formatted }),
+        }).catch(() => {});
+
+        return formatted;
+      }
+    } catch (e) {}
+    return null;
+  };
+
   // Search function
   const handleSearch = async (searchVal: string) => {
     const val = searchVal.trim();
@@ -112,13 +239,27 @@ function OrderTrackerContent() {
         if (data.allMatches && data.allMatches.length > 1) {
           setAllMatches(data.allMatches);
         }
+        return;
+      }
+
+      // If server returned 404 / not found, check client local backup storage
+      const localFound = searchLocalOrders(val);
+      if (localFound) {
+        setOrder(localFound);
+        return;
+      }
+
+      setOrder(null);
+      setError(data.error || `"${val}" üzrə heç bir sifariş tapılmadı.`);
+    } catch (err: any) {
+      // Network failure: fallback to local device storage
+      const localFound = searchLocalOrders(val);
+      if (localFound) {
+        setOrder(localFound);
       } else {
         setOrder(null);
-        setError(data.error || "Sifariş tapılmadı.");
+        setError("Şəbəkə xətası baş verdi. Zəhmət olmasa yenidən cəhd edin.");
       }
-    } catch (err: any) {
-      setOrder(null);
-      setError("Şəbəkə xətası baş verdi. Zəhmət olmasa yenidən cəhd edin.");
     } finally {
       setLoading(false);
     }

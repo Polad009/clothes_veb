@@ -79,6 +79,7 @@ export interface StoreSettings {
 
 export interface StoreOrder {
   id: string;
+  trackingCode?: string;
   date: string;
   customer: {
     fullName: string;
@@ -150,57 +151,113 @@ export interface StoreData {
   loyalty?: any[];
 }
 
+const GLOBAL_STORE_KEY = '__HORVVALLE_STORE_DATA__';
+const ORDERS_BACKUP_PATH = path.join(os.tmpdir(), 'horvvalle_orders_backup.json');
+
 export function readStoreDb(): StoreData {
-  if (cachedDb) {
-    return cachedDb;
+  const g = globalThis as any;
+  if (g[GLOBAL_STORE_KEY]) {
+    return g[GLOBAL_STORE_KEY];
   }
+
+  let dbData: StoreData | null = null;
 
   // 1. If /tmp/storeData.json exists (from recent writes in this serverless environment), use it
   if (fs.existsSync(TMP_DB_PATH)) {
     try {
       const raw = fs.readFileSync(TMP_DB_PATH, 'utf-8');
-      cachedDb = JSON.parse(raw);
-      return cachedDb!;
+      dbData = JSON.parse(raw);
     } catch (e) {
       console.warn('Error reading from tmp DB, falling back to bundled DB:', e);
     }
   }
 
   // 2. Otherwise read from bundled storeData.json
-  try {
-    if (fs.existsSync(BUNDLED_DB_PATH)) {
-      const raw = fs.readFileSync(BUNDLED_DB_PATH, 'utf-8');
-      cachedDb = JSON.parse(raw);
-      return cachedDb!;
+  if (!dbData) {
+    try {
+      if (fs.existsSync(BUNDLED_DB_PATH)) {
+        const raw = fs.readFileSync(BUNDLED_DB_PATH, 'utf-8');
+        dbData = JSON.parse(raw);
+      }
+    } catch (error) {
+      console.error('Error reading store database:', error);
     }
-    throw new Error(`DB file not found at ${BUNDLED_DB_PATH}`);
-  } catch (error) {
-    console.error('Error reading store database:', error);
-    throw error;
   }
+
+  if (!dbData) {
+    dbData = {
+      settings: {
+        storeName: "HORVVALLE",
+        tagline: "LÜKS MODA & FƏRDİ DƏRZİLİK ATELYESİ",
+        freeShippingThreshold: 60,
+        currency: "AZN",
+        currencySymbol: "₼",
+        contactEmail: "info@horvvalle.com",
+        contactPhone: "+994 55-766-90-50",
+      },
+      content: {
+        announcements: [],
+        hero: {} as any,
+        promoBanner: {} as any,
+        campaignSecondary: {} as any,
+      },
+      products: [],
+      orders: [],
+      podOrders: [],
+    };
+  }
+
+  // Ensure orders array exists
+  if (!Array.isArray(dbData.orders)) {
+    dbData.orders = [];
+  }
+
+  // Merge extra orders backup if available in /tmp
+  if (fs.existsSync(ORDERS_BACKUP_PATH)) {
+    try {
+      const backupRaw = fs.readFileSync(ORDERS_BACKUP_PATH, 'utf-8');
+      const backupOrders = JSON.parse(backupRaw);
+      if (Array.isArray(backupOrders)) {
+        for (const bo of backupOrders) {
+          if (!dbData.orders.some((o) => o.id === bo.id)) {
+            dbData.orders.unshift(bo);
+          }
+        }
+      }
+    } catch (e) {}
+  }
+
+  cachedDb = dbData;
+  g[GLOBAL_STORE_KEY] = dbData;
+  return dbData;
 }
 
 export function writeStoreDb(data: StoreData): void {
-  // Always update in-memory cache first
+  // Always update in-memory global cache first
   cachedDb = data;
+  const g = globalThis as any;
+  g[GLOBAL_STORE_KEY] = data;
 
   const jsonStr = JSON.stringify(data, null, 2);
 
   // 1. Try writing to bundled path (works in local dev)
   try {
     fs.writeFileSync(BUNDLED_DB_PATH, jsonStr, 'utf-8');
-    return;
   } catch (error: any) {
-    // If read-only filesystem (e.g. Vercel / AWS Lambda EROFS)
-    if (error.code === 'EROFS' || error.message?.includes('read-only')) {
-      try {
-        fs.writeFileSync(TMP_DB_PATH, jsonStr, 'utf-8');
-        return;
-      } catch (tmpError) {
-        console.warn('Failed to write to tmp DB:', tmpError);
-      }
-    } else {
-      console.warn('Warning writing store database:', error.message);
-    }
+    // EROFS on Vercel is expected, fallback to /tmp
   }
+
+  // 2. Always write to /tmp so other serverless functions in the same instance have it
+  try {
+    fs.writeFileSync(TMP_DB_PATH, jsonStr, 'utf-8');
+  } catch (tmpError) {
+    console.warn('Failed to write to tmp DB:', tmpError);
+  }
+
+  // 3. Keep dedicated orders backup in /tmp
+  try {
+    if (data.orders && Array.isArray(data.orders)) {
+      fs.writeFileSync(ORDERS_BACKUP_PATH, JSON.stringify(data.orders), 'utf-8');
+    }
+  } catch (e) {}
 }
