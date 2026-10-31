@@ -228,30 +228,4 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST: Sync/Restore order from client localStorage back into server memory (Serverless resurrection)
-export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json();
-    const order = body.order;
-    if (!order || !order.id) {
-      return NextResponse.json({ success: false, error: "Etibarsız sifariş məlumatı" }, { status: 400 });
-    }
 
-    const db = readStoreDb();
-    if (!Array.isArray(db.orders)) {
-      db.orders = [];
-    }
-
-    const existingIdx = db.orders.findIndex((o) => o.id === order.id);
-    if (existingIdx >= 0) {
-      db.orders[existingIdx] = { ...db.orders[existingIdx], ...order };
-    } else {
-      db.orders.unshift(order);
-    }
-
-    writeStoreDb(db);
-    return NextResponse.json({ success: true, message: "Sifariş serverdə bərpa edildi" });
-  } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
-  }
-}

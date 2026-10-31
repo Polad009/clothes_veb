@@ -198,13 +198,6 @@ function OrderTrackerContent() {
           relatedPod: null,
         };
 
-        // Background sync with server
-        fetch("/api/orders/track", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ order: formatted }),
-        }).catch(() => {});
-
         return formatted;
       }
     } catch (e) {}
@@ -261,29 +254,41 @@ function OrderTrackerContent() {
         return;
       }
 
-      // If server returned 404 / not found, check client local backup storage with STRICT phone check
-      const localFound = searchLocalOrders(val, isPhoneSearch);
-      if (localFound) {
-        setOrder(localFound);
-        return;
+      // If server returned 404 / not found:
+      // If searched by code and not on server (deleted or old test), clean from device memory
+      if (!isPhoneSearch && typeof window !== "undefined") {
+        try {
+          const raw = localStorage.getItem("horvvalle_saved_orders");
+          if (raw) {
+            const list = JSON.parse(raw);
+            const filtered = list.filter((item: any) => {
+              const oId = (item.id || "").toUpperCase().replace(/^#/, "");
+              const cleanQ = val.toUpperCase().replace(/^#/, "");
+              return oId !== cleanQ;
+            });
+            localStorage.setItem("horvvalle_saved_orders", JSON.stringify(filtered));
+            setRecentSavedOrders(filtered);
+          }
+          const lastRaw = localStorage.getItem("horvvalle_last_order");
+          if (lastRaw) {
+            const lastObj = JSON.parse(lastRaw);
+            if ((lastObj.id || "").toUpperCase().replace(/^#/, "") === val.toUpperCase().replace(/^#/, "")) {
+              localStorage.removeItem("horvvalle_last_order");
+            }
+          }
+        } catch (e) {}
       }
 
       setOrder(null);
       setError(
         data.error ||
           (isPhoneSearch
-            ? `"${val}" telefon nömrəsi ilə heç bir sifariş tapılmadı.`
-            : `"${val}" kodlu heç bir sifariş tapılmadı.`)
+            ? `"${val}" telefon nömrəsi ilə heç bir aktiv sifariş tapılmadı.`
+            : `"${val}" kodlu sifariş tapılmadı və ya sistemdən silinib.`)
       );
     } catch (err: any) {
-      // Network failure: fallback to local device storage with strict phone check
-      const localFound = searchLocalOrders(val, isPhoneSearch);
-      if (localFound) {
-        setOrder(localFound);
-      } else {
-        setOrder(null);
-        setError("Şəbəkə xətası baş verdi. Zəhmət olmasa yenidən cəhd edin.");
-      }
+      setOrder(null);
+      setError("Şəbəkə xətası baş verdi. Zəhmət olmasa yenidən cəhd edin.");
     } finally {
       setLoading(false);
     }
@@ -361,24 +366,55 @@ function OrderTrackerContent() {
                 <History size={14} className="text-amber-700" />
                 <span>Bu cihazda aşkar edilən son sifarişləriniz:</span>
               </span>
-              <span className="text-[10px] text-amber-700 font-medium">Avtomatik yaddaş</span>
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    localStorage.removeItem("horvvalle_saved_orders");
+                    localStorage.removeItem("horvvalle_last_order");
+                    setRecentSavedOrders([]);
+                  }
+                }}
+                className="text-[10px] text-amber-800 hover:text-rose-700 font-bold underline transition cursor-pointer"
+              >
+                Tarixçəni təmizlə
+              </button>
             </div>
             <div className="flex flex-wrap gap-2 pt-1">
               {recentSavedOrders.map((rec) => (
-                <button
+                <div
                   key={rec.id}
-                  type="button"
-                  onClick={() => {
-                    setQuery(rec.id);
-                    setSearchMode("code");
-                    handleSearch(rec.id, "code");
-                  }}
-                  className="px-3 py-1.5 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-200 text-stone-900 font-semibold text-xs flex items-center gap-2 transition shadow-2xs active:scale-95"
+                  className="inline-flex items-center rounded-xl bg-white border border-amber-200 text-stone-900 font-semibold text-xs shadow-2xs overflow-hidden"
                 >
-                  <span className="font-mono font-bold text-stone-900">#{rec.id}</span>
-                  {rec.total ? <span className="text-stone-500">· {rec.total} ₼</span> : null}
-                  <ArrowRight size={12} className="text-amber-700" />
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQuery(rec.id);
+                      setSearchMode("code");
+                      handleSearch(rec.id, "code");
+                    }}
+                    className="px-3 py-1.5 hover:bg-amber-100/60 flex items-center gap-2 transition cursor-pointer"
+                  >
+                    <span className="font-mono font-bold text-stone-900">#{rec.id}</span>
+                    {rec.total ? <span className="text-stone-500">· {rec.total} ₼</span> : null}
+                    <ArrowRight size={12} className="text-amber-700" />
+                  </button>
+                  <button
+                    type="button"
+                    title="Bu sınaq kodunu yaddaşdan sil"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (typeof window !== "undefined") {
+                        const next = recentSavedOrders.filter((item) => item.id !== rec.id);
+                        setRecentSavedOrders(next);
+                        localStorage.setItem("horvvalle_saved_orders", JSON.stringify(next));
+                      }
+                    }}
+                    className="px-2 py-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 border-l border-amber-100 transition cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                </div>
               ))}
             </div>
           </div>
