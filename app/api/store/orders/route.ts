@@ -1,16 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readStoreDb, writeStoreDb, StoreOrder } from '@/lib/storeDb';
 import { notifyNewOrder } from '@/lib/notifications/orderNotifier';
+import { isAdminAuthenticated } from '@/lib/adminAuth';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
-  try {
+export async function GET(req: NextRequest) {
+  // Never expose full customer orders publicly
+  if (isAdminAuthenticated(req)) {
     const db = readStoreDb();
     return NextResponse.json(db.orders);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
   }
+  return NextResponse.json(
+    { error: 'Access denied: Sifariş məlumatları yalnız izləmə kodu və ya admin girişi ilə mümkündür.' },
+    { status: 403 }
+  );
 }
 
 export async function POST(req: NextRequest) {
@@ -42,11 +46,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, order: recentDuplicate, duplicatePrevented: true });
     }
 
+    const sanitizedCustomer = {
+      fullName: String(customer.fullName || '').replace(/[<>]/g, '').trim().slice(0, 100),
+      phone: String(customer.phone || '').replace(/[<>]/g, '').trim().slice(0, 30),
+      email: String(customer.email || '').replace(/[<>]/g, '').trim().slice(0, 120),
+      address: String(customer.address || '').replace(/[<>]/g, '').trim().slice(0, 250),
+      city: String(customer.city || 'Bakı').replace(/[<>]/g, '').trim().slice(0, 60),
+      country: 'Azərbaycan',
+    };
+
     const newOrder: StoreOrder = {
       id: orderId,
       trackingCode: trackingCode,
       date: body.date || new Date().toISOString(),
-      customer,
+      customer: sanitizedCustomer,
       items,
       paymentMethod: paymentMethod || 'Card',
       paymentStatus: body.paymentStatus || 'Paid',
@@ -104,6 +117,9 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
+  if (!isAdminAuthenticated(req)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   try {
     const { id, orderStatus, paymentStatus } = await req.json();
     const db = readStoreDb();
@@ -124,6 +140,9 @@ export async function PATCH(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  if (!isAdminAuthenticated(req)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   try {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');

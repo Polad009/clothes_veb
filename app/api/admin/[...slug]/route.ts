@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readStoreDb, writeStoreDb, StoreProduct } from '@/lib/storeDb';
+import {
+  verifyAdminCredentials,
+  createAdminToken,
+  isAdminAuthenticated,
+} from '@/lib/adminAuth';
 import fs from 'fs';
 import path from 'path';
 
@@ -13,13 +18,30 @@ export async function GET(
     const slug = params.slug || [];
     const route = slug[0];
 
-    // 1. Full store data
+    // Auth verification check
+    if (route === 'verify') {
+      const isAuth = isAdminAuthenticated(req);
+      if (isAuth) {
+        return NextResponse.json({ success: true, authenticated: true });
+      }
+      return NextResponse.json({ success: false, authenticated: false }, { status: 401 });
+    }
+
+    // ALL OTHER GET ROUTES REQUIRE ADMIN AUTH
+    if (!isAdminAuthenticated(req)) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Admin icazəsi tələb olunur' },
+        { status: 401 }
+      );
+    }
+
+    // 1. Full store data (protected)
     if (route === 'data') {
       const data = readStoreDb();
       return NextResponse.json(data);
     }
 
-    // 2. Gallery images list
+    // 2. Gallery images list (protected)
     if (route === 'gallery') {
       const imagesDir = path.join(process.cwd(), 'public', 'images');
       const list: string[] = [];
@@ -59,6 +81,51 @@ export async function POST(
     const route = slug[0];
     const subRoute = slug[1];
     const body = await req.json().catch(() => ({}));
+
+    // 0. LOGIN ROUTE (Publicly accessible for authenticating)
+    if (route === 'login') {
+      const { username, password } = body;
+      const isValid = verifyAdminCredentials(username, password);
+
+      if (!isValid) {
+        return NextResponse.json(
+          { error: 'İstifadəçi adı və ya şifrə yanlışdır.' },
+          { status: 401 }
+        );
+      }
+
+      const token = createAdminToken(username || 'admin');
+      const response = NextResponse.json({ success: true, token });
+
+      // Set secure HTTP-only cookie
+      response.cookies.set({
+        name: 'horvvalle_admin_token',
+        value: token,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 7 * 24 * 60 * 60, // 7 days
+      });
+
+      return response;
+    }
+
+    // 0. LOGOUT ROUTE
+    if (route === 'logout') {
+      const response = NextResponse.json({ success: true, message: 'Çıxış edildi' });
+      response.cookies.delete('horvvalle_admin_token');
+      return response;
+    }
+
+    // ALL OTHER POST ROUTES REQUIRE ADMIN AUTH
+    if (!isAdminAuthenticated(req)) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Admin icazəsi tələb olunur' },
+        { status: 401 }
+      );
+    }
+
     const db = readStoreDb();
 
     // 1. Save Product (Add or Edit)
@@ -174,6 +241,14 @@ export async function PATCH(
   { params }: { params: { slug: string[] } }
 ) {
   try {
+    // ALL PATCH ROUTES REQUIRE ADMIN AUTH
+    if (!isAdminAuthenticated(req)) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Admin icazəsi tələb olunur' },
+        { status: 401 }
+      );
+    }
+
     const slug = params.slug || [];
     const route = slug[0];
     const id = slug[1];
@@ -216,6 +291,14 @@ export async function DELETE(
   { params }: { params: { slug: string[] } }
 ) {
   try {
+    // ALL DELETE ROUTES REQUIRE ADMIN AUTH
+    if (!isAdminAuthenticated(req)) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Admin icazəsi tələb olunur' },
+        { status: 401 }
+      );
+    }
+
     const slug = params.slug || [];
     const route = slug[0];
     const id = slug[1];
