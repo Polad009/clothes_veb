@@ -8,6 +8,91 @@ import { MOCK_PRODUCTS } from "@/data/products";
 import { useStoreData } from "@/context/StoreDataContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
+import { useLanguage } from "@/context/LanguageContext";
+
+const SEARCH_I18N = {
+  az: {
+    placeholder: "Horvvalle kolleksiyasında axtarın (məs: hudi, kətan, kargo)...",
+    clear: "Təmizlə",
+    suggestions: "{sT.suggestions}",
+    searchHint: "Məhsul adı, növü və ya xüsusiyyəti üzrə axtarın.",
+    searchExample: 'Məsələn: "3iplik Qara Hudi", "Kətan Köynək", "Kargo" və ya "Magenta"',
+    noResults: (q: string) => `"${q}" üzrə heç bir nəticə tapılmadı.`,
+    studioCta: "3D Studiyada Fərdi Dizayn Et",
+    results: "Nəticələr",
+    clickToOpen: "{sT.clickToOpen}",
+    catalogTitle: "HORVVALLE ATELIER KATALOQU",
+    escToClose: "Bağlamaq üçün ESC basın",
+    tags: [
+      { label: "Klassik Qəhvəyi Kətan", query: "Kətan" },
+      { label: "3iplik Qalın Qara Hudi", query: "Hudi" },
+      { label: "Xaki Kargo Şalvar", query: "Kargo" },
+      { label: "Ağ Pambıq T-Shirt", query: "Ağ" },
+      { label: "3D Çap Studiyası", query: "3D", isStudio: true },
+    ],
+  },
+  en: {
+    placeholder: "Search Horvvalle collection (e.g. hoodie, linen, cargo)...",
+    clear: "Clear",
+    suggestions: "Suggestions:",
+    searchHint: "Search by product name, category, or fabric details.",
+    searchExample: 'For example: "3-Thread Black Hoodie", "Linen Shirt", "Cargo"',
+    noResults: (q: string) => `No results found for "${q}".`,
+    studioCta: "Create Custom Design in 3D Studio",
+    results: "Results",
+    clickToOpen: "Click to view",
+    catalogTitle: "HORVVALLE ATELIER CATALOG",
+    escToClose: "Press ESC to close",
+    tags: [
+      { label: "Classic Brown Linen", query: "Linen" },
+      { label: "Heavy 3-Thread Black Hoodie", query: "Hoodie" },
+      { label: "Khaki Cargo Pants", query: "Cargo" },
+      { label: "White Cotton T-Shirt", query: "White" },
+      { label: "3D Custom Studio", query: "3D", isStudio: true },
+    ],
+  },
+  ru: {
+    placeholder: "Поиск по коллекции Horvvalle (худи, лен, карго)...",
+    clear: "Очистить",
+    suggestions: "Рекомендации:",
+    searchHint: "Ищите по названию, категории или ткани изделия.",
+    searchExample: 'Например: "Черное худи 3-нитка", "Льняная рубашка", "Карго"',
+    noResults: (q: string) => `По запросу "${q}" ничего не найдено.`,
+    studioCta: "Создать дизайн в 3D Студии",
+    results: "Результаты",
+    clickToOpen: "Нажмите для перехода",
+    catalogTitle: "КАТАЛОГ АТЕЛЬЕ HORVVALLE",
+    escToClose: "Нажмите ESC для закрытия",
+    tags: [
+      { label: "Классический лен", query: "Лен" },
+      { label: "Плотное черное худи 3-нитка", query: "Худи" },
+      { label: "Брюки карго хаки", query: "Карго" },
+      { label: "Белая футболка", query: "Белая" },
+      { label: "3D Студия дизайна", query: "3D", isStudio: true },
+    ],
+  },
+  tr: {
+    placeholder: "Horvvalle koleksiyonunda arayın (hudi, keten, kargo)...",
+    clear: "Temizle",
+    suggestions: "Öneriler:",
+    searchHint: "Ürün adı, kategori veya kumaş özelliklerine göre arayın.",
+    searchExample: 'Örnek: "3 İplik Siyah Hudi", "Keten Gömlek", "Kargo"',
+    noResults: (q: string) => `"${q}" için hiçbir sonuç bulunamadı.`,
+    studioCta: "3D Stüdyoda Özel Tasarla",
+    results: "Sonuçlar",
+    clickToOpen: "Görüntülemek için tıklayın",
+    catalogTitle: "HORVVALLE ATÖLYE KATALOĞU",
+    escToClose: "Kapatmak için ESC tuşuna basın",
+    tags: [
+      { label: "Klasik Kahverengi Keten", query: "Keten" },
+      { label: "3 İplik Kalın Siyah Hudi", query: "Hudi" },
+      { label: "Haki Kargo Pantolon", query: "Kargo" },
+      { label: "Beyaz Pamuklu T-Shirt", query: "Beyaz" },
+      { label: "3D Baskı Stüdyosu", query: "3D", isStudio: true },
+    ],
+  },
+};
+
 import gsap from "gsap";
 
 interface SearchModalProps {
@@ -19,18 +104,15 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const router = useRouter();
   const { formatPrice } = useCurrency();
   const { products } = useStoreData();
+  const { language } = useLanguage();
+  const sLang = (language as "az" | "en" | "ru" | "tr") || "az";
+  const sT = SEARCH_I18N[sLang] || SEARCH_I18N.az;
   const [query, setQuery] = useState("");
   const modalBoxRef = useRef<HTMLDivElement>(null);
 
   useBodyScrollLock(isOpen);
 
-  const popularTags = [
-    { label: "Klassik Qəhvəyi Kətan", query: "Kətan" },
-    { label: "3iplik Qalın Qara Hudi", query: "Hudi" },
-    { label: "Xaki Kargo Şalvar", query: "Kargo" },
-    { label: "Ağ Pambıq T-Shirt", query: "Ağ" },
-    { label: "3D Çap Studiyası", query: "3D", isStudio: true },
-  ];
+  const popularTags = sT.tags;
 
   // GSAP Smooth Modal Entrance
   useEffect(() => {
@@ -87,7 +169,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
           </div>
           <input
             type="text"
-            placeholder="Horvvalle kolleksiyasında axtarın (məs: hudi, kətan, kargo)..."
+            placeholder={sT.placeholder}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             autoFocus
@@ -99,7 +181,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
               onClick={() => setQuery("")}
               className="px-2 py-1 text-xs text-white/50 hover:text-white transition cursor-pointer"
             >
-              Təmizlə
+              {sT.clear}
             </button>
           )}
           <button
@@ -142,23 +224,23 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
           {query.trim() === "" ? (
             <div className="py-10 text-center space-y-2">
               <span className="text-xs sm:text-sm text-white/60 block">
-                Məhsul adı, növü və ya xüsusiyyəti üzrə axtarın.
+                {sT.searchHint}
               </span>
               <span className="text-[11px] text-[#E6C280] font-semibold block">
-                Məsələn: "3iplik Qara Hudi", "Kətan Köynək", "Kargo" və ya "Magenta"
+                {sT.searchExample}
               </span>
             </div>
           ) : filtered.length === 0 ? (
             <div className="py-10 text-center space-y-3">
               <p className="text-sm text-white/70">
-                "<span className="font-semibold text-white">{query}</span>" üzrə heç bir nəticə tapılmadı.
+                {sT.noResults(query)}
               </p>
               <Link
                 href="/studio"
                 onClick={onClose}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-black text-xs font-semibold tracking-wider uppercase transition shadow-md hover:bg-white/90"
               >
-                <span>3D Studiyada Fərdi Dizayn Et</span>
+                <span>{sT.studioCta}</span>
                 <ArrowRight size={13} />
               </Link>
             </div>
@@ -166,7 +248,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-1">
                 <span className="text-[10px] font-bold text-[#E6C280] uppercase tracking-[0.2em]">
-                  Nəticələr ({filtered.length})
+                  {sT.results} ({filtered.length})
                 </span>
                 <span className="text-[10px] text-white/50">
                   Daxil olmaq üçün klikləyin
@@ -206,8 +288,8 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
         {/* Modal Footer Key Indicator */}
         <div className="px-6 py-2.5 bg-[#140702] border-t border-white/10 flex items-center justify-between text-[11px] text-white/50">
-          <span>HORVVALLE ATELIER KATALOQU</span>
-          <span>Bağlamaq üçün <kbd className="font-mono text-[9px] bg-white/10 px-1.5 py-0.5 rounded border border-white/20 text-white/70">ESC</kbd> basın</span>
+          <span>{sT.catalogTitle}</span>
+          <span>{sT.escToClose.split("ESC")[0]}<kbd className="font-mono text-[9px] bg-white/10 px-1.5 py-0.5 rounded border border-white/20 text-white/70">ESC</kbd>{sT.escToClose.split("ESC")[1] || ""}</span>
         </div>
       </div>
     </div>

@@ -21,10 +21,60 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import { ApplePayLogo, PaymentLogosRow } from "@/components/PaymentLogos";
 
+
+const CART_I18N = {
+  az: {
+    cartTitle: "Səbətiniz",
+    freeDeliveryBanner: "Bakı və Sumqayıt daxili çatdırılma PULSUZ",
+    emptyDesc: "{cT.emptyDesc}",
+    studioBtn: "Fərdi Dizayn Studiyası",
+    customBadge: "{cT.customBadge}",
+    customOrder: "Fərdi Çap Sifarişi",
+    fastBuyApple: "ilə Sürətli Al",
+    deliveryFreeBaku: "PULSUZ (Bakı & Sumqayıt)",
+    securityBadge: "256-Bit SSL Təhlükəsiz Ödəniş və 14 Gün Zəmanət",
+  },
+  en: {
+    cartTitle: "Your Cart",
+    freeDeliveryBanner: "FREE delivery within Baku & Sumgayit",
+    emptyDesc: "Explore our t-shirts, hoodies, pants, accessories, or create your own in the 3D studio.",
+    studioBtn: "Custom Design Studio",
+    customBadge: "CUSTOM",
+    customOrder: "Custom Print Order",
+    fastBuyApple: "Fast Checkout",
+    deliveryFreeBaku: "FREE (Baku & Sumgayit)",
+    securityBadge: "256-Bit SSL Secure Checkout & 14-Day Guarantee",
+  },
+  ru: {
+    cartTitle: "Корзина",
+    freeDeliveryBanner: "БЕСПЛАТНАЯ доставка по Баку и Сумгаиту",
+    emptyDesc: "Ознакомьтесь с нашими футболками, худи, брюками и аксессуарами или посетите 3D-студию.",
+    studioBtn: "Студия дизайна",
+    customBadge: "ИНДИВИДУАЛЬНО",
+    customOrder: "Индивидуальный заказ",
+    fastBuyApple: "Быстрая покупка",
+    deliveryFreeBaku: "БЕСПЛАТНО (Баку и Сумгаит)",
+    securityBadge: "Безопасная оплата 256-Bit SSL и 14 дней гарантии",
+  },
+  tr: {
+    cartTitle: "Sepetiniz",
+    freeDeliveryBanner: "Bakü ve Sumgayıt içi teslimat ÜCRETSİZ",
+    emptyDesc: "T-shirt, hudi, pantolon ve aksesuarlarımıza veya 3D tasarım stüdyomuza göz atın.",
+    studioBtn: "Özel Tasarım Stüdyosu",
+    customBadge: "ÖZEL",
+    customOrder: "Özel Baskı Siparişi",
+    fastBuyApple: "ile Hızlı Al",
+    deliveryFreeBaku: "ÜCRETSİZ (Bakü ve Sumgayıt)",
+    securityBadge: "256-Bit SSL Güvenli Ödeme ve 14 Gün Garanti",
+  },
+};
+
 export function CartDrawer() {
   const router = useRouter();
   const { formatPrice } = useCurrency();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const langKey = (language as "az" | "en" | "ru" | "tr") || "az";
+  const cT = CART_I18N[langKey] || CART_I18N.az;
   const {
     items,
     isOpen,
@@ -80,7 +130,7 @@ export function CartDrawer() {
                     <ShoppingBag size={15} />
                   </div>
                   <h2 className="text-base font-normal tracking-tight text-[#1A1517] font-eb-garamond text-xl">
-                    Səbətiniz ({totalCount})
+                    {cT.cartTitle} ({totalCount})
                   </h2>
                 </div>
                 <button
@@ -98,7 +148,7 @@ export function CartDrawer() {
                 <div className="flex items-center justify-center text-xs font-medium">
                   <span className="flex items-center gap-1.5 text-[#5C5247]">
                     <Truck size={14} className="text-[#B08D57] shrink-0" />
-                    <span>Bakı və Sumqayıt daxili çatdırılma <strong>PULSUZ</strong></span>
+                    <span>{cT.freeDeliveryBanner}</span>
                   </span>
                 </div>
               </div>
@@ -132,7 +182,7 @@ export function CartDrawer() {
                         className="w-full py-3 rounded-full bg-white border border-[#E5DFD5] text-[#1A1517] font-semibold text-xs uppercase tracking-wider hover:border-[#B08D57] hover:bg-stone-50 transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs active:scale-98"
                       >
                         <Palette size={14} className="text-[#B08D57]" />
-                        <span>Fərdi Dizayn Studiyası</span>
+                        <span>{cT.studioBtn}</span>
                       </Link>
                     </div>
                   </div>
@@ -178,15 +228,15 @@ export function CartDrawer() {
                           </div>
 
                           <div className="flex items-center gap-2 text-xs text-[#786E63] mt-1">
-                            <span>Ölçü: <strong className="text-[#1A1517]">{item.size}</strong></span>
+                            <span>{t.product.size}: <strong className="text-[#1A1517]">{item.size}</strong></span>
                             <span>•</span>
-                            <span>Rəng: <strong className="text-[#1A1517]">{item.color}</strong></span>
+                            <span>{t.product.color}: <strong className="text-[#1A1517]">{item.color}</strong></span>
                           </div>
 
                           {item.type === "custom" && (
                             <div className="text-[10px] text-[#B08D57] font-semibold mt-1 flex items-center gap-1">
                               <Palette size={11} className="text-[#B08D57]" />
-                              <span>Fərdi Çap Sifarişi</span>
+                              <span>{cT.customOrder}</span>
                             </div>
                           )}
                         </div>
@@ -234,9 +284,9 @@ export function CartDrawer() {
                       <span className="font-bold text-[#1A1517]">{formatPrice(totalPrice)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Çatdırılma:</span>
+                      <span>{t.checkout.delivery}:</span>
                       <span className="font-bold text-[#047857]">
-                        PULSUZ (Bakı & Sumqayıt)
+                        {cT.deliveryFreeBaku}
                       </span>
                     </div>
                     <div className="flex justify-between text-base font-normal text-[#1A1517] font-eb-garamond pt-2 border-t border-[#E8E2D8]">
@@ -253,8 +303,17 @@ export function CartDrawer() {
                       onClick={handleCheckout}
                       className="w-full py-3.5 px-4 rounded-full bg-black hover:bg-zinc-900 border border-black text-white font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-sm active:scale-98 cursor-pointer"
                     >
-                      <ApplePayLogo className="h-4 w-auto" variant="dark" />
-                      <span>ilə Sürətli Al</span>
+                      {language === "en" ? (
+                        <>
+                          <span>{cT.fastBuyApple} with</span>
+                          <ApplePayLogo className="h-4 w-auto" variant="dark" />
+                        </>
+                      ) : (
+                        <>
+                          <ApplePayLogo className="h-4 w-auto" variant="dark" />
+                          <span>{cT.fastBuyApple}</span>
+                        </>
+                      )}
                     </button>
 
                     {/* Main Checkout Button: Black Luxury Pill CTA */}
@@ -273,7 +332,7 @@ export function CartDrawer() {
                     <PaymentLogosRow size="sm" />
                     <div className="flex items-center justify-center gap-2 text-[10.5px] text-[#8C8276]">
                       <ShieldCheck size={14} className="text-[#B08D57]" />
-                      <span>256-Bit SSL Təhlükəsiz Ödəniş və 14 Gün Zəmanət</span>
+                      <span>{cT.securityBadge}</span>
                     </div>
                   </div>
                 </div>

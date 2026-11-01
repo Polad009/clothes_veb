@@ -39,11 +39,12 @@ export default function Home() {
 
   const [introRevealed, setIntroRevealed] = useState(true);
 
+  const { language } = useLanguage();
   const badgeMessages = [
     hero.tag || "HORVVALLE ATELIER · 2026 COUTURE · BAKI",
-    "100% XALİS DARANMIŞ PAMBIQ (220-380 GSM)",
-    "CANLI 3D DTG ÇAP STUDİYASI — BAKI",
-    "BAKI VƏ SUMQAYIT ƏRAZİSİNƏ PULSUZ ÇATDIRILMA",
+    language === "en" ? "100% PURE COMBED COTTON (220-380 GSM)" : language === "ru" ? "100% ЧИСТЫЙ ГРЕБЕННОЙ ХЛОПОК (220-380 GSM)" : language === "tr" ? "%100 SAF TARANMIŞ PAMUK (220-380 GSM)" : "100% XALİS DARANMIŞ PAMBIQ (220-380 GSM)",
+    language === "en" ? "LIVE 3D DTG PRINT STUDIO — BAKU" : language === "ru" ? "ЖИВАЯ 3D СТУДИЯ DTG ПЕЧАТИ — БАКУ" : language === "tr" ? "CANLI 3D DTG BASKI STÜDYOSU — BAKÜ" : "CANLI 3D DTG ÇAP STUDİYASI — BAKI",
+    language === "en" ? "FREE DELIVERY TO BAKU & SUMGAYIT" : language === "ru" ? "БЕСПЛАТНАЯ ДОСТАВКА В БАКУ И СУМГАИТ" : language === "tr" ? "BAKÜ VE SUMGAYIT'A ÜCRETSİZ TESLİMAT" : "BAKI VƏ SUMQAYIT ƏRAZİSİNƏ PULSUZ ÇATDIRILMA",
   ];
 
   useEffect(() => {
@@ -64,45 +65,45 @@ export default function Home() {
       id: "koynek",
       num: "01",
       title: t.home.shirtsCategory || "T-Shirt & Köynək",
-      desc: "Streetwear & Oxford",
-      fabric: "100% Xalis Pambıq · 220-240 GSM",
+      desc: language === "en" ? "Streetwear & Oxford" : language === "ru" ? "Стритвир и Оксфорд" : language === "tr" ? "Streetwear & Oxford" : "Streetwear & Oxford",
+      fabric: language === "en" ? "100% Pure Cotton · 220-240 GSM" : language === "ru" ? "100% Чистый Хлопок · 220-240 GSM" : language === "tr" ? "%100 Saf Pamuk · 220-240 GSM" : "100% Xalis Pambıq · 220-240 GSM",
       image: "/images/categories/tshirt-and-shirt-showcase.webp",
       link: "/collections?category=koynek",
-      count: "6 Model",
+      count: language === "en" ? "6 Models" : language === "ru" ? "6 Моделей" : language === "tr" ? "6 Model" : "6 Model",
       tag: "240 GSM COUTURE",
     },
     {
       id: "hudi",
       num: "02",
       title: t.home.hoodiesCategory || "Hudi & Sviter",
-      desc: "3iplik Qalın & İsti",
-      fabric: "Ağır 3iplik Fleece · 380 GSM",
+      desc: language === "en" ? "Heavy 3-Thread & Warm" : language === "ru" ? "Плотная 3-нитка и тепло" : language === "tr" ? "3 İplik Kalın & Sıcak" : "3iplik Qalın & İsti",
+      fabric: language === "en" ? "Heavy 3-Thread Fleece · 380 GSM" : language === "ru" ? "Плотный флис 3-нитка · 380 GSM" : language === "tr" ? "Ağır 3 İplik Polar · 380 GSM" : "Ağır 3iplik Fleece · 380 GSM",
       image: "/images/products/heavyweight-hoodie-black/mockup.jpg",
       link: "/collections?category=hudi",
-      count: "4 Model",
+      count: language === "en" ? "4 Models" : language === "ru" ? "4 Модели" : language === "tr" ? "4 Model" : "4 Model",
       tag: "380 GSM FLEECE",
     },
     {
       id: "salvar",
       num: "03",
       title: t.home.pantsCategory || "Şalvar & Şortik",
-      desc: "Chino & Denim & Kargo",
-      fabric: "Pambıq Twill & 12.5 oz İndiqo",
+      desc: language === "en" ? "Chino, Denim & Cargo" : language === "ru" ? "Чинос, деним и карго" : language === "tr" ? "Chino, Denim & Kargo" : "Chino & Denim & Kargo",
+      fabric: language === "en" ? "Cotton Twill & 12.5 oz Indigo" : language === "ru" ? "Хлопковый твил и 12.5 унций индиго" : language === "tr" ? "Pamuklu Dimi & 12.5 oz İndigo" : "Pambıq Twill & 12.5 oz İndiqo",
       image: "/images/categories/salvar-and-shortik-showcase.webp",
       link: "/collections?category=salvar",
-      count: "5 Model",
-      tag: "DƏQİQ ATELYE KƏSİMİ",
+      count: language === "en" ? "5 Models" : language === "ru" ? "5 Моделей" : language === "tr" ? "5 Model" : "5 Model",
+      tag: language === "en" ? "PRECISION ATELIER CUT" : language === "ru" ? "ТОЧНЫЙ КРОЙ АТЕЛЬЕ" : language === "tr" ? "HASSAS ATÖLYE KESİMİ" : "DƏQİQ ATELYE KƏSİMİ",
     },
     {
       id: "aksesuar",
       num: "04",
       title: t.home.accessoriesCategory || "Aksesuarlar",
-      desc: "Kepkalar & Eko Çantalar",
-      fabric: "Qalın Twill & Təbii Kətan",
+      desc: language === "en" ? "Caps & Eco Tote Bags" : language === "ru" ? "Кепки и эко-сумки" : language === "tr" ? "Şapkalar & Eko Çantalar" : "Kepkalar & Eko Çantalar",
+      fabric: language === "en" ? "Heavy Twill & Natural Canvas" : language === "ru" ? "Плотный твил и натуральный холст" : language === "tr" ? "Kalın Dimi & Doğal Keten" : "Qalın Twill & Təbii Kətan",
       image: "/images/products/snapback-cap-heavy/mockup.jpg",
       link: "/collections?category=aksesuar",
-      count: "2 Model",
-      tag: "3D ÇAP STUDİYASI",
+      count: language === "en" ? "2 Models" : language === "ru" ? "2 Модели" : language === "tr" ? "2 Model" : "2 Model",
+      tag: language === "en" ? "3D PRINT STUDIO" : language === "ru" ? "3D СТУДИЯ ПЕЧАТИ" : language === "tr" ? "3D BASKI STÜDYOSU" : "3D ÇAP STUDİYASI",
     },
   ];
 
@@ -300,7 +301,7 @@ export default function Home() {
             prefetch={true}
             className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-stone-900 hover:bg-black text-white font-medium text-xs uppercase tracking-wider transition-all shadow-md group"
           >
-            <span>Bütün Kolleksiyanı Gör ({products.length} Məhsul)</span>
+            <span>{language === "en" ? `View Full Collection (${products.length} Items)` : language === "ru" ? `Посмотреть всю коллекцию (${products.length} Тов.)` : language === "tr" ? `Tüm Koleksiyonu Gör (${products.length} Ürün)` : `Bütün Kolleksiyanı Gör (${products.length} Məhsul)`}</span>
             <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
@@ -314,29 +315,29 @@ export default function Home() {
             <div className="lg:col-span-7 space-y-5">
               <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-stone-100 border border-stone-200 text-stone-800 text-xs font-medium uppercase tracking-wider">
                 <Palette size={14} className="text-stone-700" />
-                <span>{podBanner.tag || "3D CANLI DİZAYN ATELYESİ"}</span>
+                <span>{language === "en" ? "3D LIVE DESIGN ATELIER" : language === "ru" ? "3D СТУДИЯ ДИЗАЙНА" : language === "tr" ? "3D CANLI TASARIM ATÖLYESİ" : (podBanner.tag || "3D CANLI DİZAYN ATELYESİ")}</span>
               </div>
 
               <h2 className="text-3xl sm:text-5xl font-normal uppercase tracking-tight text-stone-900 font-serif-luxury leading-[1.05]">
-                {podBanner.title || "ÖZ ŞƏKLİNİ VƏ YA DİZAYNINI KÖYNƏYƏ ÇAP ET"}
+                {language === "en" ? "CREATE YOUR OWN DESIGN WITH HORVVALLE QUALITY" : language === "ru" ? "СОЗДАЙТЕ СВОЙ ДИЗАЙН В КАЧЕСТВЕ HORVVALLE" : language === "tr" ? "KENDİ TASARIMINI HORVVALLE KALİTESİYLE YARAT" : (podBanner.title || "ÖZ DİZAYNINI HORVVALLE KEYFİYYƏTİ İLƏ YARAT")}
               </h2>
 
               <p className="text-sm sm:text-base text-stone-600 leading-relaxed max-w-xl">
-                {podBanner.description || "Sevdiyiniz şəkli, loqonu və ya mətni göndərin — biz 100% yüksək keyfiyyətli pambıq köynək üzərində canlı DTG texnologiyası ilə çap edib ünvanınıza çatdıraq. Yuyulduqda çatlamır, rəngini itirmir."}
+                {language === "en" ? "Send your favorite image, logo, or artwork — the Horvvalle atelier prints it on 100% premium cotton with vivid DTG technology and delivers to your doorstep." : language === "ru" ? "Отправьте любимое изображение или логотип — ателье Horvvalle напечатает его на 100% премиум-хлопке с помощью технологии DTG и доставит вам." : language === "tr" ? "Favori görselinizi, logonuzu veya özel çiziminizi gönderin — Horvvalle atölyesi %100 birinci sınıf pamuk üzerine canlı DTG teknolojisiyle basıp adresinize teslim etsin." : (podBanner.description || "Sevdiyiniz şəkli, loqonu və ya eksklüziv rəsmi göndərin — Horvvalle atelyesi 100% yüksək keyfiyyətli premium pambıq üzərində canlı DTG texnologiyası ilə çap edib ünvanınıza çatdırsın.")}
               </p>
 
               <div className="grid grid-cols-3 gap-3 pt-2">
                 <div className="p-3.5 rounded-2xl bg-white border border-stone-200/80 shadow-2xs">
-                  <div className="text-xs font-bold text-stone-900 uppercase">100% Pambıq</div>
-                  <div className="text-[11px] text-stone-500 mt-0.5">220 GSM sıx toxunuş</div>
+                  <div className="text-xs font-bold text-stone-900 uppercase">{language === "en" ? "100% Cotton" : language === "ru" ? "100% Хлопок" : language === "tr" ? "%100 Pamuk" : "100% Pambıq"}</div>
+                  <div className="text-[11px] text-stone-500 mt-0.5">{language === "en" ? "220 GSM Dense Weave" : language === "ru" ? "220 GSM Плотное плетение" : language === "tr" ? "220 GSM Sıkı Doku" : "220 GSM sıx toxunuş"}</div>
                 </div>
                 <div className="p-3.5 rounded-2xl bg-white border border-stone-200/80 shadow-2xs">
-                  <div className="text-xs font-bold text-stone-900 uppercase">Ultra HD Çap</div>
-                  <div className="text-[11px] text-stone-500 mt-0.5">Davamlı və parlaq</div>
+                  <div className="text-xs font-bold text-stone-900 uppercase">{language === "en" ? "Ultra HD Print" : language === "ru" ? "Ultra HD Печать" : language === "tr" ? "Ultra HD Baskı" : "Ultra HD Çap"}</div>
+                  <div className="text-[11px] text-stone-500 mt-0.5">{language === "en" ? "Durable & Vibrant" : language === "ru" ? "Стойкая и яркая" : language === "tr" ? "Dayanıklı ve parlak" : "Davamlı və parlaq"}</div>
                 </div>
                 <div className="p-3.5 rounded-2xl bg-white border border-stone-200/80 shadow-2xs">
-                  <div className="text-xs font-bold text-stone-900 uppercase">1-2 İş Günü</div>
-                  <div className="text-[11px] text-stone-500 mt-0.5">Sürətli çatdırılma</div>
+                  <div className="text-xs font-bold text-stone-900 uppercase">{language === "en" ? "1-2 Business Days" : language === "ru" ? "1-2 Рабочих дня" : language === "tr" ? "1-2 İş Günü" : "1-2 İş Günü"}</div>
+                  <div className="text-[11px] text-stone-500 mt-0.5">{language === "en" ? "Express delivery" : language === "ru" ? "Быстрая доставка" : language === "tr" ? "Hızlı teslimat" : "Sürətli çatdırılma"}</div>
                 </div>
               </div>
 
@@ -347,7 +348,7 @@ export default function Home() {
                   className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-stone-900 hover:bg-black text-white font-medium text-xs uppercase tracking-wider transition-all shadow-md active:scale-95"
                 >
                   <Palette size={16} className="text-stone-300" />
-                  <span>{podBanner.ctaText || "Dizayn Studiyasına Keç"}</span>
+                  <span>{language === "en" ? "Go to Design Studio" : language === "ru" ? "В студию дизайна" : language === "tr" ? "Tasarım Stüdyosuna Geç" : (podBanner.ctaText || "Dizayn Studiyasına Keç")}</span>
                   <ArrowRight size={14} />
                 </Link>
               </div>
@@ -368,15 +369,15 @@ export default function Home() {
                 {/* Simulated Custom Print Overlay */}
                 <div className="absolute inset-x-16 top-24 bottom-24 border-2 border-dashed border-stone-400 rounded-2xl flex flex-col items-center justify-center p-4 bg-stone-100/70 backdrop-blur-[1px]">
                   <span className="text-2xl font-serif-luxury font-normal text-stone-900 tracking-wider">
-                    SƏNİN DİZAYNIN
+                    {language === "en" ? "YOUR DESIGN" : language === "ru" ? "ВАШ ДИЗАЙН" : language === "tr" ? "SENİN TASARIMIN" : "SƏNİN DİZAYNIN"}
                   </span>
                   <span className="text-[10px] uppercase tracking-wider text-stone-600 font-bold mt-1">
-                    [ ÇAP SAHƏSİ ]
+                    {language === "en" ? "[ PRINT AREA ]" : language === "ru" ? "[ ОБЛАСТЬ ПЕЧАТИ ]" : language === "tr" ? "[ BASKI ALANI ]" : "[ ÇAP SAHƏSİ ]"}
                   </span>
                 </div>
 
                 <div className="absolute bottom-4 inset-x-4 p-3 rounded-2xl bg-white/95 backdrop-blur-md border border-stone-200 flex items-center justify-between text-xs text-stone-900 shadow-sm">
-                  <span className="font-semibold text-stone-900">100% Pambıq Baza T-Shirt</span>
+                  <span className="font-semibold text-stone-900">{language === "en" ? "100% Cotton Base T-Shirt" : language === "ru" ? "Базовая футболка 100% хлопок" : language === "tr" ? "%100 Pamuklu Temel T-Shirt" : "100% Pambıq Baza T-Shirt"}</span>
                   <span className="text-stone-900 font-bold font-serif-luxury text-sm">45.00 ₼</span>
                 </div>
               </div>
@@ -400,13 +401,13 @@ export default function Home() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-6 sm:p-10 text-white z-10">
               <span className="text-xs font-semibold text-stone-300 uppercase tracking-wider">
-                {promoBanner?.tag || "PREMIUM KƏSİMLƏR"}
+                {language === "en" ? "HORVVALLE TAILORING" : language === "ru" ? "КРОЙ HORVVALLE" : language === "tr" ? "HORVVALLE KESİMLERİ" : (promoBanner?.tag || "HORVVALLE KƏSİMLƏRİ")}
               </span>
               <h3 className="text-2xl sm:text-3xl font-serif-luxury font-normal uppercase mt-1">
-                {promoBanner?.title || "HƏR GÜN ÜÇÜN İDEAL ŞALVARLAR"}
+                {language === "en" ? "PERFECT PANTS FOR EVERY DAY" : language === "ru" ? "ИДЕАЛЬНЫЕ БРЮКИ НА КАЖДЫЙ ДЕНЬ" : language === "tr" ? "HER GÜN İÇİN İDEAL PANTOLONLAR" : (promoBanner?.title || "HƏR GÜN ÜÇÜN İDEAL ŞALVARLAR")}
               </h3>
               <p className="text-xs text-stone-200 mt-1.5 max-w-sm line-clamp-2">
-                {promoBanner?.subtitle}
+                {language === "en" ? "Classic chinos, comfortable linen, and straight-fit denim. Perfect for office or city strolls." : language === "ru" ? "Классические чиносы, удобный лен и прямой деним. Идеально для офиса и прогулок." : language === "tr" ? "Klasik chino, rahat keten ve düz kesim denim pantolonlar. Ofis veya şehir yürüyüşleri için ideal." : (promoBanner?.subtitle || "Klassik chino, rahat kətan və düz kəsim denim şalvarlar. İstər ofis, istərsə də şəhər gəzintisi üçün.")}
               </p>
               <div className="pt-4">
                 <Link
@@ -414,7 +415,7 @@ export default function Home() {
                   prefetch={true}
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white text-stone-900 font-medium text-xs uppercase tracking-wider hover:bg-stone-100 transition shadow-sm"
                 >
-                  <span>{promoBanner?.ctaText || "Şalvarlara Bax"}</span>
+                  <span>{language === "en" ? "ALL PANTS" : language === "ru" ? "ВСЕ БРЮКИ" : language === "tr" ? "TÜM PANTOLONLAR" : (promoBanner?.ctaText || "BÜTÜN ŞALVARLAR")}</span>
                   <ArrowRight size={14} />
                 </Link>
               </div>
@@ -433,13 +434,13 @@ export default function Home() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-6 sm:p-10 text-white z-10">
               <span className="text-xs font-semibold text-stone-300 uppercase tracking-wider">
-                {campaignSecondary?.tag || "PREMIUM 3İPLİK"}
+                {language === "en" ? "HORVVALLE COUTURE" : language === "ru" ? "HORVVALLE COUTURE" : language === "tr" ? "HORVVALLE COUTURE" : (campaignSecondary?.tag || "HORVVALLE COUTURE")}
               </span>
               <h3 className="text-2xl sm:text-3xl font-serif-luxury font-normal uppercase mt-1">
-                {campaignSecondary?.title || "İSTİ VƏ RAHAT OVERSIZED HUDİ"}
+                {language === "en" ? "WARM & COMFORTABLE OVERSIZED HOODIE COLLECTION" : language === "ru" ? "ТЕПЛАЯ И УДОБНАЯ КОЛЛЕКЦИЯ ОВЕРСАЙЗ ХУДИ" : language === "tr" ? "SICAK VE RAHAT OVERSIZED HUDİ KOLEKSİYONU" : (campaignSecondary?.title || "İSTİ VƏ RAHAT OVERSIZED HUDİ KOLLEKSİYASI")}
               </h3>
               <p className="text-xs text-stone-200 mt-1.5 max-w-sm line-clamp-2">
-                {campaignSecondary?.subtitle || "Qalın 380 GSM pambıq toxunuşu, isti astar və canlı DTF çap keyfiyyəti."}
+                {language === "en" ? "Thick 380 GSM cotton feel, warm lining, and vibrant DTF print quality. Ideal for streetwear style." : language === "ru" ? "Плотный хлопок 380 GSM, теплая подкладка и яркая печать DTF. Идеально для уличного стиля." : language === "tr" ? "Kalın 380 GSM pamuk dokusu, sıcak astar ve canlı DTF baskı kalitesi. Şehir stili için ideal." : (campaignSecondary?.subtitle || "Qalın 380 GSM pambıq toxunuşu, isti astar və canlı DTF çap keyfiyyəti. Şəhər stili üçün ideal.")}
               </p>
               <div className="pt-4">
                 <Link
@@ -447,7 +448,7 @@ export default function Home() {
                   prefetch={true}
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white text-stone-900 font-medium text-xs uppercase tracking-wider hover:bg-stone-100 transition shadow-sm"
                 >
-                  <span>{campaignSecondary?.ctaText || "Hudilərə Bax"}</span>
+                  <span>{language === "en" ? "VIEW HOODIES" : language === "ru" ? "СМОТРЕТЬ ХУДИ" : language === "tr" ? "HUDİLERE BAK" : (campaignSecondary?.ctaText || "HUDİLƏRƏ BAX")}</span>
                   <ArrowRight size={14} />
                 </Link>
               </div>

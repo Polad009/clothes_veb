@@ -200,17 +200,17 @@ export function Footer() {
             <ul className="space-y-2 text-xs">
               <li>
                 <Link href="/collections?category=hudi" className="text-white/70 hover:text-white transition">
-                  Hody qalın (3iplik)
+                  {language === "en" ? "Heavyweight Hoodie (3-Thread)" : language === "ru" ? "Плотное худи (3-нитка)" : language === "tr" ? "Kalın Hudi (3 İplik)" : "Hody qalın (3iplik)"}
                 </Link>
               </li>
               <li>
                 <Link href="/collections?category=aksesuar" className="text-white/70 hover:text-white transition">
-                  Kepka - qalın
+                  {language === "en" ? "Heavyweight Snapback Cap" : language === "ru" ? "Плотная кепка" : language === "tr" ? "Kalın Şapka" : "Kepka - qalın"}
                 </Link>
               </li>
               <li>
                 <Link href="/collections?category=aksesuar" className="text-white/70 hover:text-white transition">
-                  Kətan Eko Çanta
+                  {language === "en" ? "Canvas Eco Tote Bag" : language === "ru" ? "Хлопковый эко-шоппер" : language === "tr" ? "Keten Eko Çanta" : "Kətan Eko Çanta"}
                 </Link>
               </li>
               <li>

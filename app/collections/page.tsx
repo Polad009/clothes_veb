@@ -1,4 +1,34 @@
+
 "use client";
+
+function getLocalizedFit(f: string, lang: string) {
+  if (f === "all") return "";
+  const map: Record<string, { en: string; ru: string; tr: string }> = {
+    "T-shirt Regular (Süprəm)": { en: "Regular T-Shirt (Supreme Cotton)", ru: "Классическая футболка (Супрем)", tr: "Klasik T-Shirt (Süprem)" },
+    "T-shirt Regular (2iplik / TS Parça)": { en: "Regular T-Shirt (2-Thread)", ru: "Классическая футболка (2-нитка)", tr: "Klasik T-Shirt (2 İplik)" },
+    "Oversize T-shirt (Süprəm / 2iplik)": { en: "Oversized T-Shirt (2-Thread)", ru: "Оверсайз футболка (2-нитка)", tr: "Oversize T-Shirt (2 İplik)" },
+    "Polo - qısaqol": { en: "Short-sleeve Polo", ru: "Поло с коротким рукавом", tr: "Kısa Kollu Polo" },
+    "Polo - uzunqol": { en: "Long-sleeve Polo", ru: "Поло с длинным рукавом", tr: "Uzun Kollu Polo" },
+    "Sviter - nazik (2iplik)": { en: "Lightweight Sweater (2-Thread)", ru: "Тонкий свитер (2-нитка)", tr: "İnce Kazak (2 İplik)" },
+    "Sviter - qalın (3iplik)": { en: "Heavyweight Sweater (3-Thread)", ru: "Плотный свитер (3-нитка)", tr: "Kalın Kazak (3 İplik)" },
+    "Hody nazik (2iplik)": { en: "Lightweight Hoodie (2-Thread)", ru: "Тонкое худи (2-нитка)", tr: "İnce Hudi (2 İplik)" },
+    "Hody qalın (3iplik)": { en: "Heavyweight Hoodie (3-Thread)", ru: "Плотное худи (3-нитка)", tr: "Kalın Hudi (3 İplik)" },
+    "Yarımzamok nazik (2iplik)": { en: "Half-Zip Pullover (2-Thread)", ru: "Пуловер на молнии (2-нитка)", tr: "Yarım Fermuarlı Kazak (2 İplik)" },
+    "Yarımzamok qalın (3iplik)": { en: "Heavy Half-Zip (3-Thread)", ru: "Плотный пуловер на молнии (3-нитка)", tr: "Kalın Yarım Fermuarlı (3 İplik)" },
+    "Balonka": { en: "Windbreaker / Puffer Vest", ru: "Ветровка / Жилетка", tr: "Rüzgarlık / Yelek" },
+    "Şalvar nazik (2iplik)": { en: "Lightweight Pants (2-Thread)", ru: "Тонкие брюки (2-нитка)", tr: "İnce Pantolon (2 İplik)" },
+    "Şalvar qalın (3iplik / TS Parça)": { en: "Heavyweight Pants (3-Thread)", ru: "Плотные брюки (3-нитка)", tr: "Kalın Pantolon (3 İplik)" },
+    "Kepka - nazik": { en: "Lightweight Cap", ru: "Легкая кепка", tr: "İnce Şapka" },
+    "Kepka - qalın": { en: "Heavyweight Snapback Cap", ru: "Плотная кепка", tr: "Kalın Şapka" },
+  };
+
+  const item = map[f];
+  if (!item) return f;
+  if (lang === "en") return item.en;
+  if (lang === "ru") return item.ru;
+  if (lang === "tr") return item.tr;
+  return f;
+}
 
 import React, { Suspense, useState, useMemo, useEffect } from "react";
 import Link from "next/link";
@@ -384,9 +414,9 @@ function CollectionsContent() {
                             ? "bg-stone-900 text-white font-semibold shadow-xs"
                             : "text-stone-600 hover:text-stone-900 hover:bg-stone-100/70"
                         }`}
-                        title={f === "all" ? "Bütün modellər" : f}
+                        title={f === "all" ? (t.collections?.all || "Bütün modellər") : getLocalizedFit(f, language)}
                       >
-                        {f === "all" ? "Bütün modellər" : f}
+                        {f === "all" ? (t.collections?.all || "Bütün modellər") : getLocalizedFit(f, language)}
                       </button>
                     );
                   })}

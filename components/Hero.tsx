@@ -1,4 +1,20 @@
+
 "use client";
+
+function localizeHeroFit(fit: string | undefined, lang: string) {
+  if (!fit) return "";
+  const f = fit.toLowerCase();
+  if (f.includes("hody qalın") || f.includes("3iplik")) {
+    return lang === "en" ? "Heavyweight Hoodie (3-Thread)" : lang === "ru" ? "Плотное худи (3-нитка)" : lang === "tr" ? "Kalın Hudi (3 İplik)" : fit;
+  }
+  if (f.includes("kepka") || f.includes("qalın")) {
+    return lang === "en" ? "Heavyweight Snapback Cap" : lang === "ru" ? "Плотная кепка" : lang === "tr" ? "Kalın Şapka" : fit;
+  }
+  if (f.includes("kətan eko çanta")) {
+    return lang === "en" ? "Canvas Eco Tote Bag" : lang === "ru" ? "Хлопковый эко-шоппер" : lang === "tr" ? "Keten Eko Çanta" : fit;
+  }
+  return fit;
+}
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
@@ -136,7 +152,7 @@ export function Hero() {
         name: p.name,
         category: p.category || "koynek",
         title: (p.name || "Horvvalle Couture").toUpperCase(),
-        subtitle: p.fit || p.composition || p.category,
+        subtitle: localizeHeroFit(p.fit || p.composition || p.category, language),
         price: formatPrice(p.price),
         compareAtPrice: p.compareAtPrice ? formatPrice(p.compareAtPrice) : undefined,
         colorHex: primaryColor?.hex || palette.colorHex,

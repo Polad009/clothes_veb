@@ -190,7 +190,7 @@ export function ProductCard({ product, variant = "light", priority = false }: Pr
               }
             >
               <Plus size={14} className={isDark ? "text-black" : "text-stone-300"} />
-              <span>{isDark ? "Sürətli səbətə at" : "Sürətli Səbətə At"}</span>
+              <span>{language === "en" ? "Quick Add" : language === "ru" ? "В корзину" : language === "tr" ? "Hızlı Ekle" : isDark ? "Sürətli səbətə at" : "Sürətli Səbətə At"}</span>
             </button>
           ) : (
             <div

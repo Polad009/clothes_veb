@@ -277,7 +277,7 @@ export default function CheckoutPage() {
   }, [user, profile]);
 
   // Payment Selection
-  const [paymentMethod, setPaymentMethod] = useState<"apple_pay" | "google_pay" | "card" | "cod">("apple_pay");
+  const [paymentMethod, setPaymentMethod] = useState<"apple_pay" | "google_pay" | "card">("apple_pay");
   const isTestMode = process.env.NEXT_PUBLIC_PAYMENT_MODE === "test";
   const enableCod = process.env.NEXT_PUBLIC_ENABLE_COD !== "false";
   const [walletDebugMsg, setWalletDebugMsg] = useState<{ text: string; method?: string } | null>(null);
@@ -1466,44 +1466,6 @@ export default function CheckoutPage() {
                         </motion.div>
                       </div>
                     </div>
-                  )}
-
-                  {/* COD (Cash on Delivery) Option */}
-                  {enableCod && (
-                    <label
-                      onClick={() => {
-                        if (!hasCustomItems) {
-                          setPaymentMethod("cod");
-                        }
-                      }}
-                      className={`p-4 rounded-2xl border flex items-center justify-between transition-all ${
-                        hasCustomItems
-                          ? "border-stone-200 bg-stone-50 opacity-60 cursor-not-allowed text-stone-400"
-                          : paymentMethod === "cod"
-                          ? "border-stone-900 bg-stone-50 text-stone-900 ring-1 ring-stone-900/10 shadow-xs cursor-pointer"
-                          : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:text-stone-900 cursor-pointer"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <Truck size={20} className={paymentMethod === "cod" ? "text-stone-900" : "text-stone-400"} />
-                        <div>
-                          <div className="text-xs font-bold text-stone-900 flex items-center gap-2">
-                            <span>{cT.codTitle}</span>
-                            {hasCustomItems && (
-                              <span className="text-[9px] font-bold bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full border border-rose-200">
-                                {cT.codNoCustom}
-                              </span>
-                            )}
-                          </div>
-                          <div className="text-[11px] text-stone-500">
-                            Məhsulu ünvanda kuryerdən təhvil alarkən nağd və ya kartla ödəyin
-                          </div>
-                        </div>
-                      </div>
-                      <span className="w-4 h-4 rounded-full border-2 border-stone-300 flex items-center justify-center">
-                        {paymentMethod === "cod" && <span className="w-2 h-2 rounded-full bg-stone-900" />}
-                      </span>
-                    </label>
                   )}
                 </div>
               </div>

@@ -96,15 +96,15 @@ export function GooglePayLogo({
  */
 export function VisaLogo({ className = "h-5 w-auto" }: { className?: string }) {
   return (
-    <div className="inline-flex items-center justify-center rounded-lg px-2 py-1 bg-white border border-zinc-200 select-none shadow-2xs transition-transform hover:scale-105">
+    <div className="inline-flex items-center justify-center rounded-lg px-2.5 py-1 bg-white border border-zinc-200 select-none shadow-2xs transition-transform hover:scale-105">
       <svg
-        viewBox="0 0 36 12"
+        viewBox="0 7 24 10"
         className={className}
         xmlns="http://www.w3.org/2000/svg"
         aria-label="Visa"
       >
         <path
-          d="M14.6 11.5L12.3.5H9.6L6 8.4 5.3 4.3C4.9 2.5 3.3 1.2 1.5.6L0 .5v.5c2.4.6 4.3 2 4.9 4.3l2.4 8.7h2.8l4.3-10.8 1.7 8.3h-1.5v.5h4zm4.2-.7c2 0 3.3-.9 3.3-2.3 0-1.8-2.5-1.9-2.5-2.8 0-.5.5-.8 1.5-.8.9 0 1.6.2 2 .4l.4-1.9c-.6-.2-1.4-.4-2.4-.4-2.5 0-4.2 1.3-4.2 3.1 0 1.9 2.6 2.1 2.6 2.9 0 .6-.6.9-1.6.9-.9 0-1.8-.2-2.3-.5l-.4 1.9c.7.3 1.9.5 3.6.5zm8.9.7l2.2-11H27l-2.2 11h2.9zm8.3-11h-2.2c-.7 0-1.2.2-1.5.9l-4.2 10.1h3l.6-1.7h3.7l.3 1.7h2.6l-2.3-11zm-3.5 7l1.6-4.4.9 4.4h-2.5z"
+          d="M9.112 8.262L5.97 15.758H3.92L2.374 9.775c-.094-.368-.175-.503-.461-.658C1.447 8.864.677 8.627 0 8.479l.046-.217h3.3a.904.904 0 01.894.764l.817 4.338 2.018-5.102zm8.033 5.049c.008-1.979-2.736-2.088-2.717-2.972.006-.269.262-.555.822-.628a3.66 3.66 0 011.913.336l.34-1.59a5.207 5.207 0 00-1.814-.333c-1.917 0-3.266 1.02-3.278 2.479-.012 1.079.963 1.68 1.698 2.04.756.367 1.01.603 1.006.931-.005.504-.602.725-1.16.734-.975.015-1.54-.263-1.992-.473l-.351 1.642c.453.208 1.289.39 2.156.398 2.037 0 3.37-1.006 3.377-2.564m5.061 2.447H24l-1.565-7.496h-1.656a.883.883 0 00-.826.55l-2.909 6.946h2.036l.405-1.12h2.488zm-2.163-2.656l1.02-2.815.588 2.815zm-8.16-4.84l-1.603 7.496H8.34l1.605-7.496z"
           fill="#1434CB"
         />
       </svg>
