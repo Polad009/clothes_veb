@@ -23,11 +23,13 @@ import {
   PaymentLogosRow,
 } from "@/components/PaymentLogos";
 import { playPurchaseSuccessSound } from "@/lib/soundEffects";
+import { useAuth } from "@/context/AuthContext";
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, totalPrice, clearCart } = useCart();
   const { formatPrice, currency } = useCurrency();
+  const { user, profile, isLoading: isAuthLoading, openAuthModal } = useAuth();
 
   // Form State
   const [fullName, setFullName] = useState("");
@@ -35,6 +37,18 @@ export default function CheckoutPage() {
   const [email, setEmail] = useState("");
   const [city, setCity] = useState("Bakı");
   const [address, setAddress] = useState("");
+
+  // Auto-fill from authenticated Supabase profile
+  useEffect(() => {
+    if (user) {
+      if (user.email && !email) setEmail(user.email);
+      if (profile?.full_name && !fullName) setFullName(profile.full_name);
+      else if (user.user_metadata?.full_name && !fullName) setFullName(user.user_metadata.full_name);
+      if (profile?.phone && (!phone || phone === "+994 ")) setPhone(profile.phone);
+      if (profile?.city && city === "Bakı") setCity(profile.city);
+      if (profile?.address && !address) setAddress(profile.address);
+    }
+  }, [user, profile]);
 
   // Payment Selection
   const [paymentMethod, setPaymentMethod] = useState<"apple_pay" | "google_pay" | "card">("apple_pay");
@@ -89,6 +103,11 @@ export default function CheckoutPage() {
   const validateShipping = () => {
     const errors: Record<string, string> = {};
 
+    if (!user) {
+      openAuthModal();
+      errors.auth = "Sifariş üçün giriş və ya qeydiyyat tələb olunur";
+    }
+
     if (!fullName.trim()) {
       errors.fullName = "Ad və soyadınızı daxil edin";
     } else if (fullName.trim().length < 3) {
@@ -102,9 +121,12 @@ export default function CheckoutPage() {
       errors.phone = "Düzgün əlaqə nömrəsi daxil edin (məs: +994 50 123 45 67)";
     }
 
-    if (email.trim()) {
+    const customerEmail = user?.email || email;
+    if (!customerEmail.trim()) {
+      errors.email = "E-poçt ünvanınızı daxil edin";
+    } else {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email.trim())) {
+      if (!emailRegex.test(customerEmail.trim())) {
         errors.email = "Düzgün e-poçt ünvanı daxil edin (məs: ad@example.com)";
       }
     }
@@ -119,6 +141,12 @@ export default function CheckoutPage() {
   };
 
   const validateAll = () => {
+    if (!user) {
+      openAuthModal();
+      setErrorMsg("Məhsul almaq və izləmə kodunuzu əldə etmək üçün zəhmət olmasa daxil olun.");
+      return false;
+    }
+
     const errors = validateShipping();
 
     if (paymentMethod === "card") {
@@ -240,6 +268,11 @@ export default function CheckoutPage() {
   const processOrder = async (chosenMethod: string) => {
     setErrorMsg(null);
 
+    if (!user) {
+      openAuthModal();
+      return;
+    }
+
     if (items.length === 0) {
       setErrorMsg("Səbətiniz boşdur.");
       return;
@@ -253,16 +286,18 @@ export default function CheckoutPage() {
 
     try {
       const clientOrderId = `VTX-ORD-${Math.floor(1000 + Math.random() * 9000)}`;
+      const customerEmail = user.email || email;
 
       const res = await fetch("/api/store/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id: clientOrderId,
+          userId: user.id,
           customer: {
             fullName,
             phone,
-            email: email || "musteri@horvvalle.com",
+            email: customerEmail,
             address,
             city,
             country: "Azərbaycan",
@@ -318,7 +353,7 @@ export default function CheckoutPage() {
             customer: {
               fullName: fullName || "Müştəri",
               phone: phone || "",
-              email: email || "musteri@horvvalle.com",
+              email: customerEmail,
               address: address || "",
               city: city || "Bakı",
             },
@@ -384,6 +419,11 @@ export default function CheckoutPage() {
                 <button
                   type="button"
                   onClick={() => {
+                    if (!user) {
+                      openAuthModal();
+                      setErrorMsg("Məhsul almaq və izləmə kodunuzu əldə etmək üçün zəhmət olmasa daxil olun.");
+                      return;
+                    }
                     setPaymentMethod("apple_pay");
                     const errors = validateShipping();
                     setFieldErrors(errors);
@@ -410,6 +450,11 @@ export default function CheckoutPage() {
                 <button
                   type="button"
                   onClick={() => {
+                    if (!user) {
+                      openAuthModal();
+                      setErrorMsg("Məhsul almaq və izləmə kodunuzu əldə etmək üçün zəhmət olmasa daxil olun.");
+                      return;
+                    }
                     setPaymentMethod("google_pay");
                     const errors = validateShipping();
                     setFieldErrors(errors);
@@ -471,6 +516,54 @@ export default function CheckoutPage() {
                 </motion.div>
               )}
             </AnimatePresence>
+
+            {/* Customer Authentication Gate */}
+            {!user ? (
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/90 rounded-3xl p-6 sm:p-7 space-y-4 shadow-xs text-stone-900">
+                <div className="flex items-start gap-3.5">
+                  <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center shrink-0">
+                    <Lock size={20} />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="font-eb-garamond text-xl font-normal text-stone-900">
+                      Sifariş üçün Giriş və ya Qeydiyyat Tələb Olunur
+                    </h3>
+                    <p className="text-xs text-stone-600 leading-relaxed">
+                      HORVVALLE atelyesi hər bir sifariş üçün xüsusi <strong>Fərdi İzləmə Kodu</strong> təyin edir və bu kod yalnız qeydiyyatlı profilinizdə saxlanılır. Məhsul almaq və sifarişinizi canlı izləmək üçün daxil olun.
+                    </p>
+                  </div>
+                </div>
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={openAuthModal}
+                    className="w-full sm:w-auto py-3 px-6 rounded-full bg-stone-900 hover:bg-black text-white text-xs font-bold uppercase tracking-wider transition shadow-sm cursor-pointer"
+                  >
+                    Daxil Ol / Qeydiyyatdan Keç
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-emerald-50/70 border border-emerald-200/90 rounded-3xl p-4 sm:p-5 flex items-center justify-between shadow-2xs">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs">
+                    {(profile?.full_name || user.email || 'H')[0].toUpperCase()}
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-stone-900 flex items-center gap-2">
+                      <span>{profile?.full_name || user.email}</span>
+                      <span className="text-[9px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-200">
+                        Təsdiqlənmiş Hesab
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-stone-500 font-mono">{user.email}</div>
+                  </div>
+                </div>
+                <div className="text-[11px] text-emerald-700 font-medium hidden sm:block">
+                  ✓ İzləmə kodu birbaşa bu profilinizə bağlanacaq
+                </div>
+              </div>
+            )}
 
             {/* Customer Information Form - noValidate to avoid ugly browser tooltips */}
             <form noValidate onSubmit={handleCardSubmit} className="space-y-6">
@@ -569,17 +662,22 @@ export default function CheckoutPage() {
                     className="space-y-1.5"
                   >
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-semibold text-stone-700 uppercase">E-poçt (Qəbz üçün)</label>
-                      <span className="text-[10px] text-stone-400">İstəyə bağlı</span>
+                      <label className="text-xs font-semibold text-stone-700 uppercase">E-poçt (Qəbz və İzləmə üçün) *</label>
+                      {user?.email && (
+                        <span className="text-[10px] text-emerald-700 font-bold">Hesabınıza bağlıdır</span>
+                      )}
                     </div>
                     <input
                       id="field-email"
                       type="email"
                       placeholder="ad@example.com"
-                      value={email}
+                      value={user?.email || email}
+                      readOnly={Boolean(user?.email)}
                       onChange={(e) => handleFieldChange("email", e.target.value, setEmail)}
                       className={`w-full rounded-xl px-3.5 py-2.5 text-xs text-stone-900 placeholder-stone-400 transition-all duration-200 focus:outline-none ${
-                        fieldErrors.email
+                        user?.email
+                          ? "bg-stone-100 border border-stone-200 cursor-not-allowed text-stone-600 font-mono"
+                          : fieldErrors.email
                           ? "bg-rose-50/40 border border-rose-400 ring-2 ring-rose-200/60 focus:border-rose-500 focus:ring-rose-300"
                           : "bg-stone-50 border border-stone-200 focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900"
                       }`}

@@ -80,6 +80,8 @@ export interface StoreSettings {
 export interface StoreOrder {
   id: string;
   trackingCode?: string;
+  userId?: string;
+  source?: string;
   date: string;
   customer: {
     fullName: string;

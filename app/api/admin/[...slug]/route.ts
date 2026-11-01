@@ -35,7 +35,7 @@ async function getEnrichedStoreData() {
 
     if (supaOrders && supaOrders.length > 0) {
       const existingIds = new Set((db.orders || []).map((o: any) => String(o.id)));
-      
+
       const convertedSupaOrders = supaOrders.map((so: any) => ({
         id: String(so.id),
         date: so.created_at,
@@ -128,7 +128,7 @@ export async function GET(
               list.push('/' + rel.replace(/\\/g, '/'));
             }
           }
-        } catch (e) {}
+        } catch (e) { }
       };
 
       scan(imagesDir);

@@ -7,13 +7,14 @@ import { sendOrderConfirmation, sendOrderStatusUpdate } from '@/lib/email/emailS
 
 export const dynamic = 'force-dynamic';
 
-async function syncOrderToSupabase(order: any, customer: any, items: any[]) {
+async function syncOrderToSupabase(order: any, customer: any, items: any[], userId?: string) {
   const client = supabaseServer;
   if (!client) return;
   try {
     const { data: supaOrder } = await client
       .from('orders')
       .insert({
+        user_id: userId || null,
         customer_name: customer.fullName,
         customer_phone: customer.phone,
         customer_email: customer.email,
@@ -97,6 +98,7 @@ export async function POST(req: NextRequest) {
     const newOrder: StoreOrder = {
       id: orderId,
       trackingCode: trackingCode,
+      userId: body.userId || undefined,
       date: body.date || new Date().toISOString(),
       customer: sanitizedCustomer,
       items,
@@ -143,7 +145,7 @@ export async function POST(req: NextRequest) {
     writeStoreDb(db);
 
     // Persist into Supabase Cloud Database in background
-    syncOrderToSupabase(newOrder, sanitizedCustomer, items);
+    syncOrderToSupabase(newOrder, sanitizedCustomer, items, body.userId);
 
     // Send instant free mobile notification (Telegram / NTFY)
     try {
