@@ -2,8 +2,46 @@ import { NextRequest, NextResponse } from 'next/server';
 import { readStoreDb, writeStoreDb, StoreOrder } from '@/lib/storeDb';
 import { notifyNewOrder } from '@/lib/notifications/orderNotifier';
 import { isAdminAuthenticated } from '@/lib/adminAuth';
+import { supabaseServer } from '@/lib/supabaseServer';
 
 export const dynamic = 'force-dynamic';
+
+async function syncOrderToSupabase(order: any, customer: any, items: any[]) {
+  const client = supabaseServer;
+  if (!client) return;
+  try {
+    const { data: supaOrder } = await client
+      .from('orders')
+      .insert({
+        customer_name: customer.fullName,
+        customer_phone: customer.phone,
+        customer_email: customer.email,
+        delivery_address: customer.address,
+        delivery_city: customer.city,
+        total_amount: Number(order.total) || 0,
+        payment_method: order.paymentMethod || 'Card',
+        payment_status: order.paymentStatus || 'paid',
+        order_status: order.orderStatus || 'Yeni Sifariş',
+      })
+      .select()
+      .single();
+
+    if (supaOrder && items && Array.isArray(items)) {
+      const itemRows = items.map((i: any) => ({
+        order_id: supaOrder.id,
+        item_name: String(i.name || 'Məhsul'),
+        color: String(i.color || 'Standart'),
+        size: String(i.size || 'L'),
+        quantity: Number(i.quantity) || 1,
+        unit_price: Number(i.price) || 0,
+        total_price: (Number(i.price) || 0) * (Number(i.quantity) || 1),
+      }));
+      await client.from('order_items').insert(itemRows);
+    }
+  } catch (err) {
+    console.warn('Supabase cloud order sync warning:', err);
+  }
+}
 
 export async function GET(req: NextRequest) {
   // Never expose full customer orders publicly
@@ -102,6 +140,9 @@ export async function POST(req: NextRequest) {
     }
 
     writeStoreDb(db);
+
+    // Persist into Supabase Cloud Database in background
+    syncOrderToSupabase(newOrder, sanitizedCustomer, items);
 
     // Send instant free mobile notification (Telegram / NTFY)
     try {
