@@ -392,7 +392,11 @@ export default function Home() {
           {/* Banner 1: Chino & Cins Şalvarlar */}
           <div data-cms-section="promoBanner" data-cms-title="Şalvar Kolleksiyası Banneri" className="relative aspect-[4/5] sm:aspect-[16/11] rounded-3xl overflow-hidden border border-stone-200/80 group bg-white shadow-2xs">
             <Image
-              src={promoBanner?.image || "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?q=80&w=1200&auto=format&fit=crop"}
+              src={
+                promoBanner?.image && !promoBanner.image.includes("beige-slim-chino-pants/mockup")
+                  ? promoBanner.image
+                  : "/images/categories/pants_collection_banner.jpg"
+              }
               alt="Şalvar Kolleksiyası"
               fill
               sizes="(max-width: 768px) 100vw, 50vw"

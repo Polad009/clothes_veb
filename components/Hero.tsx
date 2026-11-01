@@ -111,7 +111,7 @@ const INITIAL_FALLBACK_PRODUCTS: HeroProductItem[] = [
     category: "hudi",
     title: "HORWALLE \"BMW M MOTORSPORT\" HEAVYWEIGHT FLEECE HOODIE",
     subtitle: "Hody qalın (3iplik)",
-    price: "89₼",
+    price: "20₼",
     compareAtPrice: "129₼",
     colorHex: "#1A1A1A",
     image: "/images/uploads/bmw_hoodie_black_front_v3.png",
@@ -131,6 +131,7 @@ export function Hero() {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [selectedSize, setSelectedSize] = useState<string>("L");
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
+  const [direction, setDirection] = useState<number>(1); // 1 = right-to-left, -1 = left-to-right
 
   // Map live store products into rich hero items
   const heroProducts: HeroProductItem[] = useMemo(() => {
@@ -229,15 +230,17 @@ export function Hero() {
   const handleNext = useCallback(() => {
     if (isAnimating || total === 0) return;
     setIsAnimating(true);
+    setDirection(1);
     setCurrentIndex((prev) => (prev + 1) % total);
-    setTimeout(() => setIsAnimating(false), 550);
+    setTimeout(() => setIsAnimating(false), 450);
   }, [isAnimating, total]);
 
   const handlePrev = useCallback(() => {
     if (isAnimating || total === 0) return;
     setIsAnimating(true);
+    setDirection(-1);
     setCurrentIndex((prev) => (prev - 1 + total) % total);
-    setTimeout(() => setIsAnimating(false), 550);
+    setTimeout(() => setIsAnimating(false), 450);
   }, [isAnimating, total]);
 
   // Keyboard navigation
@@ -253,32 +256,33 @@ export function Hero() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleNext, handlePrev]);
 
-  // Slider animation
+  // Slider animation - Smooth horizontal glide (right-to-left / left-to-right)
   const productVariants = {
-    initial: {
-      y: "-110%",
+    initial: (dir: number) => ({
+      x: dir > 0 ? "85%" : "-85%",
       opacity: 0,
-      scale: 0.96,
-    },
+      scale: 0.94,
+    }),
     animate: {
-      y: "0%",
+      x: "0%",
       opacity: 1,
       scale: 1,
       transition: {
-        y: { type: "spring", stiffness: 240, damping: 26 },
-        opacity: { duration: 0.4 },
-        scale: { duration: 0.4 },
+        x: { type: "spring", stiffness: 280, damping: 28 },
+        opacity: { duration: 0.35, ease: "easeOut" },
+        scale: { duration: 0.35, ease: "easeOut" },
       },
     },
-    exit: {
-      y: "110%",
+    exit: (dir: number) => ({
+      x: dir > 0 ? "-85%" : "85%",
       opacity: 0,
-      scale: 0.96,
+      scale: 0.94,
       transition: {
-        duration: 0.48,
-        ease: [0.55, 0, 0.55, 0.2],
+        x: { type: "spring", stiffness: 280, damping: 28 },
+        opacity: { duration: 0.28, ease: "easeIn" },
+        scale: { duration: 0.28, ease: "easeIn" },
       },
-    },
+    }),
   };
 
   return (
@@ -369,15 +373,16 @@ export function Hero() {
           <div className="lg:col-span-5 flex flex-col items-center justify-center order-1 lg:order-2 my-2 lg:my-0">
             <div className="relative w-full flex flex-col items-center justify-center">
               
-              {/* Product with Downward Exit / Topward Entrance */}
-              <AnimatePresence mode="wait">
+              {/* Product with Horizontal Right-to-Left / Left-to-Right Entrance */}
+              <AnimatePresence mode="wait" custom={direction}>
                 <motion.div
                   key={currentItem.id}
+                  custom={direction}
                   variants={productVariants}
                   initial="initial"
                   animate="animate"
                   exit="exit"
-                  className="w-full flex flex-col items-center justify-center"
+                  className="w-full flex flex-col items-center justify-center overflow-visible"
                 >
                   {/* Floating Garment Container - Clickable to open Product Details */}
                   <Link
