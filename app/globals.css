@@ -7,6 +7,11 @@
     --background: #1C0D05;
     --foreground: #ffffff;
     
+    /* Luxury Font Family Bindings */
+    --font-eb-garamond: 'EB Garamond', Garamond, Georgia, serif;
+    --font-fraunces: 'Fraunces', 'Playfair Display', Georgia, serif;
+    --font-instrument: 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    
     /* Horvvalle Dark Atelier Theme Tokens */
     --atelier-bg: #2A1406;
     --atelier-bg-gradient: radial-gradient(circle at 50% 36%, #7D4C28 0%, #542E13 48%, #2A1406 100%);

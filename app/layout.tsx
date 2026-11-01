@@ -19,29 +19,6 @@ const CartDrawer = dynamic(
 );
 
 import React, { Suspense } from "react";
-import { EB_Garamond, Fraunces, Instrument_Sans } from "next/font/google";
-
-const ebGaramond = EB_Garamond({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
-  variable: "--font-eb-garamond",
-  display: "swap",
-});
-
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
-  variable: "--font-fraunces",
-  display: "swap",
-});
-
-const instrumentSans = Instrument_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-instrument",
-  display: "swap",
-});
 
 export const viewport: Viewport = {
   themeColor: "#090707",
@@ -106,11 +83,15 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..700;1,400..700&family=Fraunces:opsz,wght@9..144,300..900&family=Instrument+Sans:wght@400..700&display=swap"
+        />
         <link rel="icon" type="image/png" sizes="32x32" href="/brand/favicon-32x32.png?v=3" />
         <link rel="icon" type="image/png" sizes="512x512" href="/brand/favicon.png?v=3" />
         <link rel="apple-touch-icon" href="/brand/favicon.png?v=3" />
       </head>
-      <body className={`${ebGaramond.variable} ${fraunces.variable} ${instrumentSans.variable} min-h-screen flex flex-col bg-[#FAF7F2] text-[#1A1517] font-sans antialiased selection:bg-[#E6C280] selection:text-black`}>
+      <body className="min-h-screen flex flex-col bg-[#FAF7F2] text-[#1A1517] font-sans antialiased selection:bg-[#E6C280] selection:text-black">
         <LanguageProvider>
           <CurrencyProvider>
             <CartProvider>
