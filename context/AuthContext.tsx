@@ -146,7 +146,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (error) {
       return { error: error.message };
     }
-    closeAuthModal();
     return {};
   };
 

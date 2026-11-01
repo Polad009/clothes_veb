@@ -47,7 +47,9 @@ export function AuthModal() {
         if (res.error) {
           setErrorMsg(res.error);
         } else {
-          setSuccessMsg("Qeydiyyat tamamlandı! E-poçtunuza təsdiq linki göndərildi.");
+          setSuccessMsg("Qeydiyyatınız uğurla tamamlandı! İndi şifrənizi daxil edərək hesabınıza daxil olun.");
+          setPassword("");
+          setMode("signin");
         }
       }
     } catch (err: any) {
