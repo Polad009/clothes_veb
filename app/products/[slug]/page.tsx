@@ -26,6 +26,7 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { ApplePayLogo, PaymentLogosRow } from "@/components/PaymentLogos";
+import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -96,6 +97,8 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
+
+  useBodyScrollLock(sizeGuideOpen);
   const [activeAccordion, setActiveAccordion] = useState<string | null>("details");
 
   const activeColor = product.colors[selectedColorIndex] || product.colors[0];
@@ -613,8 +616,8 @@ export default function ProductDetailPage() {
 
       {/* Size Guide Modal */}
       {sizeGuideOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-white border border-stone-200 rounded-3xl p-6 max-w-lg w-full space-y-4 shadow-2xl text-stone-900">
+        <div data-lenis-prevent className="fixed inset-0 z-50 bg-black/50 backdrop-blur-md flex items-center justify-center p-4 overscroll-contain">
+          <div data-lenis-prevent className="bg-white border border-stone-200 rounded-3xl p-6 max-w-lg w-full space-y-4 shadow-2xl text-stone-900 overscroll-contain">
             <div className="flex items-center justify-between border-b border-stone-100 pb-3">
               <h3 className="text-lg font-bold uppercase text-stone-900 flex items-center gap-2">
                 <Ruler size={18} className="text-stone-700" />

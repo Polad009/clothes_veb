@@ -18,6 +18,7 @@ import {
 import { useCart } from "@/context/CartContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import { ApplePayLogo, PaymentLogosRow } from "@/components/PaymentLogos";
 
 export function CartDrawer() {
@@ -41,23 +42,7 @@ export function CartDrawer() {
   );
   const remainingForFree = Math.max(0, FREE_SHIPPING_THRESHOLD - totalPrice);
 
-  // Smooth scroll lock without layout jump
-  useEffect(() => {
-    if (isOpen) {
-      const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
-      document.body.style.overflow = "hidden";
-      if (scrollBarWidth > 0) {
-        document.body.style.paddingRight = `${scrollBarWidth}px`;
-      }
-    } else {
-      document.body.style.overflow = "";
-      document.body.style.paddingRight = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-      document.body.style.paddingRight = "";
-    };
-  }, [isOpen]);
+  useBodyScrollLock(isOpen);
 
   const handleCheckout = () => {
     closeCart();
@@ -67,9 +52,10 @@ export function CartDrawer() {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 overflow-hidden">
+        <div data-lenis-prevent className="fixed inset-0 z-50 overflow-hidden overscroll-contain">
           {/* Silky Smooth Dark Backdrop */}
           <motion.div
+            data-lenis-prevent
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -79,7 +65,7 @@ export function CartDrawer() {
           />
 
           {/* Slide-over Drawer Panel in Light Luxury Palette */}
-          <div className="fixed inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10 pointer-events-none">
+          <div data-lenis-prevent className="fixed inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10 pointer-events-none overscroll-contain">
             <motion.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}

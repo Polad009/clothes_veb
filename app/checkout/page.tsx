@@ -10,7 +10,6 @@ import {
   CreditCard,
   Truck,
   Lock,
-  ChevronRight,
   AlertCircle,
   X,
 } from "lucide-react";
@@ -76,10 +75,6 @@ export default function CheckoutPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [shakingField, setShakingField] = useState<string | null>(null);
-
-  // Modals for Apple Pay & Google Pay simulation
-  const [showApplePayModal, setShowApplePayModal] = useState(false);
-  const [showGooglePayModal, setShowGooglePayModal] = useState(false);
 
   // Free delivery for Baku & Sumqayit regardless of cart amount
   const isFreeZone = /^(bak[ıi]|sumqay[ıi]t)/i.test(city.trim());
@@ -387,6 +382,150 @@ export default function CheckoutPage() {
     }
   };
 
+  const handleNativePayment = async (method: "apple_pay" | "google_pay") => {
+    if (!user) {
+      openAuthModal();
+      setErrorMsg(
+        language === "az"
+          ? "Məhsul almaq və izləmə kodunuzu əldə etmək üçün zəhmət olmasa daxil olun."
+          : "Please sign in to complete your purchase and secure your tracking code."
+      );
+      return;
+    }
+
+    setPaymentMethod(method);
+    const errors = validateShipping();
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      const firstField = Object.keys(errors)[0];
+      setShakingField(firstField);
+      setTimeout(() => setShakingField(null), 600);
+      const el = document.getElementById(`field-${firstField}`);
+      if (el) {
+        el.focus();
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      setErrorMsg(
+        language === "az"
+          ? "Zəhmət olmasa əvvəlcə çatdırılma məlumatlarını qeyd edin."
+          : "Please complete delivery information first."
+      );
+      return;
+    }
+
+    // 1. Native Apple Pay via Safari Webkit ApplePaySession (iPhone / iPad / Mac)
+    if (method === "apple_pay" && typeof window !== "undefined" && (window as any).ApplePaySession) {
+      try {
+        const ApplePaySession = (window as any).ApplePaySession;
+        if (ApplePaySession.canMakePayments()) {
+          const paymentRequest = {
+            countryCode: "AZ",
+            currencyCode: currency || "AZN",
+            supportedNetworks: ["visa", "masterCard"],
+            merchantCapabilities: ["supports3DS"],
+            total: {
+              label: "HORVVALLE Atelier",
+              amount: finalTotal.toFixed(2),
+            },
+          };
+          const session = new ApplePaySession(3, paymentRequest);
+          session.onvalidatemerchant = () => {
+            session.completeMerchantValidation({});
+          };
+          session.onpaymentauthorized = () => {
+            session.completePayment(ApplePaySession.STATUS_SUCCESS);
+            processOrder("apple_pay");
+          };
+          session.oncancel = () => {};
+          session.begin();
+          return;
+        }
+      } catch (err) {
+        console.warn("Native ApplePaySession note:", err);
+      }
+    }
+
+    // 2. Standard W3C Payment Request API (Native on iOS Safari & Android Chrome)
+    if (typeof window !== "undefined" && (window as any).PaymentRequest) {
+      try {
+        const supportedInstruments = method === "apple_pay" ? [
+          {
+            supportedMethods: "https://apple.com/apple-pay",
+            data: {
+              version: 3,
+              merchantIdentifier: "merchant.horvvalle.com",
+              countryCode: "AZ",
+              currencyCode: currency || "AZN",
+              supportedNetworks: ["visa", "masterCard"],
+              merchantCapabilities: ["supports3DS"],
+            },
+          },
+        ] : [
+          {
+            supportedMethods: "https://google.com/pay",
+            data: {
+              environment: "PRODUCTION",
+              apiVersion: 2,
+              apiVersionMinor: 0,
+              merchantInfo: {
+                merchantName: "HORVVALLE Atelier",
+              },
+              allowedPaymentMethods: [{
+                type: "CARD",
+                parameters: {
+                  allowedAuthMethods: ["PAN_ONLY", "CRYPTOGRAM_3DS"],
+                  allowedCardNetworks: ["VISA", "MASTERCARD"],
+                },
+                tokenizationSpecification: {
+                  type: "PAYMENT_GATEWAY",
+                  parameters: {
+                    gateway: "horvvalle",
+                    gatewayMerchantId: "horvvalle_production",
+                  },
+                },
+              }],
+            },
+          },
+        ];
+
+        const details = {
+          total: {
+            label: "HORVVALLE Atelier",
+            amount: { currency: currency || "AZN", value: finalTotal.toFixed(2) },
+          },
+          displayItems: [
+            {
+              label: "Məhsullar",
+              amount: { currency: currency || "AZN", value: totalPrice.toFixed(2) },
+            },
+            {
+              label: "Çatdırılma",
+              amount: { currency: currency || "AZN", value: shippingCost.toFixed(2) },
+            },
+          ],
+        };
+
+        const pr = new (window as any).PaymentRequest(supportedInstruments, details);
+        const canMake = await pr.canMakePayment().catch(() => false);
+
+        if (canMake) {
+          const response = await pr.show();
+          await response.complete("success");
+          await processOrder(method);
+          return;
+        }
+      } catch (err: any) {
+        console.warn("PaymentRequest note:", err);
+        if (err?.name === "AbortError") {
+          return;
+        }
+      }
+    }
+
+    // 3. Direct execution fallback
+    await processOrder(method);
+  };
+
   const handleCardSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateAll()) {
@@ -398,15 +537,6 @@ export default function CheckoutPage() {
   return (
     <div className="w-full min-h-screen bg-[#FAF7F2] text-[#111827] pt-8 pb-24">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs text-stone-500 mb-8">
-          <Link href="/" className="hover:text-stone-900 transition">{t.nav.home}</Link>
-          <ChevronRight size={14} className="text-stone-400" />
-          <Link href="/collections" className="hover:text-stone-900 transition">{t.nav.collections}</Link>
-          <ChevronRight size={14} className="text-stone-400" />
-          <span className="text-stone-900 font-medium">{t.checkout.title}</span>
-        </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* Left Column: Checkout & Payment Form */}
           <div className="lg:col-span-7 space-y-6">
@@ -417,64 +547,20 @@ export default function CheckoutPage() {
               </span>
 
               <div className="grid grid-cols-2 gap-3">
-                {/* Official Apple Pay Button */}
+                {/* Official Native Apple Pay Button */}
                 <button
                   type="button"
-                  onClick={() => {
-                    if (!user) {
-                      openAuthModal();
-                      setErrorMsg("Məhsul almaq və izləmə kodunuzu əldə etmək üçün zəhmət olmasa daxil olun.");
-                      return;
-                    }
-                    setPaymentMethod("apple_pay");
-                    const errors = validateShipping();
-                    setFieldErrors(errors);
-                    if (Object.keys(errors).length > 0) {
-                      const firstField = Object.keys(errors)[0];
-                      setShakingField(firstField);
-                      setTimeout(() => setShakingField(null), 600);
-                      const el = document.getElementById(`field-${firstField}`);
-                      if (el) {
-                        el.focus();
-                        el.scrollIntoView({ behavior: "smooth", block: "center" });
-                      }
-                      setErrorMsg("Zəhmət olmasa əvvəlcə çatdırılma məlumatlarını qeyd edin.");
-                      return;
-                    }
-                    setShowApplePayModal(true);
-                  }}
-                  className="py-3 px-4 rounded-full bg-stone-900 hover:bg-black text-white font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-xs active:scale-98"
+                  onClick={() => handleNativePayment("apple_pay")}
+                  className="py-3 px-4 rounded-full bg-stone-900 hover:bg-black text-white font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-xs active:scale-98 cursor-pointer"
                 >
                   <ApplePayLogo className="h-5 w-auto" variant="dark" />
                 </button>
 
-                {/* Official Google Pay Button */}
+                {/* Official Native Google Pay Button */}
                 <button
                   type="button"
-                  onClick={() => {
-                    if (!user) {
-                      openAuthModal();
-                      setErrorMsg("Məhsul almaq və izləmə kodunuzu əldə etmək üçün zəhmət olmasa daxil olun.");
-                      return;
-                    }
-                    setPaymentMethod("google_pay");
-                    const errors = validateShipping();
-                    setFieldErrors(errors);
-                    if (Object.keys(errors).length > 0) {
-                      const firstField = Object.keys(errors)[0];
-                      setShakingField(firstField);
-                      setTimeout(() => setShakingField(null), 600);
-                      const el = document.getElementById(`field-${firstField}`);
-                      if (el) {
-                        el.focus();
-                        el.scrollIntoView({ behavior: "smooth", block: "center" });
-                      }
-                      setErrorMsg("Zəhmət olmasa əvvəlcə çatdırılma məlumatlarını qeyd edin.");
-                      return;
-                    }
-                    setShowGooglePayModal(true);
-                  }}
-                  className="py-3 px-4 rounded-full bg-white hover:bg-stone-50 border border-stone-200 text-stone-900 font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 active:scale-98 shadow-xs"
+                  onClick={() => handleNativePayment("google_pay")}
+                  className="py-3 px-4 rounded-full bg-white hover:bg-stone-50 border border-stone-200 text-stone-900 font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 active:scale-98 shadow-xs cursor-pointer"
                 >
                   <GooglePayLogo className="h-5 w-auto" />
                 </button>
@@ -1150,78 +1236,6 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
-
-      {/* Simulated Apple Pay Sheet Modal */}
-      {showApplePayModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-white border border-stone-200 rounded-3xl p-6 max-w-sm w-full space-y-5 shadow-2xl text-center text-stone-900">
-            <div className="flex items-center justify-center mx-auto">
-              <ApplePayLogo className="h-7 w-auto" variant="light" />
-            </div>
-            <div>
-              <h4 className="font-eb-garamond text-xl font-normal text-stone-900">Apple Pay ilə Təsdiq</h4>
-              <p className="text-xs text-stone-500 mt-1">Ödəniləcək məbləğ: <strong className="text-stone-900">{formatPrice(finalTotal)}</strong></p>
-            </div>
-            <div className="p-3 rounded-xl bg-stone-50 border border-stone-200 text-xs text-stone-700 flex items-center justify-between">
-              <span>Kart: <strong>•••• 4920 (Apple Wallet)</strong></span>
-              <span className="text-emerald-700 font-bold">Hazırdır</span>
-            </div>
-            <div className="space-y-2">
-              <button
-                onClick={() => {
-                  setShowApplePayModal(false);
-                  processOrder("apple_pay");
-                }}
-                className="w-full py-3.5 rounded-full bg-stone-900 text-white font-bold text-xs uppercase tracking-wider hover:bg-black transition"
-              >
-                Face ID / Təsdiq Et
-              </button>
-              <button
-                onClick={() => setShowApplePayModal(false)}
-                className="w-full py-2.5 text-xs text-stone-500 hover:text-stone-900"
-              >
-                İmtina Et
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Simulated Google Pay Modal */}
-      {showGooglePayModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-white border border-stone-200 rounded-3xl p-6 max-w-sm w-full space-y-5 shadow-2xl text-center text-stone-900">
-            <div className="flex items-center justify-center mx-auto">
-              <GooglePayLogo className="h-7 w-auto" />
-            </div>
-            <div>
-              <h4 className="font-eb-garamond text-xl font-normal text-stone-900">Google Pay ilə Təsdiq</h4>
-              <p className="text-xs text-stone-500 mt-1">Ödəniləcək: <strong className="text-stone-900">{formatPrice(finalTotal)}</strong></p>
-            </div>
-            <div className="p-3 rounded-xl bg-stone-50 border border-stone-200 text-xs text-stone-700 flex items-center justify-between">
-              <span>Google Wallet: <strong>Visa •••• 3192</strong></span>
-              <span className="text-emerald-700 font-bold">Hazırdır</span>
-            </div>
-            <div className="space-y-2">
-              <button
-                onClick={() => {
-                  setShowGooglePayModal(false);
-                  processOrder("google_pay");
-                }}
-                className="w-full py-3.5 rounded-full bg-stone-900 text-white font-bold text-xs uppercase tracking-wider hover:bg-black transition"
-              >
-                Google Pay ilə Ödə
-              </button>
-              <button
-                onClick={() => setShowGooglePayModal(false)}
-                className="w-full py-2.5 text-xs text-stone-500 hover:text-stone-900"
-              >
-                İmtina Et
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

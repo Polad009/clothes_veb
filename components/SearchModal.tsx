@@ -7,6 +7,7 @@ import { Search, X, ArrowRight, Box, ArrowUpRight } from "lucide-react";
 import { MOCK_PRODUCTS } from "@/data/products";
 import { useStoreData } from "@/context/StoreDataContext";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import gsap from "gsap";
 
 interface SearchModalProps {
@@ -20,6 +21,8 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const { products } = useStoreData();
   const [query, setQuery] = useState("");
   const modalBoxRef = useRef<HTMLDivElement>(null);
+
+  useBodyScrollLock(isOpen);
 
   const popularTags = [
     { label: "Klassik Qəhvəyi Kətan", query: "Kətan" },
@@ -45,13 +48,9 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
       if (e.key === "Escape") onClose();
     };
     if (isOpen) {
-      document.body.style.overflow = "hidden";
       window.addEventListener("keydown", handleKeyDown);
-    } else {
-      document.body.style.overflow = "auto";
     }
     return () => {
-      document.body.style.overflow = "auto";
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen, onClose]);
@@ -69,8 +68,12 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
     : [];
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-start justify-center pt-16 sm:pt-24 px-4 select-none">
+    <div
+      data-lenis-prevent
+      className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-start justify-center pt-16 sm:pt-24 px-4 select-none overscroll-contain"
+    >
       <div
+        data-lenis-prevent
         ref={modalBoxRef}
         className="bg-[#180B04] border border-white/20 rounded-3xl w-full max-w-2xl overflow-hidden shadow-[0_30px_70px_rgba(0,0,0,0.8)] text-white"
       >

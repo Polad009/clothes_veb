@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Lock, Mail, User as UserIcon, AlertCircle, ArrowRight, Check } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 
 export function AuthModal() {
   const {
@@ -15,6 +16,8 @@ export function AuthModal() {
     signUpWithEmail,
   } = useAuth();
   const { t } = useLanguage();
+
+  useBodyScrollLock(isAuthModalOpen);
 
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
@@ -61,12 +64,18 @@ export function AuthModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+    <div
+      data-lenis-prevent
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn overscroll-contain"
+      onClick={closeAuthModal}
+    >
       <motion.div
+        data-lenis-prevent
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 10 }}
-        className="relative w-full max-w-md bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-stone-200 text-stone-900 space-y-6"
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-md bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-stone-200 text-stone-900 space-y-6 max-h-[90vh] overflow-y-auto"
       >
         {/* Close Button */}
         <button

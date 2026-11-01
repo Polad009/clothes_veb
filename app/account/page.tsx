@@ -12,7 +12,6 @@ import {
   Clock,
   MapPin,
   LogOut,
-  ChevronRight,
   ShieldCheck,
   Phone,
   Mail,
@@ -114,13 +113,6 @@ export default function AccountPage() {
   return (
     <div className="w-full min-h-screen bg-[#FAF7F2] text-stone-900 pt-8 pb-24">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs text-stone-500">
-          <Link href="/" className="hover:text-stone-900 transition">{t.nav.home}</Link>
-          <ChevronRight size={14} className="text-stone-400" />
-          <span className="text-stone-900 font-medium">{t.account.title}</span>
-        </div>
-
         {/* User Welcome Card */}
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-stone-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div className="flex items-center gap-4">

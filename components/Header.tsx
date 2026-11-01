@@ -22,6 +22,7 @@ import { UnifiedLocaleDropdown } from "@/components/UnifiedLocaleDropdown";
 import { useLanguage } from "@/context/LanguageContext";
 import { MOCK_PRODUCTS, Product } from "@/data/products";
 import { useStoreData } from "@/context/StoreDataContext";
+import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import Logo from "@/components/Logo";
 
 interface HeaderProps {
@@ -122,17 +123,7 @@ export function Header({ className = "" }: HeaderProps) {
     setMobileMenuOpen(false);
   }, [pathname, currentCategory]);
 
-  // Lock body scroll smoothly when mobile drawer is open
-  useEffect(() => {
-    if (mobileMenuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [mobileMenuOpen]);
+  useBodyScrollLock(mobileMenuOpen);
 
   const navLinks = [
     { label: t.nav.shirts, href: "/collections?category=koynek", categoryId: "koynek" },
@@ -329,9 +320,10 @@ export function Header({ className = "" }: HeaderProps) {
       {/* Responsive Mobile Drawer in Light Luxury Aesthetic with Staggered Cascading Animation */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <div className="fixed inset-0 z-[100] lg:hidden">
+          <div data-lenis-prevent className="fixed inset-0 z-[100] lg:hidden overscroll-contain">
             {/* Backdrop */}
             <motion.div
+              data-lenis-prevent
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -342,11 +334,12 @@ export function Header({ className = "" }: HeaderProps) {
 
             {/* Sidebar Drawer - Light Luxury Atelier Theme */}
             <motion.aside
+              data-lenis-prevent
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 320 }}
-              className="fixed inset-y-0 left-0 w-[84%] max-w-sm bg-[#FAF7F2] text-[#1A1517] h-[100dvh] z-10 flex flex-col justify-between shadow-2xl border-r border-[#E8E2D8]"
+              className="fixed inset-y-0 left-0 w-[84%] max-w-sm bg-[#FAF7F2] text-[#1A1517] h-[100dvh] z-10 flex flex-col justify-between shadow-2xl border-r border-[#E8E2D8] overscroll-contain"
             >
               {/* Header */}
               <div className="p-4 sm:p-5 border-b border-[#E8E2D8] flex items-center justify-between bg-white/80 backdrop-blur-sm">
