@@ -55,7 +55,10 @@ export async function POST(req: NextRequest) {
       currency: "AZN",
       method,
       items,
-      customer,
+      customer: {
+        ...customer,
+        email: customer.email || "",
+      },
     };
 
     // 4. Process payment through pluggable provider

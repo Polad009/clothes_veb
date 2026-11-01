@@ -62,6 +62,10 @@ async function getEnrichedStoreData() {
         paymentStatus: so.payment_status || 'Paid',
         orderStatus: so.order_status || 'Yeni Sifariş',
         source: 'Supabase Cloud',
+        isTest: Boolean(so.is_test || so.payment_status === 'test_paid'),
+        currency: so.currency || 'AZN',
+        promoCode: so.promo_code || undefined,
+        provider: so.provider || 'mock',
       }));
 
       // Add any Supabase orders that aren't in local DB yet
@@ -516,7 +520,29 @@ export async function DELETE(
       return NextResponse.json({ success: true });
     }
 
-    // 2. Delete Order
+    // 2. Delete Order or Clear Test Orders
+    if (route === 'orders' && id === 'clear-test') {
+      const testIds = new Set(
+        (db.orders || [])
+          .filter((o: any) => o.isTest === true || o.paymentStatus === 'test_paid')
+          .map((o: any) => String(o.id))
+      );
+      const count = testIds.size;
+      db.orders = (db.orders || []).filter((o: any) => !testIds.has(String(o.id)));
+      db.podOrders = (db.podOrders || []).filter((p: any) => !testIds.has(String(p.orderId)));
+      writeStoreDb(db);
+
+      if (supabaseServer) {
+        try {
+          await supabaseServer.from('orders').delete().or('is_test.eq.true,payment_status.eq.test_paid');
+        } catch (e) {
+          console.warn('Supabase clear test warning:', e);
+        }
+      }
+
+      return NextResponse.json({ success: true, count, message: `${count} test sifarişi silindi.` });
+    }
+
     if (route === 'orders' && id) {
       db.orders = (db.orders || []).filter((o: any) => o.id !== id);
       db.podOrders = (db.podOrders || []).filter((p: any) => p.orderId !== id && p.id !== id);

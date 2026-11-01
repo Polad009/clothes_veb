@@ -52,7 +52,24 @@ export default function CheckoutPage() {
   }, [user, profile]);
 
   // Payment Selection
-  const [paymentMethod, setPaymentMethod] = useState<"apple_pay" | "google_pay" | "card">("apple_pay");
+  const [paymentMethod, setPaymentMethod] = useState<"apple_pay" | "google_pay" | "card" | "cod">("apple_pay");
+  const isTestMode = process.env.NEXT_PUBLIC_PAYMENT_MODE === "test";
+  const enableCod = process.env.NEXT_PUBLIC_ENABLE_COD !== "false";
+  const [walletDebugMsg, setWalletDebugMsg] = useState<{ text: string; method?: string } | null>(null);
+
+  // Load Google Pay SDK in background
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const existing = document.getElementById("google-pay-sdk");
+      if (!existing) {
+        const script = document.createElement("script");
+        script.id = "google-pay-sdk";
+        script.src = "https://pay.google.com/gp/p/js/pay.js";
+        script.async = true;
+        document.body.appendChild(script);
+      }
+    }
+  }, []);
 
   // Card Form State
   const [cardNumber, setCardNumber] = useState("");
@@ -81,6 +98,7 @@ export default function CheckoutPage() {
   const shippingCost = isFreeZone ? 0 : (totalPrice >= 60 ? 0 : 5);
   const discountAmount = promoDiscountAmount > 0 ? promoDiscountAmount : (totalPrice * discountPercent) / 100;
   const finalTotal = Math.max(0, totalPrice - discountAmount + shippingCost);
+  const hasCustomItems = items.some((i) => i.type === "custom");
 
   const clearFieldError = (field: string) => {
     if (fieldErrors[field]) {
@@ -314,12 +332,15 @@ export default function CheckoutPage() {
               ? "Apple Pay"
               : chosenMethod === "google_pay"
               ? "Google Pay"
+              : chosenMethod === "cod"
+              ? "Çatdırılmada Ödəniş (COD)"
               : "Bank Kartı (Visa/Mastercard)",
           subtotal: totalPrice,
           shipping: shippingCost,
           discount: discountAmount,
           promoCode: appliedPromoCode || null,
-          orderStatus: "Yeni Sifariş",
+          currency: currency || "AZN",
+          orderStatus: chosenMethod === "cod" ? "Təsdiqləndi (COD)" : "Yeni Sifariş",
           total: finalTotal,
         }),
       });
@@ -328,7 +349,6 @@ export default function CheckoutPage() {
       if (!res.ok) {
         throw new Error(data.error || "Sifariş zamanı xəta baş verdi.");
       }
-
 
       if (typeof window !== "undefined" && data?.order?.id) {
         try {
@@ -345,8 +365,9 @@ export default function CheckoutPage() {
             shipping: shippingCost,
             discount: discountAmount,
             paymentMethod: data.order.paymentMethod || chosenMethod,
-            paymentStatus: data.order.paymentStatus || "Ödənilib",
-            orderStatus: data.order.orderStatus || "Yeni Sifariş",
+            paymentStatus: data.order.paymentStatus || (chosenMethod === "cod" ? "confirmed_cod" : isTestMode ? "test_paid" : "Ödənilib"),
+            orderStatus: data.order.orderStatus || (chosenMethod === "cod" ? "Təsdiqləndi (COD)" : "Yeni Sifariş"),
+            isTest: Boolean(data.order.isTest || isTestMode),
             customer: {
               fullName: fullName || "Müştəri",
               phone: phone || "",
@@ -383,6 +404,7 @@ export default function CheckoutPage() {
   };
 
   const handleNativePayment = async (method: "apple_pay" | "google_pay") => {
+    setWalletDebugMsg(null);
     if (!user) {
       openAuthModal();
       setErrorMsg(
@@ -414,63 +436,109 @@ export default function CheckoutPage() {
     }
 
     // 1. Native Apple Pay via Safari Webkit ApplePaySession (iPhone / iPad / Mac)
-    if (method === "apple_pay" && typeof window !== "undefined" && (window as any).ApplePaySession) {
+    if (method === "apple_pay") {
+      const hasApplePay = typeof window !== "undefined" && Boolean((window as any).ApplePaySession);
+      if (!hasApplePay) {
+        const debugReason = "Apple Pay yalnız iOS Safari və ya macOS Safari brauzerində aktivdir (və HTTPS bağlantısı tələb olunur).";
+        console.warn("[Apple Pay Debug]:", debugReason);
+        setWalletDebugMsg({
+          method: "apple_pay",
+          text: `⚠️ ${debugReason}`,
+        });
+        return;
+      }
+
+      const ApplePaySession = (window as any).ApplePaySession;
       try {
-        const ApplePaySession = (window as any).ApplePaySession;
-        if (ApplePaySession.canMakePayments()) {
-          const paymentRequest = {
-            countryCode: "AZ",
-            currencyCode: currency || "AZN",
-            supportedNetworks: ["visa", "masterCard"],
-            merchantCapabilities: ["supports3DS"],
-            total: {
-              label: "HORVVALLE Atelier",
-              amount: finalTotal.toFixed(2),
-            },
-          };
-          const session = new ApplePaySession(3, paymentRequest);
-          session.onvalidatemerchant = () => {
-            session.completeMerchantValidation({});
-          };
-          session.onpaymentauthorized = () => {
-            session.completePayment(ApplePaySession.STATUS_SUCCESS);
-            processOrder("apple_pay");
-          };
-          session.oncancel = () => {};
-          session.begin();
+        const canPay = ApplePaySession.canMakePayments();
+        if (!canPay) {
+          const debugReason = "canMakePayments() false qaytardı. Səbəb: Apple Wallet-də aktiv bank kartı quraşdırılmayıb və ya domen HTTPS deyil.";
+          console.warn("[Apple Pay Debug]:", debugReason);
+          setWalletDebugMsg({
+            method: "apple_pay",
+            text: `⚠️ Apple Pay pəncərəsi açıla bilmədi: ${debugReason}`,
+          });
           return;
         }
-      } catch (err) {
-        console.warn("Native ApplePaySession note:", err);
+
+        const paymentRequest = {
+          countryCode: "AZ",
+          currencyCode: currency || "AZN",
+          supportedNetworks: ["visa", "masterCard"],
+          merchantCapabilities: ["supports3DS"],
+          total: {
+            label: "HORVVALLE Atelier",
+            amount: finalTotal.toFixed(2),
+            type: "final",
+          },
+          lineItems: [
+            {
+              label: "Məhsullar",
+              amount: totalPrice.toFixed(2),
+            },
+            {
+              label: "Çatdırılma",
+              amount: shippingCost.toFixed(2),
+            },
+          ],
+        };
+
+        const session = new ApplePaySession(3, paymentRequest);
+
+        session.onvalidatemerchant = async (event: any) => {
+          try {
+            const res = await fetch("/api/payments/apple/validate", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ validationURL: event.validationURL }),
+            });
+            const data = await res.json();
+            if (data?.session) {
+              session.completeMerchantValidation(data.session);
+            } else {
+              session.completeMerchantValidation({});
+            }
+          } catch {
+            session.completeMerchantValidation({});
+          }
+        };
+
+        session.onpaymentauthorized = () => {
+          session.completePayment(ApplePaySession.STATUS_SUCCESS);
+          processOrder("apple_pay");
+        };
+
+        session.oncancel = () => {
+          // Native payment sheet was closed/cancelled by user: silent return
+          console.info("[Apple Pay]: İstifadəçi ödənişi ləğv etdi.");
+        };
+
+        session.begin();
+        return;
+      } catch (err: any) {
+        console.warn("[Apple Pay Error]:", err);
+        setWalletDebugMsg({
+          method: "apple_pay",
+          text: `Apple Pay xətası: ${err?.message || "Ödəniş pəncərəsi başladıla bilmədi."}`,
+        });
+        return;
       }
     }
 
-    // 2. Standard W3C Payment Request API (Native on iOS Safari & Android Chrome)
-    if (typeof window !== "undefined" && (window as any).PaymentRequest) {
-      try {
-        const supportedInstruments = method === "apple_pay" ? [
-          {
-            supportedMethods: "https://apple.com/apple-pay",
-            data: {
-              version: 3,
-              merchantIdentifier: "merchant.horvvalle.com",
-              countryCode: "AZ",
-              currencyCode: currency || "AZN",
-              supportedNetworks: ["visa", "masterCard"],
-              merchantCapabilities: ["supports3DS"],
-            },
-          },
-        ] : [
-          {
-            supportedMethods: "https://google.com/pay",
-            data: {
-              environment: "PRODUCTION",
-              apiVersion: 2,
-              apiVersionMinor: 0,
-              merchantInfo: {
-                merchantName: "HORVVALLE Atelier",
-              },
-              allowedPaymentMethods: [{
+    // 2. Official Google Pay Integration (TEST Mode)
+    if (method === "google_pay") {
+      const win = typeof window !== "undefined" ? (window as any) : {};
+      if (win.google?.payments?.api?.PaymentsClient) {
+        try {
+          const paymentsClient = new win.google.payments.api.PaymentsClient({
+            environment: "TEST",
+          });
+
+          const paymentDataRequest = {
+            apiVersion: 2,
+            apiVersionMinor: 0,
+            allowedPaymentMethods: [
+              {
                 type: "CARD",
                 parameters: {
                   allowedAuthMethods: ["PAN_ONLY", "CRYPTOGRAM_3DS"],
@@ -479,51 +547,123 @@ export default function CheckoutPage() {
                 tokenizationSpecification: {
                   type: "PAYMENT_GATEWAY",
                   parameters: {
-                    gateway: "horvvalle",
-                    gatewayMerchantId: "horvvalle_production",
+                    gateway: "example",
+                    gatewayMerchantId: "exampleGatewayMerchantId",
                   },
                 },
-              }],
+              },
+            ],
+            merchantInfo: {
+              merchantId: "12345678901234567890",
+              merchantName: "HORVVALLE Atelier",
             },
-          },
-        ];
-
-        const details = {
-          total: {
-            label: "HORVVALLE Atelier",
-            amount: { currency: currency || "AZN", value: finalTotal.toFixed(2) },
-          },
-          displayItems: [
-            {
-              label: "Məhsullar",
-              amount: { currency: currency || "AZN", value: totalPrice.toFixed(2) },
+            transactionInfo: {
+              totalPriceStatus: "FINAL",
+              totalPriceLabel: "Total",
+              totalPrice: finalTotal.toFixed(2),
+              currencyCode: currency || "AZN",
+              countryCode: "AZ",
             },
-            {
-              label: "Çatdırılma",
-              amount: { currency: currency || "AZN", value: shippingCost.toFixed(2) },
-            },
-          ],
-        };
+          };
 
-        const pr = new (window as any).PaymentRequest(supportedInstruments, details);
-        const canMake = await pr.canMakePayment().catch(() => false);
+          const isReady = await paymentsClient.isReadyToPay({
+            apiVersion: 2,
+            apiVersionMinor: 0,
+            allowedPaymentMethods: paymentDataRequest.allowedPaymentMethods,
+          });
 
-        if (canMake) {
-          const response = await pr.show();
-          await response.complete("success");
-          await processOrder(method);
+          if (isReady.result) {
+            try {
+              const paymentData = await paymentsClient.loadPaymentData(paymentDataRequest);
+              if (paymentData) {
+                await processOrder("google_pay");
+                return;
+              }
+            } catch (payErr: any) {
+              if (payErr?.statusCode === "CANCELED") {
+                console.info("[Google Pay]: İstifadəçi Google Pay pəncərəsini bağladı.");
+                return;
+              }
+              console.warn("Google pay load error:", payErr);
+            }
+          } else {
+            setWalletDebugMsg({
+              method: "google_pay",
+              text: "Google Pay xəbərdarlığı: Brauzerinizdə Google Pay aktiv deyil və ya kart tapılmadı.",
+            });
+            return;
+          }
+        } catch (gErr: any) {
+          console.warn("[Google Pay API error]:", gErr);
+          setWalletDebugMsg({
+            method: "google_pay",
+            text: `Google Pay xətası: ${gErr?.message || "Google Pay API xətası"}`,
+          });
           return;
         }
-      } catch (err: any) {
-        console.warn("PaymentRequest note:", err);
-        if (err?.name === "AbortError") {
-          return;
+      } else {
+        // Fallback using W3C PaymentRequest API
+        if (typeof window !== "undefined" && (window as any).PaymentRequest) {
+          try {
+            const supportedInstruments = [
+              {
+                supportedMethods: "https://google.com/pay",
+                data: {
+                  environment: "TEST",
+                  apiVersion: 2,
+                  apiVersionMinor: 0,
+                  merchantInfo: {
+                    merchantName: "HORVVALLE Atelier",
+                  },
+                  allowedPaymentMethods: [
+                    {
+                      type: "CARD",
+                      parameters: {
+                        allowedAuthMethods: ["PAN_ONLY", "CRYPTOGRAM_3DS"],
+                        allowedCardNetworks: ["VISA", "MASTERCARD"],
+                      },
+                      tokenizationSpecification: {
+                        type: "PAYMENT_GATEWAY",
+                        parameters: {
+                          gateway: "example",
+                          gatewayMerchantId: "exampleGatewayMerchantId",
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ];
+
+            const details = {
+              total: {
+                label: "HORVVALLE Atelier",
+                amount: { currency: currency || "AZN", value: finalTotal.toFixed(2) },
+              },
+            };
+
+            const pr = new (window as any).PaymentRequest(supportedInstruments, details);
+            const canMake = await pr.canMakePayment().catch(() => false);
+
+            if (canMake) {
+              const response = await pr.show();
+              await response.complete("success");
+              await processOrder("google_pay");
+              return;
+            }
+          } catch (err: any) {
+            if (err?.name === "AbortError") {
+              return;
+            }
+          }
         }
+
+        setWalletDebugMsg({
+          method: "google_pay",
+          text: "Google Pay xəbərdarlığı: Cihazınızda Google Pay quraşdırılmayıb.",
+        });
       }
     }
-
-    // 3. Direct execution fallback
-    await processOrder(method);
   };
 
   const handleCardSubmit = (e: React.FormEvent) => {
@@ -540,6 +680,21 @@ export default function CheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* Left Column: Checkout & Payment Form */}
           <div className="lg:col-span-7 space-y-6">
+            {/* Test Mode Banner */}
+            {isTestMode && (
+              <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-950 text-xs flex items-center justify-between gap-3 shadow-2xs">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping shrink-0" />
+                  <span className="font-bold uppercase tracking-wider text-[10px] text-amber-900 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-300">
+                    TEST MODE
+                  </span>
+                  <span className="text-[11px] text-amber-800 font-medium">
+                    Real ödəniş çəkilmir. Test rejimində təhlükəsiz sınaq sifarişi edə bilərsiniz.
+                  </span>
+                </div>
+              </div>
+            )}
+
             {/* Express 1-Click Payment Row */}
             <div className="bg-white border border-stone-200/90 rounded-3xl p-6 space-y-4 shadow-xs">
               <span className="text-xs font-semibold uppercase tracking-wider text-stone-600 block text-center">
@@ -565,6 +720,38 @@ export default function CheckoutPage() {
                   <GooglePayLogo className="h-5 w-auto" />
                 </button>
               </div>
+
+              {/* Wallet Debug Notification Container */}
+              {walletDebugMsg && (
+                <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200 text-amber-950 text-[11px] space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-1.5 font-semibold text-stone-900">
+                      <AlertCircle size={14} className="text-amber-600 shrink-0" />
+                      <span>{walletDebugMsg.text}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setWalletDebugMsg(null)}
+                      className="text-stone-400 hover:text-stone-700 p-0.5"
+                    >
+                      <X size={13} />
+                    </button>
+                  </div>
+                  {isTestMode && (
+                    <div className="pt-1.5 flex items-center justify-between border-t border-amber-200/60">
+                      <span className="text-stone-600 text-[10.5px]">Test rejimində axını tam yoxlamaq üçün:</span>
+                      <button
+                        type="button"
+                        disabled={isProcessing}
+                        onClick={() => processOrder(walletDebugMsg.method || "apple_pay")}
+                        className="py-1 px-3.5 rounded-xl bg-stone-900 hover:bg-black text-white text-[10.5px] font-bold uppercase tracking-wider transition cursor-pointer disabled:opacity-50"
+                      >
+                        {isProcessing ? "..." : "Sınaq Sifarişini Təsdiq Et"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="flex items-center gap-3 pt-2">
                 <div className="h-px bg-stone-200 flex-1" />
@@ -926,6 +1113,14 @@ export default function CheckoutPage() {
                   {/* Card Form when selected */}
                   {paymentMethod === "card" && (
                     <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-3 animate-fadeIn">
+                      {isTestMode && (
+                        <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-[11px] flex items-center gap-2">
+                          <AlertCircle size={15} className="text-blue-600 shrink-0" />
+                          <span>
+                            Test rejimi: Real kart provayderi (Stripe/PashaBank/Payriff) qoşulana qədər kart məlumatları saxlanılmır və sifariş 'test_paid' statusu ilə test olunur.
+                          </span>
+                        </div>
+                      )}
                       <div className="space-y-1">
                         <label className="text-[11px] font-semibold text-stone-700 uppercase">Kart Üzərindəki Ad</label>
                         <input
@@ -1048,6 +1243,44 @@ export default function CheckoutPage() {
                         </motion.div>
                       </div>
                     </div>
+                  )}
+
+                  {/* COD (Cash on Delivery) Option */}
+                  {enableCod && (
+                    <label
+                      onClick={() => {
+                        if (!hasCustomItems) {
+                          setPaymentMethod("cod");
+                        }
+                      }}
+                      className={`p-4 rounded-2xl border flex items-center justify-between transition-all ${
+                        hasCustomItems
+                          ? "border-stone-200 bg-stone-50 opacity-60 cursor-not-allowed text-stone-400"
+                          : paymentMethod === "cod"
+                          ? "border-stone-900 bg-stone-50 text-stone-900 ring-1 ring-stone-900/10 shadow-xs cursor-pointer"
+                          : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:text-stone-900 cursor-pointer"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Truck size={20} className={paymentMethod === "cod" ? "text-stone-900" : "text-stone-400"} />
+                        <div>
+                          <div className="text-xs font-bold text-stone-900 flex items-center gap-2">
+                            <span>Çatdırılmada Ödəniş (Nağd / Kuryer POS)</span>
+                            {hasCustomItems && (
+                              <span className="text-[9px] font-bold bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full border border-rose-200">
+                                Fərdi dizaynlı məhsullara şamil olunmur
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[11px] text-stone-500">
+                            Məhsulu ünvanda kuryerdən təhvil alarkən nağd və ya kartla ödəyin
+                          </div>
+                        </div>
+                      </div>
+                      <span className="w-4 h-4 rounded-full border-2 border-stone-300 flex items-center justify-center">
+                        {paymentMethod === "cod" && <span className="w-2 h-2 rounded-full bg-stone-900" />}
+                      </span>
+                    </label>
                   )}
                 </div>
               </div>

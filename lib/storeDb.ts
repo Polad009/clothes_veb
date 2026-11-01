@@ -111,6 +111,11 @@ export interface StoreOrder {
   shipping: number;
   discount: number;
   total: number;
+  isTest?: boolean;
+  provider?: string;
+  providerPaymentId?: string;
+  promoCode?: string;
+  currency?: string;
 }
 
 export interface PodOrder {

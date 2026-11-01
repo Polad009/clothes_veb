@@ -869,10 +869,16 @@
               Və Status İdarəetməsi</p>
           </div>
           <div class="flex items-center gap-2">
+            <button onclick="clearTestOrders()"
+              class="px-3.5 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-xl font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
+              title="Yalnız sınaq (test) sifarişlərini bazadan təmizləyir">
+              <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-amber-600"></i>
+              <span>Test Sifarişləri Təmizlə</span>
+            </button>
             <button onclick="clearAllOrders()"
-              class="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
+              class="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
               <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-              <span>Sınaq Sifarişlərini Sıfırla</span>
+              <span>Hamısını Sıfırla</span>
             </button>
             <button onclick="loadData()"
               class="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
@@ -882,22 +888,42 @@
           </div>
         </div>
 
-        <!-- Orders Status Tabs Filter -->
-        <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs font-bold">
-          <button onclick="filterOrdersByStatus('all')" id="order-pill-all"
-            class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-black text-white cursor-pointer">Hamısı</button>
-          <button onclick="filterOrdersByStatus('yeni')" id="order-pill-yeni"
-            class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Yeni Sifarişlər</button>
-          <button onclick="filterOrdersByStatus('tesdiq')" id="order-pill-tesdiq"
-            class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Təsdiqləndi</button>
-          <button onclick="filterOrdersByStatus('capda')" id="order-pill-capda"
-            class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Çapda / Dərzidə</button>
-          <button onclick="filterOrdersByStatus('kuryer')" id="order-pill-kuryer"
-            class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Kuryerdə (Yolda)</button>
-          <button onclick="filterOrdersByStatus('catdirildi')" id="order-pill-catdirildi"
-            class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Çatdırıldı</button>
-          <button onclick="filterOrdersByStatus('legv')" id="order-pill-legv"
-            class="order-filter-pill px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Ləğv Edildi</button>
+        <!-- Orders Filter & Search Toolbar -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-2xs">
+          <!-- Status Tabs Filter -->
+          <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 text-xs font-bold">
+            <button onclick="filterOrdersByStatus('all')" id="order-pill-all"
+              class="order-filter-pill px-3 py-1.5 rounded-xl bg-black text-white cursor-pointer">Hamısı</button>
+            <button onclick="filterOrdersByStatus('yeni')" id="order-pill-yeni"
+              class="order-filter-pill px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Yeni</button>
+            <button onclick="filterOrdersByStatus('tesdiq')" id="order-pill-tesdiq"
+              class="order-filter-pill px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Təsdiqləndi</button>
+            <button onclick="filterOrdersByStatus('capda')" id="order-pill-capda"
+              class="order-filter-pill px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Çapda</button>
+            <button onclick="filterOrdersByStatus('kuryer')" id="order-pill-kuryer"
+              class="order-filter-pill px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Kuryerdə</button>
+            <button onclick="filterOrdersByStatus('catdirildi')" id="order-pill-catdirildi"
+              class="order-filter-pill px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Çatdırıldı</button>
+            <button onclick="filterOrdersByStatus('legv')" id="order-pill-legv"
+              class="order-filter-pill px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:text-black cursor-pointer">Ləğv</button>
+          </div>
+
+          <!-- Real vs Test Filter & Search -->
+          <div class="flex items-center gap-2">
+            <div class="flex items-center p-0.5 bg-slate-100 rounded-xl text-[11px] font-bold">
+              <button onclick="filterOrdersByMode('all')" id="mode-pill-all"
+                class="order-mode-pill px-2.5 py-1 rounded-lg bg-white text-slate-900 shadow-2xs cursor-pointer">Hamısı</button>
+              <button onclick="filterOrdersByMode('real')" id="mode-pill-real"
+                class="order-mode-pill px-2.5 py-1 rounded-lg text-slate-600 hover:text-black cursor-pointer">Real</button>
+              <button onclick="filterOrdersByMode('test')" id="mode-pill-test"
+                class="order-mode-pill px-2.5 py-1 rounded-lg text-amber-700 hover:text-amber-900 cursor-pointer">Test (Sınaq)</button>
+            </div>
+            <div class="relative">
+              <input type="text" id="orderSearchInput" oninput="renderOrdersTable()" placeholder="Axtar (Ad, nömrə, ID)..."
+                class="w-48 sm:w-56 pl-7 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-black focus:bg-white transition" />
+              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5 pointer-events-none"></i>
+            </div>
+          </div>
         </div>
 
         <!-- Orders Table -->
@@ -2060,6 +2086,8 @@
     // ----------------------------------------------------
     // ORDERS TABLE & STATUS CHANGE
     // ----------------------------------------------------
+    let CURRENT_ORDER_MODE = 'all';
+
     function filterOrdersByStatus(status) {
       CURRENT_ORDER_FILTER = status;
       document.querySelectorAll('.order-filter-pill').forEach(p => {
@@ -2070,6 +2098,20 @@
       if (activePill) {
         activePill.classList.remove('bg-slate-100', 'text-slate-600');
         activePill.classList.add('bg-black', 'text-white');
+      }
+      renderOrdersTable();
+    }
+
+    function filterOrdersByMode(mode) {
+      CURRENT_ORDER_MODE = mode;
+      document.querySelectorAll('.order-mode-pill').forEach(p => {
+        p.classList.remove('bg-white', 'text-slate-900', 'shadow-2xs');
+        p.classList.add('text-slate-600');
+      });
+      const activePill = document.getElementById(`mode-pill-${mode}`);
+      if (activePill) {
+        activePill.classList.remove('text-slate-600');
+        activePill.classList.add('bg-white', 'text-slate-900', 'shadow-2xs');
       }
       renderOrdersTable();
     }
@@ -2092,6 +2134,29 @@
         });
       }
 
+      // Filter by mode (real vs test)
+      if (CURRENT_ORDER_MODE === 'real') {
+        orders = orders.filter(o => o.isTest !== true && o.paymentStatus !== 'test_paid');
+      } else if (CURRENT_ORDER_MODE === 'test') {
+        orders = orders.filter(o => o.isTest === true || o.paymentStatus === 'test_paid');
+      }
+
+      // Filter by Search Query
+      const q = (document.getElementById('orderSearchInput')?.value || '').toLowerCase().trim();
+      if (q) {
+        orders = orders.filter(o => {
+          const cust = o.customer || {};
+          return (
+            (o.id || '').toLowerCase().includes(q) ||
+            (o.trackingCode || '').toLowerCase().includes(q) ||
+            (cust.fullName || '').toLowerCase().includes(q) ||
+            (cust.phone || '').toLowerCase().includes(q) ||
+            (cust.email || '').toLowerCase().includes(q) ||
+            (cust.city || '').toLowerCase().includes(q)
+          );
+        });
+      }
+
       if (orders.length === 0) {
         container.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400">Heç bir sifariş tapılmadı.</td></tr>`;
         return;
@@ -2100,11 +2165,19 @@
       container.innerHTML = orders.map(o => {
         const theme = getStatusTheme(o.orderStatus);
         const cust = o.customer || {};
+        const isTestOrder = Boolean(o.isTest || o.paymentStatus === 'test_paid');
+        const isCod = String(o.paymentMethod || '').toLowerCase().includes('çatdırılma') || String(o.paymentMethod || '').toLowerCase().includes('cod');
+        const isPaid = (o.paymentStatus || '').toLowerCase() === 'paid' || (o.paymentStatus || '').toLowerCase() === 'ödənilib';
+
         return `
-          <tr class="hover:bg-slate-50/60 transition">
+          <tr class="hover:bg-slate-50/60 transition ${isTestOrder ? 'bg-amber-50/20' : ''}">
             <td class="p-3.5">
-              <div class="font-bold text-slate-900">${o.id}</div>
-              <div class="text-[10px] text-slate-400">${new Date(o.date || Date.now()).toLocaleDateString('az-AZ')}</div>
+              <div class="flex items-center gap-1.5 font-bold text-slate-900">
+                <span>${o.id}</span>
+                ${isTestOrder ? `<span class="px-1.5 py-0.2 rounded text-[8px] font-black bg-amber-100 text-amber-900 border border-amber-300">TEST</span>` : ''}
+              </div>
+              <div class="text-[10px] text-slate-400 font-mono">${new Date(o.date || Date.now()).toLocaleDateString('az-AZ')} ${new Date(o.date || Date.now()).toLocaleTimeString('az-AZ', { hour: '2-digit', minute: '2-digit' })}</div>
+              ${o.trackingCode ? `<div class="text-[9px] text-emerald-700 font-mono font-bold">#${o.trackingCode}</div>` : ''}
             </td>
             <td class="p-3.5">
               <div class="font-bold text-slate-900 flex items-center gap-1.5">
@@ -2127,12 +2200,40 @@
             <td class="p-3.5">
               <div class="text-xs text-slate-700 max-w-[200px] truncate">${(o.items || []).map(i => `${i.quantity}x ${i.name} (${i.size || 'L'})`).join(', ')}</div>
             </td>
-            <td class="p-3.5 font-black text-slate-900">${Number(o.total || 0).toFixed(2)} ₼</td>
-            <td class="p-3.5 font-bold text-slate-700 text-[11px]">${o.paymentMethod || 'Kart'}</td>
+            <td class="p-3.5 font-black text-slate-900">
+              <div>${Number(o.total || 0).toFixed(2)} ₼</div>
+              ${o.promoCode ? `<div class="text-[9px] font-bold text-emerald-700">Promokod: ${o.promoCode}</div>` : ''}
+            </td>
+            <td class="p-3.5 text-[11px]">
+              <div class="font-bold text-slate-800">${o.paymentMethod || 'Kart'}</div>
+              ${isTestOrder ? `
+                <div class="inline-block mt-0.5 px-1.5 py-0.2 rounded text-[8.5px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                  ● Sınaq Ödənişi
+                </div>
+              ` : isCod && !isPaid ? `
+                <div class="mt-1 flex items-center gap-1.5">
+                  <span class="px-1.5 py-0.2 rounded text-[8.5px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
+                    COD Qapıda
+                  </span>
+                  <button onclick="markCodPaid('${o.id}')" class="px-1.5 py-0.5 rounded text-[8px] font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition cursor-pointer" title="Ödəniş qapıda kuryerə təhvil verildikdə klikləyin">
+                    Ödənildi et
+                  </button>
+                </div>
+              ` : isPaid ? `
+                <div class="inline-block mt-0.5 px-1.5 py-0.2 rounded text-[8.5px] font-bold bg-emerald-100 text-emerald-800">
+                  ✓ Ödənilib
+                </div>
+              ` : `
+                <div class="inline-block mt-0.5 px-1.5 py-0.2 rounded text-[8.5px] font-bold bg-slate-100 text-slate-600">
+                  ${o.paymentStatus || 'Gözləmədə'}
+                </div>
+              `}
+            </td>
             <td class="p-3.5">
               <select onchange="updateOrderStatus('${o.id}', this.value)" class="text-[10px] font-bold px-2 py-1 rounded-full border border-slate-200 outline-none cursor-pointer ${theme.badgeClass}">
                 <option value="Yeni Sifariş" ${o.orderStatus === 'Yeni Sifariş' || o.orderStatus === 'Processing' ? 'selected' : ''}>Yeni Sifariş</option>
                 <option value="Təsdiqləndi" ${o.orderStatus === 'Təsdiqləndi' ? 'selected' : ''}>Təsdiqləndi</option>
+                <option value="Təsdiqləndi (COD)" ${o.orderStatus === 'Təsdiqləndi (COD)' ? 'selected' : ''}>Təsdiqləndi (COD)</option>
                 <option value="Çapda / Dərzidə" ${o.orderStatus === 'Çapda / Dərzidə' ? 'selected' : ''}>Çapda / Dərzidə</option>
                 <option value="Kuryerdədir" ${o.orderStatus === 'Kuryerdədir' ? 'selected' : ''}>Kuryerdədir (Yolda)</option>
                 <option value="Çatdırıldı" ${o.orderStatus === 'Çatdırıldı' ? 'selected' : ''}>Çatdırıldı</option>
@@ -2150,6 +2251,42 @@
           </tr>
         `;
       }).join('');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    async function clearTestOrders() {
+      if (!confirm('Bütün test (sınaq) sifarişləri birdəfəlik silinsin? Real sifarişlərə toxunulmayacaq.')) return;
+      try {
+        const res = await fetch('/api/admin/orders/clear-test', { method: 'DELETE' });
+        const result = await res.json();
+        if (result.success) {
+          alert('✓ ' + (result.message || 'Bütün test sifarişləri silindi.'));
+          await loadData();
+        } else {
+          alert('Xəta: ' + (result.error || 'Silinmədi'));
+        }
+      } catch (err) {
+        alert('Xəta: ' + err.message);
+      }
+    }
+
+    async function markCodPaid(orderId) {
+      if (!confirm('Bu COD sifarişinin ödənişi təhvil alındı kimi qeyd edilsin?')) return;
+      try {
+        const res = await fetch(`/api/admin/orders/${orderId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ paymentStatus: 'paid' })
+        });
+        const result = await res.json();
+        if (result.success) {
+          await loadData();
+        } else {
+          alert('Xəta: ' + (result.error || 'Status dəyişmədi'));
+        }
+      } catch (err) {
+        alert('Xəta: ' + err.message);
+      }
     }
 
     function renderStats() {

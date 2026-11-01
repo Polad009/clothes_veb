@@ -33,6 +33,7 @@ export class MockPaymentProvider implements PaymentProvider {
     if (!validation.valid) {
       return {
         success: false,
+        status: "failed",
         message: validation.reason,
       };
     }
@@ -43,6 +44,7 @@ export class MockPaymentProvider implements PaymentProvider {
     if (request.method === "cash_on_delivery") {
       return {
         success: true,
+        status: "confirmed_cod",
         transactionId,
         message: "Sifarişiniz qapıda ödəniş seçimi ilə qeydə alındı.",
       };
@@ -51,6 +53,7 @@ export class MockPaymentProvider implements PaymentProvider {
     // For Apple Pay / Google Pay / Card
     return {
       success: true,
+      status: "test_paid",
       transactionId,
       paymentUrl: `/checkout/success?txn=${transactionId}`,
       message: "Ödəniş uğurla qəbul edildi.",

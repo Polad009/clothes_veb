@@ -3,15 +3,17 @@
 import React, { Suspense, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { CheckCircle2, ArrowRight, Check } from "lucide-react";
-import { formatPrice } from "@/lib/utils";
+import { CheckCircle2, ArrowRight, Check, AlertCircle } from "lucide-react";
+import { useCurrency } from "@/context/CurrencyContext";
 import { playPurchaseSuccessSound } from "@/lib/soundEffects";
 
 function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
-  const orderId = searchParams.get("orderId") || `NV-ORD-${Math.floor(1000 + Math.random() * 9000)}`;
+  const orderId = searchParams.get("order") || searchParams.get("orderId") || `VTX-ORD-${Math.floor(1000 + Math.random() * 9000)}`;
   const method = searchParams.get("method") || "card";
   const total = Number(searchParams.get("total")) || 0;
+  const isTest = searchParams.get("test") === "true";
+  const { formatPrice } = useCurrency();
   const [copied, setCopied] = React.useState(false);
 
   useEffect(() => {
@@ -19,7 +21,6 @@ function CheckoutSuccessContent() {
       playPurchaseSuccessSound();
     } catch (e) {}
 
-    // Automatically persist recent order to localStorage for instant 1-click recovery (preserve full details if already saved)
     if (typeof window !== "undefined" && orderId) {
       try {
         const raw = localStorage.getItem("horvvalle_saved_orders");
@@ -31,12 +32,13 @@ function CheckoutSuccessContent() {
             date: new Date().toISOString(),
             total,
             method,
+            isTest,
           });
           localStorage.setItem("horvvalle_saved_orders", JSON.stringify(list.slice(0, 10)));
         }
       } catch (e) {}
     }
-  }, [orderId, total, method]);
+  }, [orderId, total, method, isTest]);
 
   const handleCopyCode = () => {
     if (typeof navigator !== "undefined" && navigator.clipboard) {
@@ -49,16 +51,19 @@ function CheckoutSuccessContent() {
   const getMethodTitle = (m: string) => {
     switch (m) {
       case "apple_pay":
-        return " Apple Pay ilə uğurla ödənildi";
+        return " Apple Pay";
       case "google_pay":
-        return "Google Pay ilə uğurla ödənildi";
+        return "Google Pay";
+      case "cash_on_delivery":
+      case "cod":
+        return "Çatdırılmada Ödəniş (Qapıda Nağd/Kart)";
       default:
-        return "Bank Kartı ilə uğurla ödənildi";
+        return "Bank Kartı (Visa/Mastercard)";
     }
   };
 
   const whatsappMessage = encodeURIComponent(
-    `HORVVALLE Sifariş İzləmə Məlumatım:\nSifariş Nömrəsi: ${orderId}\nMəbləğ: ${total ? `${total} ₼` : "Ödənilib"}\nİzləmə linki: https://horvvalle.com/track?orderId=${orderId}`
+    `HORVVALLE Sifariş İzləmə Məlumatım:\nSifariş Nömrəsi: ${orderId}\nMəbləğ: ${total ? formatPrice(total) : "Ödənilib"}\nİzləmə linki: https://horvvalle.com/track?orderId=${orderId}`
   );
 
   return (
@@ -69,15 +74,24 @@ function CheckoutSuccessContent() {
       </div>
 
       <div className="space-y-3">
-        <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-stone-100 text-stone-800 text-xs font-semibold uppercase tracking-wider border border-stone-200">
-          <Check size={14} />
-          <span>Sifarişiniz Təsdiqləndi</span>
-        </div>
+        {isTest ? (
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-50 text-amber-900 text-xs font-bold uppercase tracking-wider border border-amber-200">
+            <AlertCircle size={14} className="text-amber-700" />
+            <span>TEST REJİMİ — Real Ödəniş Çəkilməyib</span>
+          </div>
+        ) : (
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-stone-100 text-stone-800 text-xs font-semibold uppercase tracking-wider border border-stone-200">
+            <Check size={14} />
+            <span>Sifarişiniz Təsdiqləndi</span>
+          </div>
+        )}
         <h1 className="font-eb-garamond text-3xl sm:text-5xl font-normal text-stone-900 tracking-wide">
           Təşəkkür <span className="italic font-normal">edirik!</span>
         </h1>
         <p className="text-xs sm:text-sm text-stone-600 max-w-md mx-auto leading-relaxed">
-          Ödəniş uğurla qəbul edildi. Sifarişiniz atelyedə qablaşdırılmaya göndərildi və kuryerimiz 1-2 iş günü ərzində sizinlə əlaqə saxlayacaq.
+          {method === "cash_on_delivery" || method === "cod"
+            ? "Sifarişiniz qeydə alındı. Məhsul çatdırılan zaman kuryerə nağd və ya kartla ödəniş edə bilərsiniz."
+            : "Ödəniş uğurla qəbul edildi. Sifarişiniz atelyedə qablaşdırılmaya göndərildi və kuryerimiz 1-2 iş günü ərzində sizinlə əlaqə saxlayacaq."}
         </p>
       </div>
 
@@ -134,7 +148,7 @@ function CheckoutSuccessContent() {
           </div>
           {total > 0 && (
             <div className="flex justify-between">
-              <span className="text-stone-500">Ödənilən Məbləğ:</span>
+              <span className="text-stone-500">Məbləğ:</span>
               <span className="font-bold text-stone-900">{formatPrice(total)}</span>
             </div>
           )}
@@ -150,53 +164,27 @@ function CheckoutSuccessContent() {
             href={`https://wa.me/?text=${whatsappMessage}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full py-2.5 px-4 rounded-xl bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center justify-center gap-2 transition"
+            className="w-full py-2.5 px-3 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold text-xs flex items-center justify-center gap-2 hover:bg-emerald-100 transition shadow-2xs"
           >
-            <span>💬 Kodu WhatsApp ilə özünüzə göndərin</span>
-          </a>
-
-          <a
-            href={`https://wa.me/994557669050?text=${encodeURIComponent(`Salam! HORWALLE-dən #${orderId} nömrəli sifarişimlə bağlı məlumat almaq istəyirəm.`)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full py-2.5 px-4 rounded-xl bg-stone-100 hover:bg-stone-200/70 border border-stone-200 text-stone-800 text-xs font-semibold flex items-center justify-center gap-2 transition"
-          >
-            <span className="text-emerald-600 font-bold">🎧 Sualınız var?</span>
-            <span>WhatsApp Dəstək: <strong>+994 55-766-90-50</strong></span>
+            <span>WhatsApp-da Saxla</span>
           </a>
         </div>
       </div>
 
-      {/* Safety Reassurance for Lost Tracking Code */}
-      <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80 text-left max-w-lg mx-auto text-xs space-y-1 text-amber-900">
-        <div className="font-bold flex items-center gap-1.5 text-amber-950">
-          <span>🛡️ İzləmə kodunu qeyd etmək yaddan çıxsa nə etməli?</span>
-        </div>
-        <p className="text-amber-800/90 leading-relaxed text-[11px]">
-          Narahat olmayın! İzləmə kodunu itirsəniz belə, <strong>«Sifarişi İzlə»</strong> səhifəsində sadəcə sifariş zamanı daxil etdiyiniz <strong>telefon nömrənizi</strong> yazaraq sifarişinizi istənilən vaxt dərhal bərpa edib canlı izləyə bilərsiniz.
-        </p>
-      </div>
-
-      {/* Buttons */}
+      {/* Action buttons */}
       <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
         <Link
-          href={`/track?orderId=${encodeURIComponent(orderId)}`}
-          className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-sm active:scale-98"
+          href={`/track?orderId=${orderId}`}
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-stone-900 text-white font-bold text-xs uppercase tracking-wider hover:bg-black transition shadow-sm active:scale-98"
         >
-          <span>📦 Sifarişinizi Canlı İzləyin</span>
+          <span>Sifarişimi Canlı İzlə</span>
           <ArrowRight size={14} />
         </Link>
         <Link
           href="/collections"
-          className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-stone-900 text-white font-bold text-xs uppercase tracking-wider hover:bg-black transition-all flex items-center justify-center gap-2 shadow-sm active:scale-98"
+          className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 rounded-full bg-white border border-stone-200 text-stone-800 font-semibold text-xs uppercase tracking-wider hover:bg-stone-50 transition active:scale-98"
         >
           <span>Alış-verişə Davam Et</span>
-        </Link>
-        <Link
-          href="/"
-          className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-white border border-stone-200 text-stone-700 font-bold text-xs uppercase tracking-wider hover:border-stone-400 hover:text-stone-900 transition-all text-center"
-        >
-          Ana Səhifəyə Qayıt
         </Link>
       </div>
     </div>
@@ -205,7 +193,7 @@ function CheckoutSuccessContent() {
 
 export default function CheckoutSuccessPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-stone-400 text-sm">Yüklənir...</div>}>
+    <Suspense fallback={<div className="min-h-[50vh] flex items-center justify-center">Yüklənir...</div>}>
       <CheckoutSuccessContent />
     </Suspense>
   );
