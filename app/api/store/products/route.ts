@@ -112,16 +112,35 @@ export async function POST(req: NextRequest) {
     }
 
     const db = readStoreDb();
-    const existingIndex = db.products.findIndex(p => p.id === product.id);
+    const existingIndex = db.products.findIndex(
+      (p) => p.id === product.id || (product.slug && p.slug === product.slug)
+    );
+
+    const hasCompareAtPrice = product.compareAtPrice !== null && product.compareAtPrice !== undefined && (product.compareAtPrice as any) !== '';
+    const parsedCompareAtPrice = hasCompareAtPrice ? Number(product.compareAtPrice) : undefined;
 
     if (existingIndex >= 0) {
-      db.products[existingIndex] = { ...db.products[existingIndex], ...product };
+      db.products[existingIndex] = {
+        ...db.products[existingIndex],
+        ...product,
+        price: Number(product.price) || 0,
+      };
+      if (hasCompareAtPrice) {
+        db.products[existingIndex].compareAtPrice = parsedCompareAtPrice;
+      } else {
+        delete db.products[existingIndex].compareAtPrice;
+      }
     } else {
       if (!product.id) {
         product.id = 'vtx-' + Date.now().toString(36);
       }
       if (!product.slug) {
         product.slug = product.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      }
+      if (hasCompareAtPrice) {
+        product.compareAtPrice = parsedCompareAtPrice;
+      } else {
+        delete product.compareAtPrice;
       }
       db.products.unshift(product);
     }
@@ -130,43 +149,74 @@ export async function POST(req: NextRequest) {
 
     if (supabaseServer) {
       try {
-        const meta = {
-          id: product.id,
-          refCode: product.refCode,
-          description: product.description,
-          compareAtPrice: product.compareAtPrice,
-          badge: product.badge,
-          rating: product.rating,
-          reviewCount: product.reviewCount,
-          fit: product.fit,
-          fabric: product.fabric,
-          composition: product.composition,
-          care: product.care,
-          sizes: product.sizes,
-          colors: product.colors,
-          images: (product as any).images,
-          features: (product as any).features,
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(product.id || '');
+        let existingSupa: any = null;
+
+        if (isUuid) {
+          const res = await supabaseServer.from('products').select('*').eq('id', product.id).maybeSingle();
+          existingSupa = res.data;
+        }
+
+        if (!existingSupa && product.slug) {
+          const res = await supabaseServer.from('products').select('*').eq('slug', product.slug).maybeSingle();
+          existingSupa = res.data;
+        }
+
+        if (!existingSupa && product.name) {
+          const res = await supabaseServer.from('products').select('*').eq('name', product.name).maybeSingle();
+          existingSupa = res.data;
+        }
+
+        let existingMeta: any = {};
+        if (existingSupa && typeof existingSupa.description === 'string' && existingSupa.description.startsWith('{')) {
+          try { existingMeta = JSON.parse(existingSupa.description); } catch(e) {}
+        }
+
+        const meta: any = {
+          ...existingMeta,
+          id: product.id || existingMeta.id || 'vtx-' + Date.now().toString(36),
+          refCode: product.refCode || existingMeta.refCode || product.slug,
+          description: product.description !== undefined ? product.description : (existingMeta.description || ''),
+          badge: product.badge !== undefined ? product.badge : (existingMeta.badge || ''),
+          rating: product.rating ?? existingMeta.rating ?? 5.0,
+          reviewCount: product.reviewCount ?? existingMeta.reviewCount ?? 12,
+          fit: product.fit || existingMeta.fit || 'Regular Fit',
+          fabric: product.fabric || existingMeta.fabric || '',
+          composition: product.composition || existingMeta.composition || '',
+          care: product.care || existingMeta.care || '',
+          sizes: product.sizes || existingMeta.sizes || ['S', 'M', 'L', 'XL'],
+          colors: product.colors || existingMeta.colors || [],
+          images: (product as any).images || existingMeta.images || [],
+          features: (product as any).features || existingMeta.features || [],
         };
 
-        const { data: existingSupa } = await supabaseServer
-          .from('products')
-          .select('id')
-          .or(`slug.eq."${product.slug}",id.eq."${product.id}"`)
-          .maybeSingle();
+        if (hasCompareAtPrice) {
+          meta.compareAtPrice = parsedCompareAtPrice;
+        } else {
+          delete meta.compareAtPrice;
+        }
 
-        const recordId = existingSupa?.id || product.id;
-
-        await supabaseServer.from('products').upsert({
-          id: recordId,
-          slug: product.slug,
-          name: product.name,
-          price: Number(product.price) || 0,
-          category: product.category || 'koynek',
-          gender: product.gender || 'unisex',
-          is_new: (product as any).isNew ?? false,
-          in_stock: product.inStock ?? true,
-          description: JSON.stringify(meta),
-        });
+        if (existingSupa) {
+          await supabaseServer.from('products').update({
+            name: product.name,
+            price: Number(product.price) || 0,
+            category: product.category || existingSupa.category || 'koynek',
+            gender: product.gender || existingSupa.gender || 'unisex',
+            in_stock: product.inStock ?? existingSupa.in_stock ?? true,
+            description: JSON.stringify(meta),
+          }).eq('id', existingSupa.id);
+        } else {
+          await supabaseServer.from('products').insert({
+            slug: product.slug,
+            name: product.name,
+            price: Number(product.price) || 0,
+            category: product.category || 'koynek',
+            gender: product.gender || 'unisex',
+            is_new: (product as any).isNew ?? false,
+            in_stock: product.inStock ?? true,
+            description: JSON.stringify(meta),
+          });
+        }
       } catch (e) {
         console.warn('[Products API] Supabase upsert error:', e);
       }
@@ -199,7 +249,12 @@ export async function DELETE(req: NextRequest) {
 
     if (supabaseServer) {
       try {
-        await supabaseServer.from('products').delete().or(`id.eq."${id}",slug.eq."${id}"`);
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+        if (isUuid) {
+          await supabaseServer.from('products').delete().eq('id', id);
+        } else {
+          await supabaseServer.from('products').delete().eq('slug', id);
+        }
       } catch (e) {
         console.warn('[Products API] Supabase delete error:', e);
       }

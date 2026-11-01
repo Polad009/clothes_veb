@@ -1,6 +1,6 @@
 export type PaymentMethod = 'card' | 'apple_pay' | 'google_pay' | 'cash_on_delivery';
 
-export type PaymentStatus = 
+export type PaymentStatus =
   | 'pending_payment'
   | 'test_paid'
   | 'paid'
@@ -25,7 +25,7 @@ export interface OrderItem {
 export interface PaymentCustomer {
   fullName: string;
   phone: string;
-  email?: string;
+  email: string;
   address: string;
   city: string;
   country?: string;

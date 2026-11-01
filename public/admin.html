@@ -2840,10 +2840,11 @@
       document.getElementById('prodEditId').value = p.id;
       document.getElementById('prodName').value = p.name || '';
       document.getElementById('prodCategory').value = p.category || 'koynek';
-      document.getElementById('prodPrice').value = p.price || '';
-      document.getElementById('prodComparePrice').value = p.compareAtPrice || '';
-      document.getElementById('prodImage').value = p.image || '';
-      document.getElementById('prodHoverImage').value = p.hoverImage || '';
+      document.getElementById('prodPrice').value = p.price != null ? p.price : '';
+      document.getElementById('prodComparePrice').value = (p.compareAtPrice != null && p.compareAtPrice !== '') ? p.compareAtPrice : '';
+      const firstColor = (p.colors && p.colors[0]) || {};
+      document.getElementById('prodImage').value = p.image || firstColor.image || '';
+      document.getElementById('prodHoverImage').value = p.hoverImage || firstColor.hoverImage || '';
       document.getElementById('prodDesc').value = p.description || '';
       document.getElementById('productModalTitle').innerText = 'Məhsulu Redaktə Et';
       document.getElementById('productModal').classList.remove('hidden');
@@ -2858,29 +2859,36 @@
     async function handleProductFormSubmit(e) {
       e.preventDefault();
       const id = document.getElementById('prodEditId').value;
+      const existing = (STORE_DATA.products || []).find(x => x.id === id);
       const name = document.getElementById('prodName').value.trim();
       const category = document.getElementById('prodCategory').value;
       const price = Number(document.getElementById('prodPrice').value) || 0;
-      const compareAtPrice = Number(document.getElementById('prodComparePrice').value) || undefined;
+      const compareRaw = document.getElementById('prodComparePrice').value.trim();
+      const compareAtPrice = compareRaw ? Number(compareRaw) : null;
       const image = document.getElementById('prodImage').value.trim();
       const hoverImage = document.getElementById('prodHoverImage').value.trim();
       const description = document.getElementById('prodDesc').value.trim();
 
       const payload = {
+        ...(existing || {}),
         id: id || undefined,
+        slug: existing?.slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
         name,
         category,
         price,
-        compareAtPrice,
-        image,
-        hoverImage,
-        description,
-        inStock: true,
-        gender: 'men',
-        colors: [
-          { name: 'Onyx Black', hex: '#111111', image: image, hoverImage: hoverImage }
-        ]
+        compareAtPrice: compareAtPrice,
+        image: image || existing?.image || '',
+        hoverImage: hoverImage || existing?.hoverImage || '',
+        description: description || existing?.description || '',
+        inStock: existing?.inStock ?? true,
+        gender: existing?.gender || 'men',
       };
+
+      if (!existing?.colors || existing.colors.length === 0) {
+        payload.colors = [
+          { name: 'Standart', hex: '#111111', image: image, hoverImage: hoverImage }
+        ];
+      }
 
       try {
         const res = await fetch('/api/admin/products', {
@@ -2892,7 +2900,9 @@
         if (result.success) {
           closeProductModal();
           await loadData();
-          alert('✓ Məhsul uğurla yadda saxlanıldı!');
+          alert('✓ Məhsul və qiymət uğurla yadda saxlanıldı!');
+        } else {
+          alert('Xəta baş verdi: ' + (result.error || 'Server xətası'));
         }
       } catch (err) {
         alert('Xəta baş verdi: ' + err.message);
