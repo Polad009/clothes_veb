@@ -28,8 +28,12 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://etpujoxudwdntjjjgxpa.supabase.co";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+const supabaseUrl =
+  process.env.NEXT_PUBLIC_SUPABASE_URL ||
+  "https://hrgvvsyalafdscponoca.supabase.co";
+const supabaseAnonKey =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+  "sb_publishable_CcExxC_DKX4AQLzUYrfJzw_FViGjYPx";
 
 export const supabase = supabaseAnonKey
   ? createClient(supabaseUrl, supabaseAnonKey)
