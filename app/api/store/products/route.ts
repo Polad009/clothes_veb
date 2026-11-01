@@ -37,7 +37,8 @@ export async function GET(req: NextRequest) {
             const resolvedImages = (meta.images && meta.images.length > 0) ? meta.images : [resolvedImage];
 
             return {
-              id: meta.id || sp.id,
+              id: sp.id,
+              metaId: meta.id || sp.id,
               slug: sp.slug,
               name: sp.name,
               refCode: meta.refCode || sp.slug,
