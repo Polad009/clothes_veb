@@ -112,13 +112,19 @@ export function StoreDataProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     fetchLiveStoreData();
 
-    // Auto-refresh when tab gains focus (e.g. user made changes in admin portal and clicked back)
+    // Auto-refresh when tab gains focus or when admin panel saves data across tabs
     const onFocus = () => fetchLiveStoreData();
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === "hv_store_updated") fetchLiveStoreData();
+    };
+
     window.addEventListener("focus", onFocus);
     window.addEventListener("hv-store-refresh", onFocus);
+    window.addEventListener("storage", onStorage);
     return () => {
       window.removeEventListener("focus", onFocus);
       window.removeEventListener("hv-store-refresh", onFocus);
+      window.removeEventListener("storage", onStorage);
     };
   }, [fetchLiveStoreData]);
 

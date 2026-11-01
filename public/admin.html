@@ -1495,15 +1495,64 @@
             <input type="number" step="0.01" id="prodComparePrice"
               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
           </div>
-          <div class="sm:col-span-2">
-            <label class="block font-bold text-slate-700 mb-1">Əsas Ön Şəkil URL *</label>
-            <input type="text" id="prodImage" required placeholder="/images/products/..."
-              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+          <!-- 1. ƏSAS ÖN ŞƏKİL (KOMPÜTERDƏN YÜKLƏ / SEÇ) -->
+          <div class="sm:col-span-2 space-y-1.5">
+            <div class="flex items-center justify-between">
+              <label class="block font-bold text-slate-700">1. Əsas Ön Şəkil *</label>
+              <span class="text-[10px] text-slate-400">Kompyuterdən fayl seçin</span>
+            </div>
+            
+            <div class="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-2xl">
+              <div id="frontPreviewBox" class="w-14 h-16 rounded-xl bg-white border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
+                <i data-lucide="image" class="w-6 h-6 text-slate-300"></i>
+              </div>
+              <div class="flex-1 space-y-1.5">
+                <div class="flex items-center gap-2">
+                  <input type="file" id="prodFrontFileInput" accept="image/*" class="hidden" onchange="handleDirectFileUpload(this, 'prodImage', 'frontPreviewBox', 'frontPrintBadge')">
+                  <button type="button" onclick="document.getElementById('prodFrontFileInput').click()" class="px-3 py-1.5 bg-slate-900 hover:bg-black text-white rounded-xl font-bold text-[11px] cursor-pointer inline-flex items-center gap-1.5 shadow-2xs">
+                    <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                    <span>Kompüterdən Seç</span>
+                  </button>
+                  <span id="frontUploadStatus" class="text-[10px] text-slate-400">PNG, JPG və ya WEBP</span>
+                </div>
+                <input type="text" id="prodImage" required placeholder="/images/uploads/..."
+                  class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-[11px] font-mono text-slate-600">
+              </div>
+            </div>
+            <div id="frontPrintBadge" class="hidden text-[10px] bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg px-2.5 py-1 flex items-center justify-between">
+              <span>✨ Çap Dizaynı (Print Layer) avtomatik kəsildi</span>
+              <a id="frontPrintLink" href="#" target="_blank" class="font-bold underline">Bax</a>
+            </div>
           </div>
-          <div class="sm:col-span-2">
-            <label class="block font-bold text-slate-700 mb-1">Arxa (Hover) Şəkil URL</label>
-            <input type="text" id="prodHoverImage" placeholder="/images/products/..."
-              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+
+          <!-- 2. ARXA (HOVER) ŞƏKİL (KOMPÜTERDƏN YÜKLƏ / SEÇ) -->
+          <div class="sm:col-span-2 space-y-1.5">
+            <div class="flex items-center justify-between">
+              <label class="block font-bold text-slate-700">2. Arxa (Hover) Şəkil</label>
+              <span class="text-[10px] text-slate-400">Kompyuterdən fayl seçin</span>
+            </div>
+            
+            <div class="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-2xl">
+              <div id="backPreviewBox" class="w-14 h-16 rounded-xl bg-white border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
+                <i data-lucide="image" class="w-6 h-6 text-slate-300"></i>
+              </div>
+              <div class="flex-1 space-y-1.5">
+                <div class="flex items-center gap-2">
+                  <input type="file" id="prodBackFileInput" accept="image/*" class="hidden" onchange="handleDirectFileUpload(this, 'prodHoverImage', 'backPreviewBox', 'backPrintBadge')">
+                  <button type="button" onclick="document.getElementById('prodBackFileInput').click()" class="px-3 py-1.5 bg-slate-900 hover:bg-black text-white rounded-xl font-bold text-[11px] cursor-pointer inline-flex items-center gap-1.5 shadow-2xs">
+                    <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                    <span>Kompüterdən Seç</span>
+                  </button>
+                  <span id="backUploadStatus" class="text-[10px] text-slate-400">PNG, JPG və ya WEBP</span>
+                </div>
+                <input type="text" id="prodHoverImage" placeholder="/images/uploads/..."
+                  class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-[11px] font-mono text-slate-600">
+              </div>
+            </div>
+            <div id="backPrintBadge" class="hidden text-[10px] bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg px-2.5 py-1 flex items-center justify-between">
+              <span>✨ Arxa Çap Dizaynı (Print Layer) avtomatik kəsildi</span>
+              <a id="backPrintLink" href="#" target="_blank" class="font-bold underline">Bax</a>
+            </div>
           </div>
           <div class="sm:col-span-2">
             <label class="block font-bold text-slate-700 mb-1">Təsvir</label>
@@ -2858,9 +2907,14 @@
       document.getElementById('prodImage').value = '';
       document.getElementById('prodHoverImage').value = '';
       document.getElementById('prodDesc').value = '';
+      document.getElementById('frontPreviewBox').innerHTML = '<i data-lucide="image" class="w-6 h-6 text-slate-300"></i>';
+      document.getElementById('backPreviewBox').innerHTML = '<i data-lucide="image" class="w-6 h-6 text-slate-300"></i>';
+      document.getElementById('frontPrintBadge').classList.add('hidden');
+      document.getElementById('backPrintBadge').classList.add('hidden');
       document.getElementById('productModalTitle').innerText = 'Yeni Məhsul Əlavə Et';
       document.getElementById('productModal').classList.remove('hidden');
       document.getElementById('productModal').classList.add('flex');
+      if (window.lucide) lucide.createIcons();
     }
 
     function editProduct(id) {
@@ -2872,12 +2926,73 @@
       document.getElementById('prodPrice').value = p.price != null ? p.price : '';
       document.getElementById('prodComparePrice').value = (p.compareAtPrice != null && p.compareAtPrice !== '') ? p.compareAtPrice : '';
       const firstColor = (p.colors && p.colors[0]) || {};
-      document.getElementById('prodImage').value = p.image || firstColor.image || '';
-      document.getElementById('prodHoverImage').value = p.hoverImage || firstColor.hoverImage || '';
+      const frontImg = p.image || firstColor.image || '';
+      const backImg = p.hoverImage || firstColor.hoverImage || '';
+      document.getElementById('prodImage').value = frontImg;
+      document.getElementById('prodHoverImage').value = backImg;
       document.getElementById('prodDesc').value = p.description || '';
+
+      const frontBox = document.getElementById('frontPreviewBox');
+      if (frontImg) {
+        frontBox.innerHTML = `<img src="${frontImg}" class="w-full h-full object-contain p-0.5" />`;
+      } else {
+        frontBox.innerHTML = '<i data-lucide="image" class="w-6 h-6 text-slate-300"></i>';
+      }
+
+      const backBox = document.getElementById('backPreviewBox');
+      if (backImg) {
+        backBox.innerHTML = `<img src="${backImg}" class="w-full h-full object-contain p-0.5" />`;
+      } else {
+        backBox.innerHTML = '<i data-lucide="image" class="w-6 h-6 text-slate-300"></i>';
+      }
+
+      document.getElementById('frontPrintBadge').classList.add('hidden');
+      document.getElementById('backPrintBadge').classList.add('hidden');
+
       document.getElementById('productModalTitle').innerText = 'Məhsulu Redaktə Et';
       document.getElementById('productModal').classList.remove('hidden');
       document.getElementById('productModal').classList.add('flex');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    async function handleDirectFileUpload(input, targetUrlInputId, previewBoxId, badgeId) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+
+      const previewBox = document.getElementById(previewBoxId);
+      const statusEl = previewBox?.parentElement?.querySelector('span');
+      if (statusEl) statusEl.innerText = 'Yüklənir və print analiz edilir...';
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await fetch('/api/admin/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await res.json();
+        if (data.success && data.url) {
+          document.getElementById(targetUrlInputId).value = data.url;
+          if (previewBox) {
+            previewBox.innerHTML = `<img src="${data.url}" class="w-full h-full object-contain p-0.5" />`;
+          }
+          if (statusEl) statusEl.innerText = '✓ Yükləndi: ' + file.name;
+
+          if (data.printLayerUrl && badgeId) {
+            const badge = document.getElementById(badgeId);
+            const link = badge?.querySelector('a');
+            if (badge) badge.classList.remove('hidden');
+            if (link) link.href = data.printLayerUrl;
+          }
+        } else {
+          alert('Yükləmə xətası: ' + (data.error || 'Server xətası'));
+          if (statusEl) statusEl.innerText = 'Xəta baş verdi';
+        }
+      } catch (err) {
+        alert('Şəbəkə xətası: ' + err.message);
+        if (statusEl) statusEl.innerText = 'Xəta baş verdi';
+      }
     }
 
     function closeProductModal() {
@@ -2932,24 +3047,42 @@
       'dust': {
         title: 'Horvvalle Angel Dust Vintage Hoodie',
         printLayers: [
-          { name: 'Angel Dust Çap Stensili (Ultra HD)', url: '/images/uploads/angel_stencil.png', desc: 'Hudi üçün təmizlənmiş şəffaf qrafik lay' },
+          { name: 'Angel Dust Rəsmi Qrafik Çapı (Ultra HD Art)', url: '/images/uploads/angel_dust_print_art.png', desc: 'Arxa hissədəki "Angel Dust - Beauty in Imperfection" rəsmi incəsənət çapı' },
+          { name: 'Angel Dust Şəffaf Çap Qatı (DTF/DTG)', url: '/images/uploads/angel_dust_print_transparent.png', desc: 'Parça rəngi şəffaflaşdırılmış, birbaşa basmağa hazır DTF lay' },
         ],
         mockups: [
-          { name: 'Vintage Hudi - Ön (Cutout)', url: '/images/uploads/angel_dust_hoodie_cutout.png' },
-          { name: 'Vintage Hudi - Arxa', url: '/images/uploads/real_hoodie_back_clean.png' },
+          { name: 'Arxa Görünüş (Official Back)', url: '/images/uploads/angel_dust_hoodie_back_official.png' },
+          { name: 'Ön Görünüş (Front Cutout)', url: '/images/uploads/angel_dust_hoodie_cutout.png' },
+          { name: 'Arxa Kəsim (Clean Back Cutout)', url: '/images/uploads/angel_dust_hoodie_back_cutout.png' },
         ]
       }
     };
 
     function openPrintModal(keyOrSlug) {
       const lower = String(keyOrSlug).toLowerCase();
-      let foundKey = 'bmw';
+      let foundKey = '';
       if (lower.includes('mclaren')) foundKey = 'mclaren';
       else if (lower.includes('angelus') || lower.includes('polo')) foundKey = 'angelus';
       else if (lower.includes('dust') || lower.includes('vintage-hoodie')) foundKey = 'dust';
       else if (lower.includes('bmw') || lower.includes('motorsport')) foundKey = 'bmw';
 
-      const data = PRODUCT_PRINT_MAP[foundKey] || PRODUCT_PRINT_MAP['bmw'];
+      const prod = (STORE_DATA.products || []).find(p => p.id === keyOrSlug || p.slug === keyOrSlug);
+      let data = foundKey ? PRODUCT_PRINT_MAP[foundKey] : null;
+
+      if (!data && prod) {
+        data = {
+          title: prod.name,
+          printLayers: (prod.printLayers && prod.printLayers.length > 0) ? prod.printLayers : [
+            { name: 'Avtomatik Çap Dizaynı', url: prod.hoverImage || prod.image, desc: 'Paltarın üzərindən kəsilmiş çap qatı' }
+          ],
+          mockups: [
+            { name: 'Ön Görünüş', url: prod.image || '/images/hero/black-tee.jpg' },
+            ...(prod.hoverImage ? [{ name: 'Arxa Görünüş', url: prod.hoverImage }] : [])
+          ]
+        };
+      } else if (!data) {
+        data = PRODUCT_PRINT_MAP['bmw'];
+      }
       document.getElementById('printModalTitle').innerText = data.title;
 
       const html = `
@@ -3063,6 +3196,8 @@
         const result = await res.json();
         if (result.success) {
           closeProductModal();
+          localStorage.setItem('hv_store_updated', Date.now().toString());
+          window.dispatchEvent(new Event('hv-store-refresh'));
           await loadData();
           alert('✓ Məhsul və qiymət uğurla yadda saxlanıldı!');
         } else {

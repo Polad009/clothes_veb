@@ -9,6 +9,7 @@ import { sendOrderStatusUpdate, sendBroadcastCampaign } from '@/lib/email/emailS
 import { supabaseServer } from '@/lib/supabaseServer';
 import fs from 'fs';
 import path from 'path';
+import sharp from 'sharp';
 
 export const dynamic = 'force-dynamic';
 
@@ -96,7 +97,8 @@ async function getEnrichedStoreData() {
         const resolvedImages = (meta.images && meta.images.length > 0) ? meta.images : [resolvedImage];
 
         return {
-          id: meta.id || sp.id,
+          id: sp.id,
+          metaId: meta.id || sp.id,
           slug: sp.slug,
           name: sp.name,
           refCode: meta.refCode || sp.slug,
@@ -116,6 +118,7 @@ async function getEnrichedStoreData() {
           description: meta.description || (typeof sp.description === 'string' && !sp.description.startsWith('{') ? sp.description : ''),
           image: resolvedImage,
           images: resolvedImages,
+          hoverImage: meta.hoverImage || meta.colors?.[0]?.hoverImage || '',
           colors: meta.colors || [],
           sizes: meta.sizes && meta.sizes.length > 0 ? meta.sizes : ['S', 'M', 'L', 'XL'],
           features: meta.features || [],
@@ -199,7 +202,15 @@ export async function POST(
     const slug = params.slug || [];
     const route = slug[0];
     const subRoute = slug[1];
-    const body = await req.json().catch(() => ({}));
+
+    const contentType = req.headers.get('content-type') || '';
+    let body: any = {};
+    let formData: FormData | null = null;
+    if (contentType.includes('multipart/form-data')) {
+      formData = await req.formData().catch(() => null);
+    } else {
+      body = await req.json().catch(() => ({}));
+    }
 
     // 0. LOGIN ROUTE (Publicly accessible for authenticating)
     if (route === 'login') {
@@ -292,6 +303,11 @@ export async function POST(
             existingSupa = res.data;
           }
 
+          if (!existingSupa && product.supaId) {
+            const res = await supabaseServer.from('products').select('*').eq('id', product.supaId).maybeSingle();
+            existingSupa = res.data;
+          }
+
           if (!existingSupa && product.slug) {
             const res = await supabaseServer.from('products').select('*').eq('slug', product.slug).maybeSingle();
             existingSupa = res.data;
@@ -300,6 +316,14 @@ export async function POST(
           if (!existingSupa && product.name) {
             const res = await supabaseServer.from('products').select('*').eq('name', product.name).maybeSingle();
             existingSupa = res.data;
+          }
+
+          if (!existingSupa && product.name) {
+            const firstWord = product.name.trim().split(' ')[0];
+            if (firstWord && firstWord.length > 2) {
+              const res = await supabaseServer.from('products').select('*').ilike('name', `%${firstWord}%`).limit(1);
+              if (res.data && res.data.length > 0) existingSupa = res.data[0];
+            }
           }
 
           let existingMeta: any = {};
@@ -325,6 +349,10 @@ export async function POST(
             features: product.features || existingMeta.features || [],
           };
 
+          if (product.image) meta.image = product.image;
+          if (product.hoverImage) meta.hoverImage = product.hoverImage;
+          if (product.printLayers) meta.printLayers = product.printLayers;
+
           if (hasCompareAtPrice) {
             meta.compareAtPrice = parsedCompareAtPrice;
           } else {
@@ -343,6 +371,7 @@ export async function POST(
 
             if (updateRes.error) {
               console.error('[AdminAPI] Supabase product update error:', updateRes.error);
+              return NextResponse.json({ success: false, error: 'Supabase update xətası: ' + updateRes.error.message }, { status: 500 });
             }
           } else {
             const insertRes = await supabaseServer.from('products').insert({
@@ -358,14 +387,89 @@ export async function POST(
 
             if (insertRes.error) {
               console.error('[AdminAPI] Supabase product insert error:', insertRes.error);
+              return NextResponse.json({ success: false, error: 'Supabase insert xətası: ' + insertRes.error.message }, { status: 500 });
             }
           }
-        } catch (e) {
+        } catch (e: any) {
           console.warn('[AdminAPI] Supabase product upsert error:', e);
+          return NextResponse.json({ success: false, error: 'Supabase əlaqə xətası: ' + (e?.message || 'Naməlum') }, { status: 500 });
         }
       }
 
       return NextResponse.json({ success: true, product });
+    }
+
+    // 1.1 Direct Image / Garment Upload with Automatic Print Layer Extraction
+    if (route === 'upload' || route === 'upload-image') {
+      try {
+        let buffer: Buffer | null = null;
+        let originalName = 'garment.png';
+
+        if (formData) {
+          const file = formData.get('file') as File | null;
+          if (file) {
+            originalName = file.name || 'garment.png';
+            buffer = Buffer.from(await file.arrayBuffer());
+          }
+        } else if (body.dataUrl) {
+          const matches = body.dataUrl.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+          if (matches && matches[2]) {
+            buffer = Buffer.from(matches[2], 'base64');
+          }
+        }
+
+        if (!buffer) {
+          return NextResponse.json({ error: 'Fayl tapılmadı. Kompyuterdən şəkil seçin.' }, { status: 400 });
+        }
+
+        const uploadsDir = path.join(process.cwd(), 'public', 'images', 'uploads');
+        if (!fs.existsSync(uploadsDir)) {
+          fs.mkdirSync(uploadsDir, { recursive: true });
+        }
+
+        const cleanBase = originalName.replace(/[^a-zA-Z0-9_\-\.]/g, '_').replace(/\.[^/.]+$/, '').slice(0, 30);
+        const uniqueSuffix = Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+        const mainFileName = `${cleanBase}_${uniqueSuffix}.png`;
+        const mainFilePath = path.join(uploadsDir, mainFileName);
+
+        // Save high quality PNG
+        await sharp(buffer).png({ quality: 95 }).toFile(mainFilePath);
+        const mainUrl = `/images/uploads/${mainFileName}`;
+
+        // AUTOMATIC MOCKUP / PRINT DESIGN EXTRACTION
+        let printLayerUrl = '';
+        try {
+          const meta = await sharp(buffer).metadata();
+          if (meta.width && meta.height && meta.width > 100 && meta.height > 100) {
+            const cropW = Math.round(meta.width * 0.54);
+            const cropH = Math.round(meta.height * 0.52);
+            const cropL = Math.max(0, Math.round((meta.width - cropW) / 2));
+            const cropT = Math.max(0, Math.round(meta.height * 0.26));
+
+            const printFileName = `${cleanBase}_print_layer_${uniqueSuffix}.png`;
+            const printFilePath = path.join(uploadsDir, printFileName);
+
+            await sharp(buffer)
+              .extract({ left: cropL, top: cropT, width: cropW, height: cropH })
+              .png({ quality: 95 })
+              .toFile(printFilePath);
+
+            printLayerUrl = `/images/uploads/${printFileName}`;
+          }
+        } catch (extractErr) {
+          console.warn('[Upload] Print extraction skipped:', extractErr);
+        }
+
+        return NextResponse.json({
+          success: true,
+          url: mainUrl,
+          printLayerUrl: printLayerUrl || mainUrl,
+          filename: mainFileName,
+        });
+      } catch (uploadErr: any) {
+        console.error('[Upload API Error]:', uploadErr);
+        return NextResponse.json({ error: 'Yükləmə xətası: ' + uploadErr.message }, { status: 500 });
+      }
     }
 
     // 2. Update Dynamic CMS Content & Settings

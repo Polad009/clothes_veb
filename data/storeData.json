@@ -321,20 +321,22 @@
         "XXL"
       ],
       "image": "/images/uploads/angel_dust_hoodie_cutout.png",
-      "hoverImage": "/images/uploads/Code_Generated_Image__3__png_1792855968247.png",
+      "hoverImage": "/images/uploads/angel_dust_hoodie_back_official.png",
       "gallery": [
-        "/images/uploads/Code_Generated_Image__2__png_1792855952562.png",
-        "/images/uploads/Code_Generated_Image__3__png_1792855968247.png"
+        "/images/uploads/angel_dust_hoodie_cutout.png",
+        "/images/uploads/angel_dust_hoodie_back_official.png",
+        "/images/uploads/angel_dust_print_art.png"
       ],
       "colors": [
         {
           "name": "Washed Black",
           "hex": "#1A1A1A",
           "image": "/images/uploads/angel_dust_hoodie_cutout.png",
-          "hoverImage": "/images/uploads/Code_Generated_Image__3__png_1792855968247.png",
+          "hoverImage": "/images/uploads/angel_dust_hoodie_back_official.png",
           "gallery": [
-            "/images/uploads/Code_Generated_Image__2__png_1792855952562.png",
-            "/images/uploads/Code_Generated_Image__3__png_1792855968247.png"
+            "/images/uploads/angel_dust_hoodie_cutout.png",
+            "/images/uploads/angel_dust_hoodie_back_official.png",
+            "/images/uploads/angel_dust_print_art.png"
           ]
         }
       ],
