@@ -24,7 +24,7 @@ const RUNWAY_TOP: RunwayItem[] = [
     src: "/images/uploads/bmw_hoodie_black_front_v3.png",
     title: "BMW M Motorsport Qara Hudi",
     tag: "380 GSM FLEECE",
-    defaultPrice: 89,
+    defaultPrice: 20,
     link: "/products/horwalle-bmw-m-motorsport-heavyweight-fleece-hoodie",
   },
   {
@@ -42,7 +42,7 @@ const RUNWAY_TOP: RunwayItem[] = [
     src: "/images/uploads/bmw_hoodie_grey_front_v3.png",
     title: "BMW M Motorsport Melanj Boz",
     tag: "PREMIUM FLEECE",
-    defaultPrice: 89,
+    defaultPrice: 20,
     link: "/products/horwalle-bmw-m-motorsport-heavyweight-fleece-hoodie",
   },
   {
@@ -90,7 +90,7 @@ const RUNWAY_BOTTOM: RunwayItem[] = [
     src: "/images/uploads/bmw_hoodie_black_back_v3.png",
     title: "BMW M Motorsport Arxa Loqo",
     tag: "DTF ARTWORK",
-    defaultPrice: 89,
+    defaultPrice: 20,
     link: "/products/horwalle-bmw-m-motorsport-heavyweight-fleece-hoodie",
   },
   {
@@ -117,7 +117,7 @@ const RUNWAY_BOTTOM: RunwayItem[] = [
     src: "/images/uploads/bmw_hoodie_white_front_v3.png",
     title: "BMW M Motorsport Ağ Hudi",
     tag: "LIMITED EDITION",
-    defaultPrice: 89,
+    defaultPrice: 20,
     link: "/products/horwalle-bmw-m-motorsport-heavyweight-fleece-hoodie",
   },
   {
