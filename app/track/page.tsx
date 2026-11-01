@@ -26,6 +26,9 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useCurrency } from "@/context/CurrencyContext";
+import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
 
 interface OrderTrackingData {
   id: string;
@@ -71,8 +74,12 @@ function OrderTrackerContent() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") || searchParams.get("orderId") || "";
 
+  const { formatPrice, currency } = useCurrency();
+  const { t, language } = useLanguage();
+  const { user } = useAuth();
+
   const [query, setQuery] = useState(initialQuery);
-  const [searchMode, setSearchMode] = useState<"code" | "phone">("code");
+  const [searchMode, setSearchMode] = useState<"code" | "phone" | "email">("code");
   const [loading, setLoading] = useState(false);
   const [order, setOrder] = useState<OrderTrackingData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -205,19 +212,20 @@ function OrderTrackerContent() {
   };
 
   // Search function
-  const handleSearch = async (searchVal: string, forcedMode?: "code" | "phone") => {
+  const handleSearch = async (searchVal: string, forcedMode?: "code" | "phone" | "email") => {
     const val = searchVal.trim();
     if (!val) return;
 
     const currentMode = forcedMode || searchMode;
-    const isPhoneSearch = currentMode === "phone" || (val.replace(/\D/g, "").length >= 7 && !/[A-Z]/i.test(val));
+    const isEmailSearch = currentMode === "email" || val.includes("@");
+    const isPhoneSearch = !isEmailSearch && (currentMode === "phone" || (val.replace(/\D/g, "").length >= 7 && !/[A-Z]/i.test(val)));
 
     setLoading(true);
     setError(null);
     setAllMatches(null);
 
     try {
-      const typeParam = isPhoneSearch ? "phone" : "code";
+      const typeParam = isEmailSearch ? "email" : isPhoneSearch ? "phone" : "code";
       const res = await fetch(`/api/orders/track?q=${encodeURIComponent(val)}&type=${typeParam}`);
       const data = await res.json();
 
@@ -282,7 +290,9 @@ function OrderTrackerContent() {
       setOrder(null);
       setError(
         data.error ||
-          (isPhoneSearch
+          (isEmailSearch
+            ? `"${val}" e-poçt (Gmail) ünvanı ilə heç bir aktiv sifariş tapılmadı.`
+            : isPhoneSearch
             ? `"${val}" telefon nömrəsi ilə heç bir aktiv sifariş tapılmadı.`
             : `"${val}" kodlu sifariş tapılmadı və ya sistemdən silinib.`)
       );
@@ -324,11 +334,11 @@ function OrderTrackerContent() {
   }, [order?.id]);
 
   const steps = [
-    { num: 1, label: "Qəbul edildi", icon: CheckCircle2, desc: "Sifariş qeydə alındı" },
-    { num: 2, label: "Təsdiqləndi", icon: ShieldCheck, desc: "Menecer təsdiqlədi" },
-    { num: 3, label: "Çapda / Dərzidə", icon: Printer, desc: "DTF çap və atelye" },
-    { num: 4, label: "Kuryerdədir", icon: Truck, desc: "Ünvana çatdırılır" },
-    { num: 5, label: "Çatdırıldı", icon: Package, desc: "Təhvil verildi" },
+    { num: 1, label: t.track.statusNew || "Qəbul edildi", icon: CheckCircle2, desc: "Sifariş qeydə alındı" },
+    { num: 2, label: t.track.statusConfirmed || "Təsdiqləndi", icon: ShieldCheck, desc: "Menecer təsdiqlədi" },
+    { num: 3, label: t.track.statusTailoring || "Çapda / Dərzidə", icon: Printer, desc: "DTF çap və atelye" },
+    { num: 4, label: t.track.statusCourier || "Kuryerdədir", icon: Truck, desc: "Ünvana çatdırılır" },
+    { num: 5, label: t.track.statusDelivered || "Çatdırıldı", icon: Package, desc: "Təhvil verildi" },
   ];
 
   const currentStep = order?.statusMeta?.step || 1;
@@ -350,11 +360,11 @@ function OrderTrackerContent() {
           </div>
 
           <h1 className="font-eb-garamond text-3xl sm:text-5xl font-normal text-stone-900 tracking-wide">
-            Sifarişinizi <span className="italic font-normal">izləyin</span>
+            {t.track.title || "Sifarişinizi izləyin"}
           </h1>
 
           <p className="text-xs sm:text-sm text-stone-600 max-w-md mx-auto leading-relaxed">
-            Sifariş nömrənizi və ya <strong>yalnız telefon nömrənizi</strong> daxil edərək cari çatdırılma mərhələsini canlı izləyin.
+            {t.track.subtitle || "Sifarişinizin canlı statusunu, atelye hazırlığını və kuryer məlumatlarını öyrənin"}
           </p>
         </div>
 
@@ -396,7 +406,7 @@ function OrderTrackerContent() {
                     className="px-3 py-1.5 hover:bg-amber-100/60 flex items-center gap-2 transition cursor-pointer"
                   >
                     <span className="font-mono font-bold text-stone-900">#{rec.id}</span>
-                    {rec.total ? <span className="text-stone-500">· {rec.total} ₼</span> : null}
+                    {rec.total ? <span className="text-stone-500">· {formatPrice(rec.total)}</span> : null}
                     <ArrowRight size={12} className="text-amber-700" />
                   </button>
                   <button
@@ -422,8 +432,8 @@ function OrderTrackerContent() {
 
         {/* Search Card with Two Modes */}
         <div className="bg-white p-5 sm:p-6 rounded-3xl border border-stone-200 shadow-md max-w-2xl mx-auto space-y-4">
-          {/* Mode Switch Tabs */}
-          <div className="flex p-1 bg-stone-100 rounded-2xl gap-1">
+          {/* Mode Switch Tabs (Code, Phone, Email) */}
+          <div className="grid grid-cols-3 p-1 bg-stone-100 rounded-2xl gap-1">
             <button
               type="button"
               onClick={() => {
@@ -431,14 +441,14 @@ function OrderTrackerContent() {
                 setQuery("");
                 setError(null);
               }}
-              className={`flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
+              className={`py-2 px-1 rounded-xl text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 searchMode === "code"
                   ? "bg-white text-stone-900 shadow-xs"
                   : "text-stone-500 hover:text-stone-900"
               }`}
             >
-              <Package size={14} />
-              <span>Sifariş Kodu İlə</span>
+              <Package size={13} />
+              <span className="truncate">{t.track.byCode || "Sifariş Kodu"}</span>
             </button>
 
             <button
@@ -448,17 +458,52 @@ function OrderTrackerContent() {
                 setQuery("");
                 setError(null);
               }}
-              className={`flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
+              className={`py-2 px-1 rounded-xl text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 searchMode === "phone"
                   ? "bg-stone-900 text-white shadow-xs"
                   : "text-stone-500 hover:text-stone-900"
               }`}
             >
-              <Phone size={14} />
-              <span>Telefon Nömrəsi İlə</span>
-              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-400 text-stone-950 font-black">CANLI</span>
+              <Phone size={13} />
+              <span className="truncate">{t.track.byPhone || "Telefon İlə"}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setSearchMode("email");
+                setQuery(user?.email || "");
+                setError(null);
+              }}
+              className={`py-2 px-1 rounded-xl text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                searchMode === "email"
+                  ? "bg-stone-900 text-white shadow-xs"
+                  : "text-stone-500 hover:text-stone-900"
+              }`}
+            >
+              <Mail size={13} />
+              <span className="truncate">{t.track.byEmail || "Gmail İlə"}</span>
             </button>
           </div>
+
+          {/* Logged in User Fast Tracking Prompt */}
+          {user?.email && searchMode === "email" && (
+            <div className="flex items-center justify-between p-2.5 rounded-xl bg-amber-50/80 border border-amber-200/80 text-xs">
+              <span className="text-amber-900 font-medium truncate">
+                Daxil olunmuş hesab: <strong>{user.email}</strong>
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery(user.email || "");
+                  handleSearch(user.email || "", "email");
+                }}
+                className="px-2.5 py-1 rounded-lg bg-amber-800 hover:bg-amber-900 text-white font-bold text-[11px] transition shrink-0 cursor-pointer"
+              >
+                Sifarişlərimi göstər
+              </button>
+            </div>
+          )}
 
           <form
             onSubmit={(e) => {
@@ -470,17 +515,21 @@ function OrderTrackerContent() {
             <div className="relative flex-1">
               {searchMode === "code" ? (
                 <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5" />
-              ) : (
+              ) : searchMode === "phone" ? (
                 <Phone className="w-4 h-4 text-emerald-600 absolute left-3.5 top-3.5" />
+              ) : (
+                <Mail className="w-4 h-4 text-sky-600 absolute left-3.5 top-3.5" />
               )}
               <input
-                type={searchMode === "phone" ? "tel" : "text"}
+                type={searchMode === "email" ? "email" : searchMode === "phone" ? "tel" : "text"}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={
                   searchMode === "code"
-                    ? "Sifariş № (məs: VTX-ORD-5374)..."
-                    : "Əlaqə nömrəniz (məs: +994 50 123 45 67)..."
+                    ? t.track.codePlaceholder || "Sifariş № (məs: VTX-ORD-5374)..."
+                    : searchMode === "phone"
+                    ? t.track.phonePlaceholder || "Əlaqə nömrəniz (məs: +994 50 123 45 67)..."
+                    : t.track.emailPlaceholder || "məsələn: adiniz@gmail.com"
                 }
                 className="w-full bg-stone-50 border border-stone-200 rounded-2xl pl-10 pr-4 py-3 text-xs sm:text-sm font-semibold text-stone-900 placeholder-stone-400 focus:outline-none focus:border-stone-900 focus:bg-white transition"
               />
@@ -489,37 +538,42 @@ function OrderTrackerContent() {
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-3 rounded-2xl bg-stone-900 hover:bg-black text-white text-xs font-bold uppercase tracking-wider transition active:scale-95 disabled:opacity-50 shrink-0 shadow-sm flex items-center gap-1.5"
+              className="px-6 py-3 rounded-2xl bg-stone-900 hover:bg-black text-white text-xs font-bold uppercase tracking-wider transition active:scale-95 disabled:opacity-50 shrink-0 shadow-sm flex items-center gap-1.5 cursor-pointer"
             >
               {loading ? (
-                <span>Axtarılır...</span>
+                <span>{t.track.trackingBtn || "Axtarılır..."}</span>
               ) : (
                 <>
-                  <span>{searchMode === "code" ? "İzlə" : "Tap"}</span>
+                  <span>{t.track.trackBtn || "İzlə"}</span>
                   <ArrowRight size={14} />
                 </>
               )}
             </button>
           </form>
 
-          {/* Forgotten Code Reassurance Helper */}
+          {/* Search Helper Notes */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 border-t border-stone-100 text-[11px] text-stone-500">
             {searchMode === "code" ? (
               <button
                 type="button"
                 onClick={() => {
-                  setSearchMode("phone");
+                  setSearchMode("email");
                   setError(null);
                 }}
-                className="text-stone-700 hover:text-black font-semibold flex items-center gap-1.5 transition text-left"
+                className="text-stone-700 hover:text-black font-semibold flex items-center gap-1.5 transition text-left cursor-pointer"
               >
                 <HelpCircle size={13} className="text-amber-600 shrink-0" />
-                <span>İzləmə kodunuzu unutmusunuz? <strong>Telefon nömrənizlə tapın →</strong></span>
+                <span>İzləmə kodunuzu unutmusunuz? <strong>E-poçt və ya Telefon ilə tapın →</strong></span>
               </button>
-            ) : (
+            ) : searchMode === "phone" ? (
               <div className="text-emerald-700 flex items-center gap-1.5 font-medium">
                 <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
                 <span>Kodu bilməsəniz belə, sifariş zamanı yazdığınız nömrə ilə dərhal tapılacaq.</span>
+              </div>
+            ) : (
+              <div className="text-sky-700 flex items-center gap-1.5 font-medium">
+                <CheckCircle2 size={13} className="text-sky-600 shrink-0" />
+                <span>Qeydiyyatdan keçdiyiniz Gmail və ya e-poçt ünvanınızı yazaraq bütün sifarişlərinizi izləyin.</span>
               </div>
             )}
 
@@ -528,12 +582,19 @@ function OrderTrackerContent() {
               <button
                 type="button"
                 onClick={() => {
-                  setQuery("VTX-ORD-5374");
-                  handleSearch("VTX-ORD-5374");
+                  if (searchMode === "email") {
+                    setQuery("musteri@horvvalle.com");
+                    handleSearch("musteri@horvvalle.com", "email");
+                  } else if (searchMode === "phone") {
+                    setQuery("+994 50 123 45 67");
+                  } else {
+                    setQuery("VTX-ORD-5374");
+                    handleSearch("VTX-ORD-5374", "code");
+                  }
                 }}
-                className="underline hover:text-stone-700 font-mono"
+                className="underline hover:text-stone-700 font-mono cursor-pointer"
               >
-                #VTX-ORD-5374
+                {searchMode === "email" ? "musteri@horvvalle.com" : searchMode === "phone" ? "+994 50 123 45 67" : "#VTX-ORD-5374"}
               </button>
             </div>
           </div>
@@ -544,7 +605,7 @@ function OrderTrackerContent() {
           <div className="bg-white p-5 rounded-3xl border border-stone-200 shadow-sm max-w-2xl mx-auto space-y-3 animate-in fade-in">
             <div className="flex items-center justify-between text-xs">
               <span className="font-bold text-stone-900">
-                Nömrənizə aid {allMatches.length} sifariş aşkar edildi:
+                {t.track.allOrders || "Axtarışınıza aid"} ({allMatches.length} sifariş):
               </span>
               <span className="text-stone-500 text-[11px]">Baxmaq istədiyiniz sifarişi seçin</span>
             </div>
@@ -557,7 +618,7 @@ function OrderTrackerContent() {
                     key={m.id}
                     type="button"
                     onClick={() => handleSearch(m.id)}
-                    className={`p-3 rounded-2xl border text-left transition flex items-center justify-between ${
+                    className={`p-3 rounded-2xl border text-left transition flex items-center justify-between cursor-pointer ${
                       isSelected
                         ? "bg-stone-900 text-white border-stone-900 shadow-sm"
                         : "bg-stone-50 hover:bg-stone-100 text-stone-800 border-stone-200"
@@ -566,7 +627,7 @@ function OrderTrackerContent() {
                     <div>
                       <div className="font-mono font-bold text-xs">{m.id}</div>
                       <div className={`text-[10px] mt-0.5 ${isSelected ? "text-stone-300" : "text-stone-500"}`}>
-                        {m.date ? new Date(m.date).toLocaleDateString("az-AZ") : "Sifariş"} · {m.total} ₼
+                        {m.date ? new Date(m.date).toLocaleDateString(language === "az" ? "az-AZ" : language === "ru" ? "ru-RU" : language === "tr" ? "tr-TR" : "en-US") : "Sifariş"} · {formatPrice(m.total)}
                       </div>
                     </div>
                     <span
@@ -722,7 +783,7 @@ function OrderTrackerContent() {
             {/* Order Items & Summary */}
             <div className="space-y-3 pt-2">
               <div className="text-xs font-bold text-stone-600 uppercase tracking-wider">
-                Sifariş Edilmiş Məhsullar:
+                {t.track.orderItems || "Sifariş Edilmiş Məhsullar"}:
               </div>
 
               <div className="space-y-2">
@@ -758,7 +819,7 @@ function OrderTrackerContent() {
 
                     <div className="text-right shrink-0">
                       <span className="font-black text-sm text-stone-900 block">
-                        {Number(item.price || order.total).toFixed(2)} ₼
+                        {formatPrice(item.price || order.total)}
                       </span>
                     </div>
                   </div>
@@ -771,7 +832,7 @@ function OrderTrackerContent() {
               <div className="space-y-2 bg-stone-50 p-4 rounded-2xl border border-stone-200/80">
                 <div className="font-bold text-stone-900 flex items-center gap-1.5 uppercase text-[10px] tracking-wider text-stone-500">
                   <MapPin size={12} />
-                  <span>Çatdırılma Ünvanı</span>
+                  <span>{t.track.deliveryAddress || "Çatdırılma Ünvanı"}</span>
                 </div>
                 <div className="font-bold text-stone-900 text-sm">{order.customer.fullName}</div>
                 <div className="text-stone-600">{order.customer.phone}</div>
@@ -781,7 +842,7 @@ function OrderTrackerContent() {
               <div className="space-y-2 bg-stone-50 p-4 rounded-2xl border border-stone-200/80 flex flex-col justify-between">
                 <div className="font-bold text-stone-900 flex items-center gap-1.5 uppercase text-[10px] tracking-wider text-stone-500">
                   <CreditCard size={12} />
-                  <span>Ödəniş Məlumatı</span>
+                  <span>{t.track.paymentInfo || "Ödəniş Məlumatı"}</span>
                 </div>
                 <div className="space-y-1">
                   <div className="flex justify-between text-stone-600">
@@ -793,8 +854,8 @@ function OrderTrackerContent() {
                     <strong className="text-emerald-700">{order.paymentStatus}</strong>
                   </div>
                   <div className="flex justify-between text-stone-900 font-bold pt-2 border-t border-stone-200 text-sm">
-                    <span>Cəmi Ödənilən:</span>
-                    <span className="font-black">{Number(order.total).toFixed(2)} ₼</span>
+                    <span>{t.track.total || "Cəmi Ödənilən"}:</span>
+                    <span className="font-black">{formatPrice(order.total)}</span>
                   </div>
                 </div>
               </div>

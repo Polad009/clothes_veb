@@ -17,11 +17,13 @@ import {
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { ApplePayLogo, PaymentLogosRow } from "@/components/PaymentLogos";
 
 export function CartDrawer() {
   const router = useRouter();
   const { formatPrice } = useCurrency();
+  const { t } = useLanguage();
   const {
     items,
     isOpen,
@@ -124,7 +126,7 @@ export function CartDrawer() {
                     </div>
                     <div>
                       <h3 className="font-eb-garamond text-2xl text-[#1A1517]">
-                        Səbətiniz boşdur
+                        {t.action.cartEmpty || "Səbətiniz boşdur"}
                       </h3>
                       <p className="text-xs text-[#786E63] mt-1 max-w-xs">
                         Köynək, hudi, şalvar və aksesuarlarımıza və ya 3D fərdi dizayn studiyasına nəzər salın.
@@ -136,7 +138,7 @@ export function CartDrawer() {
                         onClick={closeCart}
                         className="w-full py-3 rounded-full bg-[#1A1517] text-white font-semibold text-xs uppercase tracking-wider hover:bg-black transition text-center shadow-sm cursor-pointer active:scale-98"
                       >
-                        Kolleksiyaya Keç
+                        {t.action.continueShopping || "Kolleksiyaya Keç"}
                       </Link>
                       <Link
                         href="/studio"
@@ -242,7 +244,7 @@ export function CartDrawer() {
                 <div className="p-4 sm:p-5 border-t border-[#E8E2D8] bg-white space-y-3.5 shadow-lg">
                   <div className="space-y-1.5 text-xs text-[#5C5247]">
                     <div className="flex justify-between">
-                      <span>Məhsulların cəmi:</span>
+                      <span>{t.action.subtotal || "Məhsulların cəmi"}:</span>
                       <span className="font-bold text-[#1A1517]">{formatPrice(totalPrice)}</span>
                     </div>
                     <div className="flex justify-between">
@@ -252,7 +254,7 @@ export function CartDrawer() {
                       </span>
                     </div>
                     <div className="flex justify-between text-base font-normal text-[#1A1517] font-eb-garamond pt-2 border-t border-[#E8E2D8]">
-                      <span>Yekun Məbləğ:</span>
+                      <span>{t.track?.total || "Yekun Məbləğ"}:</span>
                       <span className="font-bold text-xl text-[#B08D57]">{formatPrice(totalPrice)}</span>
                     </div>
                   </div>
@@ -275,7 +277,7 @@ export function CartDrawer() {
                       onClick={handleCheckout}
                       className="w-full py-3.5 px-4 rounded-full bg-[#1A1517] hover:bg-black text-white font-semibold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-md active:scale-98 cursor-pointer"
                     >
-                      <span>Sifarişi Rəsmiləşdir</span>
+                      <span>{t.action.checkout || "Sifarişi Rəsmiləşdir"}</span>
                       <ArrowRight size={15} />
                     </button>
                   </div>

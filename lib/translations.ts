@@ -4,10 +4,15 @@ export interface Translations {
   // Navigation
   nav: {
     shirts: string;
+    hoodies: string;
     pants: string;
     socks: string;
+    accessories: string;
     collection: string;
+    track: string;
     studio: string;
+    login: string;
+    account: string;
     searchPlaceholder: string;
     searchBtn: string;
     menuTitle: string;
@@ -33,10 +38,60 @@ export interface Translations {
     pantsBtn: string;
     socksBtn: string;
     studioBtn: string;
+    designBtn: string;
+    collectionBtn: string;
+    selectSize: string;
     featureCotton: string;
     featureDtg: string;
     featureShipping: string;
     featureReturn: string;
+  };
+  // Track Page
+  track: {
+    title: string;
+    subtitle: string;
+    byCode: string;
+    byPhone: string;
+    byEmail: string;
+    codePlaceholder: string;
+    phonePlaceholder: string;
+    emailPlaceholder: string;
+    trackBtn: string;
+    trackingBtn: string;
+    orderSummary: string;
+    orderItems: string;
+    deliveryAddress: string;
+    paymentInfo: string;
+    total: string;
+    subtotal: string;
+    shipping: string;
+    free: string;
+    allOrders: string;
+    recentOrders: string;
+    notFound: string;
+    statusNew: string;
+    statusConfirmed: string;
+    statusTailoring: string;
+    statusCourier: string;
+    statusDelivered: string;
+    statusCancelled: string;
+  };
+  // Home Page
+  home: {
+    allModels: string;
+    shirtsCategory: string;
+    hoodiesCategory: string;
+    pantsCategory: string;
+    accessoriesCategory: string;
+    viewCollection: string;
+    view: string;
+    selectedModels: string;
+    wardrobeFoundation: string;
+    atelierShowcase: string;
+    selectedShowcase: string;
+    fourDirections: string;
+    fourDirectionsTitle: string;
+    fourDirectionsDesc: string;
   };
   // Products & Studio
   studio: {
@@ -100,16 +155,21 @@ export interface Translations {
 export const TRANSLATIONS: Record<LanguageCode, Translations> = {
   az: {
     nav: {
-      shirts: "KÖYNƏKLƏR",
-      pants: "ŞALVARLAR",
-      socks: "CORABLAR",
-      collection: "KOLLEKSİYA",
-      studio: "FƏRDİ ÇAP",
+      shirts: "Köynək",
+      hoodies: "Hudi",
+      pants: "Şalvar",
+      socks: "Corab",
+      accessories: "Aksesuar",
+      collection: "Kolleksiya",
+      track: "Sifarişi İzlə",
+      studio: "3D Fərdi Studiya",
+      login: "Daxil Ol / Qeydiyyat",
+      account: "Müştəri Hesabı",
       searchPlaceholder: "Məhsul və ya model axtar...",
       searchBtn: "Axtar",
       menuTitle: "Geyim & Çap Studiyası",
-      categories: "KATEQORİYALAR",
-      securePayment: "TƏHLÜKƏSİZ ÖDƏNİŞ",
+      categories: "Kolleksiyalar",
+      securePayment: "Təhlükəsiz Ödəniş",
       currency: "Valyuta",
       language: "Dil",
     },
@@ -128,10 +188,58 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       pantsBtn: "Şalvarlar",
       socksBtn: "Corablar",
       studioBtn: "Öz Dizaynını Yarat",
+      designBtn: "3D Studiyada dizayn et",
+      collectionBtn: "Kolleksiyaya bax",
+      selectSize: "Ölçünü seç",
       featureCotton: "100% Xalis Pambıq",
       featureDtg: "Ultra HD DTG Çap",
       featureShipping: "Bakı və Sumqayıtda Pulsuz Çatdırılma",
       featureReturn: "14 Günlük Qaytarılma",
+    },
+    track: {
+      title: "Sifarişi İzləyin",
+      subtitle: "Sifarişinizin canlı statusunu, atelye hazırlığını və kuryer məlumatlarını öyrənin",
+      byCode: "Sifariş Kodu İlə",
+      byPhone: "Telefon Nömrəsi İlə",
+      byEmail: "E-poçt (Gmail) İlə",
+      codePlaceholder: "məsələn: #VTX-ORD-2026 və ya 8841",
+      phonePlaceholder: "məsələn: +994 50 123 45 67",
+      emailPlaceholder: "məsələn: adiniz@gmail.com",
+      trackBtn: "İzlə",
+      trackingBtn: "Axtarılır...",
+      orderSummary: "Sifariş Məlumatları",
+      orderItems: "Sifariş Edilən Məhsullar",
+      deliveryAddress: "Çatdırılma Ünvanı",
+      paymentInfo: "Ödəniş Metodu",
+      total: "Yekun Məbləğ",
+      subtotal: "Məhsullar Cəmi",
+      shipping: "Çatdırılma",
+      free: "Pulsuz",
+      allOrders: "Bütün Tapılan Sifarişləriniz",
+      recentOrders: "Son Axtarılan Sifarişlər",
+      notFound: "Heç bir aktiv sifariş tapılmadı.",
+      statusNew: "Yeni Sifariş (Qəbul edildi)",
+      statusConfirmed: "Təsdiqləndi",
+      statusTailoring: "Çapda / Dərzidə",
+      statusCourier: "Kuryerdədir (Yoldadır)",
+      statusDelivered: "Çatdırıldı",
+      statusCancelled: "Ləğv edildi",
+    },
+    home: {
+      allModels: "Bütün Modellər",
+      shirtsCategory: "T-Shirt & Köynək",
+      hoodiesCategory: "Hudi & Sviter",
+      pantsCategory: "Şalvar & Şortik",
+      accessoriesCategory: "Aksesuarlar",
+      viewCollection: "Kolleksiyaya Keç",
+      view: "Bax",
+      selectedModels: "SEÇİLMİŞ MODELLƏR",
+      wardrobeFoundation: "QARDEROBUNUZUN TƏMƏLİ",
+      atelierShowcase: "CANLI ATELYE VİTRİNİ",
+      selectedShowcase: "HORVVALLE SEÇİLMİŞ MODELLƏR",
+      fourDirections: "KOLLEKSİYA STRUKTURU",
+      fourDirectionsTitle: "DÖRD ƏSAS DƏRZİLİK İSTİQAMƏTİ",
+      fourDirectionsDesc: "Xalis daranmış sıx pambıq, isti 3iplik fleece və dəqiq kəsimli şalvarlar. İstənilən bölməni seçərək modelləri kəşf edin.",
     },
     studio: {
       liveModelPreview: "Model Üzərində Canlı Baxış",
@@ -191,16 +299,21 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
 
   en: {
     nav: {
-      shirts: "SHIRTS",
-      pants: "PANTS",
-      socks: "SOCKS",
-      collection: "COLLECTION",
-      studio: "CUSTOM LAB",
+      shirts: "Shirts",
+      hoodies: "Hoodies",
+      pants: "Pants",
+      socks: "Socks",
+      accessories: "Accessories",
+      collection: "Collection",
+      track: "Track Order",
+      studio: "3D Custom Lab",
+      login: "Sign In / Register",
+      account: "Customer Account",
       searchPlaceholder: "Search products or styles...",
       searchBtn: "Search",
       menuTitle: "Apparel & Print Atelier",
-      categories: "CATEGORIES",
-      securePayment: "SECURE CHECKOUT",
+      categories: "Categories",
+      securePayment: "Secure Checkout",
       currency: "Currency",
       language: "Language",
     },
@@ -219,10 +332,58 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       pantsBtn: "Pants & Chinos",
       socksBtn: "Socks",
       studioBtn: "Create Your Design",
+      designBtn: "Design in 3D Studio",
+      collectionBtn: "View Collection",
+      selectSize: "Select Size",
       featureCotton: "100% Combed Cotton",
       featureDtg: "Ultra HD DTG Print",
       featureShipping: "Free Shipping Available",
       featureReturn: "14-Day Hassle-Free Returns",
+    },
+    track: {
+      title: "Track Your Order",
+      subtitle: "Check live order progress, atelier tailoring status, and courier tracking",
+      byCode: "By Order Code",
+      byPhone: "By Phone Number",
+      byEmail: "By Email (Gmail)",
+      codePlaceholder: "e.g. #VTX-ORD-2026 or 8841",
+      phonePlaceholder: "e.g. +994 50 123 45 67",
+      emailPlaceholder: "e.g. yourname@gmail.com",
+      trackBtn: "Track",
+      trackingBtn: "Searching...",
+      orderSummary: "Order Details",
+      orderItems: "Ordered Garments",
+      deliveryAddress: "Delivery Address",
+      paymentInfo: "Payment Method",
+      total: "Grand Total",
+      subtotal: "Subtotal",
+      shipping: "Delivery",
+      free: "Free",
+      allOrders: "All Matching Orders",
+      recentOrders: "Recently Tracked Orders",
+      notFound: "No active order found matching your query.",
+      statusNew: "New Order (Received)",
+      statusConfirmed: "Confirmed",
+      statusTailoring: "Printing / Tailoring",
+      statusCourier: "With Courier (Out for Delivery)",
+      statusDelivered: "Delivered",
+      statusCancelled: "Cancelled",
+    },
+    home: {
+      allModels: "All Garments",
+      shirtsCategory: "T-Shirts & Shirts",
+      hoodiesCategory: "Hoodies & Sweaters",
+      pantsCategory: "Pants & Shorts",
+      accessoriesCategory: "Accessories",
+      viewCollection: "Explore Collection",
+      view: "View",
+      selectedModels: "CURATED ATELIER PIECES",
+      wardrobeFoundation: "FOUNDATION OF YOUR WARDROBE",
+      atelierShowcase: "LIVE ATELIER SHOWCASE",
+      selectedShowcase: "HORVVALLE SIGNATURE MODELS",
+      fourDirections: "COLLECTION STRUCTURE",
+      fourDirectionsTitle: "FOUR CORE TAILORING PILLARS",
+      fourDirectionsDesc: "Heavyweight combed cotton, plush 3-thread fleece, and precision-tailored trousers. Explore each atelier category.",
     },
     studio: {
       liveModelPreview: "Live Model Simulation",
@@ -282,16 +443,21 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
 
   ru: {
     nav: {
-      shirts: "РУБАШКИ",
-      pants: "БРЮКИ",
-      socks: "НОСКИ",
-      collection: "КОЛЛЕКЦИЯ",
-      studio: "СВОЙ ПРИНТ",
+      shirts: "Рубашки",
+      hoodies: "Худи",
+      pants: "Брюки",
+      socks: "Носки",
+      accessories: "Аксессуары",
+      collection: "Коллекция",
+      track: "Отследить заказ",
+      studio: "3D Студия",
+      login: "Войти / Регистрация",
+      account: "Личный Кабинет",
       searchPlaceholder: "Поиск товаров и моделей...",
       searchBtn: "Поиск",
       menuTitle: "Одежда и Студия Печати",
-      categories: "КАТЕГОРИИ",
-      securePayment: "БЕЗОПАСНАЯ ОПЛАТА",
+      categories: "Коллекции",
+      securePayment: "Безопасная Оплата",
       currency: "Валюта",
       language: "Язык",
     },
@@ -310,10 +476,58 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       pantsBtn: "Брюки и Чиносы",
       socksBtn: "Носки",
       studioBtn: "Создать Свой Дизайн",
+      designBtn: "Дизайн в 3D Студии",
+      collectionBtn: "Смотреть коллекцию",
+      selectSize: "Выберите размер",
       featureCotton: "100% Гребенной Хлопок",
       featureDtg: "Печать Ultra HD DTG",
       featureShipping: "Бесплатная Доставка",
       featureReturn: "14 Дней Гарантия Возврата",
+    },
+    track: {
+      title: "Отследить Заказ",
+      subtitle: "Узнайте статус готовности, пошив в ателье и курьерскую доставку",
+      byCode: "По Коду Заказа",
+      byPhone: "По Номеру Телефона",
+      byEmail: "По Почте (Gmail)",
+      codePlaceholder: "напр: #VTX-ORD-2026 или 8841",
+      phonePlaceholder: "напр: +994 50 123 45 67",
+      emailPlaceholder: "напр: vash.email@gmail.com",
+      trackBtn: "Отследить",
+      trackingBtn: "Поиск...",
+      orderSummary: "Детали Заказа",
+      orderItems: "Заказанные Товары",
+      deliveryAddress: "Адрес Доставки",
+      paymentInfo: "Способ Оплаты",
+      total: "Общий Итог",
+      subtotal: "Товары",
+      shipping: "Доставка",
+      free: "Бесплатно",
+      allOrders: "Все Найденные Заказы",
+      recentOrders: "Недавние Заказы",
+      notFound: "Активных заказов не найдено.",
+      statusNew: "Новый Заказ (Принят)",
+      statusConfirmed: "Подтвержден",
+      statusTailoring: "В Печати / Пошиве",
+      statusCourier: "У Курьера (В Пути)",
+      statusDelivered: "Доставлен",
+      statusCancelled: "Отменен",
+    },
+    home: {
+      allModels: "Все Модели",
+      shirtsCategory: "Футболки и Рубашки",
+      hoodiesCategory: "Худи и Свитшоты",
+      pantsCategory: "Брюки и Шорты",
+      accessoriesCategory: "Аксессуары",
+      viewCollection: "В Коллекцию",
+      view: "Смотреть",
+      selectedModels: "ИЗБРАННЫЕ МОДЕЛИ",
+      wardrobeFoundation: "ОСНОВА ВАШЕГО ГАРДЕРОБА",
+      atelierShowcase: "ВИТРИНА АТЕЛЬЕ",
+      selectedShowcase: "ИЗБРАННЫЕ МОДЕЛИ HORVVALLE",
+      fourDirections: "СТРУКТУРА КОЛЛЕКЦИИ",
+      fourDirectionsTitle: "ЧЕТЫРЕ ГЛАВНЫХ НАПРАВЛЕНИЯ",
+      fourDirectionsDesc: "Плотный гребенной хлопок, теплый 3-х ниточный флис и точный крой брюк.",
     },
     studio: {
       liveModelPreview: "Живая Примерка на Модели",
@@ -373,38 +587,91 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
 
   tr: {
     nav: {
-      shirts: "GÖMLEKLER",
-      pants: "PANTOLONLAR",
-      socks: "ÇORAPLAR",
-      collection: "KOLEKSİYON",
-      studio: "ÖZEL BASKI",
+      shirts: "Gömlek",
+      hoodies: "Hudi",
+      pants: "Pantolon",
+      socks: "Çorap",
+      accessories: "Aksesuar",
+      collection: "Koleksiyon",
+      track: "Sipariş Takibi",
+      studio: "3D Özel Stüdyo",
+      login: "Giriş Yap / Kaydol",
+      account: "Müşteri Hesabı",
       searchPlaceholder: "Ürün veya model ara...",
       searchBtn: "Ara",
       menuTitle: "Giyim & Baskı Atölyesi",
-      categories: "KATEGORİLER",
-      securePayment: "GÜVENLİ ÖDEME",
+      categories: "Koleksiyonlar",
+      securePayment: "Güvenli Ödeme",
       currency: "Para Birimi",
       language: "Dil",
     },
     announcements: {
-      freeShipping: "BAKÜ VE SUMGAYIT İÇİN ÜCRETSİZ HIZLI KARGO",
-      customStudio: "ÖZEL BASKI ATÖLYESİ — KENDİ TASARIMINI TİŞÖRTE BAS",
-      cottonLinen: "%100 BİRİNCİ SINIF PENYE PAMUK VE DOĞAL KETEN KOLEKSİYONU",
-      guaranteedReturns: "14 GÜN İÇİNDE KOLAY VE GARANTİLİ İADE",
+      freeShipping: "BAKÜ VE SUMGAYIT BÖLGESİNE KARGO ÜCRETSİZDİR",
+      customStudio: "ÖZEL BASKI STÜDYOSU — KENDİ TASARIMINI GİY",
+      cottonLinen: "%100 PREMİUM PENYE PAMUK VE DOĞAL KETEN KOLEKSİYONU",
+      guaranteedReturns: "14 GÜN KOLAY VE GARANTİLİ İADE",
       expressDelivery: "HIZLI KURYE VE GÜVENLİ TESLİMAT",
     },
     hero: {
-      tag: "HORVVALLE ATELIER · 2026 KOLEKSİYONU",
+      tag: "HORVVALLE ATELIER · 2026 COUTURE",
       brand: "HORVVALLE",
       subtitle: "LÜKS GİYİM VE ÖZEL DİKİM ATÖLYESİ",
       shirtsBtn: "Gömlekler",
       pantsBtn: "Pantolonlar",
       socksBtn: "Çoraplar",
       studioBtn: "Kendi Tasarımını Yap",
+      designBtn: "3D Stüdyoda Tasarla",
+      collectionBtn: "Koleksiyonu Gör",
+      selectSize: "Beden seç",
       featureCotton: "%100 Saf Penye Pamuk",
       featureDtg: "Ultra HD DTG Baskı",
       featureShipping: "Ücretsiz Kargo İmkanı",
       featureReturn: "14 Gün Kolay İade",
+    },
+    track: {
+      title: "Siparişinizi Takip Edin",
+      subtitle: "Siparişinizin durumunu, atölye hazırlığını ve kurye teslimatını anlık izleyin",
+      byCode: "Sipariş Kodu İle",
+      byPhone: "Telefon Numarası İle",
+      byEmail: "E-posta (Gmail) İle",
+      codePlaceholder: "örnek: #VTX-ORD-2026 veya 8841",
+      phonePlaceholder: "örnek: +994 50 123 45 67",
+      emailPlaceholder: "örnek: adiniz@gmail.com",
+      trackBtn: "Takip Et",
+      trackingBtn: "Aranıyor...",
+      orderSummary: "Sipariş Detayları",
+      orderItems: "Sipariş Edilen Ürünler",
+      deliveryAddress: "Teslimat Adresi",
+      paymentInfo: "Ödeme Yöntemi",
+      total: "Genel Toplam",
+      subtotal: "Ara Toplam",
+      shipping: "Kargo",
+      free: "Ücretsiz",
+      allOrders: "Bulunan Tüm Siparişleriniz",
+      recentOrders: "Son Takip Edilenler",
+      notFound: "Aramanıza uygun sipariş bulunamadı.",
+      statusNew: "Yeni Sipariş (Alındı)",
+      statusConfirmed: "Onaylandı",
+      statusTailoring: "Baskıda / Terzide",
+      statusCourier: "Kuryede (Yolda)",
+      statusDelivered: "Teslim Edildi",
+      statusCancelled: "İptal Edildi",
+    },
+    home: {
+      allModels: "Tüm Modeller",
+      shirtsCategory: "T-Shirt & Gömlek",
+      hoodiesCategory: "Hudi & Sweatshirt",
+      pantsCategory: "Pantolon & Şort",
+      accessoriesCategory: "Aksesuarlar",
+      viewCollection: "Koleksiyona Git",
+      view: "İncele",
+      selectedModels: "SEÇKİN MODELLER",
+      wardrobeFoundation: "GARDROBUNUZUN TEMELİ",
+      atelierShowcase: "CANLI ATÖLYE VİTRİNİ",
+      selectedShowcase: "HORVVALLE İMZA MODELLERİ",
+      fourDirections: "KOLEKSİYON YAPISI",
+      fourDirectionsTitle: "DÖRT TEMEL TERZİ ALANI",
+      fourDirectionsDesc: "Yoğun penye pamuk, sıcak 3iplik polar ve kusursuz kesimli pantolonlar.",
     },
     studio: {
       liveModelPreview: "Model Üzerinde Canlı Önizleme",

@@ -135,12 +135,12 @@ export function Header({ className = "" }: HeaderProps) {
   }, [mobileMenuOpen]);
 
   const navLinks = [
-    { label: "Köynək", href: "/collections?category=koynek", categoryId: "koynek" },
-    { label: "Hudi", href: "/collections?category=hudi", categoryId: "hudi" },
-    { label: "Şalvar", href: "/collections?category=salvar", categoryId: "salvar" },
-    { label: "Aksesuar", href: "/collections?category=aksesuar", categoryId: "aksesuar" },
-    { label: "Kolleksiya", href: "/collections", categoryId: "all" },
-    { label: "Sifarişi İzlə", href: "/track", categoryId: "track" },
+    { label: t.nav.shirts, href: "/collections?category=koynek", categoryId: "koynek" },
+    { label: t.nav.hoodies, href: "/collections?category=hudi", categoryId: "hudi" },
+    { label: t.nav.pants, href: "/collections?category=salvar", categoryId: "salvar" },
+    { label: t.nav.accessories, href: "/collections?category=aksesuar", categoryId: "aksesuar" },
+    { label: t.nav.collection, href: "/collections", categoryId: "all" },
+    { label: t.nav.track, href: "/track", categoryId: "track" },
   ];
 
   const isLinkActive = (categoryId: string, href: string) => {
@@ -385,7 +385,7 @@ export function Header({ className = "" }: HeaderProps) {
                       type="text"
                       value={mobileSearchQuery}
                       onChange={(e) => setMobileSearchQuery(e.target.value)}
-                      placeholder="Axtarış..."
+                      placeholder={t.nav.searchPlaceholder || "Axtarış..."}
                       className="w-full bg-transparent text-xs font-medium focus:outline-none placeholder:text-[#5C5247]/60 text-[#1A1517]"
                     />
                     {mobileSearchQuery.trim() ? (
@@ -485,7 +485,7 @@ export function Header({ className = "" }: HeaderProps) {
 
                 <div className="pt-2">
                   <div className="text-[10px] font-bold uppercase tracking-widest text-[#9A7B4F] px-1 pb-2">
-                    Kolleksiyalar
+                    {t.nav.categories || "Kolleksiyalar"}
                   </div>
 
                   {/* Staggered cascading container */}
@@ -562,7 +562,7 @@ export function Header({ className = "" }: HeaderProps) {
                       >
                         <span className="flex items-center gap-2">
                           <Box size={16} className={isStudioActive ? "text-[#E6C280]" : "text-[#B08D57]"} />
-                          <span>3D Fərdi Studiya</span>
+                          <span>{t.nav.studio || "3D Fərdi Studiya"}</span>
                         </span>
                         <ChevronRight size={14} className="opacity-40" />
                       </Link>
@@ -584,7 +584,7 @@ export function Header({ className = "" }: HeaderProps) {
                         {(profile?.full_name || user.email || "H")[0].toUpperCase()}
                       </div>
                       <div>
-                        <div>{profile?.full_name || "Müştəri Hesabı"}</div>
+                        <div>{profile?.full_name || t.nav.account || "Müştəri Hesabı"}</div>
                         <div className="text-[10px] text-stone-500 truncate max-w-[170px]">{user.email}</div>
                       </div>
                     </div>
@@ -600,7 +600,7 @@ export function Header({ className = "" }: HeaderProps) {
                     className="w-full py-3 rounded-full bg-stone-900 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer active:scale-98 transition"
                   >
                     <User size={14} />
-                    <span>Daxil Ol / Qeydiyyat</span>
+                    <span>{t.nav.login || "Daxil Ol / Qeydiyyat"}</span>
                   </button>
                 )}
               </div>
@@ -608,7 +608,7 @@ export function Header({ className = "" }: HeaderProps) {
               {/* Bottom: Locale Dropdown */}
               <div className="p-4 sm:p-5 border-t border-[#E8E2D8] bg-[#F5EFE6]">
                 <div className="flex items-center justify-between text-xs font-medium text-[#5C5247]">
-                  <span>Dil və Valyuta:</span>
+                  <span>{t.nav.language} & {t.nav.currency}:</span>
                   <UnifiedLocaleDropdown direction="up" align="right" variant="light" />
                 </div>
               </div>

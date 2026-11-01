@@ -63,7 +63,7 @@ export default function Home() {
     {
       id: "koynek",
       num: "01",
-      title: "T-Shirt & Köynək",
+      title: t.home.shirtsCategory || "T-Shirt & Köynək",
       desc: "Streetwear & Oxford",
       fabric: "100% Xalis Pambıq · 220-240 GSM",
       image: "/images/categories/tshirt-and-shirt-showcase.webp",
@@ -74,7 +74,7 @@ export default function Home() {
     {
       id: "hudi",
       num: "02",
-      title: "Hudi & Sviter",
+      title: t.home.hoodiesCategory || "Hudi & Sviter",
       desc: "3iplik Qalın & İsti",
       fabric: "Ağır 3iplik Fleece · 380 GSM",
       image: "/images/products/heavyweight-hoodie-black/mockup.jpg",
@@ -85,7 +85,7 @@ export default function Home() {
     {
       id: "salvar",
       num: "03",
-      title: "Şalvar & Şortik",
+      title: t.home.pantsCategory || "Şalvar & Şortik",
       desc: "Chino & Denim & Kargo",
       fabric: "Pambıq Twill & 12.5 oz İndiqo",
       image: "/images/categories/salvar-and-shortik-showcase.webp",
@@ -96,7 +96,7 @@ export default function Home() {
     {
       id: "aksesuar",
       num: "04",
-      title: "Aksesuarlar",
+      title: t.home.accessoriesCategory || "Aksesuarlar",
       desc: "Kepkalar & Eko Çantalar",
       fabric: "Qalın Twill & Təbii Kətan",
       image: "/images/products/snapback-cap-heavy/mockup.jpg",
@@ -124,10 +124,10 @@ export default function Home() {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4 text-center">
           <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-stone-500">
-            CANLI ATELYE VİTRİNİ
+            {t.home.atelierShowcase || "CANLI ATELYE VİTRİNİ"}
           </span>
           <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-tight text-stone-900 font-editorial mt-0.5">
-            HORVVALLE SEÇİLMİŞ MODELLƏR
+            {t.home.selectedShowcase || "HORVVALLE SEÇİLMİŞ MODELLƏR"}
           </h2>
         </div>
 
@@ -143,14 +143,14 @@ export default function Home() {
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-stone-100 border border-stone-200/80 text-[10px] font-bold uppercase tracking-[0.2em] text-stone-600 mb-2">
                 <span>HORVVALLE ATELIER</span>
                 <span className="w-1 h-1 rounded-full bg-stone-400" />
-                <span>KOLLEKSİYA STRUKTURU</span>
+                <span>{t.home.fourDirections || "KOLLEKSİYA STRUKTURU"}</span>
               </div>
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-normal uppercase tracking-tight text-stone-900 font-serif-luxury">
-                DÖRD ƏSAS DƏRZİLİK İSTİQAMƏTİ
+                {t.home.fourDirectionsTitle || "DÖRD ƏSAS DƏRZİLİK İSTİQAMƏTİ"}
               </h2>
             </div>
             <p className="text-xs sm:text-sm text-stone-500 max-w-md leading-relaxed">
-              Xalis daranmış sıx pambıq, isti 3iplik fleece və dəqiq kəsimli şalvarlar. İstənilən bölməni seçərək modelləri kəşf edin.
+              {t.home.fourDirectionsDesc || "Xalis daranmış sıx pambıq, isti 3iplik fleece və dəqiq kəsimli şalvarlar. İstənilən bölməni seçərək modelləri kəşf edin."}
             </p>
           </div>
 
@@ -187,7 +187,7 @@ export default function Home() {
                     />
                     <div className="absolute inset-0 bg-stone-900/0 group-hover:bg-stone-900/10 transition-colors" />
                     <div className="absolute bottom-2.5 right-2.5 px-2.5 py-1 rounded-full bg-white/95 backdrop-blur-md border border-stone-200/80 text-[10px] font-semibold text-stone-800 shadow-sm flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <span>Bax</span>
+                      <span>{t.home.view || "Bax"}</span>
                       <ArrowRight size={11} />
                     </div>
                   </Link>
@@ -216,7 +216,7 @@ export default function Home() {
                     prefetch={true}
                     className="inline-flex items-center gap-1.5 font-semibold text-stone-900 group-hover:text-amber-800 transition-colors uppercase tracking-wider text-[11px]"
                   >
-                    <span>Kolleksiyaya Keç</span>
+                    <span>{t.home.viewCollection || "Kolleksiyaya Keç"}</span>
                     <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </div>
@@ -231,21 +231,21 @@ export default function Home() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-stone-200/80">
           <div>
             <span className="text-xs font-semibold uppercase tracking-[0.25em] text-stone-500 block mb-1">
-              SEÇİLMİŞ MODELLƏR
+              {t.home.selectedModels || "SEÇİLMİŞ MODELLƏR"}
             </span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-normal uppercase tracking-tight text-stone-900 font-serif-luxury">
-              QARDEROBUNUZUN TƏMƏLİ
+              {t.home.wardrobeFoundation || "QARDEROBUNUZUN TƏMƏLİ"}
             </h2>
           </div>
 
           {/* Animated Filter Pills with Smooth Sliding Indicator */}
           <div className="flex items-center gap-1 sm:gap-1.5 p-1 sm:p-1.5 rounded-full bg-stone-100/90 border border-stone-200/80 shadow-2xs overflow-x-auto max-w-full">
             {[
-              { id: "all", label: "Bütün Modellər" },
-              { id: "koynek", label: "T-Shirt & Köynək" },
-              { id: "hudi", label: "Hudi & Sviter" },
-              { id: "salvar", label: "Şalvar & Şortik" },
-              { id: "aksesuar", label: "Aksesuarlar" },
+              { id: "all", label: t.home.allModels || "Bütün Modellər" },
+              { id: "koynek", label: t.home.shirtsCategory || "T-Shirt & Köynək" },
+              { id: "hudi", label: t.home.hoodiesCategory || "Hudi & Sviter" },
+              { id: "salvar", label: t.home.pantsCategory || "Şalvar & Şortik" },
+              { id: "aksesuar", label: t.home.accessoriesCategory || "Aksesuarlar" },
             ].map((tab) => {
               const isActive = activeCategory === tab.id;
               return (

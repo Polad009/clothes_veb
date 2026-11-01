@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { SizeChip } from "@/components/ui/SizeChip";
 import { useStoreData } from "@/context/StoreDataContext";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 export interface HeroProductItem {
   id: string;
@@ -109,6 +110,7 @@ const INITIAL_FALLBACK_PRODUCTS: HeroProductItem[] = [
 export function Hero() {
   const { products } = useStoreData();
   const { formatPrice } = useCurrency();
+  const { t, language } = useLanguage();
 
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [selectedSize, setSelectedSize] = useState<string>("L");
@@ -287,19 +289,44 @@ export function Hero() {
           <div className="lg:col-span-4 flex flex-col justify-center space-y-3 sm:space-y-3.5 text-center lg:text-left order-2 lg:order-1">
             {/* Headline */}
             <h1 className="font-eb-garamond text-2xl sm:text-3xl lg:text-[2.2rem] xl:text-[2.45rem] font-normal leading-[1.14] tracking-tight">
-              <span>Sənin ölçün,</span>
-              <span className="block italic text-[#E6C280]">sənin üslubun.</span>
+              {language === "az" ? (
+                <>
+                  <span>Sənin ölçün,</span>
+                  <span className="block italic text-[#E6C280]">sənin üslubun.</span>
+                </>
+              ) : language === "en" ? (
+                <>
+                  <span>Your fit,</span>
+                  <span className="block italic text-[#E6C280]">your style.</span>
+                </>
+              ) : language === "ru" ? (
+                <>
+                  <span>Твой размер,</span>
+                  <span className="block italic text-[#E6C280]">твой стиль.</span>
+                </>
+              ) : (
+                <>
+                  <span>Senin bedenin,</span>
+                  <span className="block italic text-[#E6C280]">senin stilin.</span>
+                </>
+              )}
             </h1>
 
-            {/* Azerbaijani Description */}
+            {/* Localized Description */}
             <p className="text-white/80 text-xs sm:text-[13.5px] leading-relaxed max-w-sm mx-auto lg:mx-0 font-sans">
-              Atelyedə hər geyim ölçünə görə tikilir, istədiyin dizayn isə canlı 3D çapla köynəyə köçürülür.
+              {language === "az"
+                ? "Atelyedə hər geyim ölçünə görə tikilir, istədiyin dizayn isə canlı 3D çapla köynəyə köçürülür."
+                : language === "en"
+                ? "Every garment is crafted to your exact fit, with live 3D print simulations brought to life."
+                : language === "ru"
+                ? "Каждая вещь шьется точно по вашей фигуре, а ваш дизайн переносится живой 3D печатью."
+                : "Her kıyafet bedeninize özel dikilir, dilediğiniz tasarım 3D baskıyla hayata geçer."}
             </p>
 
             {/* Shared UI Buttons */}
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5 pt-1">
               <Button variant="primary" href="/studio">
-                <span>3D Studiyada dizayn et</span>
+                <span>{t.hero.designBtn || "3D Studiyada dizayn et"}</span>
                 <svg
                   width="13"
                   height="13"
@@ -315,7 +342,7 @@ export function Hero() {
               </Button>
 
               <Button variant="secondary" href="/collections">
-                Kolleksiyaya bax
+                {t.hero.collectionBtn || "Kolleksiyaya bax"}
               </Button>
             </div>
           </div>
@@ -407,7 +434,7 @@ export function Hero() {
             {/* Size Selector */}
             <div className="pt-0.5">
               <span className="text-white/90 text-xs sm:text-sm font-medium block mb-2">
-                Ölçünü seç
+                {t.hero.selectSize || "Ölçünü seç"}
               </span>
 
               <div className="flex items-center gap-2 flex-wrap justify-center lg:justify-end">
@@ -548,10 +575,12 @@ export function Hero() {
           <button
             type="button"
             onClick={handleNext}
-            aria-label={`Növbəti məhsul: ${nextItem.title}`}
+            aria-label={`${language === "az" ? "Növbəti məhsul" : language === "en" ? "Next piece" : language === "ru" ? "Следующий товар" : "Sonraki ürün"}: ${nextItem.title}`}
             className="sm:hidden flex items-center gap-1.5 text-xs text-white/80 hover:text-white transition cursor-pointer"
           >
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-white/70">Növbəti</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-white/70">
+              {language === "az" ? "Növbəti" : language === "en" ? "Next" : language === "ru" ? "Далее" : "Sonraki"}
+            </span>
             <div className="w-8 h-8 relative flex items-center justify-center">
               <Image
                 src={nextItem.image}
@@ -564,10 +593,29 @@ export function Hero() {
           </button>
         </div>
 
-        {/* Center: Azerbaijani Slogan in EB Garamond */}
+        {/* Center: Multilingual Slogan in EB Garamond */}
         <div className="font-eb-garamond text-center text-white/95 text-lg sm:text-xl lg:text-2xl leading-snug order-1 sm:order-2">
-          <div>Daha yaxşı geyin.</div>
-          <div>Daha yaxşı hiss et.</div>
+          {language === "az" ? (
+            <>
+              <div>Daha yaxşı geyin.</div>
+              <div>Daha yaxşı hiss et.</div>
+            </>
+          ) : language === "en" ? (
+            <>
+              <div>Dress better.</div>
+              <div>Feel better.</div>
+            </>
+          ) : language === "ru" ? (
+            <>
+              <div>Одевайся лучше.</div>
+              <div>Чувствуй лучше.</div>
+            </>
+          ) : (
+            <>
+              <div>Daha iyi giyin.</div>
+              <div>Daha iyi hisset.</div>
+            </>
+          )}
         </div>
 
         {/* Desktop/Tablet: Next Product Mini Thumbnail */}
