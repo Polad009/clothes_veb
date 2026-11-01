@@ -25,11 +25,236 @@ import { playPurchaseSuccessSound } from "@/lib/soundEffects";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 
+const CHECKOUT_I18N = {
+  az: {
+    testBanner: "Real ödəniş çəkilmir. Test rejimində təhlükəsiz sınaq sifarişi edə bilərsiniz.",
+    orPayWithCard: "{cT.orPayWithCard}",
+    testFlowPrompt: "Test rejimində axını tam yoxlamaq üçün:",
+    confirmTestOrder: "Sınaq Sifarişini Təsdiq Et",
+    applePayRequiresSafari: "Apple Pay yalnız iOS Safari və ya macOS Safari brauzerində aktivdir (və HTTPS bağlantısı tələb olunur).",
+    applePayNoCards: "canMakePayments() false qaytardı. Səbəb: Apple Wallet-də aktiv bank kartı quraşdırılmayıb və ya domen HTTPS deyil.",
+    applePayError: "Apple Pay xətası: Ödəniş pəncərəsi başladıla bilmədi.",
+    googlePayNotice: "Google Pay xəbərdarlığı: Brauzerinizdə Google Pay aktiv deyil və ya kart tapılmadı.",
+    googlePayNotInstalled: "Google Pay xəbərdarlığı: Cihazınızda Google Pay quraşdırılmayıb.",
+    googlePayError: "Google Pay xətası: Google Pay API xətası.",
+    checkInfo: "Məlumatları yoxlayın",
+    checkErrorsBelow: "Zəhmət olmasa qırmızı xəbərdarlıqlı xanaları düzgün doldurun.",
+    fillDeliveryFirst: "Zəhmət olmasa əvvəlcə çatdırılma məlumatlarını qeyd edin.",
+    loginToBuy: "Məhsul almaq və izləmə kodunuzu əldə etmək üçün zəhmət olmasa daxil olun.",
+    authRequiredOrder: "Sifariş üçün giriş və ya qeydiyyat tələb olunur",
+    cartEmpty: "Səbətiniz boşdur.",
+    reqField: "Mütləq sahə",
+    enterFullName: "Ad və soyadınızı daxil edin",
+    fullNameMin: "Ad və soyad ən azı 3 hərfdən ibarət olmalıdır",
+    enterPhone: "Əlaqə nömrənizi daxil edin",
+    validPhone: "Düzgün əlaqə nömrəsi daxil edin (məs: +994 50 123 45 67)",
+    enterEmail: "E-poçt ünvanınızı daxil edin",
+    validEmail: "Düzgün e-poçt ünvanı daxil edin (məs: ad@example.com)",
+    enterAddress: "Çatdırılma ünvanınızı qeyd edin",
+    addressMin: "Daha ətraflı ünvan daxil edin (küçə, bina, mənzil)",
+    addressPlaceholder: "Məs: Nizami küçəsi 14, mənzil 28",
+    bakuSumqayitFree: "Bakı və Sumqayıt: Pulsuz",
+    regions5: "Bölgə: 5 ₼",
+    regionsLabel: "Rayonlar",
+    regionsPlaceholder: "Rayon və ya şəhər (Gəncə, Şəki)",
+    cardName: "Kart Üzerindəki Ad",
+    cardNumber: "Kart Nömrəsi",
+    cardExpiry: "Bitmə Tarixi (AA/İL)",
+    cardCvc: "CVC / CVV",
+    cardNumReq: "16 rəqəmli kart nömrəsini daxil edin",
+    cardNumMin: "Kart nömrəsi 16 rəqəmdən ibarət olmalıdır",
+    cardExpReq: "Bitmə tarixini qeyd edin",
+    cardExpFormat: "Format düzgün deyil (məs: 12/28)",
+    cardCvcReq: "CVC kodunu daxil edin",
+    cardCvcMin: "3 və ya 4 rəqəmli CVC daxil edin",
+    cardTestNotice: "Test rejimi: Real kart provayderi (Stripe/PashaBank/Payriff) qoşulana qədər kart məlumatları saxlanılmır və sifariş 'test_paid' statusu ilə test olunur.",
+    codTitle: "Çatdırılmada Ödəniş (Nağd / Kuryer POS)",
+    codSubtitle: "{cT.codSubtitle}",
+    codNoCustom: "Fərdi sifarişlərə şamil olunmur",
+    freeDeliveryTitle: "Bakı və Sumqayıt Ərazisinə Pulsuz Çatdırılma",
+    freeDeliveryDesc: "Bakı və Sumqayıt daxili bütün sifarişlər heç bir məbləğ məhdudiyyəti olmadan kuryerlə tam pulsuz çatdırılır.",
+    guaranteeTitle: "HORVVALLE Atelye Zəmanəti",
+    guaranteeDesc: "Ölçü uyğun gəlmədikdə 14 gün ərzində asan dəyişmə və ya ödənişin tam geri qaytarılması təmin edilir.",
+    helpTitle: "Sifarişdə kömək lazımdır?",
+    helpLive: "Canlı Dəstək",
+    helpDesc: "Ölçü seçimi, çatdırılma və ya suallarınız üçün birbaşa WhatsApp dəstək xəttimizə yaza bilərsiniz:",
+    itemsLabel: "Məhsullar",
+    shippingLabel: "Çatdırılma",
+  },
+  en: {
+    testBanner: "No real payment is charged. You can safely complete a test order in test mode.",
+    orPayWithCard: "OR PAY WITH CARD",
+    testFlowPrompt: "To test the full flow in test mode:",
+    confirmTestOrder: "Confirm Test Order",
+    applePayRequiresSafari: "Apple Pay is only available in iOS Safari or macOS Safari (and requires an HTTPS connection).",
+    applePayNoCards: "canMakePayments() returned false. Reason: No active card configured in Apple Wallet or the domain is not HTTPS.",
+    applePayError: "Apple Pay error: Could not launch payment sheet.",
+    googlePayNotice: "Google Pay notice: Google Pay is not active in your browser or no card was found.",
+    googlePayNotInstalled: "Google Pay notice: Google Pay is not configured on your device.",
+    googlePayError: "Google Pay error: Google Pay API error.",
+    checkInfo: "Please review your information",
+    checkErrorsBelow: "Please correct the highlighted fields before proceeding.",
+    fillDeliveryFirst: "Please complete delivery information first.",
+    loginToBuy: "Please sign in to complete your purchase and secure your tracking code.",
+    authRequiredOrder: "Sign in or registration required to order",
+    cartEmpty: "Your cart is empty.",
+    reqField: "Required",
+    enterFullName: "Please enter your full name",
+    fullNameMin: "Full name must be at least 3 letters",
+    enterPhone: "Please enter your phone number",
+    validPhone: "Please enter a valid phone number (e.g. +994 50 123 45 67)",
+    enterEmail: "Please enter your email address",
+    validEmail: "Please enter a valid email address (e.g. name@example.com)",
+    enterAddress: "Please enter your delivery address",
+    addressMin: "Please enter a detailed address (street, building, apt)",
+    addressPlaceholder: "e.g. 14 Nizami Street, Apt 28",
+    bakuSumqayitFree: "Baku & Sumgayit: Free",
+    regions5: "Regions: 5 ₼",
+    regionsLabel: "Regions",
+    regionsPlaceholder: "Region or city (e.g. Ganja, Shaki)",
+    cardName: "Name on Card",
+    cardNumber: "Card Number",
+    cardExpiry: "Expiry Date (MM/YY)",
+    cardCvc: "CVC / CVV",
+    cardNumReq: "Please enter a 16-digit card number",
+    cardNumMin: "Card number must contain 16 digits",
+    cardExpReq: "Please enter expiration date",
+    cardExpFormat: "Invalid format (e.g. 12/28)",
+    cardCvcReq: "Please enter CVC code",
+    cardCvcMin: "Enter a 3 or 4-digit CVC",
+    cardTestNotice: "Test Mode: Card details are not stored. The order will be registered with 'test_paid' status until a live provider is configured.",
+    codTitle: "Cash on Delivery (Cash / Courier POS)",
+    codSubtitle: "Pay with cash or card upon receiving your order from the courier",
+    codNoCustom: "Not eligible for custom designs",
+    freeDeliveryTitle: "Free Delivery to Baku & Sumgayit",
+    freeDeliveryDesc: "All orders within Baku and Sumgayit are delivered completely free of charge by courier, with no minimum spend.",
+    guaranteeTitle: "HORVVALLE Atelier Guarantee",
+    guaranteeDesc: "Easy exchange or full refund within 14 days if the fit is not suitable.",
+    helpTitle: "Need help with your order?",
+    helpLive: "Live Support",
+    helpDesc: "For sizing assistance, delivery, or general questions, message our direct WhatsApp support:",
+    itemsLabel: "Items",
+    shippingLabel: "Delivery",
+  },
+  ru: {
+    testBanner: "Списание средств не производится. В тестовом режиме вы можете безопасно оформить заказ.",
+    orPayWithCard: "ИЛИ ОПЛАТИТЕ КАРТОЙ",
+    testFlowPrompt: "Для проверки процесса в тестовом режиме:",
+    confirmTestOrder: "Подтвердить тестовый заказ",
+    applePayRequiresSafari: "Apple Pay доступен только в браузерах Safari на iOS или macOS (и требует подключения HTTPS).",
+    applePayNoCards: "canMakePayments() вернул false. Причина: в Apple Wallet не добавлена активная карта или домен не использует HTTPS.",
+    applePayError: "Ошибка Apple Pay: Не удалось запустить платежное окно.",
+    googlePayNotice: "Предупреждение Google Pay: Google Pay не активен в вашем браузере или карта не найдена.",
+    googlePayNotInstalled: "Предупреждение Google Pay: Google Pay не настроен на вашем устройстве.",
+    googlePayError: "Ошибка Google Pay: Ошибка API Google Pay.",
+    checkInfo: "Проверьте данные",
+    checkErrorsBelow: "Пожалуйста, корректно заполните выделенные поля.",
+    fillDeliveryFirst: "Пожалуйста, сначала заполните данные доставки.",
+    loginToBuy: "Пожалуйста, войдите в аккаунт для оформления заказа и получения трек-кода.",
+    authRequiredOrder: "Для оформления заказа требуется вход или регистрация",
+    cartEmpty: "Ваша корзина пуста.",
+    reqField: "Обязательно",
+    enterFullName: "Введите имя и фамилию",
+    fullNameMin: "Имя должно содержать не менее 3 букв",
+    enterPhone: "Введите контактный номер",
+    validPhone: "Введите корректный номер (напр.: +994 50 123 45 67)",
+    enterEmail: "Введите адрес эл. почты",
+    validEmail: "Введите корректный адрес эл. почты (напр.: name@example.com)",
+    enterAddress: "Укажите адрес доставки",
+    addressMin: "Укажите подробный адрес (улица, дом, кв.)",
+    addressPlaceholder: "Напр.: ул. Низами 14, кв. 28",
+    bakuSumqayitFree: "Баку и Сумгаит: Бесплатно",
+    regions5: "Регионы: 5 ₼",
+    regionsLabel: "Регионы",
+    regionsPlaceholder: "Район или город (Гянджа, Шеки)",
+    cardName: "Имя на карте",
+    cardNumber: "Номер карты",
+    cardExpiry: "Срок действия (ММ/ГГ)",
+    cardCvc: "CVC / CVV",
+    cardNumReq: "Введите 16-значный номер карты",
+    cardNumMin: "Номер карты должен состоять из 16 цифр",
+    cardExpReq: "Укажите срок действия",
+    cardExpFormat: "Неверный формат (напр.: 12/28)",
+    cardCvcReq: "Введите код CVC",
+    cardCvcMin: "Введите 3- или 4-значный CVC",
+    cardTestNotice: "Тестовый режим: Данные карты не сохраняются. Заказ оформляется со статусом 'test_paid' до подключения реального провайдера.",
+    codTitle: "Оплата при доставке (Наличные / Терминал)",
+    codSubtitle: "Оплатите наличными или картой при получении заказа у курьера",
+    codNoCustom: "Недоступно для индивидуальных заказов",
+    freeDeliveryTitle: "Бесплатная доставка по Баку и Сумгаиту",
+    freeDeliveryDesc: "Все заказы по Баку и Сумгаиту доставляются курьером абсолютно бесплатно, без ограничений по сумме.",
+    guaranteeTitle: "Гарантия ателье HORVVALLE",
+    guaranteeDesc: "Легкий обмен или полный возврат средств в течение 14 дней, если размер не подошел.",
+    helpTitle: "Нужна помощь с заказом?",
+    helpLive: "Живая поддержка",
+    helpDesc: "По вопросам подбора размера, доставки или оформления пишите напрямую в нашу поддержку WhatsApp:",
+    itemsLabel: "Товары",
+    shippingLabel: "Доставка",
+  },
+  tr: {
+    testBanner: "Gerçek ödeme alınmaz. Test modunda güvenle deneme siparişi verebilirsiniz.",
+    orPayWithCard: "VEYA KARTLA ÖDEYİN",
+    testFlowPrompt: "Test modunda tüm akışı denemek için:",
+    confirmTestOrder: "Test Siparişini Onayla",
+    applePayRequiresSafari: "Apple Pay yalnızca iOS Safari veya macOS Safari tarayıcısında etkindir (ve HTTPS bağlantısı gerektirir).",
+    applePayNoCards: "canMakePayments() false döndürdü. Sebep: Apple Wallet'ta etkin bir kart tanımlı değil veya alan adı HTTPS değil.",
+    applePayError: "Apple Pay hatası: Ödeme penceresi başlatılamadı.",
+    googlePayNotice: "Google Pay uyarısı: Tarayıcınızda Google Pay etkin değil veya kayıtlı kart bulunamadı.",
+    googlePayNotInstalled: "Google Pay uyarısı: Cihazınızda Google Pay kurulu değil.",
+    googlePayError: "Google Pay hatası: Google Pay API hatası.",
+    checkInfo: "Bilgileri kontrol edin",
+    checkErrorsBelow: "Lütfen işaretli alanları doğru şekilde doldurun.",
+    fillDeliveryFirst: "Lütfen önce teslimat bilgilerini girin.",
+    loginToBuy: "Sipariş vermek ve takip kodunuzu almak için lütfen giriş yapın.",
+    authRequiredOrder: "Sipariş için giriş veya kayıt gereklidir",
+    cartEmpty: "Sepetiniz boş.",
+    reqField: "Zorunlu alan",
+    enterFullName: "Adınızı ve soyadınızı girin",
+    fullNameMin: "Ad ve soyad en az 3 harften oluşmalıdır",
+    enterPhone: "İletişim numaranızı girin",
+    validPhone: "Geçerli bir telefon numarası girin (örn: +994 50 123 45 67)",
+    enterEmail: "E-posta adresinizi girin",
+    validEmail: "Geçerli bir e-posta adresi girin (örn: ad@example.com)",
+    enterAddress: "Teslimat adresinizi girin",
+    addressMin: "Daha ayrıntılı adres girin (sokak, bina, daire)",
+    addressPlaceholder: "Örn: Nizami Caddesi 14, Daire 28",
+    bakuSumqayitFree: "Bakü ve Sumgayıt: Ücretsiz",
+    regions5: "Bölgeler: 5 ₼",
+    regionsLabel: "Bölgeler",
+    regionsPlaceholder: "Bölge veya şehir (Gence, Şeki)",
+    cardName: "Kart Üzerindeki İsim",
+    cardNumber: "Kart Numarası",
+    cardExpiry: "Son Kullanma Tarihi (AA/YY)",
+    cardCvc: "CVC / CVV",
+    cardNumReq: "16 haneli kart numarasını girin",
+    cardNumMin: "Kart numarası 16 haneden oluşmalıdır",
+    cardExpReq: "Son kullanma tarihini girin",
+    cardExpFormat: "Geçersiz format (örn: 12/28)",
+    cardCvcReq: "CVC kodunu girin",
+    cardCvcMin: "3 veya 4 haneli CVC girin",
+    cardTestNotice: "Test Modu: Kart bilgileri kaydedilmez. Gerçek ödeme sağlayıcısı bağlanana kadar sipariş 'test_paid' olarak test edilir.",
+    codTitle: "Kapıda Ödeme (Nakit / Kurye POS)",
+    codSubtitle: "Siparişi kuryeden teslim alırken nakit veya kartla ödeyin",
+    codNoCustom: "Özel tasarım ürünler için geçerli değildir",
+    freeDeliveryTitle: "Bakü ve Sumgayıt'a Ücretsiz Teslimat",
+    freeDeliveryDesc: "Bakü ve Sumgayıt içindeki tüm siparişler herhangi bir tutar sınırı olmaksızın kurye ile tamamen ücretsiz teslim edilir.",
+    guaranteeTitle: "HORVVALLE Atölye Garantisi",
+    guaranteeDesc: "Beden uymadığında 14 gün içinde kolay değişim veya tam iade sağlanır.",
+    helpTitle: "Siparişte yardıma mı ihtiyacınız var?",
+    helpLive: "Canlı Destek",
+    helpDesc: "Beden seçimi, teslimat veya sorularınız için doğrudan WhatsApp destek hattımıza yazabilirsiniz:",
+    itemsLabel: "Ürünler",
+    shippingLabel: "Teslimat",
+  },
+};
+
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, totalPrice, clearCart } = useCart();
   const { formatPrice, currency } = useCurrency();
   const { t, language } = useLanguage();
+  const langKey = (language as "az" | "en" | "ru" | "tr") || "az";
+  const cT = CHECKOUT_I18N[langKey] || CHECKOUT_I18N.az;
   const { user, profile, isLoading: isAuthLoading, openAuthModal } = useAuth();
 
   // Form State
@@ -120,36 +345,36 @@ export default function CheckoutPage() {
 
     if (!user) {
       openAuthModal();
-      errors.auth = "Sifariş üçün giriş və ya qeydiyyat tələb olunur";
+      errors.auth = cT.authRequiredOrder;
     }
 
     if (!fullName.trim()) {
-      errors.fullName = "Ad və soyadınızı daxil edin";
+      errors.fullName = cT.enterFullName;
     } else if (fullName.trim().length < 3) {
-      errors.fullName = "Ad və soyad ən azı 3 hərfdən ibarət olmalıdır";
+      errors.fullName = cT.fullNameMin;
     }
 
     const digits = phone.replace(/\D/g, "");
     if (!phone.trim()) {
-      errors.phone = "Əlaqə nömrənizi daxil edin";
+      errors.phone = cT.enterPhone;
     } else if (digits.length < 9) {
-      errors.phone = "Düzgün əlaqə nömrəsi daxil edin (məs: +994 50 123 45 67)";
+      errors.phone = cT.validPhone;
     }
 
     const customerEmail = user?.email || email;
     if (!customerEmail.trim()) {
-      errors.email = "E-poçt ünvanınızı daxil edin";
+      errors.email = cT.enterEmail;
     } else {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(customerEmail.trim())) {
-        errors.email = "Düzgün e-poçt ünvanı daxil edin (məs: ad@example.com)";
+        errors.email = cT.validEmail;
       }
     }
 
     if (!address.trim()) {
-      errors.address = "Çatdırılma ünvanınızı qeyd edin";
+      errors.address = cT.enterAddress;
     } else if (address.trim().length < 4) {
-      errors.address = "Daha ətraflı ünvan daxil edin (küçə, bina, mənzil)";
+      errors.address = cT.addressMin;
     }
 
     return errors;
@@ -158,7 +383,7 @@ export default function CheckoutPage() {
   const validateAll = () => {
     if (!user) {
       openAuthModal();
-      setErrorMsg("Məhsul almaq və izləmə kodunuzu əldə etmək üçün zəhmət olmasa daxil olun.");
+      setErrorMsg(cT.loginToBuy);
       return false;
     }
 
@@ -167,21 +392,21 @@ export default function CheckoutPage() {
     if (paymentMethod === "card") {
       const cleanCard = cardNumber.replace(/\s/g, "");
       if (!cleanCard) {
-        errors.cardNumber = "16 rəqəmli kart nömrəsini daxil edin";
+        errors.cardNumber = cT.cardNumReq;
       } else if (cleanCard.length < 16) {
-        errors.cardNumber = "Kart nömrəsi 16 rəqəmdən ibarət olmalıdır";
+        errors.cardNumber = cT.cardNumMin;
       }
 
       if (!cardExpiry.trim()) {
-        errors.cardExpiry = "Bitmə tarixini qeyd edin";
+        errors.cardExpiry = cT.cardExpReq;
       } else if (!/^\d{2}\/\d{2}$/.test(cardExpiry.trim())) {
-        errors.cardExpiry = "Format düzgün deyil (məs: 12/28)";
+        errors.cardExpiry = cT.cardExpFormat;
       }
 
       if (!cardCvc.trim()) {
-        errors.cardCvc = "CVC kodunu daxil edin";
+        errors.cardCvc = cT.cardCvcReq;
       } else if (cardCvc.trim().length < 3) {
-        errors.cardCvc = "3 və ya 4 rəqəmli CVC daxil edin";
+        errors.cardCvc = cT.cardCvcMin;
       }
     }
 
@@ -198,7 +423,7 @@ export default function CheckoutPage() {
         el.focus();
         el.scrollIntoView({ behavior: "smooth", block: "center" });
       }
-      setErrorMsg("Zəhmət olmasa qırmızı xəbərdarlıqlı xanaları düzgün doldurun.");
+      setErrorMsg(cT.checkErrorsBelow);
       return false;
     }
 
@@ -439,7 +664,7 @@ export default function CheckoutPage() {
     if (method === "apple_pay") {
       const hasApplePay = typeof window !== "undefined" && Boolean((window as any).ApplePaySession);
       if (!hasApplePay) {
-        const debugReason = "Apple Pay yalnız iOS Safari və ya macOS Safari brauzerində aktivdir (və HTTPS bağlantısı tələb olunur).";
+        const debugReason = cT.applePayRequiresSafari;
         console.warn("[Apple Pay Debug]:", debugReason);
         setWalletDebugMsg({
           method: "apple_pay",
@@ -452,11 +677,11 @@ export default function CheckoutPage() {
       try {
         const canPay = ApplePaySession.canMakePayments();
         if (!canPay) {
-          const debugReason = "canMakePayments() false qaytardı. Səbəb: Apple Wallet-də aktiv bank kartı quraşdırılmayıb və ya domen HTTPS deyil.";
+          const debugReason = cT.applePayNoCards;
           console.warn("[Apple Pay Debug]:", debugReason);
           setWalletDebugMsg({
             method: "apple_pay",
-            text: `⚠️ Apple Pay pəncərəsi açıla bilmədi: ${debugReason}`,
+            text: `⚠️ ${cT.applePayError}: ${debugReason}`,
           });
           return;
         }
@@ -473,11 +698,11 @@ export default function CheckoutPage() {
           },
           lineItems: [
             {
-              label: "Məhsullar",
+              label: cT.itemsLabel,
               amount: totalPrice.toFixed(2),
             },
             {
-              label: "Çatdırılma",
+              label: cT.shippingLabel,
               amount: shippingCost.toFixed(2),
             },
           ],
@@ -519,7 +744,7 @@ export default function CheckoutPage() {
         console.warn("[Apple Pay Error]:", err);
         setWalletDebugMsg({
           method: "apple_pay",
-          text: `Apple Pay xətası: ${err?.message || "Ödəniş pəncərəsi başladıla bilmədi."}`,
+          text: `${cT.applePayError}: ${err?.message || ""}`,
         });
         return;
       }
@@ -589,7 +814,7 @@ export default function CheckoutPage() {
           } else {
             setWalletDebugMsg({
               method: "google_pay",
-              text: "Google Pay xəbərdarlığı: Brauzerinizdə Google Pay aktiv deyil və ya kart tapılmadı.",
+              text: cT.googlePayNotice,
             });
             return;
           }
@@ -597,7 +822,7 @@ export default function CheckoutPage() {
           console.warn("[Google Pay API error]:", gErr);
           setWalletDebugMsg({
             method: "google_pay",
-            text: `Google Pay xətası: ${gErr?.message || "Google Pay API xətası"}`,
+            text: `${cT.googlePayError}: ${gErr?.message || ""}`,
           });
           return;
         }
@@ -660,7 +885,7 @@ export default function CheckoutPage() {
 
         setWalletDebugMsg({
           method: "google_pay",
-          text: "Google Pay xəbərdarlığı: Cihazınızda Google Pay quraşdırılmayıb.",
+          text: cT.googlePayNotInstalled,
         });
       }
     }
@@ -739,14 +964,14 @@ export default function CheckoutPage() {
                   </div>
                   {isTestMode && (
                     <div className="pt-1.5 flex items-center justify-between border-t border-amber-200/60">
-                      <span className="text-stone-600 text-[10.5px]">Test rejimində axını tam yoxlamaq üçün:</span>
+                      <span className="text-stone-600 text-[10.5px]">{cT.testFlowPrompt}</span>
                       <button
                         type="button"
                         disabled={isProcessing}
                         onClick={() => processOrder(walletDebugMsg.method || "apple_pay")}
                         className="py-1 px-3.5 rounded-xl bg-stone-900 hover:bg-black text-white text-[10.5px] font-bold uppercase tracking-wider transition cursor-pointer disabled:opacity-50"
                       >
-                        {isProcessing ? "..." : "Sınaq Sifarişini Təsdiq Et"}
+                        {isProcessing ? "..." : cT.confirmTestOrder}
                       </button>
                     </div>
                   )}
@@ -777,7 +1002,7 @@ export default function CheckoutPage() {
                       <AlertCircle size={16} className="text-rose-600" />
                     </div>
                     <div>
-                      <div className="font-semibold text-rose-950">Məlumatları yoxlayın</div>
+                      <div className="font-semibold text-rose-950">{cT.checkInfo}</div>
                       <div className="text-rose-700 text-[11px] mt-0.5">{errorMsg}</div>
                     </div>
                   </div>
@@ -854,7 +1079,7 @@ export default function CheckoutPage() {
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-semibold text-stone-700 uppercase">{t.checkout.fullName} *</label>
                       {fieldErrors.fullName && (
-                        <span className="text-[10px] text-rose-500 font-medium">Mütləq sahə</span>
+                        <span className="text-[10px] text-rose-500 font-medium">{cT.reqField}</span>
                       )}
                     </div>
                     <input
@@ -894,7 +1119,7 @@ export default function CheckoutPage() {
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-semibold text-stone-700 uppercase">{t.checkout.phone} *</label>
                       {fieldErrors.phone && (
-                        <span className="text-[10px] text-rose-500 font-medium">Mütləq sahə</span>
+                        <span className="text-[10px] text-rose-500 font-medium">{cT.reqField}</span>
                       )}
                     </div>
                     <input
@@ -975,7 +1200,7 @@ export default function CheckoutPage() {
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-semibold text-stone-700 uppercase">{t.checkout.city} *</label>
                       <span className="text-[10px] font-semibold text-emerald-700">
-                        {isFreeZone ? `✓ ${t.checkout.free}` : "Bölgə: 5 ₼"}
+                        {isFreeZone ? `✓ ${t.checkout.free}` : cT.regions5}
                       </span>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
@@ -1020,7 +1245,7 @@ export default function CheckoutPage() {
                             : "bg-stone-50 text-stone-700 border-stone-200 hover:border-stone-400"
                         }`}
                       >
-                        {t.collections.all} <span className="block text-[9.5px] opacity-80 font-normal">Rayonlar</span>
+                        {t.collections.all} <span className="block text-[9.5px] opacity-80 font-normal">{cT.regionsLabel}</span>
                       </button>
                     </div>
 
@@ -1028,7 +1253,7 @@ export default function CheckoutPage() {
                       <input
                         id="field-city"
                         type="text"
-                        placeholder="Rayon və ya şəhər (Gəncə, Şəki)"
+                        placeholder={cT.regionsPlaceholder}
                         value={city}
                         onChange={(e) => setCity(e.target.value)}
                         className="w-full mt-2 bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2 text-xs text-stone-900 placeholder-stone-400 focus:outline-none focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900 transition"
@@ -1045,13 +1270,13 @@ export default function CheckoutPage() {
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-semibold text-stone-700 uppercase">{t.checkout.address} *</label>
                     {fieldErrors.address && (
-                      <span className="text-[10px] text-rose-500 font-medium">Mütləq sahə</span>
+                      <span className="text-[10px] text-rose-500 font-medium">{cT.reqField}</span>
                     )}
                   </div>
                   <input
                     id="field-address"
                     type="text"
-                    placeholder="Məs: Nizami küçəsi 14, mənzil 28"
+                    placeholder={cT.addressPlaceholder}
                     value={address}
                     onChange={(e) => handleFieldChange("address", e.target.value, setAddress)}
                     className={`w-full rounded-xl px-3.5 py-2.5 text-xs text-stone-900 placeholder-stone-400 transition-all duration-200 focus:outline-none ${
@@ -1116,13 +1341,11 @@ export default function CheckoutPage() {
                       {isTestMode && (
                         <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-[11px] flex items-center gap-2">
                           <AlertCircle size={15} className="text-blue-600 shrink-0" />
-                          <span>
-                            Test rejimi: Real kart provayderi (Stripe/PashaBank/Payriff) qoşulana qədər kart məlumatları saxlanılmır və sifariş 'test_paid' statusu ilə test olunur.
-                          </span>
+                          <span>{cT.cardTestNotice}</span>
                         </div>
                       )}
                       <div className="space-y-1">
-                        <label className="text-[11px] font-semibold text-stone-700 uppercase">Kart Üzərindəki Ad</label>
+                        <label className="text-[11px] font-semibold text-stone-700 uppercase">{cT.cardName}</label>
                         <input
                           type="text"
                           placeholder="ELSHAN MAMMADOV"
@@ -1137,7 +1360,7 @@ export default function CheckoutPage() {
                         transition={{ duration: 0.45, ease: "easeInOut" }}
                         className="space-y-1"
                       >
-                        <label className="text-[11px] font-semibold text-stone-700 uppercase">Kart Nömrəsi</label>
+                        <label className="text-[11px] font-semibold text-stone-700 uppercase">{cT.cardNumber}</label>
                         <input
                           id="field-cardNumber"
                           type="text"
@@ -1177,7 +1400,7 @@ export default function CheckoutPage() {
                           transition={{ duration: 0.45, ease: "easeInOut" }}
                           className="space-y-1"
                         >
-                          <label className="text-[11px] font-semibold text-stone-700 uppercase">Bitmə Tarixi (AA/İL)</label>
+                          <label className="text-[11px] font-semibold text-stone-700 uppercase">{cT.cardExpiry}</label>
                           <input
                             id="field-cardExpiry"
                             type="text"
@@ -1212,7 +1435,7 @@ export default function CheckoutPage() {
                           transition={{ duration: 0.45, ease: "easeInOut" }}
                           className="space-y-1"
                         >
-                          <label className="text-[11px] font-semibold text-stone-700 uppercase">CVC / CVV</label>
+                          <label className="text-[11px] font-semibold text-stone-700 uppercase">{cT.cardCvc}</label>
                           <input
                             id="field-cardCvc"
                             type="password"
@@ -1265,10 +1488,10 @@ export default function CheckoutPage() {
                         <Truck size={20} className={paymentMethod === "cod" ? "text-stone-900" : "text-stone-400"} />
                         <div>
                           <div className="text-xs font-bold text-stone-900 flex items-center gap-2">
-                            <span>Çatdırılmada Ödəniş (Nağd / Kuryer POS)</span>
+                            <span>{cT.codTitle}</span>
                             {hasCustomItems && (
                               <span className="text-[9px] font-bold bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full border border-rose-200">
-                                Fərdi dizaynlı məhsullara şamil olunmur
+                                {cT.codNoCustom}
                               </span>
                             )}
                           </div>
@@ -1431,17 +1654,17 @@ export default function CheckoutPage() {
             <div className="p-4 rounded-2xl bg-white border border-stone-200/80 text-xs text-stone-600 space-y-2.5 shadow-xs">
               <div className="flex items-center gap-2 text-stone-900 font-semibold">
                 <Truck size={17} className="text-emerald-700" />
-                <span>Bakı və Sumqayıt Ərazisinə Pulsuz Çatdırılma</span>
+                <span>{cT.freeDeliveryTitle}</span>
               </div>
               <p className="text-[11px] leading-relaxed text-stone-500">
-                Bakı və Sumqayıt daxili bütün sifarişlər heç bir məbləğ məhdudiyyəti olmadan kuryerlə tam pulsuz çatdırılır.
+                {cT.freeDeliveryDesc}
               </p>
               <div className="pt-2 border-t border-stone-100 flex items-center gap-2 text-stone-900 font-semibold">
                 <ShieldCheck size={16} className="text-stone-800" />
-                <span>HORVVALLE Atelye Zəmanəti</span>
+                <span>{cT.guaranteeTitle}</span>
               </div>
               <p className="text-[11px] leading-relaxed text-stone-500">
-                Ölçü uyğun gəlmədikdə 14 gün ərzində asan dəyişmə və ya ödənişin tam geri qaytarılması təmin edilir.
+                {cT.guaranteeDesc}
               </p>
             </div>
 
@@ -1450,12 +1673,12 @@ export default function CheckoutPage() {
               <div className="flex items-center justify-between">
                 <span className="font-bold flex items-center gap-1.5 text-emerald-900">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                  Sifarişdə kömək lazımdır?
+                  {cT.helpTitle}
                 </span>
-                <span className="text-[10px] text-emerald-700 font-bold uppercase tracking-wider">Canlı Dəstək</span>
+                <span className="text-[10px] text-emerald-700 font-bold uppercase tracking-wider">{cT.helpLive}</span>
               </div>
               <p className="text-[11px] text-emerald-800/90 leading-relaxed">
-                Ölçü seçimi, çatdırılma və ya suallarınız üçün birbaşa WhatsApp dəstək xəttimizə yaza bilərsiniz:
+                {cT.helpDesc}
               </p>
               <a
                 href="https://wa.me/994557669050?text=Salam!%20Sifarişi%20rəsmiləşdirməkdə%20kömək%20edə%20bilərsiniz?"
