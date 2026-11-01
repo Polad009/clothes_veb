@@ -320,6 +320,11 @@
             <i data-lucide="tag" class="w-4 h-4 text-slate-400"></i>
             <span>Reklam Kodları</span>
           </button>
+          <button onclick="switchTab('broadcast')" id="nav-broadcast"
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
+            <i data-lucide="mail" class="w-4 h-4 text-amber-500"></i>
+            <span>Kütləvi E-poçt & Kampaniya</span>
+          </button>
         </div>
 
         <!-- 10. OFLAYN MAĞAZA -->
@@ -616,6 +621,133 @@
 
       </section>
 
+      <!-- ============================================================ -->
+      <!-- KÜTLƏVİ E-POÇT & MARKETİNQ KAMPANİYALARI -->
+      <section id="tab-broadcast" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-7xl w-full">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-2xl font-black text-slate-900 tracking-tight">KÜTLƏVİ E-POÇT & KAMPANİYALAR</h1>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 uppercase tracking-wider">Lüks Resend Motoru</span>
+            </div>
+            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">
+              Bütün qeydiyyatdan keçmiş müştərilərə brendləşdirilmiş eksklüziv təkliflər və xəbərlər göndərin
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- FORM SECTION -->
+          <div class="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-5">
+            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="edit-3" class="w-4 h-4 text-slate-700"></i> Kampaniya Tərtibatı
+            </h2>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  E-poçt Mövzusu (Subject) *
+                </label>
+                <input type="text" id="broadcastSubject" 
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                  placeholder="məsələn: HORVVALLE — Yeni Kolleksiya & Sizə Özəl 20% Endirim"
+                  oninput="updateEmailPreview()" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Böyük Başlıq (Headline) *
+                </label>
+                <input type="text" id="broadcastHeadline" 
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                  placeholder="məsələn: Premium Dərzilik & Mövsümi Qarderob"
+                  oninput="updateEmailPreview()" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Əsas Mesaj Mətni *
+                </label>
+                <textarea id="broadcastMessage" rows="5"
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition resize-none"
+                  placeholder="Dəyərli müştərimiz, atelyemizdə hazırlanan yeni fərdi kəsim kolleksiyalarımız artıq saytda satışdadır..."
+                  oninput="updateEmailPreview()"></textarea>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Özəl Promokod (İstəyə bağlı)
+                  </label>
+                  <input type="text" id="broadcastPromo" 
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm uppercase font-mono focus:outline-none focus:border-black transition"
+                    placeholder="VIP20"
+                    oninput="updateEmailPreview()" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Hərəkətə Keçid Linki (CTA)
+                  </label>
+                  <input type="url" id="broadcastCta" 
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                    value="https://horvvalle.com/collections"
+                    placeholder="https://horvvalle.com/collections" />
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+              <span id="broadcastStatusText" class="text-xs text-slate-500 font-medium"></span>
+              <button onclick="submitBroadcastCampaign()" id="btnSendBroadcast"
+                class="px-6 py-3 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 transition cursor-pointer shadow-md">
+                <i data-lucide="send" class="w-4 h-4"></i>
+                <span>Kampaniyanı Göndər</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- PREVIEW SECTION -->
+          <div class="lg:col-span-5 bg-stone-100 p-6 rounded-2xl border border-stone-200/80 shadow-inner flex flex-col items-center justify-start">
+            <div class="w-full flex items-center justify-between mb-3">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-stone-600 flex items-center gap-1.5">
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i> Canlı Müştəri Baxışı
+              </span>
+              <span class="text-[10px] text-stone-400">Mobil / Desktop Uyğun</span>
+            </div>
+
+            <!-- MOCK EMAIL BOX -->
+            <div class="w-full max-w-[380px] bg-white rounded-2xl border border-stone-200 shadow-lg overflow-hidden text-center text-slate-800">
+              <div class="bg-[#111011] p-5 text-center">
+                <div class="text-sm font-bold tracking-[3px] text-[#E6C280] uppercase">HORVVALLE</div>
+                <div class="text-[8px] text-stone-400 tracking-wider uppercase mt-1">Lüks Moda & Fərdi Dərzilik</div>
+              </div>
+              <div class="p-5 text-center space-y-3">
+                <span class="inline-block px-2.5 py-0.5 bg-[#111011] text-[#E6C280] text-[9px] font-bold uppercase tracking-wider rounded-full">
+                  Eksklüziv Kampaniya
+                </span>
+                <h3 id="prevHeadline" class="text-base font-bold text-slate-900 leading-snug">
+                  Premium Dərzilik & Mövsümi Qarderob
+                </h3>
+                <p id="prevMessage" class="text-xs text-slate-600 leading-relaxed text-justify">
+                  Dəyərli müştərimiz, atelyemizdə hazırlanan yeni fərdi kəsim kolleksiyalarımız artıq saytda satışdadır...
+                </p>
+                <div id="prevPromoBox" class="p-3 bg-stone-50 border border-dashed border-stone-300 rounded-xl my-2">
+                  <span class="text-[10px] text-stone-500 uppercase block mb-1">Xüsusi Promokod:</span>
+                  <span id="prevPromoCode" class="text-sm font-black font-mono tracking-widest text-slate-900">VIP20</span>
+                </div>
+                <div class="pt-2">
+                  <div class="inline-block bg-[#111011] text-white px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                    Kolleksiyanı Kəşf Et
+                  </div>
+                </div>
+              </div>
+              <div class="bg-stone-50 p-3 text-[9px] text-stone-500 border-t border-stone-100">
+                HORVVALLE Baku — Nizami küç. 44
+              </div>
+            </div>
+          </div>
+        </div>
+
 
       <!-- ============================================================ -->
       <!-- SLIDE 2: MƏHSUL PORTFELİ (PRODUCTS) -->
@@ -678,6 +810,133 @@
         </div>
       </section>
 
+      <!-- ============================================================ -->
+      <!-- KÜTLƏVİ E-POÇT & MARKETİNQ KAMPANİYALARI -->
+      <section id="tab-broadcast" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-7xl w-full">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-2xl font-black text-slate-900 tracking-tight">KÜTLƏVİ E-POÇT & KAMPANİYALAR</h1>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 uppercase tracking-wider">Lüks Resend Motoru</span>
+            </div>
+            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">
+              Bütün qeydiyyatdan keçmiş müştərilərə brendləşdirilmiş eksklüziv təkliflər və xəbərlər göndərin
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- FORM SECTION -->
+          <div class="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-5">
+            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="edit-3" class="w-4 h-4 text-slate-700"></i> Kampaniya Tərtibatı
+            </h2>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  E-poçt Mövzusu (Subject) *
+                </label>
+                <input type="text" id="broadcastSubject" 
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                  placeholder="məsələn: HORVVALLE — Yeni Kolleksiya & Sizə Özəl 20% Endirim"
+                  oninput="updateEmailPreview()" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Böyük Başlıq (Headline) *
+                </label>
+                <input type="text" id="broadcastHeadline" 
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                  placeholder="məsələn: Premium Dərzilik & Mövsümi Qarderob"
+                  oninput="updateEmailPreview()" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Əsas Mesaj Mətni *
+                </label>
+                <textarea id="broadcastMessage" rows="5"
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition resize-none"
+                  placeholder="Dəyərli müştərimiz, atelyemizdə hazırlanan yeni fərdi kəsim kolleksiyalarımız artıq saytda satışdadır..."
+                  oninput="updateEmailPreview()"></textarea>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Özəl Promokod (İstəyə bağlı)
+                  </label>
+                  <input type="text" id="broadcastPromo" 
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm uppercase font-mono focus:outline-none focus:border-black transition"
+                    placeholder="VIP20"
+                    oninput="updateEmailPreview()" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Hərəkətə Keçid Linki (CTA)
+                  </label>
+                  <input type="url" id="broadcastCta" 
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                    value="https://horvvalle.com/collections"
+                    placeholder="https://horvvalle.com/collections" />
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+              <span id="broadcastStatusText" class="text-xs text-slate-500 font-medium"></span>
+              <button onclick="submitBroadcastCampaign()" id="btnSendBroadcast"
+                class="px-6 py-3 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 transition cursor-pointer shadow-md">
+                <i data-lucide="send" class="w-4 h-4"></i>
+                <span>Kampaniyanı Göndər</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- PREVIEW SECTION -->
+          <div class="lg:col-span-5 bg-stone-100 p-6 rounded-2xl border border-stone-200/80 shadow-inner flex flex-col items-center justify-start">
+            <div class="w-full flex items-center justify-between mb-3">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-stone-600 flex items-center gap-1.5">
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i> Canlı Müştəri Baxışı
+              </span>
+              <span class="text-[10px] text-stone-400">Mobil / Desktop Uyğun</span>
+            </div>
+
+            <!-- MOCK EMAIL BOX -->
+            <div class="w-full max-w-[380px] bg-white rounded-2xl border border-stone-200 shadow-lg overflow-hidden text-center text-slate-800">
+              <div class="bg-[#111011] p-5 text-center">
+                <div class="text-sm font-bold tracking-[3px] text-[#E6C280] uppercase">HORVVALLE</div>
+                <div class="text-[8px] text-stone-400 tracking-wider uppercase mt-1">Lüks Moda & Fərdi Dərzilik</div>
+              </div>
+              <div class="p-5 text-center space-y-3">
+                <span class="inline-block px-2.5 py-0.5 bg-[#111011] text-[#E6C280] text-[9px] font-bold uppercase tracking-wider rounded-full">
+                  Eksklüziv Kampaniya
+                </span>
+                <h3 id="prevHeadline" class="text-base font-bold text-slate-900 leading-snug">
+                  Premium Dərzilik & Mövsümi Qarderob
+                </h3>
+                <p id="prevMessage" class="text-xs text-slate-600 leading-relaxed text-justify">
+                  Dəyərli müştərimiz, atelyemizdə hazırlanan yeni fərdi kəsim kolleksiyalarımız artıq saytda satışdadır...
+                </p>
+                <div id="prevPromoBox" class="p-3 bg-stone-50 border border-dashed border-stone-300 rounded-xl my-2">
+                  <span class="text-[10px] text-stone-500 uppercase block mb-1">Xüsusi Promokod:</span>
+                  <span id="prevPromoCode" class="text-sm font-black font-mono tracking-widest text-slate-900">VIP20</span>
+                </div>
+                <div class="pt-2">
+                  <div class="inline-block bg-[#111011] text-white px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                    Kolleksiyanı Kəşf Et
+                  </div>
+                </div>
+              </div>
+              <div class="bg-stone-50 p-3 text-[9px] text-stone-500 border-t border-stone-100">
+                HORVVALLE Baku — Nizami küç. 44
+              </div>
+            </div>
+          </div>
+        </div>
+
 
       <!-- ============================================================ -->
       <!-- SLIDE 3: KATEQORİYALAR (CATEGORIES) -->
@@ -698,6 +957,133 @@
           <!-- Dynamically populated -->
         </div>
       </section>
+
+      <!-- ============================================================ -->
+      <!-- KÜTLƏVİ E-POÇT & MARKETİNQ KAMPANİYALARI -->
+      <section id="tab-broadcast" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-7xl w-full">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-2xl font-black text-slate-900 tracking-tight">KÜTLƏVİ E-POÇT & KAMPANİYALAR</h1>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 uppercase tracking-wider">Lüks Resend Motoru</span>
+            </div>
+            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">
+              Bütün qeydiyyatdan keçmiş müştərilərə brendləşdirilmiş eksklüziv təkliflər və xəbərlər göndərin
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- FORM SECTION -->
+          <div class="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-5">
+            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="edit-3" class="w-4 h-4 text-slate-700"></i> Kampaniya Tərtibatı
+            </h2>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  E-poçt Mövzusu (Subject) *
+                </label>
+                <input type="text" id="broadcastSubject" 
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                  placeholder="məsələn: HORVVALLE — Yeni Kolleksiya & Sizə Özəl 20% Endirim"
+                  oninput="updateEmailPreview()" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Böyük Başlıq (Headline) *
+                </label>
+                <input type="text" id="broadcastHeadline" 
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                  placeholder="məsələn: Premium Dərzilik & Mövsümi Qarderob"
+                  oninput="updateEmailPreview()" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Əsas Mesaj Mətni *
+                </label>
+                <textarea id="broadcastMessage" rows="5"
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition resize-none"
+                  placeholder="Dəyərli müştərimiz, atelyemizdə hazırlanan yeni fərdi kəsim kolleksiyalarımız artıq saytda satışdadır..."
+                  oninput="updateEmailPreview()"></textarea>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Özəl Promokod (İstəyə bağlı)
+                  </label>
+                  <input type="text" id="broadcastPromo" 
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm uppercase font-mono focus:outline-none focus:border-black transition"
+                    placeholder="VIP20"
+                    oninput="updateEmailPreview()" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Hərəkətə Keçid Linki (CTA)
+                  </label>
+                  <input type="url" id="broadcastCta" 
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                    value="https://horvvalle.com/collections"
+                    placeholder="https://horvvalle.com/collections" />
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+              <span id="broadcastStatusText" class="text-xs text-slate-500 font-medium"></span>
+              <button onclick="submitBroadcastCampaign()" id="btnSendBroadcast"
+                class="px-6 py-3 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 transition cursor-pointer shadow-md">
+                <i data-lucide="send" class="w-4 h-4"></i>
+                <span>Kampaniyanı Göndər</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- PREVIEW SECTION -->
+          <div class="lg:col-span-5 bg-stone-100 p-6 rounded-2xl border border-stone-200/80 shadow-inner flex flex-col items-center justify-start">
+            <div class="w-full flex items-center justify-between mb-3">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-stone-600 flex items-center gap-1.5">
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i> Canlı Müştəri Baxışı
+              </span>
+              <span class="text-[10px] text-stone-400">Mobil / Desktop Uyğun</span>
+            </div>
+
+            <!-- MOCK EMAIL BOX -->
+            <div class="w-full max-w-[380px] bg-white rounded-2xl border border-stone-200 shadow-lg overflow-hidden text-center text-slate-800">
+              <div class="bg-[#111011] p-5 text-center">
+                <div class="text-sm font-bold tracking-[3px] text-[#E6C280] uppercase">HORVVALLE</div>
+                <div class="text-[8px] text-stone-400 tracking-wider uppercase mt-1">Lüks Moda & Fərdi Dərzilik</div>
+              </div>
+              <div class="p-5 text-center space-y-3">
+                <span class="inline-block px-2.5 py-0.5 bg-[#111011] text-[#E6C280] text-[9px] font-bold uppercase tracking-wider rounded-full">
+                  Eksklüziv Kampaniya
+                </span>
+                <h3 id="prevHeadline" class="text-base font-bold text-slate-900 leading-snug">
+                  Premium Dərzilik & Mövsümi Qarderob
+                </h3>
+                <p id="prevMessage" class="text-xs text-slate-600 leading-relaxed text-justify">
+                  Dəyərli müştərimiz, atelyemizdə hazırlanan yeni fərdi kəsim kolleksiyalarımız artıq saytda satışdadır...
+                </p>
+                <div id="prevPromoBox" class="p-3 bg-stone-50 border border-dashed border-stone-300 rounded-xl my-2">
+                  <span class="text-[10px] text-stone-500 uppercase block mb-1">Xüsusi Promokod:</span>
+                  <span id="prevPromoCode" class="text-sm font-black font-mono tracking-widest text-slate-900">VIP20</span>
+                </div>
+                <div class="pt-2">
+                  <div class="inline-block bg-[#111011] text-white px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                    Kolleksiyanı Kəşf Et
+                  </div>
+                </div>
+              </div>
+              <div class="bg-stone-50 p-3 text-[9px] text-stone-500 border-t border-stone-100">
+                HORVVALLE Baku — Nizami küç. 44
+              </div>
+            </div>
+          </div>
+        </div>
 
 
       <!-- ============================================================ -->
@@ -777,6 +1163,133 @@
         </button>
       </section>
 
+      <!-- ============================================================ -->
+      <!-- KÜTLƏVİ E-POÇT & MARKETİNQ KAMPANİYALARI -->
+      <section id="tab-broadcast" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-7xl w-full">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-2xl font-black text-slate-900 tracking-tight">KÜTLƏVİ E-POÇT & KAMPANİYALAR</h1>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 uppercase tracking-wider">Lüks Resend Motoru</span>
+            </div>
+            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">
+              Bütün qeydiyyatdan keçmiş müştərilərə brendləşdirilmiş eksklüziv təkliflər və xəbərlər göndərin
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- FORM SECTION -->
+          <div class="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-5">
+            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="edit-3" class="w-4 h-4 text-slate-700"></i> Kampaniya Tərtibatı
+            </h2>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  E-poçt Mövzusu (Subject) *
+                </label>
+                <input type="text" id="broadcastSubject" 
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                  placeholder="məsələn: HORVVALLE — Yeni Kolleksiya & Sizə Özəl 20% Endirim"
+                  oninput="updateEmailPreview()" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Böyük Başlıq (Headline) *
+                </label>
+                <input type="text" id="broadcastHeadline" 
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                  placeholder="məsələn: Premium Dərzilik & Mövsümi Qarderob"
+                  oninput="updateEmailPreview()" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Əsas Mesaj Mətni *
+                </label>
+                <textarea id="broadcastMessage" rows="5"
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition resize-none"
+                  placeholder="Dəyərli müştərimiz, atelyemizdə hazırlanan yeni fərdi kəsim kolleksiyalarımız artıq saytda satışdadır..."
+                  oninput="updateEmailPreview()"></textarea>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Özəl Promokod (İstəyə bağlı)
+                  </label>
+                  <input type="text" id="broadcastPromo" 
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm uppercase font-mono focus:outline-none focus:border-black transition"
+                    placeholder="VIP20"
+                    oninput="updateEmailPreview()" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Hərəkətə Keçid Linki (CTA)
+                  </label>
+                  <input type="url" id="broadcastCta" 
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                    value="https://horvvalle.com/collections"
+                    placeholder="https://horvvalle.com/collections" />
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+              <span id="broadcastStatusText" class="text-xs text-slate-500 font-medium"></span>
+              <button onclick="submitBroadcastCampaign()" id="btnSendBroadcast"
+                class="px-6 py-3 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 transition cursor-pointer shadow-md">
+                <i data-lucide="send" class="w-4 h-4"></i>
+                <span>Kampaniyanı Göndər</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- PREVIEW SECTION -->
+          <div class="lg:col-span-5 bg-stone-100 p-6 rounded-2xl border border-stone-200/80 shadow-inner flex flex-col items-center justify-start">
+            <div class="w-full flex items-center justify-between mb-3">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-stone-600 flex items-center gap-1.5">
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i> Canlı Müştəri Baxışı
+              </span>
+              <span class="text-[10px] text-stone-400">Mobil / Desktop Uyğun</span>
+            </div>
+
+            <!-- MOCK EMAIL BOX -->
+            <div class="w-full max-w-[380px] bg-white rounded-2xl border border-stone-200 shadow-lg overflow-hidden text-center text-slate-800">
+              <div class="bg-[#111011] p-5 text-center">
+                <div class="text-sm font-bold tracking-[3px] text-[#E6C280] uppercase">HORVVALLE</div>
+                <div class="text-[8px] text-stone-400 tracking-wider uppercase mt-1">Lüks Moda & Fərdi Dərzilik</div>
+              </div>
+              <div class="p-5 text-center space-y-3">
+                <span class="inline-block px-2.5 py-0.5 bg-[#111011] text-[#E6C280] text-[9px] font-bold uppercase tracking-wider rounded-full">
+                  Eksklüziv Kampaniya
+                </span>
+                <h3 id="prevHeadline" class="text-base font-bold text-slate-900 leading-snug">
+                  Premium Dərzilik & Mövsümi Qarderob
+                </h3>
+                <p id="prevMessage" class="text-xs text-slate-600 leading-relaxed text-justify">
+                  Dəyərli müştərimiz, atelyemizdə hazırlanan yeni fərdi kəsim kolleksiyalarımız artıq saytda satışdadır...
+                </p>
+                <div id="prevPromoBox" class="p-3 bg-stone-50 border border-dashed border-stone-300 rounded-xl my-2">
+                  <span class="text-[10px] text-stone-500 uppercase block mb-1">Xüsusi Promokod:</span>
+                  <span id="prevPromoCode" class="text-sm font-black font-mono tracking-widest text-slate-900">VIP20</span>
+                </div>
+                <div class="pt-2">
+                  <div class="inline-block bg-[#111011] text-white px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                    Kolleksiyanı Kəşf Et
+                  </div>
+                </div>
+              </div>
+              <div class="bg-stone-50 p-3 text-[9px] text-stone-500 border-t border-stone-100">
+                HORVVALLE Baku — Nizami küç. 44
+              </div>
+            </div>
+          </div>
+        </div>
+
 
       <!-- ============================================================ -->
       <!-- SLIDE 5: HAQQIMIZDA (ABOUT US & SETTINGS) -->
@@ -852,6 +1365,133 @@
         </div>
       </section>
 
+      <!-- ============================================================ -->
+      <!-- KÜTLƏVİ E-POÇT & MARKETİNQ KAMPANİYALARI -->
+      <section id="tab-broadcast" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-7xl w-full">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-2xl font-black text-slate-900 tracking-tight">KÜTLƏVİ E-POÇT & KAMPANİYALAR</h1>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 uppercase tracking-wider">Lüks Resend Motoru</span>
+            </div>
+            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">
+              Bütün qeydiyyatdan keçmiş müştərilərə brendləşdirilmiş eksklüziv təkliflər və xəbərlər göndərin
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- FORM SECTION -->
+          <div class="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-5">
+            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="edit-3" class="w-4 h-4 text-slate-700"></i> Kampaniya Tərtibatı
+            </h2>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  E-poçt Mövzusu (Subject) *
+                </label>
+                <input type="text" id="broadcastSubject" 
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                  placeholder="məsələn: HORVVALLE — Yeni Kolleksiya & Sizə Özəl 20% Endirim"
+                  oninput="updateEmailPreview()" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Böyük Başlıq (Headline) *
+                </label>
+                <input type="text" id="broadcastHeadline" 
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                  placeholder="məsələn: Premium Dərzilik & Mövsümi Qarderob"
+                  oninput="updateEmailPreview()" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Əsas Mesaj Mətni *
+                </label>
+                <textarea id="broadcastMessage" rows="5"
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition resize-none"
+                  placeholder="Dəyərli müştərimiz, atelyemizdə hazırlanan yeni fərdi kəsim kolleksiyalarımız artıq saytda satışdadır..."
+                  oninput="updateEmailPreview()"></textarea>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Özəl Promokod (İstəyə bağlı)
+                  </label>
+                  <input type="text" id="broadcastPromo" 
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm uppercase font-mono focus:outline-none focus:border-black transition"
+                    placeholder="VIP20"
+                    oninput="updateEmailPreview()" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Hərəkətə Keçid Linki (CTA)
+                  </label>
+                  <input type="url" id="broadcastCta" 
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                    value="https://horvvalle.com/collections"
+                    placeholder="https://horvvalle.com/collections" />
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+              <span id="broadcastStatusText" class="text-xs text-slate-500 font-medium"></span>
+              <button onclick="submitBroadcastCampaign()" id="btnSendBroadcast"
+                class="px-6 py-3 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 transition cursor-pointer shadow-md">
+                <i data-lucide="send" class="w-4 h-4"></i>
+                <span>Kampaniyanı Göndər</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- PREVIEW SECTION -->
+          <div class="lg:col-span-5 bg-stone-100 p-6 rounded-2xl border border-stone-200/80 shadow-inner flex flex-col items-center justify-start">
+            <div class="w-full flex items-center justify-between mb-3">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-stone-600 flex items-center gap-1.5">
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i> Canlı Müştəri Baxışı
+              </span>
+              <span class="text-[10px] text-stone-400">Mobil / Desktop Uyğun</span>
+            </div>
+
+            <!-- MOCK EMAIL BOX -->
+            <div class="w-full max-w-[380px] bg-white rounded-2xl border border-stone-200 shadow-lg overflow-hidden text-center text-slate-800">
+              <div class="bg-[#111011] p-5 text-center">
+                <div class="text-sm font-bold tracking-[3px] text-[#E6C280] uppercase">HORVVALLE</div>
+                <div class="text-[8px] text-stone-400 tracking-wider uppercase mt-1">Lüks Moda & Fərdi Dərzilik</div>
+              </div>
+              <div class="p-5 text-center space-y-3">
+                <span class="inline-block px-2.5 py-0.5 bg-[#111011] text-[#E6C280] text-[9px] font-bold uppercase tracking-wider rounded-full">
+                  Eksklüziv Kampaniya
+                </span>
+                <h3 id="prevHeadline" class="text-base font-bold text-slate-900 leading-snug">
+                  Premium Dərzilik & Mövsümi Qarderob
+                </h3>
+                <p id="prevMessage" class="text-xs text-slate-600 leading-relaxed text-justify">
+                  Dəyərli müştərimiz, atelyemizdə hazırlanan yeni fərdi kəsim kolleksiyalarımız artıq saytda satışdadır...
+                </p>
+                <div id="prevPromoBox" class="p-3 bg-stone-50 border border-dashed border-stone-300 rounded-xl my-2">
+                  <span class="text-[10px] text-stone-500 uppercase block mb-1">Xüsusi Promokod:</span>
+                  <span id="prevPromoCode" class="text-sm font-black font-mono tracking-widest text-slate-900">VIP20</span>
+                </div>
+                <div class="pt-2">
+                  <div class="inline-block bg-[#111011] text-white px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                    Kolleksiyanı Kəşf Et
+                  </div>
+                </div>
+              </div>
+              <div class="bg-stone-50 p-3 text-[9px] text-stone-500 border-t border-stone-100">
+                HORVVALLE Baku — Nizami küç. 44
+              </div>
+            </div>
+          </div>
+        </div>
+
 
       <!-- ============================================================ -->
       <!-- SLIDE 6: ONLAYN SİFARİŞLƏR (ONLINE ORDERS) -->
@@ -918,6 +1558,133 @@
           </div>
         </div>
       </section>
+
+      <!-- ============================================================ -->
+      <!-- KÜTLƏVİ E-POÇT & MARKETİNQ KAMPANİYALARI -->
+      <section id="tab-broadcast" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-7xl w-full">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-2xl font-black text-slate-900 tracking-tight">KÜTLƏVİ E-POÇT & KAMPANİYALAR</h1>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 uppercase tracking-wider">Lüks Resend Motoru</span>
+            </div>
+            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">
+              Bütün qeydiyyatdan keçmiş müştərilərə brendləşdirilmiş eksklüziv təkliflər və xəbərlər göndərin
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- FORM SECTION -->
+          <div class="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-5">
+            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="edit-3" class="w-4 h-4 text-slate-700"></i> Kampaniya Tərtibatı
+            </h2>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  E-poçt Mövzusu (Subject) *
+                </label>
+                <input type="text" id="broadcastSubject" 
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                  placeholder="məsələn: HORVVALLE — Yeni Kolleksiya & Sizə Özəl 20% Endirim"
+                  oninput="updateEmailPreview()" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Böyük Başlıq (Headline) *
+                </label>
+                <input type="text" id="broadcastHeadline" 
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                  placeholder="məsələn: Premium Dərzilik & Mövsümi Qarderob"
+                  oninput="updateEmailPreview()" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Əsas Mesaj Mətni *
+                </label>
+                <textarea id="broadcastMessage" rows="5"
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition resize-none"
+                  placeholder="Dəyərli müştərimiz, atelyemizdə hazırlanan yeni fərdi kəsim kolleksiyalarımız artıq saytda satışdadır..."
+                  oninput="updateEmailPreview()"></textarea>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Özəl Promokod (İstəyə bağlı)
+                  </label>
+                  <input type="text" id="broadcastPromo" 
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm uppercase font-mono focus:outline-none focus:border-black transition"
+                    placeholder="VIP20"
+                    oninput="updateEmailPreview()" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Hərəkətə Keçid Linki (CTA)
+                  </label>
+                  <input type="url" id="broadcastCta" 
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                    value="https://horvvalle.com/collections"
+                    placeholder="https://horvvalle.com/collections" />
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+              <span id="broadcastStatusText" class="text-xs text-slate-500 font-medium"></span>
+              <button onclick="submitBroadcastCampaign()" id="btnSendBroadcast"
+                class="px-6 py-3 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 transition cursor-pointer shadow-md">
+                <i data-lucide="send" class="w-4 h-4"></i>
+                <span>Kampaniyanı Göndər</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- PREVIEW SECTION -->
+          <div class="lg:col-span-5 bg-stone-100 p-6 rounded-2xl border border-stone-200/80 shadow-inner flex flex-col items-center justify-start">
+            <div class="w-full flex items-center justify-between mb-3">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-stone-600 flex items-center gap-1.5">
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i> Canlı Müştəri Baxışı
+              </span>
+              <span class="text-[10px] text-stone-400">Mobil / Desktop Uyğun</span>
+            </div>
+
+            <!-- MOCK EMAIL BOX -->
+            <div class="w-full max-w-[380px] bg-white rounded-2xl border border-stone-200 shadow-lg overflow-hidden text-center text-slate-800">
+              <div class="bg-[#111011] p-5 text-center">
+                <div class="text-sm font-bold tracking-[3px] text-[#E6C280] uppercase">HORVVALLE</div>
+                <div class="text-[8px] text-stone-400 tracking-wider uppercase mt-1">Lüks Moda & Fərdi Dərzilik</div>
+              </div>
+              <div class="p-5 text-center space-y-3">
+                <span class="inline-block px-2.5 py-0.5 bg-[#111011] text-[#E6C280] text-[9px] font-bold uppercase tracking-wider rounded-full">
+                  Eksklüziv Kampaniya
+                </span>
+                <h3 id="prevHeadline" class="text-base font-bold text-slate-900 leading-snug">
+                  Premium Dərzilik & Mövsümi Qarderob
+                </h3>
+                <p id="prevMessage" class="text-xs text-slate-600 leading-relaxed text-justify">
+                  Dəyərli müştərimiz, atelyemizdə hazırlanan yeni fərdi kəsim kolleksiyalarımız artıq saytda satışdadır...
+                </p>
+                <div id="prevPromoBox" class="p-3 bg-stone-50 border border-dashed border-stone-300 rounded-xl my-2">
+                  <span class="text-[10px] text-stone-500 uppercase block mb-1">Xüsusi Promokod:</span>
+                  <span id="prevPromoCode" class="text-sm font-black font-mono tracking-widest text-slate-900">VIP20</span>
+                </div>
+                <div class="pt-2">
+                  <div class="inline-block bg-[#111011] text-white px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                    Kolleksiyanı Kəşf Et
+                  </div>
+                </div>
+              </div>
+              <div class="bg-stone-50 p-3 text-[9px] text-stone-500 border-t border-stone-100">
+                HORVVALLE Baku — Nizami küç. 44
+              </div>
+            </div>
+          </div>
+        </div>
 
 
       <!-- ============================================================ -->
@@ -992,6 +1759,133 @@
           </div>
         </div>
       </section>
+
+      <!-- ============================================================ -->
+      <!-- KÜTLƏVİ E-POÇT & MARKETİNQ KAMPANİYALARI -->
+      <section id="tab-broadcast" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-7xl w-full">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-2xl font-black text-slate-900 tracking-tight">KÜTLƏVİ E-POÇT & KAMPANİYALAR</h1>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 uppercase tracking-wider">Lüks Resend Motoru</span>
+            </div>
+            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">
+              Bütün qeydiyyatdan keçmiş müştərilərə brendləşdirilmiş eksklüziv təkliflər və xəbərlər göndərin
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- FORM SECTION -->
+          <div class="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-5">
+            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="edit-3" class="w-4 h-4 text-slate-700"></i> Kampaniya Tərtibatı
+            </h2>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  E-poçt Mövzusu (Subject) *
+                </label>
+                <input type="text" id="broadcastSubject" 
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                  placeholder="məsələn: HORVVALLE — Yeni Kolleksiya & Sizə Özəl 20% Endirim"
+                  oninput="updateEmailPreview()" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Böyük Başlıq (Headline) *
+                </label>
+                <input type="text" id="broadcastHeadline" 
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                  placeholder="məsələn: Premium Dərzilik & Mövsümi Qarderob"
+                  oninput="updateEmailPreview()" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Əsas Mesaj Mətni *
+                </label>
+                <textarea id="broadcastMessage" rows="5"
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition resize-none"
+                  placeholder="Dəyərli müştərimiz, atelyemizdə hazırlanan yeni fərdi kəsim kolleksiyalarımız artıq saytda satışdadır..."
+                  oninput="updateEmailPreview()"></textarea>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Özəl Promokod (İstəyə bağlı)
+                  </label>
+                  <input type="text" id="broadcastPromo" 
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm uppercase font-mono focus:outline-none focus:border-black transition"
+                    placeholder="VIP20"
+                    oninput="updateEmailPreview()" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Hərəkətə Keçid Linki (CTA)
+                  </label>
+                  <input type="url" id="broadcastCta" 
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                    value="https://horvvalle.com/collections"
+                    placeholder="https://horvvalle.com/collections" />
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+              <span id="broadcastStatusText" class="text-xs text-slate-500 font-medium"></span>
+              <button onclick="submitBroadcastCampaign()" id="btnSendBroadcast"
+                class="px-6 py-3 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 transition cursor-pointer shadow-md">
+                <i data-lucide="send" class="w-4 h-4"></i>
+                <span>Kampaniyanı Göndər</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- PREVIEW SECTION -->
+          <div class="lg:col-span-5 bg-stone-100 p-6 rounded-2xl border border-stone-200/80 shadow-inner flex flex-col items-center justify-start">
+            <div class="w-full flex items-center justify-between mb-3">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-stone-600 flex items-center gap-1.5">
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i> Canlı Müştəri Baxışı
+              </span>
+              <span class="text-[10px] text-stone-400">Mobil / Desktop Uyğun</span>
+            </div>
+
+            <!-- MOCK EMAIL BOX -->
+            <div class="w-full max-w-[380px] bg-white rounded-2xl border border-stone-200 shadow-lg overflow-hidden text-center text-slate-800">
+              <div class="bg-[#111011] p-5 text-center">
+                <div class="text-sm font-bold tracking-[3px] text-[#E6C280] uppercase">HORVVALLE</div>
+                <div class="text-[8px] text-stone-400 tracking-wider uppercase mt-1">Lüks Moda & Fərdi Dərzilik</div>
+              </div>
+              <div class="p-5 text-center space-y-3">
+                <span class="inline-block px-2.5 py-0.5 bg-[#111011] text-[#E6C280] text-[9px] font-bold uppercase tracking-wider rounded-full">
+                  Eksklüziv Kampaniya
+                </span>
+                <h3 id="prevHeadline" class="text-base font-bold text-slate-900 leading-snug">
+                  Premium Dərzilik & Mövsümi Qarderob
+                </h3>
+                <p id="prevMessage" class="text-xs text-slate-600 leading-relaxed text-justify">
+                  Dəyərli müştərimiz, atelyemizdə hazırlanan yeni fərdi kəsim kolleksiyalarımız artıq saytda satışdadır...
+                </p>
+                <div id="prevPromoBox" class="p-3 bg-stone-50 border border-dashed border-stone-300 rounded-xl my-2">
+                  <span class="text-[10px] text-stone-500 uppercase block mb-1">Xüsusi Promokod:</span>
+                  <span id="prevPromoCode" class="text-sm font-black font-mono tracking-widest text-slate-900">VIP20</span>
+                </div>
+                <div class="pt-2">
+                  <div class="inline-block bg-[#111011] text-white px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                    Kolleksiyanı Kəşf Et
+                  </div>
+                </div>
+              </div>
+              <div class="bg-stone-50 p-3 text-[9px] text-stone-500 border-t border-stone-100">
+                HORVVALLE Baku — Nizami küç. 44
+              </div>
+            </div>
+          </div>
+        </div>
 
 
       <!-- ============================================================ -->
@@ -1079,6 +1973,133 @@
         </div>
       </section>
 
+      <!-- ============================================================ -->
+      <!-- KÜTLƏVİ E-POÇT & MARKETİNQ KAMPANİYALARI -->
+      <section id="tab-broadcast" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-7xl w-full">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-2xl font-black text-slate-900 tracking-tight">KÜTLƏVİ E-POÇT & KAMPANİYALAR</h1>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 uppercase tracking-wider">Lüks Resend Motoru</span>
+            </div>
+            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">
+              Bütün qeydiyyatdan keçmiş müştərilərə brendləşdirilmiş eksklüziv təkliflər və xəbərlər göndərin
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- FORM SECTION -->
+          <div class="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-5">
+            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="edit-3" class="w-4 h-4 text-slate-700"></i> Kampaniya Tərtibatı
+            </h2>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  E-poçt Mövzusu (Subject) *
+                </label>
+                <input type="text" id="broadcastSubject" 
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                  placeholder="məsələn: HORVVALLE — Yeni Kolleksiya & Sizə Özəl 20% Endirim"
+                  oninput="updateEmailPreview()" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Böyük Başlıq (Headline) *
+                </label>
+                <input type="text" id="broadcastHeadline" 
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                  placeholder="məsələn: Premium Dərzilik & Mövsümi Qarderob"
+                  oninput="updateEmailPreview()" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Əsas Mesaj Mətni *
+                </label>
+                <textarea id="broadcastMessage" rows="5"
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition resize-none"
+                  placeholder="Dəyərli müştərimiz, atelyemizdə hazırlanan yeni fərdi kəsim kolleksiyalarımız artıq saytda satışdadır..."
+                  oninput="updateEmailPreview()"></textarea>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Özəl Promokod (İstəyə bağlı)
+                  </label>
+                  <input type="text" id="broadcastPromo" 
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm uppercase font-mono focus:outline-none focus:border-black transition"
+                    placeholder="VIP20"
+                    oninput="updateEmailPreview()" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Hərəkətə Keçid Linki (CTA)
+                  </label>
+                  <input type="url" id="broadcastCta" 
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                    value="https://horvvalle.com/collections"
+                    placeholder="https://horvvalle.com/collections" />
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+              <span id="broadcastStatusText" class="text-xs text-slate-500 font-medium"></span>
+              <button onclick="submitBroadcastCampaign()" id="btnSendBroadcast"
+                class="px-6 py-3 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 transition cursor-pointer shadow-md">
+                <i data-lucide="send" class="w-4 h-4"></i>
+                <span>Kampaniyanı Göndər</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- PREVIEW SECTION -->
+          <div class="lg:col-span-5 bg-stone-100 p-6 rounded-2xl border border-stone-200/80 shadow-inner flex flex-col items-center justify-start">
+            <div class="w-full flex items-center justify-between mb-3">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-stone-600 flex items-center gap-1.5">
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i> Canlı Müştəri Baxışı
+              </span>
+              <span class="text-[10px] text-stone-400">Mobil / Desktop Uyğun</span>
+            </div>
+
+            <!-- MOCK EMAIL BOX -->
+            <div class="w-full max-w-[380px] bg-white rounded-2xl border border-stone-200 shadow-lg overflow-hidden text-center text-slate-800">
+              <div class="bg-[#111011] p-5 text-center">
+                <div class="text-sm font-bold tracking-[3px] text-[#E6C280] uppercase">HORVVALLE</div>
+                <div class="text-[8px] text-stone-400 tracking-wider uppercase mt-1">Lüks Moda & Fərdi Dərzilik</div>
+              </div>
+              <div class="p-5 text-center space-y-3">
+                <span class="inline-block px-2.5 py-0.5 bg-[#111011] text-[#E6C280] text-[9px] font-bold uppercase tracking-wider rounded-full">
+                  Eksklüziv Kampaniya
+                </span>
+                <h3 id="prevHeadline" class="text-base font-bold text-slate-900 leading-snug">
+                  Premium Dərzilik & Mövsümi Qarderob
+                </h3>
+                <p id="prevMessage" class="text-xs text-slate-600 leading-relaxed text-justify">
+                  Dəyərli müştərimiz, atelyemizdə hazırlanan yeni fərdi kəsim kolleksiyalarımız artıq saytda satışdadır...
+                </p>
+                <div id="prevPromoBox" class="p-3 bg-stone-50 border border-dashed border-stone-300 rounded-xl my-2">
+                  <span class="text-[10px] text-stone-500 uppercase block mb-1">Xüsusi Promokod:</span>
+                  <span id="prevPromoCode" class="text-sm font-black font-mono tracking-widest text-slate-900">VIP20</span>
+                </div>
+                <div class="pt-2">
+                  <div class="inline-block bg-[#111011] text-white px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                    Kolleksiyanı Kəşf Et
+                  </div>
+                </div>
+              </div>
+              <div class="bg-stone-50 p-3 text-[9px] text-stone-500 border-t border-stone-100">
+                HORVVALLE Baku — Nizami küç. 44
+              </div>
+            </div>
+          </div>
+        </div>
+
 
       <!-- ============================================================ -->
       <!-- SLIDE 9: REKLAM KODLARI (PROMO CODES) -->
@@ -1119,6 +2140,247 @@
           </div>
         </div>
       </section>
+
+      <!-- ============================================================ -->
+      <!-- KÜTLƏVİ E-POÇT & MARKETİNQ KAMPANİYALARI -->
+      <section id="tab-broadcast" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-7xl w-full">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-2xl font-black text-slate-900 tracking-tight">KÜTLƏVİ E-POÇT & KAMPANİYALAR</h1>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 uppercase tracking-wider">Lüks Resend Motoru</span>
+            </div>
+            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">
+              Bütün qeydiyyatdan keçmiş müştərilərə brendləşdirilmiş eksklüziv təkliflər və xəbərlər göndərin
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- FORM SECTION -->
+          <div class="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-5">
+            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="edit-3" class="w-4 h-4 text-slate-700"></i> Kampaniya Tərtibatı
+            </h2>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  E-poçt Mövzusu (Subject) *
+                </label>
+                <input type="text" id="broadcastSubject" 
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                  placeholder="məsələn: HORVVALLE — Yeni Kolleksiya & Sizə Özəl 20% Endirim"
+                  oninput="updateEmailPreview()" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Böyük Başlıq (Headline) *
+                </label>
+                <input type="text" id="broadcastHeadline" 
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                  placeholder="məsələn: Premium Dərzilik & Mövsümi Qarderob"
+                  oninput="updateEmailPreview()" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Əsas Mesaj Mətni *
+                </label>
+                <textarea id="broadcastMessage" rows="5"
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition resize-none"
+                  placeholder="Dəyərli müştərimiz, atelyemizdə hazırlanan yeni fərdi kəsim kolleksiyalarımız artıq saytda satışdadır..."
+                  oninput="updateEmailPreview()"></textarea>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Özəl Promokod (İstəyə bağlı)
+                  </label>
+                  <input type="text" id="broadcastPromo" 
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm uppercase font-mono focus:outline-none focus:border-black transition"
+                    placeholder="VIP20"
+                    oninput="updateEmailPreview()" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Hərəkətə Keçid Linki (CTA)
+                  </label>
+                  <input type="url" id="broadcastCta" 
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                    value="https://horvvalle.com/collections"
+                    placeholder="https://horvvalle.com/collections" />
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+              <span id="broadcastStatusText" class="text-xs text-slate-500 font-medium"></span>
+              <button onclick="submitBroadcastCampaign()" id="btnSendBroadcast"
+                class="px-6 py-3 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 transition cursor-pointer shadow-md">
+                <i data-lucide="send" class="w-4 h-4"></i>
+                <span>Kampaniyanı Göndər</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- PREVIEW SECTION -->
+          <div class="lg:col-span-5 bg-stone-100 p-6 rounded-2xl border border-stone-200/80 shadow-inner flex flex-col items-center justify-start">
+            <div class="w-full flex items-center justify-between mb-3">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-stone-600 flex items-center gap-1.5">
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i> Canlı Müştəri Baxışı
+              </span>
+              <span class="text-[10px] text-stone-400">Mobil / Desktop Uyğun</span>
+            </div>
+
+            <!-- MOCK EMAIL BOX -->
+            <div class="w-full max-w-[380px] bg-white rounded-2xl border border-stone-200 shadow-lg overflow-hidden text-center text-slate-800">
+              <div class="bg-[#111011] p-5 text-center">
+                <div class="text-sm font-bold tracking-[3px] text-[#E6C280] uppercase">HORVVALLE</div>
+                <div class="text-[8px] text-stone-400 tracking-wider uppercase mt-1">Lüks Moda & Fərdi Dərzilik</div>
+              </div>
+              <div class="p-5 text-center space-y-3">
+                <span class="inline-block px-2.5 py-0.5 bg-[#111011] text-[#E6C280] text-[9px] font-bold uppercase tracking-wider rounded-full">
+                  Eksklüziv Kampaniya
+                </span>
+                <h3 id="prevHeadline" class="text-base font-bold text-slate-900 leading-snug">
+                  Premium Dərzilik & Mövsümi Qarderob
+                </h3>
+                <p id="prevMessage" class="text-xs text-slate-600 leading-relaxed text-justify">
+                  Dəyərli müştərimiz, atelyemizdə hazırlanan yeni fərdi kəsim kolleksiyalarımız artıq saytda satışdadır...
+                </p>
+                <div id="prevPromoBox" class="p-3 bg-stone-50 border border-dashed border-stone-300 rounded-xl my-2">
+                  <span class="text-[10px] text-stone-500 uppercase block mb-1">Xüsusi Promokod:</span>
+                  <span id="prevPromoCode" class="text-sm font-black font-mono tracking-widest text-slate-900">VIP20</span>
+                </div>
+                <div class="pt-2">
+                  <div class="inline-block bg-[#111011] text-white px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                    Kolleksiyanı Kəşf Et
+                  </div>
+                </div>
+              </div>
+              <div class="bg-stone-50 p-3 text-[9px] text-stone-500 border-t border-stone-100">
+                HORVVALLE Baku — Nizami küç. 44
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- FORM SECTION -->
+          <div class="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-5">
+            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="edit-3" class="w-4 h-4 text-slate-700"></i> Kampaniya Tərtibatı
+            </h2>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  E-poçt Mövzusu (Subject) *
+                </label>
+                <input type="text" id="broadcastSubject" 
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                  placeholder="məsələn: HORVVALLE — Yeni Kolleksiya & Sizə Özəl 20% Endirim"
+                  oninput="updateEmailPreview()" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Böyük Başlıq (Headline) *
+                </label>
+                <input type="text" id="broadcastHeadline" 
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                  placeholder="məsələn: Premium Dərzilik & Mövsümi Qarderob"
+                  oninput="updateEmailPreview()" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Əsas Mesaj Mətni *
+                </label>
+                <textarea id="broadcastMessage" rows="5"
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition resize-none"
+                  placeholder="Dəyərli müştərimiz, atelyemizdə hazırlanan yeni fərdi kəsim kolleksiyalarımız artıq saytda satışdadır..."
+                  oninput="updateEmailPreview()"></textarea>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Özəl Promokod (İstəyə bağlı)
+                  </label>
+                  <input type="text" id="broadcastPromo" 
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm uppercase font-mono focus:outline-none focus:border-black transition"
+                    placeholder="VIP20"
+                    oninput="updateEmailPreview()" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Hərəkətə Keçid Linki (CTA)
+                  </label>
+                  <input type="url" id="broadcastCta" 
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                    value="https://horvvalle.com/collections"
+                    placeholder="https://horvvalle.com/collections" />
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+              <span id="broadcastStatusText" class="text-xs text-slate-500 font-medium"></span>
+              <button onclick="submitBroadcastCampaign()" id="btnSendBroadcast"
+                class="px-6 py-3 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 transition cursor-pointer shadow-md">
+                <i data-lucide="send" class="w-4 h-4"></i>
+                <span>Kampaniyanı Göndər</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- PREVIEW SECTION -->
+          <div class="lg:col-span-5 bg-stone-100 p-6 rounded-2xl border border-stone-200/80 shadow-inner flex flex-col items-center justify-start">
+            <div class="w-full flex items-center justify-between mb-3">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-stone-600 flex items-center gap-1.5">
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i> Canlı Müştəri Baxışı
+              </span>
+              <span class="text-[10px] text-stone-400">Mobil / Desktop Uyğun</span>
+            </div>
+
+            <!-- MOCK EMAIL BOX -->
+            <div class="w-full max-w-[380px] bg-white rounded-2xl border border-stone-200 shadow-lg overflow-hidden text-center text-slate-800">
+              <div class="bg-[#111011] p-5 text-center">
+                <div class="text-sm font-bold tracking-[3px] text-[#E6C280] uppercase">HORVVALLE</div>
+                <div class="text-[8px] text-stone-400 tracking-wider uppercase mt-1">Lüks Moda & Fərdi Dərzilik</div>
+              </div>
+              <div class="p-5 text-center space-y-3">
+                <span class="inline-block px-2.5 py-0.5 bg-[#111011] text-[#E6C280] text-[9px] font-bold uppercase tracking-wider rounded-full">
+                  Eksklüziv Kampaniya
+                </span>
+                <h3 id="prevHeadline" class="text-base font-bold text-slate-900 leading-snug">
+                  Premium Dərzilik & Mövsümi Qarderob
+                </h3>
+                <p id="prevMessage" class="text-xs text-slate-600 leading-relaxed text-justify">
+                  Dəyərli müştərimiz, atelyemizdə hazırlanan yeni fərdi kəsim kolleksiyalarımız artıq saytda satışdadır...
+                </p>
+                <div id="prevPromoBox" class="p-3 bg-stone-50 border border-dashed border-stone-300 rounded-xl my-2">
+                  <span class="text-[10px] text-stone-500 uppercase block mb-1">Xüsusi Promokod:</span>
+                  <span id="prevPromoCode" class="text-sm font-black font-mono tracking-widest text-slate-900">VIP20</span>
+                </div>
+                <div class="pt-2">
+                  <div class="inline-block bg-[#111011] text-white px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                    Kolleksiyanı Kəşf Et
+                  </div>
+                </div>
+              </div>
+              <div class="bg-stone-50 p-3 text-[9px] text-stone-500 border-t border-stone-100">
+                HORVVALLE Baku — Nizami küç. 44
+              </div>
+            </div>
+          </div>
+        </div>
 
 
       <!-- ============================================================ -->
@@ -1166,6 +2428,133 @@
           <!-- Dynamically inserted -->
         </div>
       </section>
+
+      <!-- ============================================================ -->
+      <!-- KÜTLƏVİ E-POÇT & MARKETİNQ KAMPANİYALARI -->
+      <section id="tab-broadcast" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-7xl w-full">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-2xl font-black text-slate-900 tracking-tight">KÜTLƏVİ E-POÇT & KAMPANİYALAR</h1>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 uppercase tracking-wider">Lüks Resend Motoru</span>
+            </div>
+            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">
+              Bütün qeydiyyatdan keçmiş müştərilərə brendləşdirilmiş eksklüziv təkliflər və xəbərlər göndərin
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- FORM SECTION -->
+          <div class="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-5">
+            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="edit-3" class="w-4 h-4 text-slate-700"></i> Kampaniya Tərtibatı
+            </h2>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  E-poçt Mövzusu (Subject) *
+                </label>
+                <input type="text" id="broadcastSubject" 
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                  placeholder="məsələn: HORVVALLE — Yeni Kolleksiya & Sizə Özəl 20% Endirim"
+                  oninput="updateEmailPreview()" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Böyük Başlıq (Headline) *
+                </label>
+                <input type="text" id="broadcastHeadline" 
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                  placeholder="məsələn: Premium Dərzilik & Mövsümi Qarderob"
+                  oninput="updateEmailPreview()" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Əsas Mesaj Mətni *
+                </label>
+                <textarea id="broadcastMessage" rows="5"
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition resize-none"
+                  placeholder="Dəyərli müştərimiz, atelyemizdə hazırlanan yeni fərdi kəsim kolleksiyalarımız artıq saytda satışdadır..."
+                  oninput="updateEmailPreview()"></textarea>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Özəl Promokod (İstəyə bağlı)
+                  </label>
+                  <input type="text" id="broadcastPromo" 
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm uppercase font-mono focus:outline-none focus:border-black transition"
+                    placeholder="VIP20"
+                    oninput="updateEmailPreview()" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Hərəkətə Keçid Linki (CTA)
+                  </label>
+                  <input type="url" id="broadcastCta" 
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                    value="https://horvvalle.com/collections"
+                    placeholder="https://horvvalle.com/collections" />
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+              <span id="broadcastStatusText" class="text-xs text-slate-500 font-medium"></span>
+              <button onclick="submitBroadcastCampaign()" id="btnSendBroadcast"
+                class="px-6 py-3 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 transition cursor-pointer shadow-md">
+                <i data-lucide="send" class="w-4 h-4"></i>
+                <span>Kampaniyanı Göndər</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- PREVIEW SECTION -->
+          <div class="lg:col-span-5 bg-stone-100 p-6 rounded-2xl border border-stone-200/80 shadow-inner flex flex-col items-center justify-start">
+            <div class="w-full flex items-center justify-between mb-3">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-stone-600 flex items-center gap-1.5">
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i> Canlı Müştəri Baxışı
+              </span>
+              <span class="text-[10px] text-stone-400">Mobil / Desktop Uyğun</span>
+            </div>
+
+            <!-- MOCK EMAIL BOX -->
+            <div class="w-full max-w-[380px] bg-white rounded-2xl border border-stone-200 shadow-lg overflow-hidden text-center text-slate-800">
+              <div class="bg-[#111011] p-5 text-center">
+                <div class="text-sm font-bold tracking-[3px] text-[#E6C280] uppercase">HORVVALLE</div>
+                <div class="text-[8px] text-stone-400 tracking-wider uppercase mt-1">Lüks Moda & Fərdi Dərzilik</div>
+              </div>
+              <div class="p-5 text-center space-y-3">
+                <span class="inline-block px-2.5 py-0.5 bg-[#111011] text-[#E6C280] text-[9px] font-bold uppercase tracking-wider rounded-full">
+                  Eksklüziv Kampaniya
+                </span>
+                <h3 id="prevHeadline" class="text-base font-bold text-slate-900 leading-snug">
+                  Premium Dərzilik & Mövsümi Qarderob
+                </h3>
+                <p id="prevMessage" class="text-xs text-slate-600 leading-relaxed text-justify">
+                  Dəyərli müştərimiz, atelyemizdə hazırlanan yeni fərdi kəsim kolleksiyalarımız artıq saytda satışdadır...
+                </p>
+                <div id="prevPromoBox" class="p-3 bg-stone-50 border border-dashed border-stone-300 rounded-xl my-2">
+                  <span class="text-[10px] text-stone-500 uppercase block mb-1">Xüsusi Promokod:</span>
+                  <span id="prevPromoCode" class="text-sm font-black font-mono tracking-widest text-slate-900">VIP20</span>
+                </div>
+                <div class="pt-2">
+                  <div class="inline-block bg-[#111011] text-white px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                    Kolleksiyanı Kəşf Et
+                  </div>
+                </div>
+              </div>
+              <div class="bg-stone-50 p-3 text-[9px] text-stone-500 border-t border-stone-100">
+                HORVVALLE Baku — Nizami küç. 44
+              </div>
+            </div>
+          </div>
+        </div>
 
 
       <!-- ============================================================ -->
@@ -1272,6 +2661,133 @@
         </div>
       </section>
 
+      <!-- ============================================================ -->
+      <!-- KÜTLƏVİ E-POÇT & MARKETİNQ KAMPANİYALARI -->
+      <section id="tab-broadcast" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-7xl w-full">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-2xl font-black text-slate-900 tracking-tight">KÜTLƏVİ E-POÇT & KAMPANİYALAR</h1>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 uppercase tracking-wider">Lüks Resend Motoru</span>
+            </div>
+            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">
+              Bütün qeydiyyatdan keçmiş müştərilərə brendləşdirilmiş eksklüziv təkliflər və xəbərlər göndərin
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- FORM SECTION -->
+          <div class="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-5">
+            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="edit-3" class="w-4 h-4 text-slate-700"></i> Kampaniya Tərtibatı
+            </h2>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  E-poçt Mövzusu (Subject) *
+                </label>
+                <input type="text" id="broadcastSubject" 
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                  placeholder="məsələn: HORVVALLE — Yeni Kolleksiya & Sizə Özəl 20% Endirim"
+                  oninput="updateEmailPreview()" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Böyük Başlıq (Headline) *
+                </label>
+                <input type="text" id="broadcastHeadline" 
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                  placeholder="məsələn: Premium Dərzilik & Mövsümi Qarderob"
+                  oninput="updateEmailPreview()" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Əsas Mesaj Mətni *
+                </label>
+                <textarea id="broadcastMessage" rows="5"
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition resize-none"
+                  placeholder="Dəyərli müştərimiz, atelyemizdə hazırlanan yeni fərdi kəsim kolleksiyalarımız artıq saytda satışdadır..."
+                  oninput="updateEmailPreview()"></textarea>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Özəl Promokod (İstəyə bağlı)
+                  </label>
+                  <input type="text" id="broadcastPromo" 
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm uppercase font-mono focus:outline-none focus:border-black transition"
+                    placeholder="VIP20"
+                    oninput="updateEmailPreview()" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Hərəkətə Keçid Linki (CTA)
+                  </label>
+                  <input type="url" id="broadcastCta" 
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                    value="https://horvvalle.com/collections"
+                    placeholder="https://horvvalle.com/collections" />
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+              <span id="broadcastStatusText" class="text-xs text-slate-500 font-medium"></span>
+              <button onclick="submitBroadcastCampaign()" id="btnSendBroadcast"
+                class="px-6 py-3 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 transition cursor-pointer shadow-md">
+                <i data-lucide="send" class="w-4 h-4"></i>
+                <span>Kampaniyanı Göndər</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- PREVIEW SECTION -->
+          <div class="lg:col-span-5 bg-stone-100 p-6 rounded-2xl border border-stone-200/80 shadow-inner flex flex-col items-center justify-start">
+            <div class="w-full flex items-center justify-between mb-3">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-stone-600 flex items-center gap-1.5">
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i> Canlı Müştəri Baxışı
+              </span>
+              <span class="text-[10px] text-stone-400">Mobil / Desktop Uyğun</span>
+            </div>
+
+            <!-- MOCK EMAIL BOX -->
+            <div class="w-full max-w-[380px] bg-white rounded-2xl border border-stone-200 shadow-lg overflow-hidden text-center text-slate-800">
+              <div class="bg-[#111011] p-5 text-center">
+                <div class="text-sm font-bold tracking-[3px] text-[#E6C280] uppercase">HORVVALLE</div>
+                <div class="text-[8px] text-stone-400 tracking-wider uppercase mt-1">Lüks Moda & Fərdi Dərzilik</div>
+              </div>
+              <div class="p-5 text-center space-y-3">
+                <span class="inline-block px-2.5 py-0.5 bg-[#111011] text-[#E6C280] text-[9px] font-bold uppercase tracking-wider rounded-full">
+                  Eksklüziv Kampaniya
+                </span>
+                <h3 id="prevHeadline" class="text-base font-bold text-slate-900 leading-snug">
+                  Premium Dərzilik & Mövsümi Qarderob
+                </h3>
+                <p id="prevMessage" class="text-xs text-slate-600 leading-relaxed text-justify">
+                  Dəyərli müştərimiz, atelyemizdə hazırlanan yeni fərdi kəsim kolleksiyalarımız artıq saytda satışdadır...
+                </p>
+                <div id="prevPromoBox" class="p-3 bg-stone-50 border border-dashed border-stone-300 rounded-xl my-2">
+                  <span class="text-[10px] text-stone-500 uppercase block mb-1">Xüsusi Promokod:</span>
+                  <span id="prevPromoCode" class="text-sm font-black font-mono tracking-widest text-slate-900">VIP20</span>
+                </div>
+                <div class="pt-2">
+                  <div class="inline-block bg-[#111011] text-white px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                    Kolleksiyanı Kəşf Et
+                  </div>
+                </div>
+              </div>
+              <div class="bg-stone-50 p-3 text-[9px] text-stone-500 border-t border-stone-100">
+                HORVVALLE Baku — Nizami küç. 44
+              </div>
+            </div>
+          </div>
+        </div>
+
 
       <!-- ============================================================ -->
       <!-- ƏLAVƏ TAB: FƏRDİ ÇAP STUDİYASI (POD ORDERS) -->
@@ -1288,6 +2804,133 @@
           <!-- Dynamically populated -->
         </div>
       </section>
+
+      <!-- ============================================================ -->
+      <!-- KÜTLƏVİ E-POÇT & MARKETİNQ KAMPANİYALARI -->
+      <section id="tab-broadcast" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-7xl w-full">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-2xl font-black text-slate-900 tracking-tight">KÜTLƏVİ E-POÇT & KAMPANİYALAR</h1>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 uppercase tracking-wider">Lüks Resend Motoru</span>
+            </div>
+            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">
+              Bütün qeydiyyatdan keçmiş müştərilərə brendləşdirilmiş eksklüziv təkliflər və xəbərlər göndərin
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- FORM SECTION -->
+          <div class="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-5">
+            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="edit-3" class="w-4 h-4 text-slate-700"></i> Kampaniya Tərtibatı
+            </h2>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  E-poçt Mövzusu (Subject) *
+                </label>
+                <input type="text" id="broadcastSubject" 
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                  placeholder="məsələn: HORVVALLE — Yeni Kolleksiya & Sizə Özəl 20% Endirim"
+                  oninput="updateEmailPreview()" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Böyük Başlıq (Headline) *
+                </label>
+                <input type="text" id="broadcastHeadline" 
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                  placeholder="məsələn: Premium Dərzilik & Mövsümi Qarderob"
+                  oninput="updateEmailPreview()" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Əsas Mesaj Mətni *
+                </label>
+                <textarea id="broadcastMessage" rows="5"
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition resize-none"
+                  placeholder="Dəyərli müştərimiz, atelyemizdə hazırlanan yeni fərdi kəsim kolleksiyalarımız artıq saytda satışdadır..."
+                  oninput="updateEmailPreview()"></textarea>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Özəl Promokod (İstəyə bağlı)
+                  </label>
+                  <input type="text" id="broadcastPromo" 
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm uppercase font-mono focus:outline-none focus:border-black transition"
+                    placeholder="VIP20"
+                    oninput="updateEmailPreview()" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Hərəkətə Keçid Linki (CTA)
+                  </label>
+                  <input type="url" id="broadcastCta" 
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-black transition"
+                    value="https://horvvalle.com/collections"
+                    placeholder="https://horvvalle.com/collections" />
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+              <span id="broadcastStatusText" class="text-xs text-slate-500 font-medium"></span>
+              <button onclick="submitBroadcastCampaign()" id="btnSendBroadcast"
+                class="px-6 py-3 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-2 transition cursor-pointer shadow-md">
+                <i data-lucide="send" class="w-4 h-4"></i>
+                <span>Kampaniyanı Göndər</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- PREVIEW SECTION -->
+          <div class="lg:col-span-5 bg-stone-100 p-6 rounded-2xl border border-stone-200/80 shadow-inner flex flex-col items-center justify-start">
+            <div class="w-full flex items-center justify-between mb-3">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-stone-600 flex items-center gap-1.5">
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i> Canlı Müştəri Baxışı
+              </span>
+              <span class="text-[10px] text-stone-400">Mobil / Desktop Uyğun</span>
+            </div>
+
+            <!-- MOCK EMAIL BOX -->
+            <div class="w-full max-w-[380px] bg-white rounded-2xl border border-stone-200 shadow-lg overflow-hidden text-center text-slate-800">
+              <div class="bg-[#111011] p-5 text-center">
+                <div class="text-sm font-bold tracking-[3px] text-[#E6C280] uppercase">HORVVALLE</div>
+                <div class="text-[8px] text-stone-400 tracking-wider uppercase mt-1">Lüks Moda & Fərdi Dərzilik</div>
+              </div>
+              <div class="p-5 text-center space-y-3">
+                <span class="inline-block px-2.5 py-0.5 bg-[#111011] text-[#E6C280] text-[9px] font-bold uppercase tracking-wider rounded-full">
+                  Eksklüziv Kampaniya
+                </span>
+                <h3 id="prevHeadline" class="text-base font-bold text-slate-900 leading-snug">
+                  Premium Dərzilik & Mövsümi Qarderob
+                </h3>
+                <p id="prevMessage" class="text-xs text-slate-600 leading-relaxed text-justify">
+                  Dəyərli müştərimiz, atelyemizdə hazırlanan yeni fərdi kəsim kolleksiyalarımız artıq saytda satışdadır...
+                </p>
+                <div id="prevPromoBox" class="p-3 bg-stone-50 border border-dashed border-stone-300 rounded-xl my-2">
+                  <span class="text-[10px] text-stone-500 uppercase block mb-1">Xüsusi Promokod:</span>
+                  <span id="prevPromoCode" class="text-sm font-black font-mono tracking-widest text-slate-900">VIP20</span>
+                </div>
+                <div class="pt-2">
+                  <div class="inline-block bg-[#111011] text-white px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                    Kolleksiyanı Kəşf Et
+                  </div>
+                </div>
+              </div>
+              <div class="bg-stone-50 p-3 text-[9px] text-stone-500 border-t border-stone-100">
+                HORVVALLE Baku — Nizami küç. 44
+              </div>
+            </div>
+          </div>
+        </div>
 
     </main>
   </div>

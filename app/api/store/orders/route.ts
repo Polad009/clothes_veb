@@ -3,6 +3,7 @@ import { readStoreDb, writeStoreDb, StoreOrder } from '@/lib/storeDb';
 import { notifyNewOrder } from '@/lib/notifications/orderNotifier';
 import { isAdminAuthenticated } from '@/lib/adminAuth';
 import { supabaseServer } from '@/lib/supabaseServer';
+import { sendOrderConfirmation, sendOrderStatusUpdate } from '@/lib/email/emailService';
 
 export const dynamic = 'force-dynamic';
 
@@ -151,6 +152,11 @@ export async function POST(req: NextRequest) {
       console.warn('Notification failed:', e);
     }
 
+    // Send customer order confirmation email asynchronously
+    sendOrderConfirmation(newOrder).catch((e) => {
+      console.warn('Order confirmation email warning:', e);
+    });
+
     return NextResponse.json({ success: true, order: newOrder });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -170,7 +176,13 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: 'Sifariş tapılmadı.' }, { status: 404 });
     }
 
-    if (orderStatus) db.orders[orderIndex].orderStatus = orderStatus;
+    if (orderStatus) {
+      db.orders[orderIndex].orderStatus = orderStatus;
+      // Send status update email if customer has email
+      sendOrderStatusUpdate(db.orders[orderIndex], orderStatus).catch((e) => {
+        console.warn('Status update email warning:', e);
+      });
+    }
     if (paymentStatus) db.orders[orderIndex].paymentStatus = paymentStatus;
 
     writeStoreDb(db);

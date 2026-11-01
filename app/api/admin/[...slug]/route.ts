@@ -5,6 +5,7 @@ import {
   createAdminToken,
   isAdminAuthenticated,
 } from '@/lib/adminAuth';
+import { sendOrderStatusUpdate, sendBroadcastCampaign } from '@/lib/email/emailService';
 import fs from 'fs';
 import path from 'path';
 
@@ -230,6 +231,16 @@ export async function POST(
       return NextResponse.json({ success: true, loyalty: (db as any).loyalty });
     }
 
+    // 8. Marketing Email Broadcast
+    if (route === 'broadcast-email') {
+      const { subject, headline, message, promoCode, ctaLink } = body;
+      if (!subject || !headline || !message) {
+        return NextResponse.json({ error: 'Mövzu, başlıq və mesaj mətni tələb olunur.' }, { status: 400 });
+      }
+      const result = await sendBroadcastCampaign({ subject, headline, message, promoCode, ctaLink });
+      return NextResponse.json({ success: true, result });
+    }
+
     return NextResponse.json({ error: 'Endpoint not found' }, { status: 404 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -260,7 +271,12 @@ export async function PATCH(
       const { orderStatus, paymentStatus } = body;
       const index = db.orders.findIndex((o: any) => o.id === id);
       if (index >= 0) {
-        if (orderStatus) db.orders[index].orderStatus = orderStatus;
+        if (orderStatus) {
+          db.orders[index].orderStatus = orderStatus;
+          sendOrderStatusUpdate(db.orders[index], orderStatus).catch((e) => {
+            console.warn('Status update email warning:', e);
+          });
+        }
         if (paymentStatus) db.orders[index].paymentStatus = paymentStatus;
         writeStoreDb(db);
         return NextResponse.json({ success: true, order: db.orders[index] });
