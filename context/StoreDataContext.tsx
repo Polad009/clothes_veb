@@ -90,7 +90,10 @@ export function StoreDataProvider({ children }: { children: React.ReactNode }) {
   const fetchLiveStoreData = useCallback(async () => {
     try {
       setIsLoading(true);
-      const res = await fetch("/api/store/data", { cache: "no-store" });
+      const res = await fetch(`/api/store/data?t=${Date.now()}`, {
+        cache: "no-store",
+        headers: { "Cache-Control": "no-cache", "Pragma": "no-cache" },
+      });
       if (!res.ok) return;
       const data = await res.json();
       if (data && data.products && Array.isArray(data.products)) {

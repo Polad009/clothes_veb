@@ -1522,6 +1522,29 @@
     </div>
   </div>
 
+  <!-- PRINT ASSETS & MOCKUPS MODAL (DTG / DTF PRODUCTION) -->
+  <div id="printAssetsModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-3xl w-full p-6 sm:p-7 shadow-2xl border border-slate-100 max-h-[92vh] overflow-y-auto space-y-5">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div>
+          <span class="text-[10px] font-black uppercase tracking-widest text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full">DTG & DTF İstehsalat</span>
+          <h3 id="printModalTitle" class="font-bold text-base text-slate-900 mt-1">Məhsulun Çap və Mockup Faylları</h3>
+        </div>
+        <button onclick="closePrintModal()" class="text-slate-400 hover:text-black cursor-pointer p-1 rounded-lg hover:bg-slate-100">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div id="printModalContent" class="space-y-4">
+        <!-- Rendered dynamically by openPrintModal() -->
+      </div>
+
+      <div class="flex items-center justify-end pt-3 border-t border-slate-100">
+        <button type="button" onclick="closePrintModal()" class="px-5 py-2 bg-slate-900 text-white rounded-xl font-bold text-xs cursor-pointer">Bağla</button>
+      </div>
+    </div>
+  </div>
+
 
   <!-- CATEGORY ADD/EDIT MODAL -->
   <div id="categoryModal"
@@ -1943,14 +1966,15 @@
 
       container.innerHTML = products.map(p => {
         const colors = p.colors || [];
+        const pImg = p.image || (colors[0] && colors[0].image) || (p.images && p.images[0]) || '/images/hero/black-tee.jpg';
         return `
           <tr class="hover:bg-slate-50/60 transition">
             <td class="p-3.5">
-              <img src="${p.image || '/images/hero/black-tee.jpg'}" class="w-10 h-12 object-cover rounded-lg border border-slate-200" onerror="this.src='/images/hero/black-tee.jpg'" />
+              <img src="${pImg}" class="w-12 h-14 object-contain bg-slate-50 p-0.5 rounded-lg border border-slate-200" onerror="this.src='/images/hero/black-tee.jpg'" />
             </td>
             <td class="p-3.5">
               <div class="font-bold text-slate-900 text-xs">${p.name}</div>
-              <div class="text-[10px] text-slate-400">${p.refCode || p.id}</div>
+              <div class="text-[10px] text-slate-400 font-mono">${p.refCode || p.id}</div>
             </td>
             <td class="p-3.5 font-medium text-slate-600 uppercase text-[10px]">${p.category || 'Geyim'}</td>
             <td class="p-3.5 font-bold text-slate-900">
@@ -1967,17 +1991,22 @@
                 ${colors.map(c => `<span class="w-3.5 h-3.5 rounded-full border border-slate-300 shadow-2xs" style="background-color: ${c.hex || '#000'}"></span>`).join('')}
               </div>
             </td>
-            <td class="p-3.5 text-right space-x-1">
-              <button onclick="editProduct('${p.id}')" class="p-1.5 text-slate-600 hover:text-black rounded-lg hover:bg-slate-100 cursor-pointer">
+            <td class="p-3.5 text-right space-x-1 whitespace-nowrap">
+              <button onclick="openPrintModal('${p.slug || p.id}')" title="Çap Dizaynı & Mockup (DTF/DTG)" class="p-1.5 text-indigo-600 hover:text-indigo-900 rounded-lg hover:bg-indigo-50 cursor-pointer inline-flex items-center gap-1 text-[11px] font-bold border border-indigo-200">
+                <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                <span class="hidden sm:inline">Çap Faylı</span>
+              </button>
+              <button onclick="editProduct('${p.id}')" title="Redaktə et" class="p-1.5 text-slate-600 hover:text-black rounded-lg hover:bg-slate-100 cursor-pointer inline-block">
                 <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
               </button>
-              <button onclick="deleteProduct('${p.id}')" class="p-1.5 text-rose-500 hover:text-rose-700 rounded-lg hover:bg-rose-50 cursor-pointer">
+              <button onclick="deleteProduct('${p.id}')" title="Sil" class="p-1.5 text-rose-500 hover:text-rose-700 rounded-lg hover:bg-rose-50 cursor-pointer inline-block">
                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
               </button>
             </td>
           </tr>
         `;
       }).join('');
+      if (window.lucide) { lucide.createIcons(); }
     }
 
     function filterProductsTable() {
@@ -2856,6 +2885,137 @@
       document.getElementById('productModal').classList.remove('flex');
     }
 
+    // ----------------------------------------------------
+    // PRINT ASSETS & MOCKUP DOWNLOAD MODAL
+    // ----------------------------------------------------
+    const PRODUCT_PRINT_MAP = {
+      'bmw': {
+        title: 'Horvvalle BMW M Motorsport Heavyweight Fleece Hoodie',
+        printLayers: [
+          { name: 'BMW M Şəffaf Loqolar Qatı (Ultra HD DTF)', url: '/images/uploads/bmw_hoodie_logos_layer.png', desc: 'Paltarın üzərinə birbaşa basılacaq arxa/ön vektor keyfiyyətli şəffaf DTF çap qatı' },
+          { name: 'İstehsalat & Təqdimat Lövhəsi (Bütün Ölçülər)', url: '/images/uploads/bmw_hoodie_presentation.png', desc: 'Atelye və dərzi üçün detallı görünüş və loqo yerləşmə lövhəsi' },
+        ],
+        mockups: [
+          { name: 'Qara Rəng - Ön Görünüş (Front)', url: '/images/uploads/bmw_hoodie_black_front_v3.png' },
+          { name: 'Qara Rəng - Arxa Görünüş (Back)', url: '/images/uploads/bmw_hoodie_black_back_v3.png' },
+          { name: 'Boz Rəng - Ön Görünüş', url: '/images/uploads/bmw_hoodie_grey_front_v3.png' },
+          { name: 'Boz Rəng - Arxa Görünüş', url: '/images/uploads/bmw_hoodie_grey_back_v3.png' },
+          { name: 'Ağ Rəng - Ön Görünüş', url: '/images/uploads/bmw_hoodie_white_front_v3.png' },
+          { name: 'Ağ Rəng - Arxa Görünüş', url: '/images/uploads/bmw_hoodie_white_back_v3.png' },
+        ]
+      },
+      'mclaren': {
+        title: 'Horvvalle McLaren 750S Heavyweight Oversized Tee',
+        printLayers: [
+          { name: 'McLaren Qrafik Çap Qatı - Ağ Parça Üçün (DTG)', url: '/images/uploads/mclaren_graphic_clean_white.png', desc: 'Ağ rəngli t-shirt üçün Ultra HD şəffaf qrafik dizayn' },
+          { name: 'McLaren Qrafik Çap Qatı - Qara Parça Üçün (DTF/DTG)', url: '/images/uploads/mclaren_graphic_dark_mode.png', desc: 'Qara və tünd parçalar üçün hazırlanmış xüsusi kontrastlı çap faylı' },
+          { name: 'Tam Təqdimat & Mockup Lövhəsi', url: '/images/uploads/mclaren_presentation_board.png', desc: 'Məhsulun rəsmi vitrin və istehsalat təqdimatı' },
+        ],
+        mockups: [
+          { name: 'Ağ Studiya - Ön', url: '/images/uploads/mclaren_tee_white_studio_front.png' },
+          { name: 'Ağ Studiya - Arxa', url: '/images/uploads/mclaren_tee_white_studio_back.png' },
+          { name: 'Qara Rəng - Ön', url: '/images/uploads/mclaren_tee_black_front_v2.png' },
+          { name: 'Qum Beji - Ön', url: '/images/uploads/mclaren_tee_sand_front_v3.png' },
+        ]
+      },
+      'angelus': {
+        title: 'Horvvalle Angelus Heavyweight Vintage Polo',
+        printLayers: [
+          { name: 'Angelus Mələk Qrafik Stensili (Ultra HD)', url: '/images/uploads/angel_stencil.png', desc: 'Köynəyin sinə və arxa hissəsinə basılacaq yüksək keyfiyyətli ştamp' },
+        ],
+        mockups: [
+          { name: 'Qara Polo - Ön (Cutout)', url: '/images/uploads/polo_angel_black_front_cutout.png' },
+          { name: 'Qara Polo - Arxa', url: '/images/uploads/polo_angel_black_back.png' },
+          { name: 'Ağ Polo - Ön', url: '/images/uploads/polo_angel_white_front_v8.png' },
+        ]
+      },
+      'dust': {
+        title: 'Horvvalle Angel Dust Vintage Hoodie',
+        printLayers: [
+          { name: 'Angel Dust Çap Stensili (Ultra HD)', url: '/images/uploads/angel_stencil.png', desc: 'Hudi üçün təmizlənmiş şəffaf qrafik lay' },
+        ],
+        mockups: [
+          { name: 'Vintage Hudi - Ön (Cutout)', url: '/images/uploads/angel_dust_hoodie_cutout.png' },
+          { name: 'Vintage Hudi - Arxa', url: '/images/uploads/real_hoodie_back_clean.png' },
+        ]
+      }
+    };
+
+    function openPrintModal(keyOrSlug) {
+      const lower = String(keyOrSlug).toLowerCase();
+      let foundKey = 'bmw';
+      if (lower.includes('mclaren')) foundKey = 'mclaren';
+      else if (lower.includes('angelus') || lower.includes('polo')) foundKey = 'angelus';
+      else if (lower.includes('dust') || lower.includes('vintage-hoodie')) foundKey = 'dust';
+      else if (lower.includes('bmw') || lower.includes('motorsport')) foundKey = 'bmw';
+
+      const data = PRODUCT_PRINT_MAP[foundKey] || PRODUCT_PRINT_MAP['bmw'];
+      document.getElementById('printModalTitle').innerText = data.title;
+
+      const html = `
+        <div class="space-y-4">
+          <!-- 1. PRINT LAYERS (DTF / DTG TRANSPARENT ARTWORK) -->
+          <div class="bg-indigo-50/50 border border-indigo-100 rounded-2xl p-4">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
+              <h4 class="font-bold text-xs uppercase tracking-wider text-indigo-950">1. Şəffaf Çap Qatları (DTF / DTG / Vektor)</h4>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              ${data.printLayers.map(pl => `
+                <div class="bg-white p-3 rounded-xl border border-indigo-200/60 shadow-2xs flex flex-col justify-between">
+                  <div>
+                    <div class="aspect-4/3 bg-slate-900/5 rounded-lg overflow-hidden border border-slate-200/50 flex items-center justify-center p-2 mb-2">
+                      <img src="${pl.url}" class="max-h-full max-w-full object-contain" alt="${pl.name}" />
+                    </div>
+                    <div class="font-bold text-slate-900 text-xs">${pl.name}</div>
+                    <div class="text-[10px] text-slate-500 mt-0.5">${pl.desc}</div>
+                  </div>
+                  <div class="flex items-center gap-2 mt-3 pt-2 border-t border-slate-100">
+                    <a href="${pl.url}" target="_blank" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[10px] font-bold flex-1 text-center">Bax</a>
+                    <a href="${pl.url}" download class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[10px] font-bold flex-1 text-center shadow-xs">Yüklə (PNG)</a>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- 2. READY GARMENT MOCKUPS -->
+          <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-4">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="w-2.5 h-2.5 rounded-full bg-slate-700"></span>
+              <h4 class="font-bold text-xs uppercase tracking-wider text-slate-800">2. Hazır Paltar Mockup-ları</h4>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              ${data.mockups.map(m => `
+                <div class="bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs flex flex-col justify-between">
+                  <div>
+                    <div class="aspect-square bg-slate-50 rounded-lg overflow-hidden border border-slate-100 flex items-center justify-center p-1 mb-1.5">
+                      <img src="${m.url}" class="max-h-full max-w-full object-contain" alt="${m.name}" />
+                    </div>
+                    <div class="font-bold text-slate-800 text-[11px] truncate">${m.name}</div>
+                  </div>
+                  <div class="flex items-center gap-1.5 mt-2">
+                    <a href="${m.url}" target="_blank" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md text-[9px] font-bold flex-1 text-center">Bax</a>
+                    <a href="${m.url}" download class="px-2 py-1 bg-slate-900 hover:bg-black text-white rounded-md text-[9px] font-bold flex-1 text-center">Yüklə</a>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('printModalContent').innerHTML = html;
+      document.getElementById('printAssetsModal').classList.remove('hidden');
+      document.getElementById('printAssetsModal').classList.add('flex');
+      if (window.lucide) { lucide.createIcons(); }
+    }
+
+    function closePrintModal() {
+      document.getElementById('printAssetsModal').classList.add('hidden');
+      document.getElementById('printAssetsModal').classList.remove('flex');
+    }
+
     async function handleProductFormSubmit(e) {
       e.preventDefault();
       const id = document.getElementById('prodEditId').value;
@@ -2864,7 +3024,7 @@
       const category = document.getElementById('prodCategory').value;
       const price = Number(document.getElementById('prodPrice').value) || 0;
       const compareRaw = document.getElementById('prodComparePrice').value.trim();
-      const compareAtPrice = compareRaw ? Number(compareRaw) : null;
+      const compareAtPrice = (compareRaw !== '' && !isNaN(Number(compareRaw))) ? Number(compareRaw) : null;
       const image = document.getElementById('prodImage').value.trim();
       const hoverImage = document.getElementById('prodHoverImage').value.trim();
       const description = document.getElementById('prodDesc').value.trim();
@@ -2883,6 +3043,10 @@
         inStock: existing?.inStock ?? true,
         gender: existing?.gender || 'men',
       };
+
+      if (compareAtPrice === null) {
+        delete payload.compareAtPrice;
+      }
 
       if (!existing?.colors || existing.colors.length === 0) {
         payload.colors = [

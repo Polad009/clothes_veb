@@ -4,115 +4,130 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { MoveHorizontal, ArrowUpRight } from "lucide-react";
+import { useStoreData } from "@/context/StoreDataContext";
+import { useCurrency } from "@/context/CurrencyContext";
 
 interface RunwayItem {
   id: string;
+  slug: string;
   src: string;
   title: string;
   tag: string;
-  price: string;
+  defaultPrice: number;
   link: string;
 }
 
 const RUNWAY_TOP: RunwayItem[] = [
   {
     id: "1",
-    src: "/images/products/beige-linen-relaxed-shirt/mockup.webp",
-    title: "Bej Kətan Yay Köynəyi",
-    tag: "TƏBİİ KƏTAN",
-    price: "62 ₼",
-    link: "/products/beige-linen-relaxed-shirt",
+    slug: "horwalle-bmw-m-motorsport-heavyweight-fleece-hoodie",
+    src: "/images/uploads/bmw_hoodie_black_front_v3.png",
+    title: "BMW M Motorsport Qara Hudi",
+    tag: "380 GSM FLEECE",
+    defaultPrice: 89,
+    link: "/products/horwalle-bmw-m-motorsport-heavyweight-fleece-hoodie",
   },
   {
     id: "2",
-    src: "/images/products/vintage-king-of-pop-tee/front.webp",
-    title: "King of Pop Vintage Tee",
-    tag: "OVERSIZE DTG",
-    price: "55 ₼",
-    link: "/products/vintage-king-of-pop-tee",
+    slug: "horwalle-mclaren-750s-heavyweight-oversized-tee",
+    src: "/images/uploads/mclaren_tee_white_studio_front.png",
+    title: "McLaren 750S Oversized Ağ Tee",
+    tag: "240 GSM HEAVYWEIGHT",
+    defaultPrice: 29.99,
+    link: "/products/horwalle-mclaren-750s-heavyweight-oversized-tee",
   },
   {
     id: "3",
-    src: "/images/products/white-oxford-button-down-shirt/mockup.webp",
-    title: "Klassik Ağ Oxford Köynək",
-    tag: "220 GSM COUTURE",
-    price: "55 ₼",
-    link: "/products/white-oxford-button-down-shirt",
+    slug: "horwalle-bmw-m-motorsport-heavyweight-fleece-hoodie",
+    src: "/images/uploads/bmw_hoodie_grey_front_v3.png",
+    title: "BMW M Motorsport Melanj Boz",
+    tag: "PREMIUM FLEECE",
+    defaultPrice: 89,
+    link: "/products/horwalle-bmw-m-motorsport-heavyweight-fleece-hoodie",
   },
   {
     id: "4",
-    src: "/images/products/beige-slim-chino-pants/mockup.webp",
-    title: "Qum Beji Slim Chino",
-    tag: "DƏQİQ KƏSİM",
-    price: "68 ₼",
-    link: "/products/beige-slim-chino-pants",
+    slug: "horwalle-angelus-heavyweight-vintage-polo",
+    src: "/images/uploads/polo_angel_black_front_cutout.png",
+    title: "Angelus Vintage Qara Polo",
+    tag: "HEAVY PIQUE",
+    defaultPrice: 79,
+    link: "/products/horwalle-angelus-heavyweight-vintage-polo",
   },
   {
     id: "5",
-    src: "/images/products/urban-echo-world-tour-tee/mockup.webp",
-    title: "Urban Echo World Tour Tee",
-    tag: "STREETWEAR",
-    price: "52 ₼",
-    link: "/products/urban-echo-world-tour-tee",
+    slug: "horwalle-mclaren-750s-heavyweight-oversized-tee",
+    src: "/images/uploads/mclaren_tee_black_front_v2.png",
+    title: "McLaren 750S Qara Edition",
+    tag: "STREETWEAR OVERSIZE",
+    defaultPrice: 29.99,
+    link: "/products/horwalle-mclaren-750s-heavyweight-oversized-tee",
   },
   {
     id: "6",
-    src: "/images/products/classic-straight-indigo-jeans/mockup.webp",
-    title: "İndiqo Düz Kəsim Cins",
-    tag: "DENİM",
-    price: "74 ₼",
-    link: "/products/classic-straight-indigo-jeans",
+    slug: "horwalle-angel-dust-vintage-hoodie",
+    src: "/images/uploads/angel_dust_hoodie_cutout.png",
+    title: "Angel Dust Vintage Hudi",
+    tag: "380 GSM COUTURE",
+    defaultPrice: 49,
+    link: "/products/horwalle-angel-dust-vintage-hoodie",
   },
 ];
 
 const RUNWAY_BOTTOM: RunwayItem[] = [
   {
     id: "7",
-    src: "/images/products/modern-utility-cargo-pants/mockup.webp",
-    title: "Taktiki Qara Kargo Şalvar",
-    tag: "UTILITY",
-    price: "72 ₼",
-    link: "/products/modern-utility-cargo-pants",
+    slug: "horwalle-mclaren-750s-heavyweight-oversized-tee",
+    src: "/images/uploads/mclaren_tee_white_studio_back.png",
+    title: "McLaren 750S Supercar Çap",
+    tag: "ULTRA HD DTG",
+    defaultPrice: 29.99,
+    link: "/products/horwalle-mclaren-750s-heavyweight-oversized-tee",
   },
   {
     id: "8",
-    src: "/images/products/essential-white-cotton-tee/mockup.webp",
-    title: "Ağ Pambıq Baza T-Shirt",
-    tag: "220 GSM PAMBIQ",
-    price: "32 ₼",
-    link: "/products/essential-white-cotton-tee",
+    slug: "horwalle-bmw-m-motorsport-heavyweight-fleece-hoodie",
+    src: "/images/uploads/bmw_hoodie_black_back_v3.png",
+    title: "BMW M Motorsport Arxa Loqo",
+    tag: "DTF ARTWORK",
+    defaultPrice: 89,
+    link: "/products/horwalle-bmw-m-motorsport-heavyweight-fleece-hoodie",
   },
   {
     id: "9",
-    src: "/images/products/black-formal-smart-trousers/mockup.webp",
-    title: "Qara Ziyafət Şalvarı",
-    tag: "SMART TAILORED",
-    price: "85 ₼",
-    link: "/products/black-formal-smart-trousers",
+    slug: "horwalle-angelus-heavyweight-vintage-polo",
+    src: "/images/uploads/polo_angel_white_front_v8.png",
+    title: "Angelus Vintage Ağ Polo",
+    tag: "EMBROIDERED LUXURY",
+    defaultPrice: 79,
+    link: "/products/horwalle-angelus-heavyweight-vintage-polo",
   },
   {
     id: "10",
-    src: "/images/products/black-tailored-cotton-shirt/mockup.webp",
-    title: "Qara Klassik Pambıq Köynək",
-    tag: "ELEGANT",
-    price: "58 ₼",
-    link: "/products/black-tailored-cotton-shirt",
+    slug: "horwalle-mclaren-750s-heavyweight-oversized-tee",
+    src: "/images/uploads/mclaren_tee_sand_front_v3.png",
+    title: "McLaren 750S Qum Beji",
+    tag: "VINTAGE DYE",
+    defaultPrice: 29.99,
+    link: "/products/horwalle-mclaren-750s-heavyweight-oversized-tee",
   },
   {
     id: "11",
-    src: "/images/products/urban-echo-world-tour-tee/back.webp",
-    title: "World Tour Tur Çoxpanelli Çap",
-    tag: "DTG PRINT",
-    price: "52 ₼",
-    link: "/products/urban-echo-world-tour-tee",
+    slug: "horwalle-bmw-m-motorsport-heavyweight-fleece-hoodie",
+    src: "/images/uploads/bmw_hoodie_white_front_v3.png",
+    title: "BMW M Motorsport Ağ Hudi",
+    tag: "LIMITED EDITION",
+    defaultPrice: 89,
+    link: "/products/horwalle-bmw-m-motorsport-heavyweight-fleece-hoodie",
   },
   {
     id: "12",
-    src: "/images/products/heavyweight-hoodie-black/mockup.webp",
-    title: "3iplik Qalın Qara Hudi",
-    tag: "380 GSM QALIN",
-    price: "78 ₼",
-    link: "/products/heavyweight-hoodie-black",
+    slug: "horwalle-angelus-heavyweight-vintage-polo",
+    src: "/images/uploads/polo_angel_black_back.png",
+    title: "Angelus Arxa Mələk Dizayn",
+    tag: "VINTAGE WASH",
+    defaultPrice: 79,
+    link: "/products/horwalle-angelus-heavyweight-vintage-polo",
   },
 ];
 
@@ -121,6 +136,7 @@ interface RunwayCardProps {
   staggerIndex: number;
   isPriority: boolean;
   isAnimated: boolean;
+  formattedPrice: string;
   onImageLoad?: () => void;
 }
 
@@ -129,6 +145,7 @@ function RunwayCard({
   staggerIndex,
   isPriority,
   isAnimated,
+  formattedPrice,
   onImageLoad,
 }: RunwayCardProps) {
   // Stagger sinusoidal wave delays for fluid ocean-wave motion (pure CSS)
@@ -142,18 +159,19 @@ function RunwayCard({
         style={{ animationDelay: `-${waveDelay.toFixed(2)}s` }}
         data-paused={!isAnimated}
       >
-        <div
-          className="relative block aspect-[4/5] rounded-2xl sm:rounded-3xl border border-[#EAE3D8] bg-[#FAF7F2] shadow-sm overflow-hidden select-none isolate pointer-events-none cursor-default"
+        <Link
+          href={item.link}
+          className="relative block aspect-[4/5] rounded-2xl sm:rounded-3xl border border-[#EAE3D8] bg-[#FAF7F2] shadow-sm overflow-hidden select-none isolate cursor-pointer group"
           style={{ contain: "layout paint style" }}
         >
           {/* Product Image via next/image for optimal decoding and memory containment */}
-          <div className="relative w-full h-full overflow-hidden">
+          <div className="relative w-full h-full overflow-hidden bg-white/70">
             <Image
               src={item.src}
               alt={item.title}
               fill
               sizes="360px"
-              className="object-cover"
+              className="object-contain p-2 group-hover:scale-105 transition-transform duration-500"
               priority={isPriority}
               loading={isPriority ? "eager" : "lazy"}
               decoding="async"
@@ -175,14 +193,14 @@ function RunwayCard({
             </h4>
             <div className="flex items-center justify-between mt-1 pt-0.5 border-t border-white/15">
               <span className="text-xs sm:text-sm font-bold text-[#E6C994] font-serif-luxury">
-                {item.price}
+                {formattedPrice}
               </span>
               <span className="text-[10px] text-stone-300 font-mono tracking-wider">
                 HORVVALLE
               </span>
             </div>
           </div>
-        </div>
+        </Link>
       </div>
     </div>
   );
@@ -230,6 +248,14 @@ export function UnwovenLoom() {
   }, []);
 
   const isAnimated = imagesReady && isInView;
+  const { products } = useStoreData();
+  const { formatPrice } = useCurrency();
+
+  const getPrice = (item: RunwayItem) => {
+    const prod = products.find((p) => p.slug === item.slug);
+    const p = prod ? prod.price : item.defaultPrice;
+    return formatPrice(p);
+  };
 
   return (
     <div
@@ -252,7 +278,7 @@ export function UnwovenLoom() {
       </div>
 
       {/* Row 1: Flowing Leftward with Continuous Wave (Non-stopping, always fluid) */}
-      <div className="relative w-full overflow-hidden mb-5 sm:mb-8 py-3 pointer-events-none">
+      <div className="relative w-full overflow-hidden mb-5 sm:mb-8 py-3">
         <div
           className="runway-track-left will-change-transform"
           data-paused={!isAnimated}
@@ -266,6 +292,7 @@ export function UnwovenLoom() {
                 staggerIndex={idx}
                 isPriority={idx < 4}
                 isAnimated={isAnimated}
+                formattedPrice={getPrice(item)}
                 onImageLoad={handleImageLoad}
               />
             ))}
@@ -280,6 +307,7 @@ export function UnwovenLoom() {
                 staggerIndex={idx}
                 isPriority={false}
                 isAnimated={isAnimated}
+                formattedPrice={getPrice(item)}
               />
             ))}
           </div>
@@ -287,7 +315,7 @@ export function UnwovenLoom() {
       </div>
 
       {/* Row 2: Flowing Rightward with Continuous Wave (Non-stopping, always fluid) */}
-      <div className="relative w-full overflow-hidden py-3 pointer-events-none">
+      <div className="relative w-full overflow-hidden py-3">
         <div
           className="runway-track-right will-change-transform"
           data-paused={!isAnimated}
@@ -301,6 +329,7 @@ export function UnwovenLoom() {
                 staggerIndex={idx + 4}
                 isPriority={idx < 4}
                 isAnimated={isAnimated}
+                formattedPrice={getPrice(item)}
                 onImageLoad={handleImageLoad}
               />
             ))}
@@ -315,6 +344,7 @@ export function UnwovenLoom() {
                 staggerIndex={idx + 4}
                 isPriority={false}
                 isAnimated={isAnimated}
+                formattedPrice={getPrice(item)}
               />
             ))}
           </div>
