@@ -22,6 +22,7 @@ export default function AccountPage() {
   const router = useRouter();
   const { user, profile, signOut, isLoading, openAuthModal } = useAuth();
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [isOrdersLoading, setIsOrdersLoading] = useState<boolean>(true);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -30,18 +31,44 @@ export default function AccountPage() {
   }, [isLoading, user]);
 
   useEffect(() => {
-    // Load customer's device-saved orders or fetch from Supabase
+    if (!user || !user.email) {
+      setRecentOrders([]);
+      setIsOrdersLoading(false);
+      return;
+    }
+
+    // Clean up outdated test orders from local storage
     if (typeof window !== "undefined") {
       try {
-        const raw = localStorage.getItem("horvvalle_saved_orders");
-        if (raw) {
-          const list = JSON.parse(raw);
-          if (Array.isArray(list)) {
-            setRecentOrders(list);
-          }
-        }
+        localStorage.removeItem("horvvalle_saved_orders");
       } catch (e) {}
     }
+
+    let isMounted = true;
+    setIsOrdersLoading(true);
+
+    fetch(`/api/account/orders?email=${encodeURIComponent(user.email)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (isMounted) {
+          if (data && Array.isArray(data.orders)) {
+            setRecentOrders(data.orders);
+          } else {
+            setRecentOrders([]);
+          }
+        }
+      })
+      .catch((err) => {
+        console.warn("Could not load user orders:", err);
+        if (isMounted) setRecentOrders([]);
+      })
+      .finally(() => {
+        if (isMounted) setIsOrdersLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, [user]);
 
   if (isLoading) {
@@ -150,12 +177,17 @@ export default function AccountPage() {
               </Link>
             </div>
 
-            {recentOrders.length === 0 ? (
+            {isOrdersLoading ? (
+              <div className="bg-white rounded-3xl p-8 border border-stone-200 text-center space-y-3">
+                <div className="w-6 h-6 border-2 border-stone-900 border-t-transparent rounded-full animate-spin mx-auto" />
+                <p className="text-xs text-stone-500">Sifarişləriniz yoxlanılır...</p>
+              </div>
+            ) : recentOrders.length === 0 ? (
               <div className="bg-white rounded-3xl p-8 border border-stone-200 text-center space-y-3">
                 <Package size={36} className="text-stone-300 mx-auto" />
                 <p className="text-sm font-semibold text-stone-700">Hələ heç bir sifarişiniz yoxdur</p>
                 <p className="text-xs text-stone-500 max-w-xs mx-auto">
-                  Kolleksiyamıza baxaraq bəyəndiyiniz lüks geyimi seçə və ya fərdi studiyamızda öz dizaynınızı yarada bilərsiniz.
+                  Bu e-poçt ünvanı ilə hələ heç bir sifariş qeydə alınmayıb. Kolleksiyamıza baxaraq bəyəndiyiniz lüks geyimi seçə bilərsiniz.
                 </p>
                 <div className="pt-2">
                   <Link
