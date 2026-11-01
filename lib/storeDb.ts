@@ -30,10 +30,13 @@ export interface StoreProduct {
   reviewCount: number;
   description: string;
   composition: string;
+  fabric?: string;
   care: string;
   inStock: boolean;
   sizes: string[];
   colors: ProductColor[];
+  images?: string[];
+  features?: string[];
 }
 
 export interface StoreContent {

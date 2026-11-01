@@ -6,6 +6,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { MOCK_PRODUCTS } from "@/data/products";
 import { useStoreData } from "@/context/StoreDataContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { ProductCard } from "@/components/ProductCard";
 import { CustomDropdown } from "@/components/ui/CustomDropdown";
 import { SlidersHorizontal, Filter, X, Check } from "lucide-react";
@@ -15,6 +16,7 @@ function CollectionsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { products } = useStoreData();
+  const { t, language } = useLanguage();
   const selectedCategory = searchParams.get("category") || "all";
 
   const [selectedFit, setSelectedFit] = useState<string>("all");
@@ -40,18 +42,18 @@ function CollectionsContent() {
   }, [mobileFilterOpen]);
 
   const categories = [
-    { id: "all", label: "Bütün modellər" },
-    { id: "koynek", label: "T-Shirt & köynək" },
-    { id: "hudi", label: "Hudi & sviter" },
-    { id: "salvar", label: "Şalvar & şortik" },
-    { id: "aksesuar", label: "Aksesuarlar" },
+    { id: "all", label: t.collections?.allModels || "Bütün modellər" },
+    { id: "koynek", label: t.collections?.shirts || "T-Shirt & köynək" },
+    { id: "hudi", label: t.collections?.hoodies || "Hudi & sviter" },
+    { id: "salvar", label: t.collections?.pants || "Şalvar & şortik" },
+    { id: "aksesuar", label: t.collections?.accessories || "Aksesuarlar" },
   ];
 
   const sortOptions = [
-    { id: "bestselling", label: "Ən çox satılanlar" },
-    { id: "price_asc", label: "Qiymət: Ucuzdan Bahaya" },
-    { id: "price_desc", label: "Qiymət: Bahadan Ucuza" },
-    { id: "rating", label: "Ən yüksək reytinq" },
+    { id: "bestselling", label: t.collections?.sortBestselling || "Ən çox satılanlar" },
+    { id: "price_asc", label: t.collections?.sortPriceAsc || "Qiymət: Ucuzdan Bahaya" },
+    { id: "price_desc", label: t.collections?.sortPriceDesc || "Qiymət: Bahadan Ucuza" },
+    { id: "rating", label: t.collections?.sortRating || "Ən yüksək reytinq" },
   ];
 
   const fits = [
@@ -148,45 +150,75 @@ function CollectionsContent() {
           >
             {/* Eyebrow Badge */}
             <span className="text-xs uppercase tracking-[0.25em] font-semibold text-stone-500 block mb-1.5">
-              KOLLEKSİYA 2026
+              {language === "az" ? "KOLLEKSİYA 2026" : language === "ru" ? "КОЛЛЕКЦИЯ 2026" : language === "tr" ? "KOLEKSİYON 2026" : "COLLECTION 2026"}
             </span>
 
             {/* Serif Title */}
             <h1 className="font-eb-garamond text-3xl sm:text-5xl lg:text-[3.2rem] font-normal leading-[1.1] tracking-tight text-stone-900 mt-1">
               {selectedCategory === "hudi" ? (
-                <>
-                  Hudi və <span className="italic text-stone-800">sviterlər</span>
-                </>
+                language === "az" ? (
+                  <>Hudi və <span className="italic text-stone-800">sviterlər</span></>
+                ) : language === "ru" ? (
+                  <>Худи и <span className="italic text-stone-800">свитшоты</span></>
+                ) : language === "tr" ? (
+                  <>Hudi ve <span className="italic text-stone-800">sweatshirt</span></>
+                ) : (
+                  <>Hoodies & <span className="italic text-stone-800">Sweaters</span></>
+                )
               ) : selectedCategory === "koynek" ? (
-                <>
-                  T-Shirt və <span className="italic text-stone-800">köynəklər</span>
-                </>
+                language === "az" ? (
+                  <>T-Shirt və <span className="italic text-stone-800">köynəklər</span></>
+                ) : language === "ru" ? (
+                  <>Футболки и <span className="italic text-stone-800">рубашки</span></>
+                ) : language === "tr" ? (
+                  <>T-Shirt ve <span className="italic text-stone-800">gömlekler</span></>
+                ) : (
+                  <>T-Shirts & <span className="italic text-stone-800">Shirts</span></>
+                )
               ) : selectedCategory === "salvar" ? (
-                <>
-                  Şalvar və <span className="italic text-stone-800">şortiklər</span>
-                </>
+                language === "az" ? (
+                  <>Şalvar və <span className="italic text-stone-800">şortiklər</span></>
+                ) : language === "ru" ? (
+                  <>Брюки и <span className="italic text-stone-800">шорты</span></>
+                ) : language === "tr" ? (
+                  <>Pantolon ve <span className="italic text-stone-800">şortlar</span></>
+                ) : (
+                  <>Pants & <span className="italic text-stone-800">Shorts</span></>
+                )
               ) : selectedCategory === "aksesuar" ? (
-                <>
-                  Zərif <span className="italic text-stone-800">aksesuarlar</span>
-                </>
+                language === "az" ? (
+                  <>Zərif <span className="italic text-stone-800">aksesuarlar</span></>
+                ) : language === "ru" ? (
+                  <>Изысканные <span className="italic text-stone-800">аксессуары</span></>
+                ) : language === "tr" ? (
+                  <>Zarif <span className="italic text-stone-800">aksesuarlar</span></>
+                ) : (
+                  <>Refined <span className="italic text-stone-800">Accessories</span></>
+                )
               ) : (
-                <>
-                  Bütün <span className="italic text-stone-800">modellər</span>
-                </>
+                language === "az" ? (
+                  <>Bütün <span className="italic text-stone-800">modellər</span></>
+                ) : language === "ru" ? (
+                  <>Все <span className="italic text-stone-800">модели</span></>
+                ) : language === "tr" ? (
+                  <>Tüm <span className="italic text-stone-800">modeller</span></>
+                ) : (
+                  <>All <span className="italic text-stone-800">Garments</span></>
+                )
               )}
             </h1>
 
             {/* Editorial Subtitle */}
             <p className="text-stone-600 text-sm sm:text-[14.5px] leading-relaxed max-w-xl font-sans mt-2">
               {selectedCategory === "hudi"
-                ? "3iplik qalın və isti hudilər, daranmış xalis pambıq və fərdi atelye kəsimi."
+                ? (language === "az" ? "3iplik qalın və isti hudilər, daranmış xalis pambıq və fərdi atelye kəsimi." : language === "ru" ? "Теплые и плотные худи 3-х нитка, гребенной хлопок и индивидуальный крой." : language === "tr" ? "Kalın ve sıcak tutan 3iplik polarlar, penye pamuk ve özel terzi kesimi." : "Heavyweight 3-thread fleece, combed pure cotton and bespoke atelier tailoring.")
                 : selectedCategory === "koynek"
-                ? "Oversize və regular t-shirt-lər, klassik Oxford köynəklər, 100% daranmış premium pambıq."
+                ? (language === "az" ? "Oversize və regular t-shirt-lər, klassik Oxford köynəklər, 100% daranmış premium pambıq." : language === "ru" ? "Оверсайз и классические футболки, рубашки Оксфорд из 100% гребенного хлопка." : language === "tr" ? "Oversize ve regular t-shirtler, klasik Oxford gömlekler, %100 penye pamuk." : "Oversize and regular t-shirts, classic Oxford shirts in 100% premium combed cotton.")
                 : selectedCategory === "salvar"
-                ? "Dəqiq atelye kəsimi ilə chino, denim və taktiki kargo şalvarlar."
+                ? (language === "az" ? "Dəqiq atelye kəsimi ilə chino, denim və taktiki kargo şalvarlar." : language === "ru" ? "Брюки чинос, деним и карго с безупречной посадкой по фигуре." : language === "tr" ? "Kusursuz kalıplı chino, denim ve kargo pantolonlar." : "Precision-tailored chino, denim, and cargo trousers.")
                 : selectedCategory === "aksesuar"
-                ? "Qalın kətan kepkalar, eko çantalar və fərdi aksesuarlar."
-                : "Premium köynəklər, 3iplik hudilər, şalvarlar və fərdi atelye kolleksiyası."}
+                ? (language === "az" ? "Qalın kətan kepkalar, eko çantalar və fərdi aksesuarlar." : language === "ru" ? "Плотные кепки, эко-сумки и стильные аксессуары." : language === "tr" ? "Kalın keten kasketler, eko çantalar ve özel aksesuarlar." : "Heavy canvas caps, eco tote bags and bespoke accessories.")
+                : (language === "az" ? "Premium köynəklər, 3iplik hudilər, şalvarlar və fərdi atelye kolleksiyası." : language === "ru" ? "Премиальные рубашки, плотные худи, брюки и коллекция ателье." : language === "tr" ? "Premium gömlekler, 3iplik polarlar, pantolonlar ve özel atölye koleksiyonu." : "Premium shirts, heavyweight hoodies, tailored trousers, and bespoke couture.")}
             </p>
           </motion.div>
 
@@ -209,7 +241,7 @@ function CollectionsContent() {
               className="md:hidden flex items-center gap-2 px-4 py-2.5 rounded-full bg-white hover:bg-stone-50 border border-stone-200 text-stone-800 font-medium text-xs cursor-pointer active:scale-95 transition shadow-2xs"
             >
               <SlidersHorizontal size={14} className="text-stone-600" />
-              <span>Filtrlər</span>
+              <span>{t.collections?.filters || "Filtrlər"}</span>
             </button>
           </div>
         </div>
@@ -368,23 +400,23 @@ function CollectionsContent() {
               ===================================================================== */}
           <main className="md:col-span-9">
             <div className="flex items-center justify-between mb-5 text-xs text-stone-500 font-medium uppercase tracking-wider">
-              <span>Məhsul sayı: {filteredProducts.length}</span>
+              <span>{language === "az" ? "Məhsul sayı: " : language === "ru" ? "Количество: " : language === "tr" ? "Ürün sayısı: " : "Products: "}{filteredProducts.length}</span>
             </div>
 
             {filteredProducts.length === 0 ? (
               <div className="py-20 text-center bg-white border border-stone-200/80 rounded-2xl p-8 space-y-4 text-stone-900 shadow-xs">
                 <h3 className="text-lg font-bold text-stone-900">
-                  Bu filtrlərə uyğun heç bir məhsul tapılmadı
+                  {t.collections?.noProductsFound || "Bu filtrlərə uyğun heç bir məhsul tapılmadı"}
                 </h3>
                 <p className="text-xs text-stone-500 max-w-sm mx-auto">
-                  Daha çox seçim üçün filtrləri sıfırlayın və ya 3D fərdi studiyada öz unikal dizaynınızı yaradın.
+                  {language === "az" ? "Daha çox seçim üçün filtrləri sıfırlayın və ya 3D fərdi studiyada öz unikal dizaynınızı yaradın." : language === "ru" ? "Сбросьте фильтры для большего выбора или создайте свой дизайн в 3D студии." : language === "tr" ? "Daha fazla seçenek için filtreleri sıfırlayın veya 3D stüdyoda kendi tasarımınızı yapın." : "Reset filters to see all pieces or create your bespoke design in the 3D lab."}
                 </p>
                 <button
                   type="button"
                   onClick={clearFilters}
                   className="px-6 py-2.5 rounded-full bg-stone-900 text-white font-medium text-xs uppercase hover:bg-black transition shadow-sm cursor-pointer"
                 >
-                  Filtrləri təmizlə
+                  {t.collections?.resetFilters || "Filtrləri təmizlə"}
                 </button>
               </div>
             ) : (

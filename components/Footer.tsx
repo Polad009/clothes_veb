@@ -5,8 +5,10 @@ import Link from "next/link";
 import { Check, ShieldCheck, Truck, RotateCcw, Award } from "lucide-react";
 import { PaymentLogosRow } from "@/components/PaymentLogos";
 import Logo from "@/components/Logo";
+import { useLanguage } from "@/context/LanguageContext";
 
 export function Footer() {
+  const { t, language } = useLanguage();
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
 
@@ -32,9 +34,9 @@ export function Footer() {
             </div>
             <div>
               <h4 className="text-xs font-bold text-white uppercase tracking-wider">
-                Sürətli Çatdırılma
+                {t.footer.fastDelivery}
               </h4>
-              <p className="text-[11px] text-white/60">Bakı & Sumqayıtda pulsuz</p>
+              <p className="text-[11px] text-white/60">{t.footer.fastDeliverySub}</p>
             </div>
           </div>
 
@@ -44,9 +46,9 @@ export function Footer() {
             </div>
             <div>
               <h4 className="text-xs font-bold text-white uppercase tracking-wider">
-                14 Günlük Qaytarılma
+                {t.footer.return14Days}
               </h4>
-              <p className="text-[11px] text-white/60">Asan və zəmanətli dəyişmə</p>
+              <p className="text-[11px] text-white/60">{t.footer.return14DaysSub}</p>
             </div>
           </div>
 
@@ -56,9 +58,9 @@ export function Footer() {
             </div>
             <div>
               <h4 className="text-xs font-bold text-white uppercase tracking-wider">
-                Təhlükəsiz Ödəniş
+                {t.footer.securePayment}
               </h4>
-              <p className="text-[11px] text-white/60">Apple Pay, Google Pay, Kart</p>
+              <p className="text-[11px] text-white/60">{t.footer.securePaymentSub}</p>
             </div>
           </div>
 
@@ -68,9 +70,9 @@ export function Footer() {
             </div>
             <div>
               <h4 className="text-xs font-bold text-white uppercase tracking-wider">
-                Təbii Materiallar
+                {t.footer.naturalMaterials}
               </h4>
-              <p className="text-[11px] text-white/60">100% kətan, pambıq və bambuk</p>
+              <p className="text-[11px] text-white/60">{t.footer.naturalMaterialsSub}</p>
             </div>
           </div>
         </div>
@@ -85,18 +87,18 @@ export function Footer() {
               <Logo theme="dark" />
             </div>
             <p className="text-xs text-white/70 max-w-sm leading-relaxed">
-              Lüks geyim və fərdi sənət evi. Yüksək keyfiyyətli premium köynəklər, 3iplik isti hudilər, zərif kəsimli şalvarlar və qabaqcıl 3D fərdi dizayn atelyesi.
+              {t.footer.brandDesc}
             </p>
 
             {/* Newsletter form */}
             <div className="pt-2">
               <span className="text-xs font-bold text-[#E6C280] uppercase tracking-wider block mb-2">
-                YENİ ENDİRİMLƏRƏ İLK SƏN QOŞUL
+                {t.footer.newsletterTitle}
               </span>
               <form onSubmit={handleSubscribe} className="flex gap-2 max-w-sm">
                 <input
                   type="email"
-                  placeholder="E-poçt ünvanınızı daxil edin"
+                  placeholder={t.footer.newsletterPlaceholder}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -106,12 +108,12 @@ export function Footer() {
                   type="submit"
                   className="px-5 py-2.5 rounded-full bg-white text-black font-semibold text-xs uppercase hover:bg-white/90 transition shrink-0 flex items-center gap-1.5 shadow-md active:scale-95 cursor-pointer"
                 >
-                  {subscribed ? <Check size={14} className="text-black" /> : <span>Qoşul</span>}
+                  {subscribed ? <Check size={14} className="text-black" /> : <span>{t.footer.joinBtn}</span>}
                 </button>
               </form>
               {subscribed && (
                 <span className="text-[11px] text-[#E6C280] font-semibold mt-1.5 block">
-                  ✓ Abunəliyiniz təsdiqləndi! Xoş gəldiniz kuponunuz göndərildi.
+                  ✓ {language === "az" ? "Abunəliyiniz təsdiqləndi! Xoş gəldiniz kuponunuz göndərildi." : language === "ru" ? "Подписка подтверждена! Купон отправлен." : language === "tr" ? "Aboneliğiniz onaylandı! Hoş geldiniz kuponunuz gönderildi." : "Subscription confirmed! Welcome coupon sent."}
                 </span>
               )}
             </div>
@@ -126,7 +128,7 @@ export function Footer() {
               >
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span className="text-[11px]">
-                  WhatsApp Dəstək: <strong className="text-emerald-400 font-mono tracking-wider">+994 55-766-90-50</strong>
+                  WhatsApp VIP: <strong className="text-emerald-400 font-mono tracking-wider">+994 55-766-90-50</strong>
                 </span>
               </a>
             </div>
@@ -135,7 +137,7 @@ export function Footer() {
           {/* Column 1: Köynəklər */}
           <div className="space-y-3">
             <h5 className="text-xs font-bold text-[#E6C280] uppercase tracking-wider">
-              T-SHİRT & KÖYNƏK
+              {t.home.shirtsCategory}
             </h5>
             <ul className="space-y-2 text-xs">
               <li>
@@ -164,7 +166,7 @@ export function Footer() {
           {/* Column 2: Şalvarlar */}
           <div className="space-y-3">
             <h5 className="text-xs font-bold text-[#E6C280] uppercase tracking-wider">
-              ŞALVAR & ŞORTİK
+              {t.home.pantsCategory}
             </h5>
             <ul className="space-y-2 text-xs">
               <li>
@@ -193,7 +195,7 @@ export function Footer() {
           {/* Column 3: Hudi, Aksesuar & Studio */}
           <div className="space-y-3">
             <h5 className="text-xs font-bold text-[#E6C280] uppercase tracking-wider">
-              HUDİ, AKSESUAR & ÇAP
+              {t.home.hoodiesCategory} & {t.home.accessoriesCategory}
             </h5>
             <ul className="space-y-2 text-xs">
               <li>
@@ -213,25 +215,14 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/studio" className="text-[#E6C280] font-bold hover:text-white transition flex items-center gap-1">
-                  <span>3D Fərdi Çap Atelyesi</span>
+                  <span>{t.nav.studio}</span>
                 </Link>
               </li>
               <li className="pt-1">
                 <Link href="/track" className="text-white hover:text-[#E6C280] font-bold transition flex items-center gap-1.5">
                   <span className="text-[#E6C280]">📦</span>
-                  <span>Sifarişini İzlə (Canlı)</span>
+                  <span>{t.nav.track}</span>
                 </Link>
-              </li>
-              <li className="pt-1">
-                <a
-                  href="https://wa.me/994557669050"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-stone-300 hover:text-emerald-400 transition flex items-center gap-1.5"
-                >
-                  <span className="text-emerald-400">💬</span>
-                  <span>WhatsApp: +994 55-766-90-50</span>
-                </a>
               </li>
             </ul>
           </div>
@@ -240,11 +231,7 @@ export function Footer() {
         {/* Bottom row: Payment methods & Copyright */}
         <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/50">
           <div className="flex items-center flex-wrap gap-x-3 gap-y-1">
-            <span>© {new Date().getFullYear()} HORVVALLE ATELIER. Bütün hüquqlar qorunur.</span>
-            <span className="text-white/20">·</span>
-            <Link href="/third-party-notices" className="hover:text-white transition underline underline-offset-2">
-              Üçüncü tərəf bildirişləri
-            </Link>
+            <span>© {new Date().getFullYear()} HORVVALLE ATELIER. {t.footer.rights}</span>
           </div>
 
           {/* Official Payment Icons */}

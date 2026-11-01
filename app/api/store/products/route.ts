@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readStoreDb, writeStoreDb, StoreProduct } from '@/lib/storeDb';
+import { supabaseServer } from '@/lib/supabaseServer';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,6 +17,53 @@ export async function GET(req: NextRequest) {
     const db = readStoreDb();
     let products = db.products;
 
+    if (supabaseServer) {
+      try {
+        const { data: supaProducts, error } = await supabaseServer
+          .from('products')
+          .select('*')
+          .order('created_at', { ascending: true });
+
+        if (!error && supaProducts && supaProducts.length > 0) {
+          products = supaProducts.map((sp: any) => {
+            let meta: any = {};
+            try {
+              if (typeof sp.description === 'string' && sp.description.startsWith('{')) {
+                meta = JSON.parse(sp.description);
+              }
+            } catch (e) {}
+
+            return {
+              id: meta.id || sp.id,
+              slug: sp.slug,
+              name: sp.name,
+              refCode: meta.refCode || sp.slug,
+              price: Number(sp.price),
+              compareAtPrice: meta.compareAtPrice,
+              category: sp.category,
+              gender: sp.gender || 'unisex',
+              badge: meta.badge || '',
+              rating: meta.rating ?? 5.0,
+              reviewCount: meta.reviewCount ?? 12,
+              fit: meta.fit || 'Regular Fit',
+              fabric: meta.fabric || '',
+              composition: meta.composition || '',
+              care: meta.care || '',
+              isNew: sp.is_new ?? false,
+              inStock: sp.in_stock ?? true,
+              description: meta.description || (typeof sp.description === 'string' && !sp.description.startsWith('{') ? sp.description : ''),
+              images: meta.images || [],
+              colors: meta.colors || [],
+              sizes: meta.sizes && meta.sizes.length > 0 ? meta.sizes : ['S', 'M', 'L', 'XL'],
+              features: meta.features || [],
+            };
+          });
+        }
+      } catch (e) {
+        console.warn('[Store Products API] Supabase fetch error:', e);
+      }
+    }
+
     if (gender && gender !== 'all') {
       products = products.filter(p => p.gender === gender || p.gender === 'accessories');
     }
@@ -30,8 +78,8 @@ export async function GET(req: NextRequest) {
         (p.slug && p.slug.toLowerCase().includes(search)) ||
         p.id.toLowerCase() === search ||
         p.name.toLowerCase().includes(search) ||
-        p.description.toLowerCase().includes(search) ||
-        p.category.toLowerCase().includes(search) ||
+        (p.description && p.description.toLowerCase().includes(search)) ||
+        (p.category && p.category.toLowerCase().includes(search)) ||
         (p.refCode && p.refCode.toLowerCase().includes(search))
       );
     }
@@ -67,10 +115,8 @@ export async function POST(req: NextRequest) {
     const existingIndex = db.products.findIndex(p => p.id === product.id);
 
     if (existingIndex >= 0) {
-      // Update existing
       db.products[existingIndex] = { ...db.products[existingIndex], ...product };
     } else {
-      // Create new
       if (!product.id) {
         product.id = 'vtx-' + Date.now().toString(36);
       }
@@ -81,6 +127,51 @@ export async function POST(req: NextRequest) {
     }
 
     writeStoreDb(db);
+
+    if (supabaseServer) {
+      try {
+        const meta = {
+          id: product.id,
+          refCode: product.refCode,
+          description: product.description,
+          compareAtPrice: product.compareAtPrice,
+          badge: product.badge,
+          rating: product.rating,
+          reviewCount: product.reviewCount,
+          fit: product.fit,
+          fabric: product.fabric,
+          composition: product.composition,
+          care: product.care,
+          sizes: product.sizes,
+          colors: product.colors,
+          images: (product as any).images,
+          features: (product as any).features,
+        };
+
+        const { data: existingSupa } = await supabaseServer
+          .from('products')
+          .select('id')
+          .or(`slug.eq."${product.slug}",id.eq."${product.id}"`)
+          .maybeSingle();
+
+        const recordId = existingSupa?.id || product.id;
+
+        await supabaseServer.from('products').upsert({
+          id: recordId,
+          slug: product.slug,
+          name: product.name,
+          price: Number(product.price) || 0,
+          category: product.category || 'koynek',
+          gender: product.gender || 'unisex',
+          is_new: (product as any).isNew ?? false,
+          in_stock: product.inStock ?? true,
+          description: JSON.stringify(meta),
+        });
+      } catch (e) {
+        console.warn('[Products API] Supabase upsert error:', e);
+      }
+    }
+
     return NextResponse.json({ success: true, product });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -105,6 +196,15 @@ export async function DELETE(req: NextRequest) {
     }
 
     writeStoreDb(db);
+
+    if (supabaseServer) {
+      try {
+        await supabaseServer.from('products').delete().or(`id.eq."${id}",slug.eq."${id}"`);
+      } catch (e) {
+        console.warn('[Products API] Supabase delete error:', e);
+      }
+    }
+
     return NextResponse.json({ success: true, message: 'Məhsul silindi.' });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

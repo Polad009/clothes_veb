@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Lock, Mail, User as UserIcon, AlertCircle, ArrowRight, Check } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { GooglePayLogo } from "@/components/PaymentLogos";
+import { useLanguage } from "@/context/LanguageContext";
 
 export function AuthModal() {
   const {
@@ -14,6 +14,7 @@ export function AuthModal() {
     signInWithEmail,
     signUpWithEmail,
   } = useAuth();
+  const { t } = useLanguage();
 
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
@@ -39,7 +40,7 @@ export function AuthModal() {
         }
       } else {
         if (!fullName.trim()) {
-          setErrorMsg("Zəhmət olmasa ad və soyadınızı daxil edin.");
+          setErrorMsg(t.checkout.fullName);
           setIsSubmitting(false);
           return;
         }
@@ -47,13 +48,13 @@ export function AuthModal() {
         if (res.error) {
           setErrorMsg(res.error);
         } else {
-          setSuccessMsg("Qeydiyyatınız uğurla tamamlandı! İndi şifrənizi daxil edərək hesabınıza daxil olun.");
+          setSuccessMsg(t.auth.registrationSuccess || "Qeydiyyat tamamlandı! İndi daxil olun.");
           setPassword("");
           setMode("signin");
         }
       }
     } catch (err: any) {
-      setErrorMsg(err.message || "Xəta baş verdi");
+      setErrorMsg(err.message || "Error");
     } finally {
       setIsSubmitting(false);
     }
@@ -72,7 +73,7 @@ export function AuthModal() {
           type="button"
           onClick={closeAuthModal}
           className="absolute top-5 right-5 p-2 rounded-full text-stone-400 hover:text-stone-900 hover:bg-stone-100 transition cursor-pointer"
-          aria-label="Bağla"
+          aria-label="Close"
         >
           <X size={18} />
         </button>
@@ -81,15 +82,15 @@ export function AuthModal() {
         <div className="text-center space-y-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-100 text-stone-700 text-[10px] font-bold uppercase tracking-wider">
             <Lock size={12} />
-            <span>Təhlükəsiz Müştəri Hesabı</span>
+            <span>HORVVALLE SECURE AUTH</span>
           </div>
           <h2 className="font-eb-garamond text-2xl sm:text-3xl font-normal text-stone-900">
-            {mode === "signin" ? "Hesabınıza daxil olun" : "HORVVALLE-də qeydiyyat"}
+            {mode === "signin" ? t.auth.signIn : t.auth.signUp}
           </h2>
           <p className="text-xs text-stone-500 max-w-xs mx-auto">
             {mode === "signin"
-              ? "Sifarişlərinizi canlı izləyin, ünvanlarınızı yadda saxlayın və fərdi endirimlərdən yararlanın."
-              : "Yeni kolleksiyalar və eksklüziv endirimlər birbaşa e-poçtunuza göndəriləcək."}
+              ? t.checkout.loginPrompt
+              : t.auth.signUp}
           </p>
         </div>
 
@@ -117,14 +118,14 @@ export function AuthModal() {
               d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
             />
           </svg>
-          <span>Google ilə 1-Kliklə Davam Et</span>
+          <span>{t.auth.signInWithGoogle}</span>
         </button>
 
         {/* Divider */}
         <div className="flex items-center gap-3">
           <div className="h-px bg-stone-200 flex-1" />
           <span className="text-[10px] uppercase font-bold text-stone-400 tracking-wider">
-            VƏ YA E-POÇT İLƏ
+            {t.account.status || "EMAIL"}
           </span>
           <div className="h-px bg-stone-200 flex-1" />
         </div>
@@ -160,14 +161,14 @@ export function AuthModal() {
           {mode === "signup" && (
             <div className="space-y-1">
               <label className="text-[11px] font-semibold text-stone-700 uppercase">
-                Ad və Soyad
+                {t.auth.fullName}
               </label>
               <div className="relative">
                 <UserIcon size={14} className="absolute left-3.5 top-3 text-stone-400" />
                 <input
                   type="text"
                   required
-                  placeholder="Məs: Əli Məmmədov"
+                  placeholder="John Doe"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   className="w-full bg-stone-50 border border-stone-200 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-stone-900 focus:bg-white focus:outline-none focus:border-stone-900 transition"
@@ -178,14 +179,14 @@ export function AuthModal() {
 
           <div className="space-y-1">
             <label className="text-[11px] font-semibold text-stone-700 uppercase">
-              E-poçt Ünvanı
+              {t.auth.email}
             </label>
             <div className="relative">
               <Mail size={14} className="absolute left-3.5 top-3 text-stone-400" />
               <input
                 type="email"
                 required
-                placeholder="adiniz@example.com"
+                placeholder="email@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-stone-50 border border-stone-200 rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-stone-900 focus:bg-white focus:outline-none focus:border-stone-900 transition"
@@ -196,7 +197,7 @@ export function AuthModal() {
           <div className="space-y-1">
             <div className="flex items-center justify-between">
               <label className="text-[11px] font-semibold text-stone-700 uppercase">
-                Şifrə
+                {t.auth.password}
               </label>
             </div>
             <div className="relative">
@@ -219,10 +220,10 @@ export function AuthModal() {
             className="w-full py-3.5 rounded-full bg-stone-900 hover:bg-black text-white font-bold text-xs uppercase tracking-wider transition flex items-center justify-center gap-2 shadow-sm cursor-pointer disabled:opacity-50 active:scale-98"
           >
             {isSubmitting ? (
-              <span>Yoxlanılır...</span>
+              <span>...</span>
             ) : (
               <>
-                <span>{mode === "signin" ? "Daxil Ol" : "Qeydiyyatdan Keç"}</span>
+                <span>{mode === "signin" ? t.auth.signIn : t.auth.signUp}</span>
                 <ArrowRight size={14} />
               </>
             )}
@@ -233,7 +234,6 @@ export function AuthModal() {
         <div className="text-center pt-2">
           {mode === "signin" ? (
             <p className="text-xs text-stone-500">
-              Hesabınız yoxdur?{" "}
               <button
                 type="button"
                 onClick={() => {
@@ -242,12 +242,11 @@ export function AuthModal() {
                 }}
                 className="font-bold text-stone-900 underline hover:text-black cursor-pointer"
               >
-                Qeydiyyatdan keçin
+                {t.auth.dontHaveAccount}
               </button>
             </p>
           ) : (
             <p className="text-xs text-stone-500">
-              Artıq hesabınız var?{" "}
               <button
                 type="button"
                 onClick={() => {
@@ -256,7 +255,7 @@ export function AuthModal() {
                 }}
                 className="font-bold text-stone-900 underline hover:text-black cursor-pointer"
               >
-                Daxil olun
+                {t.auth.alreadyHaveAccount}
               </button>
             </p>
           )}
@@ -265,4 +264,3 @@ export function AuthModal() {
     </div>
   );
 }
-

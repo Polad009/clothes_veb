@@ -72,6 +72,48 @@ async function getEnrichedStoreData() {
         }
       }
     }
+
+    // 3. Fetch live products from Supabase
+    const { data: supaProducts } = await supabaseServer
+      .from('products')
+      .select('*')
+      .order('created_at', { ascending: true });
+
+    if (supaProducts && supaProducts.length > 0) {
+      db.products = supaProducts.map((sp: any) => {
+        let meta: any = {};
+        try {
+          if (typeof sp.description === 'string' && sp.description.startsWith('{')) {
+            meta = JSON.parse(sp.description);
+          }
+        } catch (e) {}
+
+        return {
+          id: meta.id || sp.id,
+          slug: sp.slug,
+          name: sp.name,
+          refCode: meta.refCode || sp.slug,
+          price: Number(sp.price),
+          compareAtPrice: meta.compareAtPrice,
+          category: sp.category,
+          gender: sp.gender || 'unisex',
+          badge: meta.badge || '',
+          rating: meta.rating ?? 5.0,
+          reviewCount: meta.reviewCount ?? 12,
+          fit: meta.fit || 'Regular Fit',
+          fabric: meta.fabric || '',
+          composition: meta.composition || '',
+          care: meta.care || '',
+          isNew: sp.is_new ?? false,
+          inStock: sp.in_stock ?? true,
+          description: meta.description || (typeof sp.description === 'string' && !sp.description.startsWith('{') ? sp.description : ''),
+          images: meta.images || [],
+          colors: meta.colors || [],
+          sizes: meta.sizes && meta.sizes.length > 0 ? meta.sizes : ['S', 'M', 'L', 'XL'],
+          features: meta.features || [],
+        };
+      });
+    }
   } catch (err) {
     console.warn('[AdminAPI] Enriched data sync warning:', err);
   }
@@ -211,6 +253,53 @@ export async function POST(
       }
 
       writeStoreDb(db);
+
+      // Persist directly into Supabase products table
+      if (supabaseServer) {
+        try {
+          const meta = {
+            id: product.id,
+            refCode: product.refCode,
+            description: product.description,
+            compareAtPrice: product.compareAtPrice,
+            badge: product.badge,
+            rating: product.rating,
+            reviewCount: product.reviewCount,
+            fit: product.fit,
+            fabric: product.fabric,
+            composition: product.composition,
+            care: product.care,
+            sizes: product.sizes,
+            colors: product.colors,
+            images: product.images,
+            features: product.features,
+          };
+
+          // Find if product exists in Supabase by slug or id
+          const { data: existingSupa } = await supabaseServer
+            .from('products')
+            .select('id')
+            .or(`slug.eq."${product.slug}",id.eq."${product.id}"`)
+            .maybeSingle();
+
+          const recordId = existingSupa?.id || product.id;
+
+          await supabaseServer.from('products').upsert({
+            id: recordId,
+            slug: product.slug,
+            name: product.name,
+            price: Number(product.price) || 0,
+            category: product.category || 'koynek',
+            gender: product.gender || 'unisex',
+            is_new: product.isNew ?? false,
+            in_stock: product.inStock ?? true,
+            description: JSON.stringify(meta),
+          });
+        } catch (e) {
+          console.warn('[AdminAPI] Supabase product upsert error:', e);
+        }
+      }
+
       return NextResponse.json({ success: true, product });
     }
 
@@ -415,6 +504,15 @@ export async function DELETE(
     if (route === 'products' && id) {
       db.products = db.products.filter((p: any) => p.id !== id);
       writeStoreDb(db);
+
+      if (supabaseServer) {
+        try {
+          await supabaseServer.from('products').delete().or(`id.eq."${id}",slug.eq."${id}"`);
+        } catch (e) {
+          console.warn('[AdminAPI] Supabase product delete error:', e);
+        }
+      }
+
       return NextResponse.json({ success: true });
     }
 

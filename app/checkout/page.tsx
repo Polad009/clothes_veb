@@ -24,11 +24,13 @@ import {
 } from "@/components/PaymentLogos";
 import { playPurchaseSuccessSound } from "@/lib/soundEffects";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, totalPrice, clearCart } = useCart();
   const { formatPrice, currency } = useCurrency();
+  const { t, language } = useLanguage();
   const { user, profile, isLoading: isAuthLoading, openAuthModal } = useAuth();
 
   // Form State
@@ -398,11 +400,11 @@ export default function CheckoutPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-stone-500 mb-8">
-          <Link href="/" className="hover:text-stone-900 transition">Ana Səhifə</Link>
+          <Link href="/" className="hover:text-stone-900 transition">{t.nav.home}</Link>
           <ChevronRight size={14} className="text-stone-400" />
-          <Link href="/collections" className="hover:text-stone-900 transition">Kolleksiya</Link>
+          <Link href="/collections" className="hover:text-stone-900 transition">{t.nav.collections}</Link>
           <ChevronRight size={14} className="text-stone-400" />
-          <span className="text-stone-900 font-medium">Təhlükəsiz Ödəniş</span>
+          <span className="text-stone-900 font-medium">{t.checkout.title}</span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
@@ -411,7 +413,7 @@ export default function CheckoutPage() {
             {/* Express 1-Click Payment Row */}
             <div className="bg-white border border-stone-200/90 rounded-3xl p-6 space-y-4 shadow-xs">
               <span className="text-xs font-semibold uppercase tracking-wider text-stone-600 block text-center">
-                SÜRƏTLİ BİR-KLİKLƏ ÖDƏNİŞ
+                {t.checkout.paymentMethod}
               </span>
 
               <div className="grid grid-cols-2 gap-3">
@@ -526,10 +528,10 @@ export default function CheckoutPage() {
                   </div>
                   <div className="space-y-1">
                     <h3 className="font-eb-garamond text-xl font-normal text-stone-900">
-                      Sifariş üçün Giriş və ya Qeydiyyat Tələb Olunur
+                      {t.checkout.loginRequired}
                     </h3>
                     <p className="text-xs text-stone-600 leading-relaxed">
-                      HORVVALLE atelyesi hər bir sifariş üçün xüsusi <strong>Fərdi İzləmə Kodu</strong> təyin edir və bu kod yalnız qeydiyyatlı profilinizdə saxlanılır. Məhsul almaq və sifarişinizi canlı izləmək üçün daxil olun.
+                      {t.checkout.loginPrompt}
                     </p>
                   </div>
                 </div>
@@ -539,7 +541,7 @@ export default function CheckoutPage() {
                     onClick={openAuthModal}
                     className="w-full sm:w-auto py-3 px-6 rounded-full bg-stone-900 hover:bg-black text-white text-xs font-bold uppercase tracking-wider transition shadow-sm cursor-pointer"
                   >
-                    Daxil Ol / Qeydiyyatdan Keç
+                    {t.auth.signIn} / {t.auth.signUp}
                   </button>
                 </div>
               </div>
@@ -553,14 +555,11 @@ export default function CheckoutPage() {
                     <div className="text-xs font-bold text-stone-900 flex items-center gap-2">
                       <span>{profile?.full_name || user.email}</span>
                       <span className="text-[9px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-200">
-                        Təsdiqlənmiş Hesab
+                        VIP
                       </span>
                     </div>
                     <div className="text-[11px] text-stone-500 font-mono">{user.email}</div>
                   </div>
-                </div>
-                <div className="text-[11px] text-emerald-700 font-medium hidden sm:block">
-                  ✓ İzləmə kodu birbaşa bu profilinizə bağlanacaq
                 </div>
               </div>
             )}
@@ -570,7 +569,7 @@ export default function CheckoutPage() {
               <div className="bg-white border border-stone-200/90 rounded-3xl p-6 space-y-4 shadow-xs">
                 <h3 className="font-eb-garamond text-xl font-normal text-stone-900 flex items-center gap-2">
                   <Truck size={18} className="text-stone-700" />
-                  <span>1. Çatdırılma Məlumatları</span>
+                  <span>1. {t.checkout.contactInfo}</span>
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -580,7 +579,7 @@ export default function CheckoutPage() {
                     className="space-y-1.5"
                   >
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-semibold text-stone-700 uppercase">Ad və Soyad *</label>
+                      <label className="text-xs font-semibold text-stone-700 uppercase">{t.checkout.fullName} *</label>
                       {fieldErrors.fullName && (
                         <span className="text-[10px] text-rose-500 font-medium">Mütləq sahə</span>
                       )}
@@ -588,7 +587,7 @@ export default function CheckoutPage() {
                     <input
                       id="field-fullName"
                       type="text"
-                      placeholder="Məs: Rəşad Əliyev"
+                      placeholder="John Doe"
                       value={fullName}
                       onChange={(e) => handleFieldChange("fullName", e.target.value, setFullName)}
                       className={`w-full rounded-xl px-3.5 py-2.5 text-xs text-stone-900 placeholder-stone-400 transition-all duration-200 focus:outline-none ${
@@ -620,7 +619,7 @@ export default function CheckoutPage() {
                     className="space-y-1.5"
                   >
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-semibold text-stone-700 uppercase">Əlaqə Nömrəsi *</label>
+                      <label className="text-xs font-semibold text-stone-700 uppercase">{t.checkout.phone} *</label>
                       {fieldErrors.phone && (
                         <span className="text-[10px] text-rose-500 font-medium">Mütləq sahə</span>
                       )}
@@ -662,9 +661,9 @@ export default function CheckoutPage() {
                     className="space-y-1.5"
                   >
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-semibold text-stone-700 uppercase">E-poçt (Qəbz və İzləmə üçün) *</label>
+                      <label className="text-xs font-semibold text-stone-700 uppercase">{t.checkout.email} *</label>
                       {user?.email && (
-                        <span className="text-[10px] text-emerald-700 font-bold">Hesabınıza bağlıdır</span>
+                        <span className="text-[10px] text-emerald-700 font-bold">VIP</span>
                       )}
                     </div>
                     <input
@@ -701,9 +700,9 @@ export default function CheckoutPage() {
 
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-semibold text-stone-700 uppercase">Şəhər / Ərazi *</label>
+                      <label className="text-xs font-semibold text-stone-700 uppercase">{t.checkout.city} *</label>
                       <span className="text-[10px] font-semibold text-emerald-700">
-                        {isFreeZone ? "✓ Pulsuz Çatdırılma" : "Bölgə: 5 ₼"}
+                        {isFreeZone ? `✓ ${t.checkout.free}` : "Bölgə: 5 ₼"}
                       </span>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
@@ -719,7 +718,7 @@ export default function CheckoutPage() {
                             : "bg-stone-50 text-stone-700 border-stone-200 hover:border-stone-400"
                         }`}
                       >
-                        Bakı <span className="block text-[9.5px] opacity-80 font-normal">Pulsuz</span>
+                        Bakı <span className="block text-[9.5px] opacity-80 font-normal">{t.checkout.free}</span>
                       </button>
 
                       <button
@@ -734,7 +733,7 @@ export default function CheckoutPage() {
                             : "bg-stone-50 text-stone-700 border-stone-200 hover:border-stone-400"
                         }`}
                       >
-                        Sumqayıt <span className="block text-[9.5px] opacity-80 font-normal">Pulsuz</span>
+                        Sumqayıt <span className="block text-[9.5px] opacity-80 font-normal">{t.checkout.free}</span>
                       </button>
 
                       <button
@@ -748,7 +747,7 @@ export default function CheckoutPage() {
                             : "bg-stone-50 text-stone-700 border-stone-200 hover:border-stone-400"
                         }`}
                       >
-                        Bölgələr <span className="block text-[9.5px] opacity-80 font-normal">Rayonlar</span>
+                        {t.collections.all} <span className="block text-[9.5px] opacity-80 font-normal">Rayonlar</span>
                       </button>
                     </div>
 
@@ -756,7 +755,7 @@ export default function CheckoutPage() {
                       <input
                         id="field-city"
                         type="text"
-                        placeholder="Rayon və ya şəhər qeyd edin (Məs: Gəncə, Şəki)"
+                        placeholder="Rayon və ya şəhər (Gəncə, Şəki)"
                         value={city}
                         onChange={(e) => setCity(e.target.value)}
                         className="w-full mt-2 bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2 text-xs text-stone-900 placeholder-stone-400 focus:outline-none focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900 transition"
@@ -771,7 +770,7 @@ export default function CheckoutPage() {
                   className="space-y-1.5"
                 >
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-stone-700 uppercase">Dəqiq Ünvan (Küçə, Bina, Mənzil) *</label>
+                    <label className="text-xs font-semibold text-stone-700 uppercase">{t.checkout.address} *</label>
                     {fieldErrors.address && (
                       <span className="text-[10px] text-rose-500 font-medium">Mütləq sahə</span>
                     )}
@@ -810,7 +809,7 @@ export default function CheckoutPage() {
               <div className="bg-white border border-stone-200/90 rounded-3xl p-6 space-y-4 shadow-xs">
                 <h3 className="font-eb-garamond text-xl font-normal text-stone-900 flex items-center gap-2">
                   <Lock size={18} className="text-stone-700" />
-                  <span>2. Ödəniş Üsulu</span>
+                  <span>2. {t.checkout.paymentMethod}</span>
                 </h3>
 
                 <div className="space-y-2">
@@ -826,11 +825,11 @@ export default function CheckoutPage() {
                       <CreditCard size={20} className={paymentMethod === "card" ? "text-stone-900" : "text-stone-400"} />
                       <div>
                         <div className="text-xs font-bold text-stone-900 flex items-center gap-2">
-                          <span>Bank Kartı</span>
+                          <span>{t.checkout.creditCard}</span>
                           <VisaLogo className="h-3 w-auto" />
                           <MastercardLogo className="h-3 w-auto" />
                         </div>
-                        <div className="text-[11px] text-stone-500">256-Bit SSL təhlükəsiz şifrələmə</div>
+                        <div className="text-[11px] text-stone-500">{t.checkout.secureCheckout}</div>
                       </div>
                     </div>
                     <span className="w-4 h-4 rounded-full border-2 border-stone-300 flex items-center justify-center">
@@ -971,14 +970,14 @@ export default function CheckoutPage() {
               <button
                 type="submit"
                 disabled={isProcessing}
-                className="w-full py-4 rounded-full bg-stone-900 hover:bg-black text-white font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-md active:scale-98 disabled:opacity-50"
+                className="w-full py-4 rounded-full bg-stone-900 hover:bg-black text-white font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-md active:scale-98 disabled:opacity-50 cursor-pointer"
               >
                 {isProcessing ? (
-                  <span>Ödəniş Təsdiqlənir...</span>
+                  <span>...</span>
                 ) : (
                   <>
                     <Lock size={15} />
-                    <span>Ödənişi Tamamla — {formatPrice(finalTotal)}</span>
+                    <span>{t.checkout.confirmOrder} — {formatPrice(finalTotal)}</span>
                   </>
                 )}
               </button>
@@ -989,7 +988,7 @@ export default function CheckoutPage() {
           <div className="lg:col-span-5 space-y-6">
             <div className="bg-white border border-stone-200/90 rounded-3xl p-6 space-y-4 shadow-xs">
               <h3 className="font-eb-garamond text-xl font-normal text-stone-900 pb-3 border-b border-stone-100">
-                Sifarişin Xülasəsi ({items.length})
+                {t.checkout.orderSummary} ({items.length})
               </h3>
 
               {/* Cart Items list */}
@@ -1006,11 +1005,11 @@ export default function CheckoutPage() {
                     <div className="flex-1 min-w-0">
                       <div className="text-xs font-semibold text-stone-900 truncate">{item.name}</div>
                       <div className="text-[11px] text-stone-500">
-                        {item.size} • {item.color} • {item.quantity} ədəd
+                        {item.size} • {item.color} • {item.quantity} {language === "az" ? "ədəd" : language === "ru" ? "шт." : language === "tr" ? "adet" : "pcs"}
                       </div>
                       {item.type === "custom" && (
                         <span className="text-[9px] font-bold uppercase text-stone-800">
-                          Fərdi Çap
+                          {t.nav.studio}
                         </span>
                       )}
                     </div>
@@ -1026,7 +1025,7 @@ export default function CheckoutPage() {
                 <form onSubmit={applyPromo} className="flex gap-2">
                   <input
                     type="text"
-                    placeholder="Promokod daxil edin"
+                    placeholder={language === "az" ? "Promokod daxil edin" : language === "ru" ? "Введите промокод" : language === "tr" ? "Promosyon kodu" : "Enter promo code"}
                     value={promoCode}
                     disabled={promoApplied || isCheckingPromo}
                     onChange={(e) => {
@@ -1045,9 +1044,9 @@ export default function CheckoutPage() {
                     <button
                       type="button"
                       onClick={removePromo}
-                      className="px-3.5 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold text-xs transition"
+                      className="px-3.5 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold text-xs transition cursor-pointer"
                     >
-                      Ləğv et
+                      {language === "az" ? "Ləğv et" : language === "ru" ? "Отмена" : language === "tr" ? "İptal" : "Cancel"}
                     </button>
                   ) : (
                     <button
@@ -1055,7 +1054,7 @@ export default function CheckoutPage() {
                       disabled={isCheckingPromo}
                       className="px-4 py-2 rounded-xl bg-stone-900 hover:bg-black text-white font-semibold text-xs uppercase transition disabled:opacity-50 cursor-pointer"
                     >
-                      {isCheckingPromo ? "Yoxlanır..." : "Tətbiq Et"}
+                      {isCheckingPromo ? "..." : (language === "az" ? "Tətbiq Et" : language === "ru" ? "Применить" : language === "tr" ? "Uygula" : "Apply")}
                     </button>
                   )}
                 </form>
@@ -1079,23 +1078,23 @@ export default function CheckoutPage() {
               {/* Calculations */}
               <div className="pt-3 border-t border-stone-100 text-xs text-stone-600 space-y-2">
                 <div className="flex justify-between">
-                  <span>Məhsulların cəmi:</span>
+                  <span>{t.checkout.itemsTotal}:</span>
                   <span className="font-bold text-stone-900">{formatPrice(totalPrice)}</span>
                 </div>
                 {discountAmount > 0 && (
                   <div className="flex justify-between text-emerald-700">
                     <span>
-                      Endirim {appliedPromoCode ? `(${appliedPromoCode})` : ""}:
+                      {language === "az" ? "Endirim" : language === "ru" ? "Скидка" : language === "tr" ? "İndirim" : "Discount"} {appliedPromoCode ? `(${appliedPromoCode})` : ""}:
                     </span>
                     <span className="font-bold">-{formatPrice(discountAmount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <span>Çatdırılma:</span>
+                  <span>{t.checkout.delivery}:</span>
                   <span className="font-bold text-stone-900">
                     {shippingCost === 0 ? (
                       <span className="text-emerald-700">
-                        PULSUZ {isFreeZone ? "(Bakı & Sumqayıt)" : ""}
+                        {t.checkout.free} {isFreeZone ? "(Bakı & Sumqayıt)" : ""}
                       </span>
                     ) : (
                       formatPrice(shippingCost)
@@ -1103,7 +1102,7 @@ export default function CheckoutPage() {
                   </span>
                 </div>
                 <div className="flex justify-between text-base font-normal text-stone-900 pt-2 border-t border-stone-100">
-                  <span>Yekun Məbləğ:</span>
+                  <span>{t.checkout.grandTotal}:</span>
                   <span className="font-eb-garamond text-2xl font-normal text-stone-900">{formatPrice(finalTotal)}</span>
                 </div>
               </div>

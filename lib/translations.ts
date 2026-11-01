@@ -3,6 +3,8 @@ export type LanguageCode = "az" | "en" | "ru" | "tr";
 export interface Translations {
   // Navigation
   nav: {
+    home: string;
+    collections: string;
     shirts: string;
     hoodies: string;
     pants: string;
@@ -93,6 +95,70 @@ export interface Translations {
     fourDirectionsTitle: string;
     fourDirectionsDesc: string;
   };
+  // Collections
+  collections: {
+    allModels: string;
+    shirts: string;
+    hoodies: string;
+    pants: string;
+    accessories: string;
+    sortBestselling: string;
+    sortPriceAsc: string;
+    sortPriceDesc: string;
+    sortRating: string;
+    filters: string;
+    resetFilters: string;
+    noProductsFound: string;
+    all: string;
+    fit: string;
+    size: string;
+    filterByFit: string;
+    filterBySize: string;
+  };
+  // Checkout
+  checkout: {
+    title: string;
+    contactInfo: string;
+    fullName: string;
+    phone: string;
+    email: string;
+    city: string;
+    address: string;
+    paymentMethod: string;
+    creditCard: string;
+    confirmOrder: string;
+    loginRequired: string;
+    loginPrompt: string;
+    orderSummary: string;
+    itemsTotal: string;
+    delivery: string;
+    free: string;
+    grandTotal: string;
+    secureCheckout: string;
+  };
+  // Account
+  account: {
+    title: string;
+    logout: string;
+    myOrders: string;
+    noOrders: string;
+    trackOrder: string;
+    status: string;
+    amount: string;
+    date: string;
+  };
+  // Auth
+  auth: {
+    signIn: string;
+    signUp: string;
+    signInWithGoogle: string;
+    fullName: string;
+    email: string;
+    password: string;
+    dontHaveAccount: string;
+    alreadyHaveAccount: string;
+    registrationSuccess: string;
+  };
   // Products & Studio
   studio: {
     liveModelPreview: string;
@@ -150,11 +216,28 @@ export interface Translations {
     securePayment: string;
     easyReturn: string;
   };
+  footer: {
+    fastDelivery: string;
+    fastDeliverySub: string;
+    return14Days: string;
+    return14DaysSub: string;
+    securePayment: string;
+    securePaymentSub: string;
+    naturalMaterials: string;
+    naturalMaterialsSub: string;
+    brandDesc: string;
+    newsletterTitle: string;
+    newsletterPlaceholder: string;
+    joinBtn: string;
+    rights: string;
+  };
 }
 
 export const TRANSLATIONS: Record<LanguageCode, Translations> = {
   az: {
     nav: {
+      home: "Ana Səhifə",
+      collections: "Kolleksiya",
       shirts: "Köynək",
       hoodies: "Hudi",
       pants: "Şalvar",
@@ -241,6 +324,68 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       fourDirectionsTitle: "DÖRD ƏSAS DƏRZİLİK İSTİQAMƏTİ",
       fourDirectionsDesc: "Xalis daranmış sıx pambıq, isti 3iplik fleece və dəqiq kəsimli şalvarlar. İstənilən bölməni seçərək modelləri kəşf edin.",
     },
+    
+    "collections": {
+        "allModels": "Bütün modellər",
+        "shirts": "T-Shirt & köynək",
+        "hoodies": "Hudi & sviter",
+        "pants": "Şalvar & şortik",
+        "accessories": "Aksesuarlar",
+        "sortBestselling": "Ən çox satılanlar",
+        "sortPriceAsc": "Qiymət: Ucuzdan Bahaya",
+        "sortPriceDesc": "Qiymət: Bahadan Ucuza",
+        "sortRating": "Ən yüksək reytinq",
+        "filters": "Filtrlər",
+        "resetFilters": "Filtrləri sıfırla",
+        "noProductsFound": "Seçilmiş parametrlərə uyğun məhsul tapılmadı.",
+        "all": "Hamısı",
+        "fit": "Kəsim / Model",
+        "size": "Ölçü",
+        "filterByFit": "Kəsimə görə filtr",
+        "filterBySize": "Ölçüyə görə filtr"
+    },
+    "checkout": {
+        "title": "Sifarişin Rəsmiləşdirilməsi",
+        "contactInfo": "Əlaqə və Çatdırılma Məlumatları",
+        "fullName": "Ad və Soyad",
+        "phone": "Əlaqə Nömrəsi",
+        "email": "E-poçt Ünvanı",
+        "city": "Şəhər",
+        "address": "Çatdırılma Ünvanı",
+        "paymentMethod": "Ödəniş Metodu",
+        "creditCard": "Bank Kartı",
+        "confirmOrder": "Sifarişi Təsdiqlə",
+        "loginRequired": "Sifariş üçün daxil olun",
+        "loginPrompt": "Zəhmət olmasa sifariş verməzdən əvvəl hesabınıza daxil olun və ya qeydiyyatdan keçin.",
+        "orderSummary": "Sifarişin İcmalı",
+        "itemsTotal": "Məhsulların Cəmi",
+        "delivery": "Çatdırılma",
+        "free": "PULSUZ (Bakı & Sumqayıt)",
+        "grandTotal": "Yekun Məbləğ",
+        "secureCheckout": "256-Bit SSL Təhlükəsiz Ödəniş və 14 Gün Zəmanət"
+    },
+    "account": {
+        "title": "Müştəri Hesabı",
+        "logout": "Çıxış",
+        "myOrders": "Son Sifarişlərim",
+        "noOrders": "Hələ heç bir sifarişiniz yoxdur.",
+        "trackOrder": "Sifarişi İzlə",
+        "status": "Status",
+        "amount": "Məbləğ",
+        "date": "Tarix"
+    },
+    "auth": {
+        "signIn": "Daxil Ol",
+        "signUp": "Qeydiyyat",
+        "signInWithGoogle": "Google ilə Daxil Ol",
+        "fullName": "Ad və Soyad",
+        "email": "E-poçt Ünvanı",
+        "password": "Şifrə",
+        "dontHaveAccount": "Hesabınız yoxdur? Qeydiyyatdan keçin",
+        "alreadyHaveAccount": "Artıq hesabınız var? Daxil olun",
+        "registrationSuccess": "Qeydiyyatınız uğurla tamamlandı! İndi daxil olun."
+    }
+,
     studio: {
       liveModelPreview: "Model Üzərində Canlı Baxış",
       frontView: "Ön Görünüş",
@@ -295,10 +440,27 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       securePayment: "100% Zəmanətli Təhlükəsiz Ödəniş",
       easyReturn: "14 Günlük Asan Qaytarılma",
     },
+    footer: {
+      fastDelivery: "Sürətli Çatdırılma",
+      fastDeliverySub: "Bakı və Sumqayıtda pulsuz",
+      return14Days: "14 Günlük Qaytarılma",
+      return14DaysSub: "Asan və zəmanətli dəyişmə",
+      securePayment: "Təhlükəsiz Ödəniş",
+      securePaymentSub: "Apple Pay, Google Pay, Kart",
+      naturalMaterials: "Təbii Materiallar",
+      naturalMaterialsSub: "100% kətan, pambıq və bambuk",
+      brandDesc: "Lüks geyim və fərdi sənət evi. Yüksək keyfiyyətli premium köynəklər, 3iplik isti hudilər, zərif kəsimli şalvarlar və qabaqcıl 3D fərdi dizayn atelyesi.",
+      newsletterTitle: "YENİ ENDİRİMLƏRƏ İLK SƏN QOŞUL",
+      newsletterPlaceholder: "E-poçt ünvanınızı daxil edin",
+      joinBtn: "Qoşul",
+      rights: "Bütün hüquqlar qorunur.",
+    },
   },
 
   en: {
     nav: {
+      home: "Home",
+      collections: "Collections",
       shirts: "Shirts",
       hoodies: "Hoodies",
       pants: "Pants",
@@ -385,6 +547,68 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       fourDirectionsTitle: "FOUR CORE TAILORING PILLARS",
       fourDirectionsDesc: "Heavyweight combed cotton, plush 3-thread fleece, and precision-tailored trousers. Explore each atelier category.",
     },
+    
+    "collections": {
+        "allModels": "All Garments",
+        "shirts": "T-Shirts & Shirts",
+        "hoodies": "Hoodies & Sweaters",
+        "pants": "Pants & Chinos",
+        "accessories": "Accessories",
+        "sortBestselling": "Bestselling",
+        "sortPriceAsc": "Price: Low to High",
+        "sortPriceDesc": "Price: High to Low",
+        "sortRating": "Highest Rated",
+        "filters": "Filters",
+        "resetFilters": "Reset Filters",
+        "noProductsFound": "No products found matching your filters.",
+        "all": "All",
+        "fit": "Fit / Silhouette",
+        "size": "Size",
+        "filterByFit": "Filter by Fit",
+        "filterBySize": "Filter by Size"
+    },
+    "checkout": {
+        "title": "Checkout & Delivery",
+        "contactInfo": "Contact & Shipping Information",
+        "fullName": "Full Name",
+        "phone": "Phone Number",
+        "email": "Email Address",
+        "city": "City",
+        "address": "Shipping Address",
+        "paymentMethod": "Payment Method",
+        "creditCard": "Credit / Debit Card",
+        "confirmOrder": "Complete Order",
+        "loginRequired": "Account Required",
+        "loginPrompt": "Please sign in or create an account to proceed with your order.",
+        "orderSummary": "Order Summary",
+        "itemsTotal": "Subtotal",
+        "delivery": "Shipping",
+        "free": "FREE EXPRESS",
+        "grandTotal": "Grand Total",
+        "secureCheckout": "256-Bit SSL Encrypted Checkout & 14-Day Guarantee"
+    },
+    "account": {
+        "title": "Customer Account",
+        "logout": "Sign Out",
+        "myOrders": "Recent Orders",
+        "noOrders": "You have no orders yet.",
+        "trackOrder": "Track Order",
+        "status": "Status",
+        "amount": "Amount",
+        "date": "Date"
+    },
+    "auth": {
+        "signIn": "Sign In",
+        "signUp": "Create Account",
+        "signInWithGoogle": "Continue with Google",
+        "fullName": "Full Name",
+        "email": "Email Address",
+        "password": "Password",
+        "dontHaveAccount": "Don't have an account? Sign up",
+        "alreadyHaveAccount": "Already have an account? Sign in",
+        "registrationSuccess": "Registration successful! Please sign in."
+    }
+,
     studio: {
       liveModelPreview: "Live Model Simulation",
       frontView: "Front View",
@@ -439,10 +663,27 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       securePayment: "100% Guaranteed Secure Checkout",
       easyReturn: "14-Day Free and Easy Returns",
     },
+    footer: {
+      fastDelivery: "Fast Delivery",
+      fastDeliverySub: "Free in Baku & Sumgait",
+      return14Days: "14-Day Returns",
+      return14DaysSub: "Easy & guaranteed exchange",
+      securePayment: "Secure Payment",
+      securePaymentSub: "Apple Pay, Google Pay, Cards",
+      naturalMaterials: "Natural Materials",
+      naturalMaterialsSub: "100% linen, combed cotton & bamboo",
+      brandDesc: "Luxury apparel & bespoke studio. Premium tees, 3-thread heavyweight fleece hoodies, tailored trousers and 3D custom print atelier.",
+      newsletterTitle: "BE THE FIRST TO ACCESS NEW DROPS",
+      newsletterPlaceholder: "Enter your email address",
+      joinBtn: "Join",
+      rights: "All rights reserved.",
+    },
   },
 
   ru: {
     nav: {
+      home: "Главная",
+      collections: "Коллекция",
       shirts: "Рубашки",
       hoodies: "Худи",
       pants: "Брюки",
@@ -529,6 +770,68 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       fourDirectionsTitle: "ЧЕТЫРЕ ГЛАВНЫХ НАПРАВЛЕНИЯ",
       fourDirectionsDesc: "Плотный гребенной хлопок, теплый 3-х ниточный флис и точный крой брюк.",
     },
+    
+    "collections": {
+        "allModels": "Все модели",
+        "shirts": "Футболки и рубашки",
+        "hoodies": "Худи и свитшоты",
+        "pants": "Брюки и шорты",
+        "accessories": "Аксессуары",
+        "sortBestselling": "Хиты продаж",
+        "sortPriceAsc": "Цена: от низкой к высокой",
+        "sortPriceDesc": "Цена: от высокой к низкой",
+        "sortRating": "По рейтингу",
+        "filters": "Фильтры",
+        "resetFilters": "Сбросить фильтры",
+        "noProductsFound": "Товаров по выбранным фильтрам не найдено.",
+        "all": "Все",
+        "fit": "Покрой / Силуэт",
+        "size": "Размер",
+        "filterByFit": "Фильтр по крою",
+        "filterBySize": "Фильтр по размеру"
+    },
+    "checkout": {
+        "title": "Оформление Заказа",
+        "contactInfo": "Контактные данные и адрес",
+        "fullName": "Имя и Фамилия",
+        "phone": "Номер телефона",
+        "email": "Email адрес",
+        "city": "Город",
+        "address": "Адрес доставки",
+        "paymentMethod": "Способ оплаты",
+        "creditCard": "Банковская карта",
+        "confirmOrder": "Подтвердить заказ",
+        "loginRequired": "Требуется авторизация",
+        "loginPrompt": "Пожалуйста, войдите в аккаунт или зарегистрируйтесь для оформления заказа.",
+        "orderSummary": "Детали заказа",
+        "itemsTotal": "Стоимость товаров",
+        "delivery": "Доставка",
+        "free": "БЕСПЛАТНО",
+        "grandTotal": "Итого к оплате",
+        "secureCheckout": "256-Bit SSL Защита платежей и 14 дней гарантия"
+    },
+    "account": {
+        "title": "Личный Кабинет",
+        "logout": "Выйти",
+        "myOrders": "Мои Заказы",
+        "noOrders": "У вас пока нет заказов.",
+        "trackOrder": "Отследить",
+        "status": "Статус",
+        "amount": "Сумма",
+        "date": "Дата"
+    },
+    "auth": {
+        "signIn": "Войти",
+        "signUp": "Регистрация",
+        "signInWithGoogle": "Войти через Google",
+        "fullName": "Имя и Фамилия",
+        "email": "Электронная почта",
+        "password": "Пароль",
+        "dontHaveAccount": "Нет аккаунта? Зарегистрируйтесь",
+        "alreadyHaveAccount": "Уже есть аккаунт? Войдите",
+        "registrationSuccess": "Регистрация прошла успешно! Теперь войдите в аккаунт."
+    }
+,
     studio: {
       liveModelPreview: "Живая Примерка на Модели",
       frontView: "Вид Спереди",
@@ -583,10 +886,27 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       securePayment: "100% Безопасная Оплата",
       easyReturn: "Легкий возврат в течение 14 дней",
     },
+    footer: {
+      fastDelivery: "Быстрая Доставка",
+      fastDeliverySub: "Бесплатно в Баку и Сумгаите",
+      return14Days: "Возврат 14 Дней",
+      return14DaysSub: "Легкий обмен с гарантией",
+      securePayment: "Безопасная Оплата",
+      securePaymentSub: "Apple Pay, Google Pay, Карты",
+      naturalMaterials: "Натуральные Ткани",
+      naturalMaterialsSub: "100% лен, гребенной хлопок и бамбук",
+      brandDesc: "Дом люксовой одежды и индивидуального пошива. Премиальные футболки, теплые худи из 3-нитки и передовое 3D ателье.",
+      newsletterTitle: "УЗНАВАЙТЕ О НОВЫХ РЕЛИЗАХ ПЕРВЫМИ",
+      newsletterPlaceholder: "Введите адрес эл. почты",
+      joinBtn: "Подписаться",
+      rights: "Все права защищены.",
+    },
   },
 
   tr: {
     nav: {
+      home: "Ana Sayfa",
+      collections: "Koleksiyon",
       shirts: "Gömlek",
       hoodies: "Hudi",
       pants: "Pantolon",
@@ -673,6 +993,68 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       fourDirectionsTitle: "DÖRT TEMEL TERZİ ALANI",
       fourDirectionsDesc: "Yoğun penye pamuk, sıcak 3iplik polar ve kusursuz kesimli pantolonlar.",
     },
+    
+    "collections": {
+        "allModels": "Tüm modeller",
+        "shirts": "T-Shirt & gömlek",
+        "hoodies": "Hudi & sweatshirt",
+        "pants": "Pantolon & şort",
+        "accessories": "Aksesuarlar",
+        "sortBestselling": "Çok Satanlar",
+        "sortPriceAsc": "Fiyat: Düşükten Yükseğe",
+        "sortPriceDesc": "Fiyat: Yüksekten Düşüğe",
+        "sortRating": "En Yüksek Puan",
+        "filters": "Filtreler",
+        "resetFilters": "Filtreleri Sıfırla",
+        "noProductsFound": "Seçilen filtrelere uygun ürün bulunamadı.",
+        "all": "Tümü",
+        "fit": "Kalıp / Kesim",
+        "size": "Beden",
+        "filterByFit": "Kalıba göre filtrele",
+        "filterBySize": "Bedene göre filtrele"
+    },
+    "checkout": {
+        "title": "Siparişi Tamamla",
+        "contactInfo": "İletişim ve Teslimat Bilgileri",
+        "fullName": "Ad Soyad",
+        "phone": "Telefon Numarası",
+        "email": "E-posta Adresi",
+        "city": "Şehir",
+        "address": "Teslimat Adresi",
+        "paymentMethod": "Ödeme Yöntemi",
+        "creditCard": "Kredi / Banka Kartı",
+        "confirmOrder": "Siparişi Onayla",
+        "loginRequired": "Giriş Yapılması Gerekir",
+        "loginPrompt": "Siparişinizi tamamlamak için lütfen giriş yapın veya kayıt olun.",
+        "orderSummary": "Sipariş Özeti",
+        "itemsTotal": "Ara Toplam",
+        "delivery": "Kargo",
+        "free": "ÜCRETSİZ",
+        "grandTotal": "Toplam Tutar",
+        "secureCheckout": "256-Bit SSL Güvenli Ödeme ve 14 Gün İade Garantisi"
+    },
+    "account": {
+        "title": "Müşteri Hesabı",
+        "logout": "Çıkış Yap",
+        "myOrders": "Son Siparişlerim",
+        "noOrders": "Henüz bir siparişiniz bulunmuyor.",
+        "trackOrder": "Siparişi Takip Et",
+        "status": "Durum",
+        "amount": "Tutar",
+        "date": "Tarih"
+    },
+    "auth": {
+        "signIn": "Giriş Yap",
+        "signUp": "Kayıt Ol",
+        "signInWithGoogle": "Google ile Devam Et",
+        "fullName": "Ad Soyad",
+        "email": "E-posta Adresi",
+        "password": "Şifre",
+        "dontHaveAccount": "Hesabınız yok mu? Kaydolun",
+        "alreadyHaveAccount": "Zaten hesabınız var mı? Giriş yapın",
+        "registrationSuccess": "Kaydınız başarıyla tamamlandı! Giriş yapabilirsiniz."
+    }
+,
     studio: {
       liveModelPreview: "Model Üzerinde Canlı Önizleme",
       frontView: "Ön Görünüm",
@@ -726,6 +1108,21 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       freeShipping: "Bakü ve Sumgayıt Ücretsiz Teslimat",
       securePayment: "100% Güvenli Ödeme",
       easyReturn: "14 Gün Kolay İade",
+    },
+    footer: {
+      fastDelivery: "Hızlı Teslimat",
+      fastDeliverySub: "Bakü ve Sumgayıt'ta ücretsiz",
+      return14Days: "14 Gün İade",
+      return14DaysSub: "Kolay ve garantili değişim",
+      securePayment: "Güvenli Ödeme",
+      securePaymentSub: "Apple Pay, Google Pay, Kartlar",
+      naturalMaterials: "Doğal Malzemeler",
+      naturalMaterialsSub: "%100 keten, penye pamuk ve bambu",
+      brandDesc: "Lüks giyim ve kişiye özel tasarım evi. Premium tişörtler, 3 iplik sıcak hoodieler ve ileri 3D özel baskı atölyesi.",
+      newsletterTitle: "YENİ İNDİRİMLERDEN İLK SEN HABERDAR OL",
+      newsletterPlaceholder: "E-posta adresinizi girin",
+      joinBtn: "Katıl",
+      rights: "Tüm hakları saklıdır.",
     },
   },
 };
