@@ -17,6 +17,8 @@
   "dependencies": {
     "@react-three/drei": "^9.106.0",
     "@react-three/fiber": "^8.16.8",
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.118.0",
     "@types/three": "^0.186.0",
     "clsx": "^2.1.1",
     "compression": "^1.8.2",

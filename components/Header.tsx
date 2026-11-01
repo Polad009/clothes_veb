@@ -12,7 +12,9 @@ import {
   X,
   Box,
   ChevronRight,
+  User,
 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { HeaderQuickSearch } from "@/components/HeaderQuickSearch";
@@ -34,6 +36,7 @@ export function Header({ className = "" }: HeaderProps) {
 
   const { totalCount, openCart } = useCart();
   const { formatPrice } = useCurrency();
+  const { user, profile, openAuthModal } = useAuth();
   const { products } = useStoreData();
   const { t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -263,6 +266,38 @@ export function Header({ className = "" }: HeaderProps) {
                 buttonClassName="h-9 sm:h-10 xl:h-11 px-2.5 sm:px-3 xl:px-3.5 text-xs xl:text-sm"
               />
             </div>
+
+            {/* User Account / Login Button */}
+            {user ? (
+              <Link
+                href="/account"
+                className={`h-9 sm:h-10 xl:h-11 px-2.5 sm:px-3 rounded-full border transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 shrink-0 ${
+                  isLightMode
+                    ? "bg-white text-stone-900 border-stone-200 hover:bg-stone-50"
+                    : "bg-white/10 text-white border-white/20 hover:bg-white/20"
+                }`}
+                title="Hesabım"
+              >
+                <User size={15} className="text-[#B08D57]" />
+                <span className="hidden md:inline text-xs font-semibold max-w-[80px] truncate">
+                  {profile?.full_name?.split(" ")[0] || user.email?.split("@")[0] || "Hesabım"}
+                </span>
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={openAuthModal}
+                className={`h-9 sm:h-10 xl:h-11 px-2.5 sm:px-3.5 rounded-full border transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 shrink-0 ${
+                  isLightMode
+                    ? "bg-white text-stone-900 border-stone-200 hover:bg-stone-50"
+                    : "bg-white/10 text-white border-white/20 hover:bg-white/20"
+                }`}
+                aria-label="Daxil ol"
+              >
+                <User size={15} />
+                <span className="hidden md:inline text-xs font-semibold">Daxil ol</span>
+              </button>
+            )}
 
             {/* Cart Button */}
             <button
@@ -534,6 +569,40 @@ export function Header({ className = "" }: HeaderProps) {
                     </motion.div>
                   </motion.div>
                 </div>
+              </div>
+
+              {/* Mobile Account item */}
+              <div className="px-4 py-3 border-t border-[#E8E2D8] bg-white">
+                {user ? (
+                  <Link
+                    href="/account"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center justify-between p-3 rounded-2xl bg-[#FAF7F2] border border-[#E5DFD5] text-xs font-semibold text-stone-900"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-full bg-stone-900 text-white flex items-center justify-center font-bold text-xs">
+                        {(profile?.full_name || user.email || "H")[0].toUpperCase()}
+                      </div>
+                      <div>
+                        <div>{profile?.full_name || "Müştəri Hesabı"}</div>
+                        <div className="text-[10px] text-stone-500 truncate max-w-[170px]">{user.email}</div>
+                      </div>
+                    </div>
+                    <ChevronRight size={16} className="text-stone-400" />
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      openAuthModal();
+                    }}
+                    className="w-full py-3 rounded-full bg-stone-900 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer active:scale-98 transition"
+                  >
+                    <User size={14} />
+                    <span>Daxil Ol / Qeydiyyat</span>
+                  </button>
+                )}
               </div>
 
               {/* Bottom: Locale Dropdown */}

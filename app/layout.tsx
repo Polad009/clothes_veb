@@ -7,6 +7,7 @@ import { CartProvider } from "@/context/CartContext";
 import { CurrencyProvider } from "@/context/CurrencyContext";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { StoreDataProvider } from "@/context/StoreDataContext";
+import { AuthProvider } from "@/context/AuthContext";
 import dynamic from "next/dynamic";
 import { PageTransition } from "@/components/PageTransition";
 import { Intro } from "@/components/Intro";
@@ -114,9 +115,11 @@ export default function RootLayout({
           <CurrencyProvider>
             <CartProvider>
               <StoreDataProvider>
-                <StoreShell>
-                  {children}
-                </StoreShell>
+                <AuthProvider>
+                  <StoreShell>
+                    {children}
+                  </StoreShell>
+                </AuthProvider>
               </StoreDataProvider>
             </CartProvider>
           </CurrencyProvider>
