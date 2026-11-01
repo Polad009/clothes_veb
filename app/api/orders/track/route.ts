@@ -9,6 +9,38 @@ function normalizePhone(phone: string): string {
   return (phone || "").replace(/[^0-9]/g, "");
 }
 
+// SECURITY: Mask PII (Personally Identifiable Information) in public order tracking
+function maskName(name: string): string {
+  if (!name || name === "Müştəri" || name === "-") return "Müştəri";
+  const parts = name.trim().split(/\s+/);
+  return parts.map((p) => (p.length > 1 ? p[0] + "***" : p)).join(" ");
+}
+
+function maskPhone(phone: string): string {
+  if (!phone || phone === "-") return "-";
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length >= 7) {
+    return "+994 " + digits.slice(-9, -7) + " *** ** " + digits.slice(-2);
+  }
+  return "***";
+}
+
+function maskEmail(email: string): string {
+  if (!email || !email.includes("@")) return "-";
+  const [user, domain] = email.split("@");
+  if (user.length <= 2) return user[0] + "***@" + domain;
+  return user.slice(0, 2) + "***@" + domain;
+}
+
+function maskAddress(addr: string): string {
+  if (!addr || addr === "-") return "-";
+  const parts = addr.split(",");
+  if (parts.length > 1) {
+    return parts[0].trim() + ", ***";
+  }
+  return addr.slice(0, Math.min(6, addr.length)) + " ***";
+}
+
 // Map textual order status to numerical stepper index (1 to 5)
 function getStepIndex(status: string): { step: number; isCancelled: boolean; label: string; color: string } {
   const s = (status || "").toLowerCase();
@@ -202,11 +234,11 @@ export async function GET(req: NextRequest) {
           id: matchedOrder.id,
           date: matchedOrder.date,
           customer: {
-            fullName: matchedOrder.customer?.fullName || (matchedOrder.customer as any)?.name || "Müştəri",
-            phone: matchedOrder.customer?.phone || "-",
-            email: matchedOrder.customer?.email || "-",
+            fullName: maskName(matchedOrder.customer?.fullName || (matchedOrder.customer as any)?.name || "Müştəri"),
+            phone: maskPhone(matchedOrder.customer?.phone || "-"),
+            email: maskEmail(matchedOrder.customer?.email || "-"),
             city: matchedOrder.customer?.city || "Bakı",
-            address: matchedOrder.customer?.address || "-",
+            address: maskAddress(matchedOrder.customer?.address || "-"),
           },
           items: matchedOrder.items || [],
           paymentMethod: matchedOrder.paymentMethod || "card",
@@ -241,9 +273,9 @@ export async function GET(req: NextRequest) {
           id: matchedPod.id,
           date: matchedPod.createdAt,
           customer: {
-            fullName: matchedPod.customerName || (matchedPod as any).customer?.name || "Müştəri",
-            phone: matchedPod.customerPhone || (matchedPod as any).customer?.phone || "-",
-            email: (matchedPod as any).customerEmail || "-",
+            fullName: maskName(matchedPod.customerName || (matchedPod as any).customer?.name || "Müştəri"),
+            phone: maskPhone(matchedPod.customerPhone || (matchedPod as any).customer?.phone || "-"),
+            email: maskEmail((matchedPod as any).customerEmail || "-"),
             city: "Bakı",
             address: "Atelyedən təhvil / Çatdırılma",
           },

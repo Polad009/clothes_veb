@@ -20,7 +20,7 @@ import {
 
 export default function AccountPage() {
   const router = useRouter();
-  const { user, profile, signOut, isLoading, openAuthModal } = useAuth();
+  const { user, session, profile, signOut, isLoading, openAuthModal } = useAuth();
   const { t, language } = useLanguage();
   const { formatPrice } = useCurrency();
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
@@ -48,7 +48,12 @@ export default function AccountPage() {
     let isMounted = true;
     setIsOrdersLoading(true);
 
-    fetch(`/api/account/orders?email=${encodeURIComponent(user.email)}`)
+    const headers: Record<string, string> = {};
+    if (session?.access_token) {
+      headers["Authorization"] = `Bearer ${session.access_token}`;
+    }
+
+    fetch(`/api/account/orders?email=${encodeURIComponent(user.email)}`, { headers })
       .then((res) => res.json())
       .then((data) => {
         if (isMounted) {

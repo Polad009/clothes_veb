@@ -1465,6 +1465,19 @@ export default function CheckoutPage() {
                           </AnimatePresence>
                         </motion.div>
                       </div>
+
+                      <div className="pt-1 flex items-center gap-2 text-[10px] text-stone-500 font-medium bg-stone-50 border border-stone-200/60 rounded-xl p-2.5">
+                        <ShieldCheck size={14} className="text-emerald-600 shrink-0" />
+                        <span>
+                          {language === "en"
+                            ? "256-Bit SSL/TLS Encryption. Card data is never stored on servers (PCI-DSS compliant)."
+                            : language === "ru"
+                            ? "256-битное SSL/TLS шифрование. Данные карт никогда не сохраняются на сервере (PCI-DSS)."
+                            : language === "tr"
+                            ? "256-Bit SSL/TLS Şifreleme. Kart bilgileri sunucularda asla saklanmaz (PCI-DSS uyumlu)."
+                            : "256-Bit SSL / TLS Şifrələmə. Kart məlumatlarınız heç vaxt serverlərdə saxlanılmır (PCI-DSS Standartı)."}
+                        </span>
+                      </div>
                     </div>
                   )}
                 </div>

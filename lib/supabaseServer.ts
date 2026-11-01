@@ -5,12 +5,12 @@ const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PU
   ? process.env.NEXT_PUBLIC_SUPABASE_URL
   : REAL_SUPABASE_URL;
 
-function getServiceRoleKey(): string {
-  const envKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (envKey && envKey.startsWith('sb_secret_') && !envKey.includes('publishable')) {
-    return envKey;
+function getServiceRoleKey(): string | null {
+  const envKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
+  if (envKey && typeof envKey === 'string' && envKey.trim().length > 10) {
+    return envKey.trim();
   }
-  return 'sb_secret_' + 'SZ_IHUrf4owSr3pXwc6_rA_TLgV09XT';
+  return null;
 }
 
 const supabaseKey = getServiceRoleKey();

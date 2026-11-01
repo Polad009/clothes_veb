@@ -1,9 +1,9 @@
 import crypto from 'crypto';
 import { NextRequest } from 'next/server';
 
-const SECRET = process.env.ADMIN_JWT_SECRET || 'horvvalle_default_fallback_secret_key_829141';
-const ADMIN_USER = process.env.ADMIN_USERNAME || 'admin';
-const ADMIN_PASS = process.env.ADMIN_PASSWORD || 'horvvallle2006@2026';
+const SECRET = process.env.ADMIN_JWT_SECRET || 'horvvalle_secure_token_secret_seed_9201';
+const ADMIN_USER = (process.env.ADMIN_USERNAME || 'admin').trim().toLowerCase();
+const ADMIN_PASS = (process.env.ADMIN_PASSWORD || '').trim();
 
 function base64UrlEncode(str: string): string {
   return Buffer.from(str)
@@ -21,18 +21,31 @@ function base64UrlDecode(str: string): string {
   return Buffer.from(base64, 'base64').toString('utf-8');
 }
 
+/**
+ * Timing-safe credential verification to protect against timing attacks & brute-forcing
+ */
 export function verifyAdminCredentials(user: string, pass: string): boolean {
+  if (!ADMIN_PASS) {
+    console.error('[AdminAuth] ADMIN_PASSWORD environment variable is not configured.');
+    return false;
+  }
+
   const cleanUser = (user || '').trim().toLowerCase();
   const cleanPass = (pass || '').trim();
 
-  const validUsers = [ADMIN_USER.toLowerCase(), 'horvvalle', 'horwalle'];
-  const validPasses = [
-    ADMIN_PASS,
-    'horvvallle2006@2026',
-    'horvvalle2026',
-  ];
+  // Allow ADMIN_USER or configured alias
+  const isUserValid = cleanUser === ADMIN_USER || cleanUser === 'horvvalle';
+  if (!isUserValid) return false;
 
-  return validUsers.includes(cleanUser) && validPasses.includes(cleanPass);
+  // Constant-time string comparison against configured environment password
+  const passBuffer = Buffer.from(cleanPass);
+  const targetBuffer = Buffer.from(ADMIN_PASS);
+
+  if (passBuffer.length !== targetBuffer.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(passBuffer, targetBuffer);
 }
 
 export function createAdminToken(username: string): string {
