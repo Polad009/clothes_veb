@@ -75,6 +75,7 @@ export async function GET() {
 
     return NextResponse.json(
       {
+        version: "v2026.11.01.2029",
         products: data.products || [],
         content: data.content || {},
         settings: data.settings || {},
