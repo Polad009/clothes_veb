@@ -2107,8 +2107,21 @@
               <div class="text-[10px] text-slate-400">${new Date(o.date || Date.now()).toLocaleDateString('az-AZ')}</div>
             </td>
             <td class="p-3.5">
-              <div class="font-bold text-slate-900">${cust.fullName || 'Müştəri'}</div>
-              <div class="text-[10px] text-slate-500">${cust.phone || '-'}</div>
+              <div class="font-bold text-slate-900 flex items-center gap-1.5">
+                <span>${cust.fullName || 'Müştəri'}</span>
+                ${o.source ? `<span class="px-1.5 py-0.2 rounded text-[8px] font-bold bg-emerald-50 text-emerald-700">Bulud</span>` : ''}
+              </div>
+              <div class="flex items-center gap-1.5 mt-0.5">
+                <span class="text-[10px] text-slate-500 font-mono">${cust.phone || '-'}</span>
+                ${cust.phone && cust.phone.replace(/\D/g, '').length >= 7 ? `
+                  <a href="https://wa.me/${cust.phone.replace(/\D/g, '')}?text=${encodeURIComponent('Salam ' + (cust.fullName || '') + ', HORVVALLE atelyesindən #' + o.id + ' nömrəli sifarişinizlə bağlı əlaqə saxlayırıq.')}" 
+                    target="_blank" 
+                    class="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-1.5 py-0.5 rounded transition"
+                    title="Müştəriyə WhatsApp ilə yaz">
+                    <i data-lucide="message-circle" class="w-2.5 h-2.5"></i> WP
+                  </a>
+                ` : ''}
+              </div>
               <div class="text-[10px] text-slate-400 truncate max-w-[150px]">${cust.city || 'Bakı'}, ${cust.address || '-'}</div>
             </td>
             <td class="p-3.5">
@@ -2203,23 +2216,48 @@
     function renderCustomersTable() {
       const container = document.getElementById('customersTableBody');
       const orders = STORE_DATA.orders || [];
+      const profiles = STORE_DATA.profiles || [];
 
       const map = new Map();
+
+      // 1. Process registered Supabase profiles first
+      profiles.forEach(p => {
+        const key = (p.email || p.phone || p.id).toLowerCase();
+        map.set(key, {
+          fullName: p.full_name || 'Qeydiyyatlı Müştəri',
+          phone: p.phone || '-',
+          email: p.email || '-',
+          city: p.city || 'Bakı',
+          address: p.address || '-',
+          orderCount: 0,
+          totalSpent: 0,
+          isRegistered: true,
+          role: p.role || 'Müştəri',
+        });
+      });
+
+      // 2. Merge order history
       orders.forEach(o => {
         const cust = o.customer;
-        if (!cust || !cust.phone) return;
-        const key = cust.phone;
+        if (!cust) return;
+        const emailKey = (cust.email || '').toLowerCase();
+        const phoneKey = (cust.phone || '').replace(/\D/g, '');
+        const key = (emailKey && emailKey.includes('@')) ? emailKey : (phoneKey || cust.fullName || o.id);
+
         const existing = map.get(key) || {
           fullName: cust.fullName || 'Müştəri',
-          phone: cust.phone,
+          phone: cust.phone || '-',
           email: cust.email || '-',
           city: cust.city || 'Bakı',
           address: cust.address || '-',
           orderCount: 0,
-          totalSpent: 0
+          totalSpent: 0,
+          isRegistered: false,
         };
         existing.orderCount += 1;
         existing.totalSpent += Number(o.total || 0);
+        if (cust.phone && existing.phone === '-') existing.phone = cust.phone;
+        if (cust.fullName && (!existing.fullName || existing.fullName === 'Qeydiyyatlı Müştəri')) existing.fullName = cust.fullName;
         map.set(key, existing);
       });
 
@@ -2243,15 +2281,28 @@
         return `
           <tr class="hover:bg-slate-50/60 transition">
             <td class="p-3.5 flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center text-xs">
+              <div class="w-8 h-8 rounded-full ${c.isRegistered ? 'bg-indigo-900 text-amber-300' : 'bg-slate-900 text-white'} font-bold flex items-center justify-center text-xs">
                 ${(c.fullName || 'M')[0].toUpperCase()}
               </div>
-              <span class="font-bold text-slate-900">${c.fullName}</span>
+              <div>
+                <div class="font-bold text-slate-900 flex items-center gap-1.5">
+                  <span>${c.fullName}</span>
+                  ${c.isRegistered ? `<span class="px-1.5 py-0.5 rounded text-[8px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">Supabase</span>` : ''}
+                </div>
+                <div class="text-[10px] text-slate-400">${c.isRegistered ? 'Qeydiyyatlı İstifadəçi' : 'Qonaq Alıcı'}</div>
+              </div>
             </td>
-            <td class="p-3.5 text-slate-600 font-mono">${c.phone}</td>
-            <td class="p-3.5 text-slate-400">${c.email}</td>
-            <td class="p-3.5 text-slate-600">${c.city}, ${c.address}</td>
-            <td class="p-3.5 font-bold">${c.orderCount}</td>
+            <td class="p-3.5">
+              <div class="font-mono text-xs text-slate-700">${c.phone}</div>
+              ${c.phone && c.phone.replace(/\D/g, '').length >= 7 ? `
+                <a href="https://wa.me/${c.phone.replace(/\D/g, '')}" target="_blank" class="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-600 hover:underline">
+                  <i data-lucide="message-circle" class="w-2.5 h-2.5"></i> WhatsApp
+                </a>
+              ` : ''}
+            </td>
+            <td class="p-3.5 text-slate-500 font-mono text-[11px]">${c.email}</td>
+            <td class="p-3.5 text-slate-600 text-xs">${c.city}, ${c.address}</td>
+            <td class="p-3.5 font-bold text-xs">${c.orderCount}</td>
             <td class="p-3.5">
               <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeColor}">
                 ${isVip}

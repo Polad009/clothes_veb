@@ -6,10 +6,78 @@ import {
   isAdminAuthenticated,
 } from '@/lib/adminAuth';
 import { sendOrderStatusUpdate, sendBroadcastCampaign } from '@/lib/email/emailService';
+import { supabaseServer } from '@/lib/supabaseServer';
 import fs from 'fs';
 import path from 'path';
 
 export const dynamic = 'force-dynamic';
+
+async function getEnrichedStoreData() {
+  const db = readStoreDb();
+  if (!supabaseServer) return db;
+
+  try {
+    // 1. Fetch live registered customer profiles from Supabase
+    const { data: supaProfiles } = await supabaseServer
+      .from('profiles')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (supaProfiles) {
+      (db as any).profiles = supaProfiles;
+    }
+
+    // 2. Fetch live cloud orders from Supabase
+    const { data: supaOrders } = await supabaseServer
+      .from('orders')
+      .select('*, order_items(*)')
+      .order('created_at', { ascending: false });
+
+    if (supaOrders && supaOrders.length > 0) {
+      const existingIds = new Set((db.orders || []).map((o: any) => String(o.id)));
+      
+      const convertedSupaOrders = supaOrders.map((so: any) => ({
+        id: String(so.id),
+        date: so.created_at,
+        customer: {
+          fullName: so.customer_name || 'Müştəri',
+          phone: so.customer_phone || '-',
+          email: so.customer_email || '-',
+          address: so.delivery_address || '-',
+          city: so.delivery_city || 'Bakı',
+          country: 'Azərbaycan',
+        },
+        items: (so.order_items || []).map((it: any) => ({
+          name: it.item_name,
+          color: it.color || 'Standart',
+          size: it.size || 'L',
+          quantity: it.quantity || 1,
+          price: Number(it.unit_price) || 0,
+        })),
+        subtotal: Number(so.total_amount) || 0,
+        shipping: 0,
+        discount: 0,
+        total: Number(so.total_amount) || 0,
+        paymentMethod: so.payment_method || 'Kart',
+        paymentStatus: so.payment_status || 'Paid',
+        orderStatus: so.order_status || 'Yeni Sifariş',
+        source: 'Supabase Cloud',
+      }));
+
+      // Add any Supabase orders that aren't in local DB yet
+      for (const co of convertedSupaOrders) {
+        if (!existingIds.has(co.id)) {
+          db.orders.push(co);
+          existingIds.add(co.id);
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('[AdminAPI] Enriched data sync warning:', err);
+  }
+
+  return db;
+}
 
 export async function GET(
   req: NextRequest,
@@ -36,9 +104,9 @@ export async function GET(
       );
     }
 
-    // 1. Full store data (protected)
+    // 1. Full store data (protected & enriched with Supabase live profiles & cloud orders)
     if (route === 'data') {
-      const data = readStoreDb();
+      const data = await getEnrichedStoreData();
       return NextResponse.json(data);
     }
 
@@ -160,6 +228,16 @@ export async function POST(
       db.orders = [];
       db.podOrders = [];
       writeStoreDb(db);
+
+      if (supabaseServer) {
+        try {
+          await supabaseServer.from('order_items').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+          await supabaseServer.from('orders').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        } catch (e) {
+          console.warn('Supabase clear warning:', e);
+        }
+      }
+
       return NextResponse.json({ success: true });
     }
 
@@ -279,6 +357,19 @@ export async function PATCH(
         }
         if (paymentStatus) db.orders[index].paymentStatus = paymentStatus;
         writeStoreDb(db);
+
+        // Also sync update to Supabase orders table
+        if (supabaseServer) {
+          try {
+            const updatePayload: any = {};
+            if (orderStatus) updatePayload.order_status = orderStatus;
+            if (paymentStatus) updatePayload.payment_status = paymentStatus;
+            await supabaseServer.from('orders').update(updatePayload).eq('id', id);
+          } catch (e) {
+            console.warn('Supabase status update warning:', e);
+          }
+        }
+
         return NextResponse.json({ success: true, order: db.orders[index] });
       }
       return NextResponse.json({ error: 'Sifariş tapılmadı' }, { status: 404 });
@@ -332,6 +423,16 @@ export async function DELETE(
       db.orders = (db.orders || []).filter((o: any) => o.id !== id);
       db.podOrders = (db.podOrders || []).filter((p: any) => p.orderId !== id && p.id !== id);
       writeStoreDb(db);
+
+      if (supabaseServer) {
+        try {
+          await supabaseServer.from('order_items').delete().eq('order_id', id);
+          await supabaseServer.from('orders').delete().eq('id', id);
+        } catch (e) {
+          console.warn('Supabase delete order warning:', e);
+        }
+      }
+
       return NextResponse.json({ success: true });
     }
 
