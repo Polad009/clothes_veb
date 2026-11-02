@@ -276,8 +276,8 @@ export default function CheckoutPage() {
     }
   }, [user, profile]);
 
-  // Payment Selection
-  const [paymentMethod, setPaymentMethod] = useState<"apple_pay" | "google_pay" | "card">("apple_pay");
+  // Payment Selection - default to card so bank fields are ready and strictly validated
+  const [paymentMethod, setPaymentMethod] = useState<"apple_pay" | "google_pay" | "card">("card");
   const isTestMode = process.env.NEXT_PUBLIC_PAYMENT_MODE === "test";
   const enableCod = process.env.NEXT_PUBLIC_ENABLE_COD !== "false";
   const [walletDebugMsg, setWalletDebugMsg] = useState<{ text: string; method?: string } | null>(null);
@@ -893,10 +893,28 @@ export default function CheckoutPage() {
 
   const handleCardSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!user) {
+      openAuthModal();
+      setErrorMsg(cT.loginToBuy);
+      return;
+    }
+
+    if (paymentMethod === "apple_pay") {
+      handleNativePayment("apple_pay");
+      return;
+    }
+
+    if (paymentMethod === "google_pay") {
+      handleNativePayment("google_pay");
+      return;
+    }
+
     if (!validateAll()) {
       return;
     }
-    processOrder(paymentMethod);
+
+    processOrder("card");
   };
 
   return (
@@ -1310,7 +1328,8 @@ export default function CheckoutPage() {
                   <span>2. {t.checkout.paymentMethod}</span>
                 </h3>
 
-                <div className="space-y-2">
+                <div className="space-y-2.5">
+                  {/* Option 1: Card */}
                   <label
                     onClick={() => setPaymentMethod("card")}
                     className={`p-4 rounded-2xl border flex items-center justify-between cursor-pointer transition-all ${
@@ -1332,6 +1351,52 @@ export default function CheckoutPage() {
                     </div>
                     <span className="w-4 h-4 rounded-full border-2 border-stone-300 flex items-center justify-center">
                       {paymentMethod === "card" && <span className="w-2 h-2 rounded-full bg-stone-900" />}
+                    </span>
+                  </label>
+
+                  {/* Option 2: Apple Pay */}
+                  <label
+                    onClick={() => setPaymentMethod("apple_pay")}
+                    className={`p-4 rounded-2xl border flex items-center justify-between cursor-pointer transition-all ${
+                      paymentMethod === "apple_pay"
+                        ? "border-stone-900 bg-stone-50 text-stone-900 ring-1 ring-stone-900/10 shadow-xs"
+                        : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:text-stone-900"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <ApplePayLogo className="h-5 w-auto" variant="dark" />
+                      <div>
+                        <div className="text-xs font-bold text-stone-900">Apple Pay</div>
+                        <div className="text-[11px] text-stone-500">
+                          {language === "az" ? "Touch ID / Face ID ilə rəsmi Apple Wallet ödənişi" : "Instant payment with Apple Wallet & Face ID"}
+                        </div>
+                      </div>
+                    </div>
+                    <span className="w-4 h-4 rounded-full border-2 border-stone-300 flex items-center justify-center">
+                      {paymentMethod === "apple_pay" && <span className="w-2 h-2 rounded-full bg-stone-900" />}
+                    </span>
+                  </label>
+
+                  {/* Option 3: Google Pay */}
+                  <label
+                    onClick={() => setPaymentMethod("google_pay")}
+                    className={`p-4 rounded-2xl border flex items-center justify-between cursor-pointer transition-all ${
+                      paymentMethod === "google_pay"
+                        ? "border-stone-900 bg-stone-50 text-stone-900 ring-1 ring-stone-900/10 shadow-xs"
+                        : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:text-stone-900"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <GooglePayLogo className="h-4 w-auto" />
+                      <div>
+                        <div className="text-xs font-bold text-stone-900">Google Pay</div>
+                        <div className="text-[11px] text-stone-500">
+                          {language === "az" ? "Google hesabınızdakı kartla təhlükəsiz ödəniş" : "Fast & secure payment with Google Account"}
+                        </div>
+                      </div>
+                    </div>
+                    <span className="w-4 h-4 rounded-full border-2 border-stone-300 flex items-center justify-center">
+                      {paymentMethod === "google_pay" && <span className="w-2 h-2 rounded-full bg-stone-900" />}
                     </span>
                   </label>
 
@@ -1483,14 +1548,30 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* Submit Button */}
+              {/* Dynamic Action Button according to chosen payment method */}
               <button
                 type="submit"
                 disabled={isProcessing}
-                className="w-full py-4 rounded-full bg-stone-900 hover:bg-black text-white font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-md active:scale-98 disabled:opacity-50 cursor-pointer"
+                className={`w-full py-4 rounded-full font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-md active:scale-98 disabled:opacity-50 cursor-pointer ${
+                  paymentMethod === "apple_pay"
+                    ? "bg-black hover:bg-stone-900 text-white"
+                    : paymentMethod === "google_pay"
+                    ? "bg-white hover:bg-stone-50 text-stone-900 border border-stone-300 shadow-sm"
+                    : "bg-stone-900 hover:bg-black text-white"
+                }`}
               >
                 {isProcessing ? (
                   <span>...</span>
+                ) : paymentMethod === "apple_pay" ? (
+                  <>
+                    <ApplePayLogo className="h-5 w-auto" variant="dark" />
+                    <span className="font-semibold tracking-normal lowercase first-letter:uppercase">ilə ödə — {formatPrice(finalTotal)}</span>
+                  </>
+                ) : paymentMethod === "google_pay" ? (
+                  <>
+                    <GooglePayLogo className="h-5 w-auto" />
+                    <span className="font-semibold tracking-normal lowercase first-letter:uppercase">ilə ödə — {formatPrice(finalTotal)}</span>
+                  </>
                 ) : (
                   <>
                     <Lock size={15} />

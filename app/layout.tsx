@@ -33,6 +33,20 @@ export const metadata: Metadata = {
     default: "Horvvalle — Lüks Geyim & Fərdi Atelye | Rəsmi Mağaza",
     template: "%s | Horvvalle",
   },
+  alternates: {
+    canonical: "https://horvvalle.com",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   icons: {
     icon: [
       { url: "/brand/favicon-32x32.png?v=3", sizes: "32x32", type: "image/png" },
@@ -84,12 +98,67 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
+          rel="preload"
+          href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..700;1,400..700&family=Fraunces:opsz,wght@9..144,300..900&family=Instrument+Sans:wght@400..700&display=swap"
+          as="style"
+        />
+        <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..700;1,400..700&family=Fraunces:opsz,wght@9..144,300..900&family=Instrument+Sans:wght@400..700&display=swap"
         />
         <link rel="icon" type="image/png" sizes="32x32" href="/brand/favicon-32x32.png?v=3" />
         <link rel="icon" type="image/png" sizes="512x512" href="/brand/favicon.png?v=3" />
         <link rel="apple-touch-icon" href="/brand/favicon.png?v=3" />
+        {/* Google Search Rich Snippets & Knowledge Graph Schema */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "Organization",
+                  "@id": "https://horvvalle.com/#organization",
+                  "name": "Horvvalle",
+                  "url": "https://horvvalle.com",
+                  "logo": "https://horvvalle.com/brand/icon-dark.png",
+                  "description": "Lüks Geyim & Fərdi Atelye. Dərzilik və 3D canlı çap studiyası.",
+                  "sameAs": [
+                    "https://instagram.com/horvvalle",
+                    "https://facebook.com/horvvalle",
+                    "https://tiktok.com/@horvvalle"
+                  ]
+                },
+                {
+                  "@type": "WebSite",
+                  "@id": "https://horvvalle.com/#website",
+                  "url": "https://horvvalle.com",
+                  "name": "Horvvalle",
+                  "publisher": { "@id": "https://horvvalle.com/#organization" },
+                  "potentialAction": {
+                    "@type": "SearchAction",
+                    "target": "https://horvvalle.com/collections?q={search_term_string}",
+                    "query-input": "required name=search_term_string"
+                  }
+                },
+                {
+                  "@type": "ClothingStore",
+                  "@id": "https://horvvalle.com/#store",
+                  "name": "Horvvalle Atelier",
+                  "url": "https://horvvalle.com",
+                  "priceRange": "₼₼",
+                  "currenciesAccepted": "AZN",
+                  "paymentAccepted": "Cash, Credit Card, Apple Pay, Google Pay",
+                  "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": "Bakı",
+                    "addressCountry": "AZ"
+                  }
+                }
+              ]
+            })
+          }}
+        />
       </head>
       <body className="min-h-screen flex flex-col bg-[#FAF7F2] text-[#1A1517] font-sans antialiased selection:bg-[#E6C280] selection:text-black">
         <LanguageProvider>

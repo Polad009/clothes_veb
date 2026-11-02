@@ -22,7 +22,7 @@ export function Button({
 }: ButtonProps) {
   // Arrow circular button (‹ › slider / carousel controls from Hero)
   if (variant === "arrow") {
-    const arrowClass = `w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-black/45 hover:bg-black/75 text-white flex items-center justify-center cursor-pointer backdrop-blur-xs transition-transform active:scale-90 shadow-lg border border-white/15 select-none ${className}`;
+    const arrowClass = `w-12 h-12 min-w-[48px] min-h-[48px] rounded-full bg-black/55 hover:bg-black/85 text-white flex items-center justify-center cursor-pointer backdrop-blur-xs transition-transform active:scale-90 shadow-lg border border-white/20 select-none ${className}`;
     const arrowIcon = (
       <svg
         width="18"

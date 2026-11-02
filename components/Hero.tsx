@@ -446,7 +446,7 @@ export function Hero() {
                 {currentItem.price}
               </div>
               {currentItem.compareAtPrice && (
-                <div className="line-through text-white/55 text-sm sm:text-base font-normal mt-0.5">
+                <div className="line-through text-white/75 text-sm sm:text-base font-normal mt-0.5">
                   {currentItem.compareAtPrice}
                 </div>
               )}
@@ -480,17 +480,17 @@ export function Hero() {
         
         {/* Left: Social Media Icons + Mobile Thumbnail Toggle */}
         <div className="flex items-center justify-between w-full sm:w-auto gap-4 order-2 sm:order-1">
-          <div className="flex items-center gap-3.5 sm:gap-4 text-white/90">
+          <div className="flex items-center gap-1 sm:gap-1.5 text-white/90">
             <a
               href="https://instagram.com"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Instagram"
-              className="hover:opacity-75 transition-opacity cursor-pointer p-0.5"
+              className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-full hover:bg-white/10 transition-colors cursor-pointer"
             >
               <svg
-                width="17"
-                height="17"
+                width="18"
+                height="18"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -509,11 +509,11 @@ export function Hero() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="X"
-              className="hover:opacity-75 transition-opacity cursor-pointer p-0.5"
+              className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-full hover:bg-white/10 transition-colors cursor-pointer"
             >
               <svg
-                width="17"
-                height="17"
+                width="18"
+                height="18"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -531,11 +531,11 @@ export function Hero() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Facebook"
-              className="hover:opacity-75 transition-opacity cursor-pointer p-0.5"
+              className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-full hover:bg-white/10 transition-colors cursor-pointer"
             >
               <svg
-                width="17"
-                height="17"
+                width="18"
+                height="18"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -552,11 +552,11 @@ export function Hero() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="LinkedIn"
-              className="hover:opacity-75 transition-opacity cursor-pointer p-0.5"
+              className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-full hover:bg-white/10 transition-colors cursor-pointer"
             >
               <svg
-                width="17"
-                height="17"
+                width="18"
+                height="18"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -575,11 +575,11 @@ export function Hero() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="TikTok"
-              className="hover:opacity-75 transition-opacity cursor-pointer p-0.5"
+              className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-full hover:bg-white/10 transition-colors cursor-pointer"
             >
               <svg
-                width="17"
-                height="17"
+                width="18"
+                height="18"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"

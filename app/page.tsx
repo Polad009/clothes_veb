@@ -124,7 +124,7 @@ export default function Home() {
         <div className="pointer-events-none absolute inset-y-0 right-0 w-16 sm:w-44 bg-gradient-to-l from-[#FAF7F2] via-[#FAF7F2]/85 to-transparent z-20" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4 text-center">
-          <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-stone-500">
+          <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-stone-600">
             {t.home.atelierShowcase || "CANLI ATELYE VİTRİNİ"}
           </span>
           <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-tight text-stone-900 font-editorial mt-0.5">
@@ -150,7 +150,7 @@ export default function Home() {
                 {t.home.fourDirectionsTitle || "DÖRD ƏSAS DƏRZİLİK İSTİQAMƏTİ"}
               </h2>
             </div>
-            <p className="text-xs sm:text-sm text-stone-500 max-w-md leading-relaxed">
+            <p className="text-xs sm:text-sm text-stone-600 max-w-md leading-relaxed">
               {t.home.fourDirectionsDesc || "Xalis daranmış sıx pambıq, isti 3iplik fleece və dəqiq kəsimli şalvarlar. İstənilən bölməni seçərək modelləri kəşf edin."}
             </p>
           </div>
@@ -164,7 +164,7 @@ export default function Home() {
                 {/* Top Header inside Card */}
                 <div>
                   <div className="flex items-center justify-between gap-2 pb-3.5 border-b border-stone-100 text-xs">
-                    <span className="font-mono font-semibold text-stone-400 tracking-wider">
+                    <span className="font-mono font-semibold text-stone-600 tracking-wider">
                       {cat.num}
                     </span>
                     <span className="px-2.5 py-0.5 rounded-full bg-[#FAF7F2] border border-stone-200/70 text-[10px] font-bold uppercase tracking-wider text-stone-700">
@@ -201,7 +201,7 @@ export default function Home() {
                     <h3 className="text-xl font-normal uppercase tracking-tight text-stone-900 font-serif-luxury group-hover:text-amber-900 transition-colors">
                       {cat.title}
                     </h3>
-                    <p className="text-xs text-stone-500 line-clamp-1 pt-0.5">
+                    <p className="text-xs text-stone-600 line-clamp-1 pt-0.5">
                       {cat.fabric}
                     </p>
                   </div>
@@ -209,7 +209,7 @@ export default function Home() {
 
                 {/* Card Action Footer */}
                 <div className="pt-4 mt-4 border-t border-stone-100 flex items-center justify-between text-xs">
-                  <span className="text-stone-400 font-medium">
+                  <span className="text-stone-600 font-medium">
                     {cat.count}
                   </span>
                   <Link
@@ -231,7 +231,7 @@ export default function Home() {
         {/* Section Header & Filter Tabs */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-stone-200/80">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-[0.25em] text-stone-500 block mb-1">
+            <span className="text-xs font-semibold uppercase tracking-[0.25em] text-stone-600 block mb-1">
               {t.home.selectedModels || "SEÇİLMİŞ MODELLƏR"}
             </span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-normal uppercase tracking-tight text-stone-900 font-serif-luxury">
@@ -329,15 +329,15 @@ export default function Home() {
               <div className="grid grid-cols-3 gap-3 pt-2">
                 <div className="p-3.5 rounded-2xl bg-white border border-stone-200/80 shadow-2xs">
                   <div className="text-xs font-bold text-stone-900 uppercase">{language === "en" ? "100% Cotton" : language === "ru" ? "100% Хлопок" : language === "tr" ? "%100 Pamuk" : "100% Pambıq"}</div>
-                  <div className="text-[11px] text-stone-500 mt-0.5">{language === "en" ? "220 GSM Dense Weave" : language === "ru" ? "220 GSM Плотное плетение" : language === "tr" ? "220 GSM Sıkı Doku" : "220 GSM sıx toxunuş"}</div>
+                  <div className="text-[11px] text-stone-600 mt-0.5">{language === "en" ? "220 GSM Dense Weave" : language === "ru" ? "220 GSM Плотное плетение" : language === "tr" ? "220 GSM Sıkı Doku" : "220 GSM sıx toxunuş"}</div>
                 </div>
                 <div className="p-3.5 rounded-2xl bg-white border border-stone-200/80 shadow-2xs">
                   <div className="text-xs font-bold text-stone-900 uppercase">{language === "en" ? "Ultra HD Print" : language === "ru" ? "Ultra HD Печать" : language === "tr" ? "Ultra HD Baskı" : "Ultra HD Çap"}</div>
-                  <div className="text-[11px] text-stone-500 mt-0.5">{language === "en" ? "Durable & Vibrant" : language === "ru" ? "Стойкая и яркая" : language === "tr" ? "Dayanıklı ve parlak" : "Davamlı və parlaq"}</div>
+                  <div className="text-[11px] text-stone-600 mt-0.5">{language === "en" ? "Durable & Vibrant" : language === "ru" ? "Стойкая и яркая" : language === "tr" ? "Dayanıklı ve parlak" : "Davamlı və parlaq"}</div>
                 </div>
                 <div className="p-3.5 rounded-2xl bg-white border border-stone-200/80 shadow-2xs">
                   <div className="text-xs font-bold text-stone-900 uppercase">{language === "en" ? "1-2 Business Days" : language === "ru" ? "1-2 Рабочих дня" : language === "tr" ? "1-2 İş Günü" : "1-2 İş Günü"}</div>
-                  <div className="text-[11px] text-stone-500 mt-0.5">{language === "en" ? "Express delivery" : language === "ru" ? "Быстрая доставка" : language === "tr" ? "Hızlı teslimat" : "Sürətli çatdırılma"}</div>
+                  <div className="text-[11px] text-stone-600 mt-0.5">{language === "en" ? "Express delivery" : language === "ru" ? "Быстрая доставка" : language === "tr" ? "Hızlı teslimat" : "Sürətli çatdırılma"}</div>
                 </div>
               </div>
 

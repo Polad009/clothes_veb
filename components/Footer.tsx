@@ -33,10 +33,10 @@ export function Footer() {
               <Truck size={19} className="text-[#E6C280]" />
             </div>
             <div>
-              <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+              <p className="text-xs font-bold text-white uppercase tracking-wider">
                 {t.footer.fastDelivery}
-              </h4>
-              <p className="text-[11px] text-white/60">{t.footer.fastDeliverySub}</p>
+              </p>
+              <p className="text-[11px] text-stone-300">{t.footer.fastDeliverySub}</p>
             </div>
           </div>
 
@@ -45,10 +45,10 @@ export function Footer() {
               <RotateCcw size={19} className="text-[#E6C280]" />
             </div>
             <div>
-              <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+              <p className="text-xs font-bold text-white uppercase tracking-wider">
                 {t.footer.return14Days}
-              </h4>
-              <p className="text-[11px] text-white/60">{t.footer.return14DaysSub}</p>
+              </p>
+              <p className="text-[11px] text-stone-300">{t.footer.return14DaysSub}</p>
             </div>
           </div>
 
@@ -57,10 +57,10 @@ export function Footer() {
               <ShieldCheck size={19} className="text-[#E6C280]" />
             </div>
             <div>
-              <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+              <p className="text-xs font-bold text-white uppercase tracking-wider">
                 {t.footer.securePayment}
-              </h4>
-              <p className="text-[11px] text-white/60">{t.footer.securePaymentSub}</p>
+              </p>
+              <p className="text-[11px] text-stone-300">{t.footer.securePaymentSub}</p>
             </div>
           </div>
 
@@ -69,10 +69,10 @@ export function Footer() {
               <Award size={19} className="text-[#E6C280]" />
             </div>
             <div>
-              <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+              <p className="text-xs font-bold text-white uppercase tracking-wider">
                 {t.footer.naturalMaterials}
-              </h4>
-              <p className="text-[11px] text-white/60">{t.footer.naturalMaterialsSub}</p>
+              </p>
+              <p className="text-[11px] text-stone-300">{t.footer.naturalMaterialsSub}</p>
             </div>
           </div>
         </div>
@@ -136,27 +136,27 @@ export function Footer() {
 
           {/* Column 1: Köynəklər */}
           <div className="space-y-3">
-            <h5 className="text-xs font-bold text-[#E6C280] uppercase tracking-wider">
+            <p className="text-xs font-bold text-[#E6C280] uppercase tracking-wider">
               {t.home.shirtsCategory}
-            </h5>
+            </p>
             <ul className="space-y-2 text-xs">
               <li>
-                <Link href="/collections?category=koynek" className="text-white/70 hover:text-white transition">
+                <Link href="/collections?category=koynek" className="text-stone-300 hover:text-white transition">
                   Vintage Heavyweight T-Shirt
                 </Link>
               </li>
               <li>
-                <Link href="/collections?category=koynek" className="text-white/70 hover:text-white transition">
+                <Link href="/collections?category=koynek" className="text-stone-300 hover:text-white transition">
                   Klassik Oxford Köynək
                 </Link>
               </li>
               <li>
-                <Link href="/collections?category=koynek" className="text-white/70 hover:text-white transition">
+                <Link href="/collections?category=koynek" className="text-stone-300 hover:text-white transition">
                   Təbii Kətan Yay Köynəyi
                 </Link>
               </li>
               <li>
-                <Link href="/collections?category=koynek" className="text-white/70 hover:text-white transition">
+                <Link href="/collections?category=koynek" className="text-stone-300 hover:text-white transition">
                   Təməl Pambıq T-Shirt
                 </Link>
               </li>
@@ -165,27 +165,27 @@ export function Footer() {
 
           {/* Column 2: Şalvarlar */}
           <div className="space-y-3">
-            <h5 className="text-xs font-bold text-[#E6C280] uppercase tracking-wider">
+            <p className="text-xs font-bold text-[#E6C280] uppercase tracking-wider">
               {t.home.pantsCategory}
-            </h5>
+            </p>
             <ul className="space-y-2 text-xs">
               <li>
-                <Link href="/collections?category=salvar" className="text-white/70 hover:text-white transition">
+                <Link href="/collections?category=salvar" className="text-stone-300 hover:text-white transition">
                   Slim Chino Şalvarlar
                 </Link>
               </li>
               <li>
-                <Link href="/collections?category=salvar" className="text-white/70 hover:text-white transition">
+                <Link href="/collections?category=salvar" className="text-stone-300 hover:text-white transition">
                   Düz Kəsim Cins Şalvarlar
                 </Link>
               </li>
               <li>
-                <Link href="/collections?category=salvar" className="text-white/70 hover:text-white transition">
+                <Link href="/collections?category=salvar" className="text-stone-300 hover:text-white transition">
                   Klassik Ofis Şalvarları
                 </Link>
               </li>
               <li>
-                <Link href="/collections?category=salvar" className="text-white/70 hover:text-white transition">
+                <Link href="/collections?category=salvar" className="text-stone-300 hover:text-white transition">
                   Gündəlik Kargo Şalvar
                 </Link>
               </li>
@@ -194,22 +194,22 @@ export function Footer() {
 
           {/* Column 3: Hudi, Aksesuar & Studio */}
           <div className="space-y-3">
-            <h5 className="text-xs font-bold text-[#E6C280] uppercase tracking-wider">
+            <p className="text-xs font-bold text-[#E6C280] uppercase tracking-wider">
               {t.home.hoodiesCategory} & {t.home.accessoriesCategory}
-            </h5>
+            </p>
             <ul className="space-y-2 text-xs">
               <li>
-                <Link href="/collections?category=hudi" className="text-white/70 hover:text-white transition">
+                <Link href="/collections?category=hudi" className="text-stone-300 hover:text-white transition">
                   {language === "en" ? "Heavyweight Hoodie (3-Thread)" : language === "ru" ? "Плотное худи (3-нитка)" : language === "tr" ? "Kalın Hudi (3 İplik)" : "Hody qalın (3iplik)"}
                 </Link>
               </li>
               <li>
-                <Link href="/collections?category=aksesuar" className="text-white/70 hover:text-white transition">
+                <Link href="/collections?category=aksesuar" className="text-stone-300 hover:text-white transition">
                   {language === "en" ? "Heavyweight Snapback Cap" : language === "ru" ? "Плотная кепка" : language === "tr" ? "Kalın Şapka" : "Kepka - qalın"}
                 </Link>
               </li>
               <li>
-                <Link href="/collections?category=aksesuar" className="text-white/70 hover:text-white transition">
+                <Link href="/collections?category=aksesuar" className="text-stone-300 hover:text-white transition">
                   {language === "en" ? "Canvas Eco Tote Bag" : language === "ru" ? "Хлопковый эко-шоппер" : language === "tr" ? "Keten Eko Çanta" : "Kətan Eko Çanta"}
                 </Link>
               </li>

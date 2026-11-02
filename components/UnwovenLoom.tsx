@@ -137,6 +137,7 @@ interface RunwayCardProps {
   isPriority: boolean;
   isAnimated: boolean;
   formattedPrice: string;
+  isDuplicate?: boolean;
   onImageLoad?: () => void;
 }
 
@@ -146,6 +147,7 @@ function RunwayCard({
   isPriority,
   isAnimated,
   formattedPrice,
+  isDuplicate = false,
   onImageLoad,
 }: RunwayCardProps) {
   // Stagger sinusoidal wave delays for fluid ocean-wave motion (pure CSS)
@@ -161,6 +163,8 @@ function RunwayCard({
       >
         <Link
           href={item.link}
+          tabIndex={isDuplicate ? -1 : undefined}
+          aria-hidden={isDuplicate ? true : undefined}
           className="relative block aspect-[4/5] rounded-2xl sm:rounded-3xl border border-[#EAE3D8] bg-[#FAF7F2] shadow-sm overflow-hidden select-none isolate cursor-pointer group"
           style={{ contain: "layout paint style" }}
         >
@@ -188,9 +192,9 @@ function RunwayCard({
 
           {/* Bottom Details Platter - Pure static CSS gradient, zero filters */}
           <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4 bg-gradient-to-t from-black/85 via-black/45 to-transparent text-white flex flex-col justify-end pointer-events-none">
-            <h4 className="text-xs sm:text-sm font-serif-luxury font-normal leading-tight text-[#FAF7F2] line-clamp-1">
+            <h3 className="text-xs sm:text-sm font-serif-luxury font-normal leading-tight text-[#FAF7F2] line-clamp-1">
               {item.title}
-            </h4>
+            </h3>
             <div className="flex items-center justify-between mt-1 pt-0.5 border-t border-white/15">
               <span className="text-xs sm:text-sm font-bold text-[#E6C994] font-serif-luxury">
                 {formattedPrice}
@@ -307,6 +311,7 @@ export function UnwovenLoom() {
                 staggerIndex={idx}
                 isPriority={false}
                 isAnimated={isAnimated}
+                isDuplicate={true}
                 formattedPrice={getPrice(item)}
               />
             ))}
@@ -344,6 +349,7 @@ export function UnwovenLoom() {
                 staggerIndex={idx + 4}
                 isPriority={false}
                 isAnimated={isAnimated}
+                isDuplicate={true}
                 formattedPrice={getPrice(item)}
               />
             ))}
