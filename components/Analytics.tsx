@@ -3,7 +3,7 @@
 import Script from "next/script";
 
 export function Analytics() {
-  const gaId = process.env.NEXT_PUBLIC_GA_ID;
+  const gaId = process.env.NEXT_PUBLIC_GA_ID || "G-4HP9YT51FD";
   const metaPixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 
   return (
