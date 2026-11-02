@@ -3481,10 +3481,13 @@
         const result = await res.json();
         if (result.success) {
           closeProductModal();
-          localStorage.setItem('hv_store_updated', Date.now().toString());
+          try {
+            localStorage.removeItem('hv_live_products_cache');
+            localStorage.setItem('hv_store_updated', Date.now().toString());
+          } catch(e) {}
           window.dispatchEvent(new Event('hv-store-refresh'));
           await loadData();
-          alert('✓ Məhsul, rənglər və bütün foto bucaqları uğurla yadda saxlanıldı!');
+          alert('✓ Məhsul, rənglər və qiymət uğurla yadda saxlanıldı!');
         } else {
           alert('Xəta baş verdi: ' + (result.error || 'Server xətası'));
         }

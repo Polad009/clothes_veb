@@ -39,8 +39,8 @@ export async function GET(req: NextRequest) {
             const resolvedImages = (meta.images && meta.images.length > 0) ? meta.images : [resolvedImage];
 
             return {
-              id: sp.id,
-              metaId: meta.id || sp.id,
+              id: meta.id || sp.id,
+              supaId: sp.id,
               slug: sp.slug,
               name: sp.name,
               refCode: meta.refCode || sp.slug,
@@ -100,7 +100,9 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(products, {
       headers: {
-        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0',
+        'CDN-Cache-Control': 'no-store',
+        'Vercel-CDN-Cache-Control': 'no-store',
         'Pragma': 'no-cache',
         'Expires': '0',
         'X-Response-Time': `${durationMs}ms`,

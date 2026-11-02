@@ -19,7 +19,7 @@ export async function GET() {
           .order('created_at', { ascending: true });
 
         if (!error && supaProducts && supaProducts.length > 0) {
-          data.products = supaProducts.map((sp: any) => {
+          const liveMapped = supaProducts.map((sp: any) => {
             let meta: any = {};
             try {
               if (typeof sp.description === 'string' && sp.description.startsWith('{')) {
@@ -31,8 +31,8 @@ export async function GET() {
             const resolvedImages = (meta.images && meta.images.length > 0) ? meta.images : [resolvedImage];
 
             return {
-              id: sp.id,
-              metaId: meta.id || sp.id,
+              id: meta.id || sp.id,
+              supaId: sp.id,
               slug: sp.slug,
               name: sp.name,
               refCode: meta.refCode || sp.slug,
@@ -57,6 +57,16 @@ export async function GET() {
               features: meta.features || [],
             };
           });
+
+          // Live Supabase products always take 100% precedence for live prices & data
+          const mergedProducts = [...liveMapped];
+          // Keep any local-only products if not in Supabase yet
+          (data.products || []).forEach((lp: any) => {
+            if (!mergedProducts.some(mp => mp.slug === lp.slug || mp.id === lp.id)) {
+              mergedProducts.push(lp);
+            }
+          });
+          data.products = mergedProducts;
         }
       } catch (err) {
         console.warn('[StoreData] Supabase products fetch error:', err);
@@ -75,7 +85,7 @@ export async function GET() {
 
     return NextResponse.json(
       {
-        version: "v2026.11.01.2029",
+        version: "v2026.11.02.live",
         products: data.products || [],
         content: data.content || {},
         settings: data.settings || {},
@@ -83,7 +93,9 @@ export async function GET() {
       },
       {
         headers: {
-          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0',
+          'CDN-Cache-Control': 'no-store',
+          'Vercel-CDN-Cache-Control': 'no-store',
           'Pragma': 'no-cache',
           'Expires': '0',
         },

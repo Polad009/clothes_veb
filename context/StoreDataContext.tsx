@@ -78,7 +78,20 @@ const StoreDataContext = createContext<StoreDataContextType>({
 });
 
 export function StoreDataProvider({ children }: { children: React.ReactNode }) {
-  const [products, setProducts] = useState<Product[]>(MOCK_PRODUCTS);
+  const [products, setProducts] = useState<Product[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("hv_live_products_cache");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed.map(normalizeProduct);
+          }
+        }
+      } catch (e) {}
+    }
+    return MOCK_PRODUCTS;
+  });
   const [content, setContent] = useState<any>(storeDataDefault.content);
   const [settings, setSettings] = useState<any>(storeDataDefault.settings);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -86,15 +99,21 @@ export function StoreDataProvider({ children }: { children: React.ReactNode }) {
   const fetchLiveStoreData = useCallback(async () => {
     try {
       setIsLoading(true);
-      const res = await fetch(`/api/store/data?t=${Date.now()}`, {
+      const res = await fetch(`/api/store/data?_nocache=${Date.now()}`, {
         cache: "no-store",
-        headers: { "Cache-Control": "no-cache", "Pragma": "no-cache" },
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Pragma": "no-cache",
+        },
       });
       if (!res.ok) return;
       const data = await res.json();
-      if (data && data.products && Array.isArray(data.products)) {
+      if (data && data.products && Array.isArray(data.products) && data.products.length > 0) {
         const normalized = data.products.map(normalizeProduct);
         setProducts(normalized);
+        try {
+          localStorage.setItem("hv_live_products_cache", JSON.stringify(normalized));
+        } catch (e) {}
       }
       if (data.content) setContent(data.content);
       if (data.settings) setSettings(data.settings);
@@ -108,19 +127,29 @@ export function StoreDataProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     fetchLiveStoreData();
 
-    // Auto-refresh when tab gains focus or when admin panel saves data across tabs
-    const onFocus = () => fetchLiveStoreData();
+    // Auto-refresh when tab gains focus, becomes visible, or when admin saves across tabs
+    const onRefresh = () => fetchLiveStoreData();
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") fetchLiveStoreData();
+    };
     const onStorage = (e: StorageEvent) => {
       if (e.key === "hv_store_updated") fetchLiveStoreData();
     };
 
-    window.addEventListener("focus", onFocus);
-    window.addEventListener("hv-store-refresh", onFocus);
+    window.addEventListener("focus", onRefresh);
+    window.addEventListener("hv-store-refresh", onRefresh);
     window.addEventListener("storage", onStorage);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    // Periodic live sync every 15 seconds to ensure any admin price updates reflect instantly
+    const interval = setInterval(fetchLiveStoreData, 15000);
+
     return () => {
-      window.removeEventListener("focus", onFocus);
-      window.removeEventListener("hv-store-refresh", onFocus);
+      window.removeEventListener("focus", onRefresh);
+      window.removeEventListener("hv-store-refresh", onRefresh);
       window.removeEventListener("storage", onStorage);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      clearInterval(interval);
     };
   }, [fetchLiveStoreData]);
 
