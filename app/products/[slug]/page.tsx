@@ -24,6 +24,8 @@ import {
   ChevronRight,
   ArrowRight,
   MessageCircle,
+  Share2,
+  Copy,
 } from "lucide-react";
 import { ApplePayLogo, PaymentLogosRow } from "@/components/PaymentLogos";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
@@ -97,6 +99,15 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyLink = () => {
+    if (typeof window !== "undefined") {
+      navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2200);
+    }
+  };
 
   useBodyScrollLock(sizeGuideOpen);
   const [activeAccordion, setActiveAccordion] = useState<string | null>("details");
@@ -499,6 +510,53 @@ export default function ProductDetailPage() {
                 <PaymentLogosRow size="sm" />
               </div>
             </motion.div>
+
+            {/* Social Sharing */}
+            <div className="pt-3 border-t border-stone-200 flex flex-wrap items-center justify-between gap-2 text-xs text-stone-500">
+              <span className="font-medium text-stone-700 flex items-center gap-1.5">
+                <Share2 size={14} className="text-stone-500" />
+                {language === "en" ? "Share item:" : language === "ru" ? "Поделиться:" : language === "tr" ? "Paylaş:" : "Məhsulu Paylaş:"}
+              </span>
+              <div className="flex items-center gap-2">
+                <a
+                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
+                    `${product.name} - Horvvalle Atelier: ${typeof window !== "undefined" ? window.location.href : ""}`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold text-[11px] transition-colors"
+                >
+                  WhatsApp
+                </a>
+                <a
+                  href={`https://t.me/share/url?url=${encodeURIComponent(
+                    typeof window !== "undefined" ? window.location.href : ""
+                  )}&text=${encodeURIComponent(product.name + " - Horvvalle Atelier")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 font-semibold text-[11px] transition-colors"
+                >
+                  Telegram
+                </a>
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  className="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold text-[11px] transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  {copied ? (
+                    <>
+                      <Check size={12} className="text-emerald-600" />
+                      <span className="text-emerald-600">Kopyalandı!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={12} />
+                      <span>Linki Kopyala</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
 
             {/* Accordions */}
             <div className="pt-4 border-t border-stone-200 space-y-3">

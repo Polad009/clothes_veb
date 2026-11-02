@@ -11,6 +11,7 @@ import { SmoothScroll } from "@/components/SmoothScroll";
 
 import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
 import { AuthModal } from "@/components/AuthModal";
+import { CookieConsent } from "@/components/CookieConsent";
 
 export function StoreShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -39,6 +40,7 @@ export function StoreShell({ children }: { children: React.ReactNode }) {
       <CartDrawer />
       <FloatingWhatsApp />
       <AuthModal />
+      <CookieConsent />
     </SmoothScroll>
   );
 }

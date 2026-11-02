@@ -9,6 +9,7 @@ import Image from "next/image";
 import { MOCK_PRODUCTS } from "@/data/products";
 import { ProductCard } from "@/components/ProductCard";
 import { Hero } from "@/components/Hero";
+import { FAQSection } from "@/components/FAQSection";
 import storeData from "@/data/storeData.json";
 
 const UnwovenLoom = dynamic(
@@ -460,6 +461,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* FAQ Accordion Section with FAQPage Schema */}
+      <FAQSection />
       </div>
     </div>
   );

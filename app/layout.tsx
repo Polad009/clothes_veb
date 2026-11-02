@@ -71,21 +71,28 @@ export const metadata: Metadata = {
     type: "website",
     locale: "az_AZ",
     url: "https://horvvalle.com",
-    siteName: "Horvvalle",
+    siteName: "Horvvalle Atelier",
     title: "Horvvalle — Lüks Geyim & Fərdi Atelye",
     description: "Horvvalle — Sənin ölçün, sənin üslubun. Atelyedə hər geyim ölçünə görə tikilir, istədiyin dizayn isə canlı 3D çapla köynəyə köçürülür.",
     images: [
       {
-        url: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1200&auto=format&fit=crop",
+        url: "https://horvvalle.com/images/salvar-and-shortik-showcase.webp",
         width: 1200,
         height: 630,
-        alt: "Horvvalle",
+        alt: "Horvvalle Atelier Luxury Fashion",
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Horvvalle — Lüks Geyim & Fərdi Atelye",
+    description: "Horvvalle — Sənin ölçün, sənin üslubun. Atelyedə hər geyim ölçünə görə tikilir, istədiyin dizayn isə canlı 3D çapla köynəyə köçürülür.",
+    images: ["https://horvvalle.com/images/salvar-and-shortik-showcase.webp"],
   },
 };
 
 import { StoreShell } from "@/components/StoreShell";
+import { Analytics } from "@/components/Analytics";
 
 export default function RootLayout({
   children,
@@ -161,6 +168,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen flex flex-col bg-[#FAF7F2] text-[#1A1517] font-sans antialiased selection:bg-[#E6C280] selection:text-black">
+        <Analytics />
         <LanguageProvider>
           <CurrencyProvider>
             <CartProvider>
