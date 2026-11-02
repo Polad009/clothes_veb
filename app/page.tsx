@@ -100,9 +100,9 @@ export default function Home() {
       title: t.home.accessoriesCategory || "Aksesuarlar",
       desc: language === "en" ? "Caps & Eco Tote Bags" : language === "ru" ? "Кепки и эко-сумки" : language === "tr" ? "Şapkalar & Eko Çantalar" : "Kepkalar & Eko Çantalar",
       fabric: language === "en" ? "Heavy Twill & Natural Canvas" : language === "ru" ? "Плотный твил и натуральный холст" : language === "tr" ? "Kalın Dimi & Doğal Keten" : "Qalın Twill & Təbii Kətan",
-      image: "/images/products/snapback-cap-heavy/mockup.jpg",
+      image: "/images/products/bmw-m-motorsport-cap/black_front.webp",
       link: "/collections?category=aksesuar",
-      count: language === "en" ? "2 Models" : language === "ru" ? "2 Модели" : language === "tr" ? "2 Model" : "2 Model",
+      count: language === "en" ? "4 Colors" : language === "ru" ? "4 Цвета" : language === "tr" ? "4 Renk" : "4 Rəng",
       tag: language === "en" ? "3D PRINT STUDIO" : language === "ru" ? "3D СТУДИЯ ПЕЧАТИ" : language === "tr" ? "3D BASKI STÜDYOSU" : "3D ÇAP STUDİYASI",
     },
   ];
