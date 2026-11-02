@@ -5,6 +5,37 @@ const SECRET = process.env.ADMIN_JWT_SECRET || 'horvvalle_super_secure_admin_sec
 const ADMIN_USER = (process.env.ADMIN_USERNAME || 'admin').trim().toLowerCase();
 const ADMIN_PASS = (process.env.ADMIN_PASSWORD || '').trim();
 
+// In-memory rate limiting map: ip -> { count, lockedUntil }
+const loginAttempts = new Map<string, { count: number; lockedUntil: number }>();
+
+export function checkRateLimit(ip: string): { allowed: boolean; retryAfter?: number } {
+  const now = Date.now();
+  const entry = loginAttempts.get(ip);
+  if (entry) {
+    if (entry.lockedUntil > now) {
+      return { allowed: false, retryAfter: Math.ceil((entry.lockedUntil - now) / 1000) };
+    }
+    if (entry.lockedUntil <= now && entry.count >= 5) {
+      loginAttempts.delete(ip);
+    }
+  }
+  return { allowed: true };
+}
+
+export function recordFailedAttempt(ip: string): void {
+  const now = Date.now();
+  const entry = loginAttempts.get(ip) || { count: 0, lockedUntil: 0 };
+  entry.count += 1;
+  if (entry.count >= 5) {
+    entry.lockedUntil = now + 15 * 60 * 1000; // 15-minute lockout
+  }
+  loginAttempts.set(ip, entry);
+}
+
+export function recordSuccessfulLogin(ip: string): void {
+  loginAttempts.delete(ip);
+}
+
 function base64UrlEncode(str: string): string {
   return Buffer.from(str)
     .toString('base64')
@@ -22,8 +53,7 @@ function base64UrlDecode(str: string): string {
 }
 
 /**
- * Robust & secure admin credential verification.
- * Accepts credentials configured in .env.local / Vercel env, plus brand fallbacks (handling typos like 2 'l's or 3 'l's).
+ * Timing-attack resistant admin credential verification.
  */
 export function verifyAdminCredentials(user: string, pass: string): boolean {
   const cleanUser = (user || '').trim().toLowerCase();
@@ -35,17 +65,18 @@ export function verifyAdminCredentials(user: string, pass: string): boolean {
     return false;
   }
 
-  // Allowed admin passwords: env variable takes priority, plus valid brand passwords
+  // Allowed passwords: env takes priority, plus valid brand passwords
   const validPasses = [
     ADMIN_PASS,
-    'horvvallle2006@2026', // exact match from .env.local (3 'l's)
-    'horvvalle2006@2026',  // standard brand spelling (2 'l's)
-    'horvvalle2026',
-    'horvvallle2026',
+    'horvvallle2006@2026',
+    'horvvalle2006@2026',
   ].filter(Boolean);
 
+  const cleanPassHash = crypto.createHash('sha256').update(cleanPass).digest();
+
   for (const target of validPasses) {
-    if (cleanPass === target) {
+    const targetHash = crypto.createHash('sha256').update(target).digest();
+    if (crypto.timingSafeEqual(cleanPassHash, targetHash)) {
       return true;
     }
   }
@@ -123,4 +154,3 @@ export function isAdminAuthenticated(req: NextRequest): boolean {
 
   return false;
 }
-

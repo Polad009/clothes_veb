@@ -192,14 +192,26 @@ export function FAQSection() {
 
         {/* Still have questions? */}
         <div className="mt-12 text-center text-xs text-stone-400">
-          Cavabını tapmadığınız başqa sualınız var?{" "}
+          {language === "en"
+            ? "Still have questions? "
+            : language === "ru"
+            ? "Остались вопросы? "
+            : language === "tr"
+            ? "Başka bir sorunuz mu var? "
+            : "Cavabını tapmadığınız başqa sualınız var? "}
           <a
             href="https://wa.me/994557669050"
             target="_blank"
             rel="noopener noreferrer"
             className="text-[#E6C280] font-semibold underline underline-offset-4 hover:text-white transition"
           >
-            WhatsApp Atelye Mütəxəssisi ilə əlaqə saxlayın
+            {language === "en"
+              ? "Contact Atelier Specialist on WhatsApp"
+              : language === "ru"
+              ? "Связаться со специалистом ателье в WhatsApp"
+              : language === "tr"
+              ? "WhatsApp ile Atölye Uzmanına Ulaşın"
+              : "WhatsApp Atelye Mütəxəssisi ilə əlaqə saxlayın"}
           </a>
         </div>
       </div>

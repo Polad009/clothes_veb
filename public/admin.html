@@ -230,19 +230,25 @@
   <!-- ============================================================ -->
   <div id="mainApp" class="hidden flex-1 flex flex-col md:flex-row w-full min-h-screen">
 
+    <!-- Mobile Drawer Backdrop -->
+    <div id="sidebarBackdrop" onclick="closeMobileSidebar()" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-30 hidden md:hidden transition-opacity"></div>
+
     <!-- ---------------------------------------------------- -->
     <!-- LEFT SIDEBAR (Şəkildəki 10 menyu bəndi ilə) -->
     <!-- ---------------------------------------------------- -->
-    <aside class="w-full md:w-64 bg-white border-r border-[#EEEEEE] flex flex-col shrink-0">
+    <aside id="adminSidebar" class="fixed inset-y-0 left-0 z-40 w-72 md:w-64 bg-white border-r border-[#EEEEEE] flex flex-col shrink-0 transform -translate-x-full md:translate-x-0 md:static transition-transform duration-300 ease-in-out shadow-2xl md:shadow-none">
 
-      <!-- Logo Header (Image 3) -->
-      <div class="h-20 flex items-center justify-center border-b border-[#F0F0F0] px-5">
+      <!-- Logo Header with Mobile Close Button -->
+      <div class="h-16 sm:h-20 flex items-center justify-between border-b border-[#F0F0F0] px-5">
         <img 
           src="/brand/logo-horizontal-black.png?v=2" 
           alt="HORWALLE" 
-          class="h-7.5 max-w-[190px] object-contain transition-transform duration-300 hover:scale-[1.02]" 
+          class="h-7 max-w-[170px] object-contain transition-transform duration-300 hover:scale-[1.02]" 
           onerror="this.src='/brand/horwalle_logo_black.png'"
         />
+        <button type="button" onclick="closeMobileSidebar()" class="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer" aria-label="Menyunu Bağla">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
       </div>
 
       <!-- Navigation Links -->
@@ -375,9 +381,12 @@
     <main class="flex-1 flex flex-col overflow-y-auto">
 
       <!-- TOP BAR (Şəkildəki yuxarı zolaq) -->
-      <header class="h-20 bg-white border-b border-[#EEEEEE] px-8 flex items-center justify-between sticky top-0 z-20">
-        <div>
-          <h2 class="text-base sm:text-lg font-black text-slate-900 tracking-wider uppercase">ANALİTİK PANEL</h2>
+      <header class="h-16 sm:h-20 bg-white border-b border-[#EEEEEE] px-4 sm:px-8 flex items-center justify-between sticky top-0 z-20">
+        <div class="flex items-center gap-3">
+          <button id="mobileSidebarToggle" type="button" onclick="toggleMobileSidebar()" class="md:hidden p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 transition cursor-pointer" aria-label="Menyu">
+            <i data-lucide="menu" class="w-5 h-5"></i>
+          </button>
+          <h2 class="text-sm sm:text-lg font-black text-slate-900 tracking-wider uppercase">ANALİTİK PANEL</h2>
         </div>
 
         <!-- Admin Profile Pill -->
@@ -3502,9 +3511,35 @@
 
 
     // ----------------------------------------------------
+    // RESPONSIVE MOBILE SIDEBAR DRAWER
+    // ----------------------------------------------------
+    function toggleMobileSidebar() {
+      const sidebar = document.getElementById('adminSidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      if (!sidebar) return;
+      const isClosed = sidebar.classList.contains('-translate-x-full');
+      if (isClosed) {
+        sidebar.classList.remove('-translate-x-full');
+        if (backdrop) backdrop.classList.remove('hidden');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+        if (backdrop) backdrop.classList.add('hidden');
+      }
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeMobileSidebar() {
+      const sidebar = document.getElementById('adminSidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      if (sidebar) sidebar.classList.add('-translate-x-full');
+      if (backdrop) backdrop.classList.add('hidden');
+    }
+
+    // ----------------------------------------------------
     // TAB SWITCHING (Exact Active Styling)
     // ----------------------------------------------------
     function switchTab(tabId) {
+      closeMobileSidebar();
       document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('.nav-item').forEach(el => {
         el.classList.remove('bg-black', 'text-white', 'shadow-xs');

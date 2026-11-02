@@ -90,10 +90,10 @@ export default function PrivacyPage() {
           <section className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 sm:p-8">
             <div className="flex items-center gap-3 mb-4 text-white">
               <HelpCircle className="text-[#E6C280]" size={20} />
-              <h2 className="text-xl font-serif font-bold">4. Çərəzlər (Cookies)</h2>
+              <h2 className="text-xl font-serif font-bold">4. Cookie Faylları (Cookies)</h2>
             </div>
             <p className="text-stone-400 mb-3">
-              Saytımızda səbətinizin yadda saxlanması, seçdiyiniz dilin və valyutanın qorunması məqsədilə çərəz fayllarından istifadə olunur. Siz istənilən vaxt brauzer nizamlamalarından çərəzləri deaktiv edə bilərsiniz.
+              Saytımızda səbətinizin yadda saxlanması, seçdiyiniz dilin və valyutanın qorunması məqsədilə cookie fayllarından istifadə olunur. Siz istənilən vaxt brauzer nizamlamalarından cookie-ləri deaktiv edə bilərsiniz.
             </p>
           </section>
 

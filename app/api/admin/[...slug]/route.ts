@@ -4,6 +4,9 @@ import {
   verifyAdminCredentials,
   createAdminToken,
   isAdminAuthenticated,
+  checkRateLimit,
+  recordFailedAttempt,
+  recordSuccessfulLogin,
 } from '@/lib/adminAuth';
 import { sendOrderStatusUpdate, sendBroadcastCampaign } from '@/lib/email/emailService';
 import { supabaseServer } from '@/lib/supabaseServer';
@@ -214,16 +217,27 @@ export async function POST(
 
     // 0. LOGIN ROUTE (Publicly accessible for authenticating)
     if (route === 'login') {
+      const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 'unknown-ip';
+      const rateCheck = checkRateLimit(ip);
+      if (!rateCheck.allowed) {
+        return NextResponse.json(
+          { error: `Çoxsaylı uğursuz cəhd! Zəhmət olmasa ${rateCheck.retryAfter} saniyə sonra yenidən cəhd edin.` },
+          { status: 429 }
+        );
+      }
+
       const { username, password } = body;
       const isValid = verifyAdminCredentials(username, password);
 
       if (!isValid) {
+        recordFailedAttempt(ip);
         return NextResponse.json(
           { error: 'İstifadəçi adı və ya şifrə yanlışdır.' },
           { status: 401 }
         );
       }
 
+      recordSuccessfulLogin(ip);
       const token = createAdminToken(username || 'admin');
       const response = NextResponse.json({ success: true, token });
 

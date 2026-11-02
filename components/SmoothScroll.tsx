@@ -21,16 +21,23 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       window.history.scrollRestoration = "auto";
     }
 
-    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+    const isMobile = typeof window !== "undefined" && (window.innerWidth < 768 || "ontouchstart" in window);
+
+    // If on mobile/touch screen, don't intercept touch events to guarantee 100% native fluidity
+    if (isMobile) {
+      return () => {
+        window.removeEventListener("popstate", handlePopState);
+      };
+    }
 
     const lenis = new Lenis({
-      duration: isMobile ? 1.0 : 1.25,
+      duration: 1.15,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // smooth exponential curve
       orientation: "vertical",
       gestureOrientation: "vertical",
       smoothWheel: true,
       wheelMultiplier: 0.95,
-      touchMultiplier: 1.5,
+      syncTouch: false,
     });
 
     lenisRef.current = lenis;

@@ -59,26 +59,34 @@ export default function ProductDetailPage() {
   const [hasCheckedDirect, setHasCheckedDirect] = useState(false);
 
   const product =
-    products.find((p) => p.slug === slug || p.id === slug) ||
     directProduct ||
+    products.find((p) => p.slug === slug || p.id === slug) ||
     MOCK_PRODUCTS.find((p) => p.slug === slug || p.id === slug);
 
   useEffect(() => {
-    if (!product && !hasCheckedDirect) {
-      fetch(`/api/store/products?q=${encodeURIComponent(slug)}`, { cache: 'no-store' })
-        .then(res => res.json())
-        .then(items => {
-          if (Array.isArray(items)) {
-            const found = items.find((p: any) => p.slug === slug || p.id === slug);
-            if (found) {
-              setDirectProduct(normalizeProduct(found));
-            }
+    let isCancelled = false;
+    fetch(`/api/store/products?q=${encodeURIComponent(slug)}&_t=${Date.now()}`, {
+      cache: "no-store",
+      headers: { "Cache-Control": "no-cache" },
+    })
+      .then((res) => res.json())
+      .then((items) => {
+        if (!isCancelled && Array.isArray(items)) {
+          const found = items.find((p: any) => p.slug === slug || p.id === slug);
+          if (found) {
+            setDirectProduct(normalizeProduct(found));
           }
-        })
-        .catch(() => {})
-        .finally(() => setHasCheckedDirect(true));
-    }
-  }, [slug, product, hasCheckedDirect]);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!isCancelled) setHasCheckedDirect(true);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [slug]);
 
   if (!product) {
     if (!hasCheckedDirect) {

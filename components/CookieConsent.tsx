@@ -41,7 +41,7 @@ export function CookieConsent() {
   return (
     <AnimatePresence>
       <motion.aside
-        aria-label="Çərəz Bildirişi"
+        aria-label="Cookie Bildirişi"
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 40 }}
@@ -57,7 +57,7 @@ export function CookieConsent() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between mb-1">
                 <h2 className="text-sm font-serif font-bold text-white flex items-center gap-1.5">
-                  <span>{language === "en" ? "Cookie Preferences" : language === "ru" ? "Использование файлов cookie" : language === "tr" ? "Çerez Tercihleri" : "Çərəz Bildirişi"}</span>
+                  <span>{language === "en" ? "Cookie Preferences" : language === "ru" ? "Использование файлов cookie" : language === "tr" ? "Cookie Tercihleri" : "Cookie Bildirişi"}</span>
                   <ShieldCheck size={14} className="text-[#E6C280]" />
                 </h2>
                 <button
@@ -76,8 +76,8 @@ export function CookieConsent() {
                   : language === "ru"
                   ? "Мы используем файлы cookie для персонализации вашего опыта, сохранения корзины и анализа работы сайта."
                   : language === "tr"
-                  ? "Atölye deneyiminizi kişiselleştirmek, sepetinizi kaydetmek ve site performansını analiz etmek için çerezler kullanıyoruz."
-                  : "Saytımızda sizə ən yaxşı atelye təcrübəsini təqdim etmək, səbətinizi qorumaq və analitika üçün çərəzlərdən istifadə edirik."}
+                  ? "Atölye deneyiminizi kişiselleştirmek, sepetinizi kaydetmek ve site performansını analiz etmek için cookie'ler kullanıyoruz."
+                  : "Saytımızda sizə ən yaxşı atelye təcrübəsini təqdim etmək, səbətinizi qorumaq və analitika üçün cookie-lərdən istifadə edirik."}
                 {" "}
                 <Link href="/privacy" className="text-[#E6C280] hover:underline">
                   {language === "en" ? "Privacy Policy" : language === "ru" ? "Подробнее" : language === "tr" ? "Detaylar" : "Ətraflı məlumat"}
