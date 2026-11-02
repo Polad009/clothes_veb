@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { memo } from "react";
 import { usePathname } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -8,7 +8,7 @@ interface TickerProps {
   className?: string;
 }
 
-export function Ticker({ className = "" }: TickerProps) {
+export const Ticker = memo(function Ticker({ className = "" }: TickerProps) {
   const pathname = usePathname();
   const { t } = useLanguage();
   const isHome = pathname === "/";
@@ -20,27 +20,38 @@ export function Ticker({ className = "" }: TickerProps) {
     t.announcements?.customStudio || "FƏRDİ ÇAP STUDİYASI — ÖZ DİZAYNINI KÖYNƏYƏ ÇAP ET",
   ];
 
-  const tickerString = rawList.join(" • ") + " • ";
-
   return (
     <div
       style={{
-        background: isHome ? "var(--hero-header-bg, #542E13)" : undefined,
-        transition: "background 0.75s ease-in-out",
+        background: isHome ? "var(--hero-header-bg, #13161F)" : "#1c1917",
+        contain: "paint layout",
       }}
-      className={`w-full py-2 overflow-hidden text-[10.5px] sm:text-[11px] font-medium tracking-[0.12em] uppercase select-none relative z-40 ${
+      className={`ticker-container w-full py-2 overflow-hidden text-[10.5px] sm:text-[11px] font-medium tracking-[0.14em] uppercase select-none relative z-40 flex border-b ${
         isHome
-          ? "text-white/90 border-none"
-          : "bg-stone-900 text-stone-300 border-b border-stone-800"
+          ? "text-white/90 border-white/10"
+          : "bg-stone-900 text-stone-300 border-stone-800"
       } ${className}`}
       aria-label="Elanlar"
     >
-      <div className="animate-marquee-30 whitespace-nowrap flex items-center">
-        <span className="inline-block px-4">{tickerString}</span>
-        <span className="inline-block px-4">{tickerString}</span>
-        <span className="inline-block px-4">{tickerString}</span>
-        <span className="inline-block px-4">{tickerString}</span>
+      {/* Track 1: Compositor-thread GPU accelerated continuous stream */}
+      <div className="animate-marquee-smooth flex items-center justify-around shrink-0 min-w-full">
+        {rawList.map((item, idx) => (
+          <span key={`t1-${idx}`} className="inline-flex items-center px-4 sm:px-6 whitespace-nowrap">
+            <span>{item}</span>
+            <span className="ml-4 sm:ml-6 text-[#E6C280]/80">•</span>
+          </span>
+        ))}
+      </div>
+
+      {/* Track 2: Seamless secondary stream running in tandem for zero-jump loop */}
+      <div className="animate-marquee-smooth flex items-center justify-around shrink-0 min-w-full" aria-hidden="true">
+        {rawList.map((item, idx) => (
+          <span key={`t2-${idx}`} className="inline-flex items-center px-4 sm:px-6 whitespace-nowrap">
+            <span>{item}</span>
+            <span className="ml-4 sm:ml-6 text-[#E6C280]/80">•</span>
+          </span>
+        ))}
       </div>
     </div>
   );
-}
+});
