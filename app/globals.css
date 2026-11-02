@@ -621,13 +621,12 @@ a:not(.no-tactile):active,
   display: flex;
   flex-shrink: 0;
   min-width: 100%;
-  animation: marqueeSeamless 30s linear infinite;
+  animation: marqueeSeamless 32s linear infinite;
   will-change: transform;
   transform: translate3d(0, 0, 0);
   -webkit-transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  contain: layout style;
 }
 
 @media (hover: hover) {

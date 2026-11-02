@@ -1458,22 +1458,31 @@
   <!-- ============================================================ -->
 
   <!-- PRODUCT ADD/EDIT MODAL -->
-  <div id="productModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs items-center justify-center p-4">
+  <div id="productModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs items-center justify-center p-3 sm:p-5">
     <div
-      class="bg-white rounded-3xl max-w-2xl w-full p-7 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto space-y-4">
+      class="bg-white rounded-3xl max-w-4xl w-full p-5 sm:p-7 shadow-2xl border border-slate-100 max-h-[92vh] overflow-y-auto space-y-4">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-        <h3 id="productModalTitle" class="font-bold text-base text-slate-900">Məhsul Əlavə Et</h3>
-        <button onclick="closeProductModal()" class="text-slate-400 hover:text-black cursor-pointer">
+        <div>
+          <h3 id="productModalTitle" class="font-bold text-base text-slate-900">Məhsul Əlavə Et</h3>
+          <p class="text-[11px] text-slate-500">Məhsulun qiyməti, rəngləri, ön/arxa/yan görünüşləri və çoxlu qalereya fotoları.</p>
+        </div>
+        <button onclick="closeProductModal()" class="text-slate-400 hover:text-black cursor-pointer p-1">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
+      <!-- Hidden universal upload trigger for color & multi-angle images -->
+      <input type="file" id="dynamicColorFileInput" accept="image/*" class="hidden" onchange="handleDynamicColorUpload(this)">
+
       <form id="productForm" onsubmit="handleProductFormSubmit(event)" class="space-y-4 text-xs">
         <input type="hidden" id="prodEditId">
+        <input type="hidden" id="prodImage">
+        <input type="hidden" id="prodHoverImage">
+
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block font-bold text-slate-700 mb-1">Məhsulun Adı *</label>
-            <input type="text" id="prodName" required
+            <input type="text" id="prodName" required placeholder="məs. HORWALLE Angelus Vintage Polo"
               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
           </div>
           <div>
@@ -1487,82 +1496,50 @@
           </div>
           <div>
             <label class="block font-bold text-slate-700 mb-1">Qiymət (₼) *</label>
-            <input type="number" step="0.01" id="prodPrice" required
+            <input type="number" step="0.01" id="prodPrice" required placeholder="79.00"
               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
           </div>
           <div>
             <label class="block font-bold text-slate-700 mb-1">Köhnə Qiymət (Endirimli) (₼)</label>
-            <input type="number" step="0.01" id="prodComparePrice"
+            <input type="number" step="0.01" id="prodComparePrice" placeholder="109.00"
               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
           </div>
-          <!-- 1. ƏSAS ÖN ŞƏKİL (KOMPÜTERDƏN YÜKLƏ / SEÇ) -->
-          <div class="sm:col-span-2 space-y-1.5">
-            <div class="flex items-center justify-between">
-              <label class="block font-bold text-slate-700">1. Əsas Ön Şəkil *</label>
-              <span class="text-[10px] text-slate-400">Kompyuterdən fayl seçin</span>
-            </div>
-            
-            <div class="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-2xl">
-              <div id="frontPreviewBox" class="w-14 h-16 rounded-xl bg-white border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
-                <i data-lucide="image" class="w-6 h-6 text-slate-300"></i>
+
+          <!-- RƏNGLƏR VƏ GÖRÜNÜŞLƏR MENECERİ (ÖN, ARXA, YAN VƏ QALEREYA) -->
+          <div class="sm:col-span-2 space-y-3 pt-3 border-t border-slate-100">
+            <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-100/70 p-3 rounded-2xl border border-slate-200/80">
+              <div>
+                <label class="block font-bold text-slate-900 text-xs sm:text-sm">Məhsul Rəngləri və Görünüş Şəkilləri</label>
+                <p class="text-[10.5px] text-slate-500">Hər rəng üçün ayrıca Ön, Arxa, Yan (sol/sağ çiyin) və Qalereya fotoları əlavə edin.</p>
               </div>
-              <div class="flex-1 space-y-1.5">
-                <div class="flex items-center gap-2">
-                  <input type="file" id="prodFrontFileInput" accept="image/*" class="hidden" onchange="handleDirectFileUpload(this, 'prodImage', 'frontPreviewBox', 'frontPrintBadge')">
-                  <button type="button" onclick="document.getElementById('prodFrontFileInput').click()" class="px-3 py-1.5 bg-slate-900 hover:bg-black text-white rounded-xl font-bold text-[11px] cursor-pointer inline-flex items-center gap-1.5 shadow-2xs">
-                    <i data-lucide="upload" class="w-3.5 h-3.5"></i>
-                    <span>Kompüterdən Seç</span>
-                  </button>
-                  <span id="frontUploadStatus" class="text-[10px] text-slate-400">PNG, JPG və ya WEBP</span>
-                </div>
-                <input type="text" id="prodImage" required placeholder="/images/uploads/..."
-                  class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-[11px] font-mono text-slate-600">
-              </div>
+              <button type="button" onclick="addNewProductColor()" class="px-3.5 py-1.5 bg-black hover:bg-slate-800 text-white rounded-xl font-bold text-xs cursor-pointer inline-flex items-center gap-1.5 shadow-2xs transition">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>+ Yeni Rəng Əlavə Et</span>
+              </button>
             </div>
-            <div id="frontPrintBadge" class="hidden text-[10px] bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg px-2.5 py-1 flex items-center justify-between">
-              <span>✨ Çap Dizaynı (Print Layer) avtomatik kəsildi</span>
-              <a id="frontPrintLink" href="#" target="_blank" class="font-bold underline">Bax</a>
+
+            <!-- DYNAMIC COLORS LIST CONTAINER -->
+            <div id="productColorsList" class="space-y-4">
+              <!-- Rendered dynamically by renderProductColors() -->
             </div>
           </div>
 
-          <!-- 2. ARXA (HOVER) ŞƏKİL (KOMPÜTERDƏN YÜKLƏ / SEÇ) -->
-          <div class="sm:col-span-2 space-y-1.5">
-            <div class="flex items-center justify-between">
-              <label class="block font-bold text-slate-700">2. Arxa (Hover) Şəkil</label>
-              <span class="text-[10px] text-slate-400">Kompyuterdən fayl seçin</span>
-            </div>
-            
-            <div class="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-2xl">
-              <div id="backPreviewBox" class="w-14 h-16 rounded-xl bg-white border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
-                <i data-lucide="image" class="w-6 h-6 text-slate-300"></i>
-              </div>
-              <div class="flex-1 space-y-1.5">
-                <div class="flex items-center gap-2">
-                  <input type="file" id="prodBackFileInput" accept="image/*" class="hidden" onchange="handleDirectFileUpload(this, 'prodHoverImage', 'backPreviewBox', 'backPrintBadge')">
-                  <button type="button" onclick="document.getElementById('prodBackFileInput').click()" class="px-3 py-1.5 bg-slate-900 hover:bg-black text-white rounded-xl font-bold text-[11px] cursor-pointer inline-flex items-center gap-1.5 shadow-2xs">
-                    <i data-lucide="upload" class="w-3.5 h-3.5"></i>
-                    <span>Kompüterdən Seç</span>
-                  </button>
-                  <span id="backUploadStatus" class="text-[10px] text-slate-400">PNG, JPG və ya WEBP</span>
-                </div>
-                <input type="text" id="prodHoverImage" placeholder="/images/uploads/..."
-                  class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-[11px] font-mono text-slate-600">
-              </div>
-            </div>
-            <div id="backPrintBadge" class="hidden text-[10px] bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg px-2.5 py-1 flex items-center justify-between">
-              <span>✨ Arxa Çap Dizaynı (Print Layer) avtomatik kəsildi</span>
-              <a id="backPrintLink" href="#" target="_blank" class="font-bold underline">Bax</a>
-            </div>
-          </div>
           <div class="sm:col-span-2">
             <label class="block font-bold text-slate-700 mb-1">Təsvir</label>
-            <textarea id="prodDesc" rows="3"
+            <textarea id="prodDesc" rows="3" placeholder="Məhsulun xüsusiyyətləri, kəsimi və parça keyfiyyəti..."
               class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs"></textarea>
           </div>
         </div>
 
         <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
           <button type="button" onclick="closeProductModal()"
+            class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold cursor-pointer">Ləğv Et</button>
+          <button type="submit" class="px-6 py-2 bg-black text-white rounded-xl font-bold cursor-pointer shadow-xs">Yadda
+            Saxla</button>
+        </div>
+      </form>
+    </div>
+  </div>
             class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold cursor-pointer">Ləğv Et</button>
           <button type="submit" class="px-5 py-2 bg-black text-white rounded-xl font-bold cursor-pointer">Yadda
             Saxla</button>
@@ -2897,8 +2874,285 @@
 
 
     // ----------------------------------------------------
-    // PRODUCT MODAL (Add / Edit)
+    // PRODUCT MODAL (Add / Edit) & MULTI-COLOR / MULTI-ANGLE MANAGER
     // ----------------------------------------------------
+    let currentEditingColors = [];
+    let currentUploadTarget = { colorIndex: 0, field: 'image' };
+
+    function renderProductColors() {
+      const container = document.getElementById('productColorsList');
+      if (!container) return;
+
+      if (!currentEditingColors || currentEditingColors.length === 0) {
+        currentEditingColors = [{
+          name: 'Standart',
+          hex: '#111111',
+          image: '',
+          hoverImage: '',
+          leftShoulderImage: '',
+          gallery: []
+        }];
+      }
+
+      container.innerHTML = currentEditingColors.map((c, idx) => {
+        const sideImg = c.leftShoulderImage || c.rightShoulderImage || '';
+        const galleryList = Array.isArray(c.gallery) ? c.gallery : [];
+
+        return `
+          <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-3" data-color-idx="${idx}">
+            <!-- Color Top Bar: Name, Picker, Hex, Delete -->
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-slate-200/80">
+              <div class="flex items-center gap-2.5 flex-1 min-w-[260px]">
+                <span class="w-6 h-6 rounded-full border border-slate-300 shadow-2xs shrink-0 transition-colors" id="colorBadge_${idx}" style="background-color: ${c.hex || '#111111'};"></span>
+                <input type="text" value="${escapeHtml(c.name || '')}" placeholder="Rəngin adı (məs. Washed Black)"
+                  oninput="updateColorField(${idx}, 'name', this.value)"
+                  class="bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 flex-1 min-w-[140px] focus:ring-1 focus:ring-black">
+                <div class="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl px-2 py-1 shadow-2xs">
+                  <input type="color" value="${c.hex || '#111111'}"
+                    oninput="updateColorHex(${idx}, this.value)"
+                    class="w-5 h-5 rounded cursor-pointer border-0 bg-transparent p-0">
+                  <input type="text" value="${c.hex || '#111111'}" id="colorHexInput_${idx}"
+                    onchange="updateColorHex(${idx}, this.value)"
+                    class="w-16 font-mono text-[11px] font-semibold text-slate-700 uppercase border-0 p-0 focus:ring-0">
+                </div>
+              </div>
+              ${currentEditingColors.length > 1 ? `
+                <button type="button" onclick="removeProductColor(${idx})" class="text-rose-600 hover:text-rose-800 hover:bg-rose-50 text-xs font-bold px-2.5 py-1.5 rounded-xl transition cursor-pointer inline-flex items-center gap-1">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  <span>Rəngi Sil</span>
+                </button>
+              ` : ''}
+            </div>
+
+            <!-- Angles Grid: 1. Ön, 2. Arxa, 3. Yan (Profil / Çiyin) -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <!-- 1. ÖN GÖRÜNÜŞ -->
+              <div class="bg-white p-3 rounded-2xl border border-slate-200 space-y-2 shadow-2xs">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-[11px] text-slate-800 flex items-center gap-1">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> 1. Ön Görünüş *
+                  </span>
+                  <button type="button" onclick="triggerColorUpload(${idx}, 'image')" class="text-[10.5px] bg-slate-900 hover:bg-black text-white px-2.5 py-1 rounded-lg font-bold cursor-pointer inline-flex items-center gap-1 shadow-2xs">
+                    <i data-lucide="upload" class="w-3 h-3"></i> Seç
+                  </button>
+                </div>
+                <div class="h-28 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center overflow-hidden p-1 relative">
+                  ${c.image ? `<img src="${c.image}" class="w-full h-full object-contain" />` : `<span class="text-[10px] text-slate-400">Ön şəkil yoxdur</span>`}
+                </div>
+                <input type="text" value="${escapeHtml(c.image || '')}" placeholder="/images/... və ya URL"
+                  oninput="updateColorField(${idx}, 'image', this.value)"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-mono text-slate-600 focus:bg-white">
+              </div>
+
+              <!-- 2. ARXA GÖRÜNÜŞ -->
+              <div class="bg-white p-3 rounded-2xl border border-slate-200 space-y-2 shadow-2xs">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-[11px] text-slate-800 flex items-center gap-1">
+                    <span class="w-2 h-2 rounded-full bg-indigo-500"></span> 2. Arxa Görünüş
+                  </span>
+                  <button type="button" onclick="triggerColorUpload(${idx}, 'hoverImage')" class="text-[10.5px] bg-slate-900 hover:bg-black text-white px-2.5 py-1 rounded-lg font-bold cursor-pointer inline-flex items-center gap-1 shadow-2xs">
+                    <i data-lucide="upload" class="w-3 h-3"></i> Seç
+                  </button>
+                </div>
+                <div class="h-28 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center overflow-hidden p-1 relative">
+                  ${c.hoverImage ? `<img src="${c.hoverImage}" class="w-full h-full object-contain" />` : `<span class="text-[10px] text-slate-400">Arxa şəkil yoxdur</span>`}
+                </div>
+                <input type="text" value="${escapeHtml(c.hoverImage || '')}" placeholder="/images/... və ya URL"
+                  oninput="updateColorField(${idx}, 'hoverImage', this.value)"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-mono text-slate-600 focus:bg-white">
+              </div>
+
+              <!-- 3. YAN (PROFİL / ÇİYİN) GÖRÜNÜŞ -->
+              <div class="bg-white p-3 rounded-2xl border border-slate-200 space-y-2 shadow-2xs">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-[11px] text-slate-800 flex items-center gap-1">
+                    <span class="w-2 h-2 rounded-full bg-amber-500"></span> 3. Yan Görünüş (Profil)
+                  </span>
+                  <button type="button" onclick="triggerColorUpload(${idx}, 'leftShoulderImage')" class="text-[10.5px] bg-slate-900 hover:bg-black text-white px-2.5 py-1 rounded-lg font-bold cursor-pointer inline-flex items-center gap-1 shadow-2xs">
+                    <i data-lucide="upload" class="w-3 h-3"></i> Seç
+                  </button>
+                </div>
+                <div class="h-28 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center overflow-hidden p-1 relative">
+                  ${sideImg ? `
+                    <img src="${sideImg}" class="w-full h-full object-contain" />
+                    <button type="button" onclick="clearColorSideImage(${idx})" title="Yan şəkli sil" class="absolute top-1 right-1 w-5 h-5 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center text-[10px] font-bold cursor-pointer shadow-xs">&times;</button>
+                  ` : `<span class="text-[10px] text-slate-400">Yan şəkil yoxdur</span>`}
+                </div>
+                <input type="text" value="${escapeHtml(sideImg)}" placeholder="/images/... və ya URL"
+                  oninput="updateColorField(${idx}, 'leftShoulderImage', this.value)"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-mono text-slate-600 focus:bg-white">
+              </div>
+            </div>
+
+            <!-- 4. ƏLAVƏ ŞƏKİLLƏR VƏ QALEREYA (ÇOXLU FOTO) -->
+            <div class="bg-white p-3 rounded-2xl border border-slate-200 space-y-2.5 shadow-2xs">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <span class="font-bold text-[11px] text-slate-900">4. Əlavə Şəkillər və Qalereya (${galleryList.length} Foto)</span>
+                  <p class="text-[10px] text-slate-400">Öndən, arxadan və yaxın detalların müxtəlif əlavə fotoları.</p>
+                </div>
+                <button type="button" onclick="triggerColorGalleryUpload(${idx})" class="text-[10.5px] bg-slate-900 hover:bg-black text-white px-3 py-1.5 rounded-xl font-bold cursor-pointer inline-flex items-center gap-1.5 shadow-2xs">
+                  <i data-lucide="plus" class="w-3 h-3"></i>
+                  <span>+ Foto Əlavə Et</span>
+                </button>
+              </div>
+
+              <!-- Thumbnails grid -->
+              <div class="flex flex-wrap items-center gap-2.5 pt-1">
+                ${galleryList.length > 0 ? galleryList.map((imgUrl, gIdx) => `
+                  <div class="relative w-16 h-20 rounded-xl bg-slate-50 border border-slate-200 overflow-hidden group shrink-0 shadow-2xs">
+                    <img src="${imgUrl}" class="w-full h-full object-contain p-0.5" />
+                    <button type="button" onclick="removeColorGalleryImage(${idx}, ${gIdx})" title="Sil" class="absolute top-1 right-1 w-4 h-4 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center text-[10px] font-bold cursor-pointer shadow-xs transition opacity-80 group-hover:opacity-100">&times;</button>
+                  </div>
+                `).join('') : `
+                  <div class="w-full py-2 px-3 rounded-xl bg-slate-50 border border-dashed border-slate-200 text-center text-[10.5px] text-slate-400">
+                    Hələlik əlavə şəkil yoxdur. "+ Foto Əlavə Et" düyməsindən istifadə edərək bu rəng üçün istənilən sayda şəkil yükləyə bilərsiniz.
+                  </div>
+                `}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Keep hidden inputs synchronized with first color
+      if (currentEditingColors[0]) {
+        const first = currentEditingColors[0];
+        document.getElementById('prodImage').value = first.image || '';
+        document.getElementById('prodHoverImage').value = first.hoverImage || '';
+      }
+
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    }
+
+    function addNewProductColor() {
+      currentEditingColors.push({
+        name: 'Yeni Rəng ' + (currentEditingColors.length + 1),
+        hex: '#111111',
+        image: '',
+        hoverImage: '',
+        leftShoulderImage: '',
+        gallery: []
+      });
+      renderProductColors();
+    }
+
+    function removeProductColor(idx) {
+      if (currentEditingColors.length <= 1) {
+        alert('Ən azı 1 rəng variantı olmalıdır!');
+        return;
+      }
+      if (confirm('Bu rəngi və ona aid olan bütün şəkilləri silmək istədiyinizdən əminsiniz?')) {
+        currentEditingColors.splice(idx, 1);
+        renderProductColors();
+      }
+    }
+
+    function updateColorField(idx, field, value) {
+      if (currentEditingColors[idx]) {
+        currentEditingColors[idx][field] = value;
+        if (field === 'leftShoulderImage') {
+          currentEditingColors[idx].rightShoulderImage = value;
+        }
+        if (idx === 0) {
+          if (field === 'image') document.getElementById('prodImage').value = value;
+          if (field === 'hoverImage') document.getElementById('prodHoverImage').value = value;
+        }
+      }
+    }
+
+    function updateColorHex(idx, hexVal) {
+      if (!hexVal) return;
+      if (currentEditingColors[idx]) {
+        currentEditingColors[idx].hex = hexVal;
+        const badge = document.getElementById('colorBadge_' + idx);
+        if (badge) badge.style.backgroundColor = hexVal;
+        const txt = document.getElementById('colorHexInput_' + idx);
+        if (txt && txt.value !== hexVal) txt.value = hexVal;
+      }
+    }
+
+    function clearColorSideImage(idx) {
+      if (currentEditingColors[idx]) {
+        currentEditingColors[idx].leftShoulderImage = '';
+        currentEditingColors[idx].rightShoulderImage = '';
+        renderProductColors();
+      }
+    }
+
+    function triggerColorUpload(colorIndex, field) {
+      currentUploadTarget = { colorIndex, field };
+      const fileInput = document.getElementById('dynamicColorFileInput');
+      if (fileInput) {
+        fileInput.value = '';
+        fileInput.click();
+      }
+    }
+
+    function triggerColorGalleryUpload(colorIndex) {
+      currentUploadTarget = { colorIndex, field: 'gallery' };
+      const fileInput = document.getElementById('dynamicColorFileInput');
+      if (fileInput) {
+        fileInput.value = '';
+        fileInput.click();
+      }
+    }
+
+    async function handleDynamicColorUpload(input) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+
+      const { colorIndex, field } = currentUploadTarget;
+      const targetColor = currentEditingColors[colorIndex];
+      if (!targetColor) return;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await fetch('/api/admin/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await res.json();
+        if (data.success && data.url) {
+          if (field === 'gallery') {
+            if (!Array.isArray(targetColor.gallery)) targetColor.gallery = [];
+            targetColor.gallery.push(data.url);
+          } else {
+            targetColor[field] = data.url;
+            if (field === 'leftShoulderImage') {
+              targetColor.rightShoulderImage = data.url;
+            }
+          }
+          renderProductColors();
+        } else {
+          alert('Yükləmə xətası: ' + (data.error || 'Fayl yüklənmədi'));
+        }
+      } catch (err) {
+        alert('Şəbəkə xətası: ' + err.message);
+      }
+    }
+
+    function removeColorGalleryImage(colorIndex, galleryIndex) {
+      const c = currentEditingColors[colorIndex];
+      if (c && Array.isArray(c.gallery)) {
+        c.gallery.splice(galleryIndex, 1);
+        renderProductColors();
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
     function openProductModal() {
       document.getElementById('prodEditId').value = '';
       document.getElementById('prodName').value = '';
@@ -2907,10 +3161,17 @@
       document.getElementById('prodImage').value = '';
       document.getElementById('prodHoverImage').value = '';
       document.getElementById('prodDesc').value = '';
-      document.getElementById('frontPreviewBox').innerHTML = '<i data-lucide="image" class="w-6 h-6 text-slate-300"></i>';
-      document.getElementById('backPreviewBox').innerHTML = '<i data-lucide="image" class="w-6 h-6 text-slate-300"></i>';
-      document.getElementById('frontPrintBadge').classList.add('hidden');
-      document.getElementById('backPrintBadge').classList.add('hidden');
+      
+      currentEditingColors = [{
+        name: 'Qara (Obsidian Noir)',
+        hex: '#1A1A1A',
+        image: '',
+        hoverImage: '',
+        leftShoulderImage: '',
+        gallery: []
+      }];
+      renderProductColors();
+
       document.getElementById('productModalTitle').innerText = 'Yeni Məhsul Əlavə Et';
       document.getElementById('productModal').classList.remove('hidden');
       document.getElementById('productModal').classList.add('flex');
@@ -2925,29 +3186,31 @@
       document.getElementById('prodCategory').value = p.category || 'koynek';
       document.getElementById('prodPrice').value = p.price != null ? p.price : '';
       document.getElementById('prodComparePrice').value = (p.compareAtPrice != null && p.compareAtPrice !== '') ? p.compareAtPrice : '';
-      const firstColor = (p.colors && p.colors[0]) || {};
-      const frontImg = p.image || firstColor.image || '';
-      const backImg = p.hoverImage || firstColor.hoverImage || '';
-      document.getElementById('prodImage').value = frontImg;
-      document.getElementById('prodHoverImage').value = backImg;
       document.getElementById('prodDesc').value = p.description || '';
 
-      const frontBox = document.getElementById('frontPreviewBox');
-      if (frontImg) {
-        frontBox.innerHTML = `<img src="${frontImg}" class="w-full h-full object-contain p-0.5" />`;
+      // Initialize rich colors
+      let colors = [];
+      if (p.colors && p.colors.length > 0) {
+        colors = JSON.parse(JSON.stringify(p.colors));
       } else {
-        frontBox.innerHTML = '<i data-lucide="image" class="w-6 h-6 text-slate-300"></i>';
+        colors = [{
+          name: 'Standart',
+          hex: '#111111',
+          image: p.image || '',
+          hoverImage: p.hoverImage || '',
+          leftShoulderImage: p.leftShoulderImage || p.rightShoulderImage || '',
+          gallery: Array.isArray(p.gallery) ? [...p.gallery] : []
+        }];
       }
 
-      const backBox = document.getElementById('backPreviewBox');
-      if (backImg) {
-        backBox.innerHTML = `<img src="${backImg}" class="w-full h-full object-contain p-0.5" />`;
-      } else {
-        backBox.innerHTML = '<i data-lucide="image" class="w-6 h-6 text-slate-300"></i>';
-      }
+      colors.forEach(c => {
+        if (!Array.isArray(c.gallery)) c.gallery = [];
+        if (!c.leftShoulderImage && c.rightShoulderImage) c.leftShoulderImage = c.rightShoulderImage;
+        if (!c.leftShoulderImage && p.leftShoulderImage) c.leftShoulderImage = p.leftShoulderImage;
+      });
 
-      document.getElementById('frontPrintBadge').classList.add('hidden');
-      document.getElementById('backPrintBadge').classList.add('hidden');
+      currentEditingColors = colors;
+      renderProductColors();
 
       document.getElementById('productModalTitle').innerText = 'Məhsulu Redaktə Et';
       document.getElementById('productModal').classList.remove('hidden');
@@ -3158,10 +3421,34 @@
       const price = Number(document.getElementById('prodPrice').value) || 0;
       const compareRaw = document.getElementById('prodComparePrice').value.trim();
       const compareAtPrice = (compareRaw !== '' && !isNaN(Number(compareRaw))) ? Number(compareRaw) : null;
-      const image = document.getElementById('prodImage').value.trim();
-      const hoverImage = document.getElementById('prodHoverImage').value.trim();
       const description = document.getElementById('prodDesc').value.trim();
 
+      if (!currentEditingColors || currentEditingColors.length === 0) {
+        alert('Ən azı 1 rəng və görünüş daxil edilməlidir!');
+        return;
+      }
+
+      // Format and ensure complete angles and gallery for each color
+      const formattedColors = currentEditingColors.map((c, i) => {
+        const cGallery = Array.isArray(c.gallery) ? [...c.gallery] : [];
+        const setOfImgs = new Set();
+        if (c.image) setOfImgs.add(c.image);
+        if (c.hoverImage) setOfImgs.add(c.hoverImage);
+        if (c.leftShoulderImage) setOfImgs.add(c.leftShoulderImage);
+        cGallery.forEach(g => { if (g && typeof g === 'string') setOfImgs.add(g.trim()); });
+
+        return {
+          name: (c.name || '').trim() || ('Rəng ' + (i + 1)),
+          hex: (c.hex || '').trim() || '#111111',
+          image: (c.image || '').trim(),
+          hoverImage: (c.hoverImage || '').trim(),
+          leftShoulderImage: (c.leftShoulderImage || '').trim(),
+          rightShoulderImage: (c.leftShoulderImage || '').trim(),
+          gallery: Array.from(setOfImgs),
+        };
+      });
+
+      const firstColor = formattedColors[0] || {};
       const payload = {
         ...(existing || {}),
         id: id || undefined,
@@ -3170,8 +3457,12 @@
         category,
         price,
         compareAtPrice: compareAtPrice,
-        image: image || existing?.image || '',
-        hoverImage: hoverImage || existing?.hoverImage || '',
+        image: firstColor.image || existing?.image || '',
+        hoverImage: firstColor.hoverImage || existing?.hoverImage || '',
+        leftShoulderImage: firstColor.leftShoulderImage || existing?.leftShoulderImage || '',
+        rightShoulderImage: firstColor.rightShoulderImage || existing?.rightShoulderImage || '',
+        gallery: firstColor.gallery && firstColor.gallery.length > 0 ? firstColor.gallery : (existing?.gallery || []),
+        colors: formattedColors,
         description: description || existing?.description || '',
         inStock: existing?.inStock ?? true,
         gender: existing?.gender || 'men',
@@ -3179,12 +3470,6 @@
 
       if (compareAtPrice === null) {
         delete payload.compareAtPrice;
-      }
-
-      if (!existing?.colors || existing.colors.length === 0) {
-        payload.colors = [
-          { name: 'Standart', hex: '#111111', image: image, hoverImage: hoverImage }
-        ];
       }
 
       try {
@@ -3199,7 +3484,7 @@
           localStorage.setItem('hv_store_updated', Date.now().toString());
           window.dispatchEvent(new Event('hv-store-refresh'));
           await loadData();
-          alert('✓ Məhsul və qiymət uğurla yadda saxlanıldı!');
+          alert('✓ Məhsul, rənglər və bütün foto bucaqları uğurla yadda saxlanıldı!');
         } else {
           alert('Xəta baş verdi: ' + (result.error || 'Server xətası'));
         }

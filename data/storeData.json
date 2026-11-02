@@ -349,12 +349,12 @@
       "name": "HORWALLE \"BMW M Motorsport\" Heavyweight Snapback Cap",
       "refCode": "HV-BMW-CAP-01",
       "description": "Horvvalle Atelye xüsusi istehsalı BMW M Motorsport snapback kepka. 100% daranmış sıx pambıq twill parça, orijinal BMW M üçrəngli vizor zolaqları və yüksək keyfiyyətli relyefli tikmə loqo detalı. Baş ölçüsünə görə arxadan asan tənzimlənir.",
-      "price": 29.0,
-      "compareAtPrice": 59.0,
+      "price": 29,
+      "compareAtPrice": 59,
       "badge": "YENİ MODEL",
       "category": "aksesuar",
       "gender": "unisex",
-      "rating": 5.0,
+      "rating": 5,
       "reviewCount": 24,
       "composition": "100% Daranmış Qalın Pambıq Twill (340 GSM)",
       "fit": "6 Panelli Strukturlaşdırılmış Snapback (Tənzimlənən kəmər)",
@@ -372,42 +372,12 @@
           "gallery": [
             "/images/products/bmw-m-motorsport-cap/black_front.webp"
           ]
-        },
-        {
-          "name": "Ağ (Alpine White)",
-          "hex": "#F5F5F7",
-          "image": "/images/products/bmw-m-motorsport-cap/white_front.webp",
-          "hoverImage": "/images/products/bmw-m-motorsport-cap/white_front.webp",
-          "gallery": [
-            "/images/products/bmw-m-motorsport-cap/white_front.webp"
-          ]
-        },
-        {
-          "name": "Tünd Göy (Marina Bay Blue)",
-          "hex": "#1E293B",
-          "image": "/images/products/bmw-m-motorsport-cap/navy_front.webp",
-          "hoverImage": "/images/products/bmw-m-motorsport-cap/navy_front.webp",
-          "gallery": [
-            "/images/products/bmw-m-motorsport-cap/navy_front.webp"
-          ]
-        },
-        {
-          "name": "Qrafit Boz (Anthracite Grey)",
-          "hex": "#475569",
-          "image": "/images/products/bmw-m-motorsport-cap/grey_front.webp",
-          "hoverImage": "/images/products/bmw-m-motorsport-cap/grey_front.webp",
-          "gallery": [
-            "/images/products/bmw-m-motorsport-cap/grey_front.webp"
-          ]
         }
       ],
       "image": "/images/products/bmw-m-motorsport-cap/black_front.webp",
       "hoverImage": "/images/products/bmw-m-motorsport-cap/black_front.webp",
       "gallery": [
-        "/images/products/bmw-m-motorsport-cap/black_front.webp",
-        "/images/products/bmw-m-motorsport-cap/white_front.webp",
-        "/images/products/bmw-m-motorsport-cap/navy_front.webp",
-        "/images/products/bmw-m-motorsport-cap/grey_front.webp"
+        "/images/products/bmw-m-motorsport-cap/black_front.webp"
       ]
     }
   ],

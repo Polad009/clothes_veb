@@ -14,23 +14,19 @@ export function normalizeProduct(p: any): Product {
     );
     const validHover = hasDistinctHover ? c.hoverImage : undefined;
 
-    let gallery: string[] = [];
-    if (c.gallery && Array.isArray(c.gallery) && c.gallery.length > 0) {
-      gallery = c.gallery.filter((img: string, idx: number, arr: string[]) => img && typeof img === 'string' && arr.indexOf(img) === idx);
-    } else {
-      gallery = [c.image];
-      if (validHover && !gallery.includes(validHover)) gallery.push(validHover);
-      if (c.leftShoulderImage && !gallery.includes(c.leftShoulderImage)) gallery.push(c.leftShoulderImage);
-      if (c.rightShoulderImage && !gallery.includes(c.rightShoulderImage)) gallery.push(c.rightShoulderImage);
-    }
+    const candidateList = Array.isArray(c.gallery) && c.gallery.length > 0 ? c.gallery : [];
+    const allCandidates = [c.image, validHover, c.leftShoulderImage, c.rightShoulderImage, ...candidateList];
+    const gallery = allCandidates.filter((img: any, idx: number, arr: any[]) => 
+      img && typeof img === 'string' && img.trim() !== '' && arr.indexOf(img) === idx
+    );
 
     return {
       name: c.name || "Standart",
       hex: c.hex || "#111111",
       image: c.image || p.image || "/images/hero/lookbook.webp",
       hoverImage: validHover || p.hoverImage,
-      leftShoulderImage: c.leftShoulderImage,
-      rightShoulderImage: c.rightShoulderImage,
+      leftShoulderImage: c.leftShoulderImage || p.leftShoulderImage,
+      rightShoulderImage: c.rightShoulderImage || p.rightShoulderImage,
       gallery: gallery.length > 0 ? gallery : [p.image || "/images/hero/lookbook.webp"],
     };
   });

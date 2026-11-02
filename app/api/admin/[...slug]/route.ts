@@ -351,6 +351,9 @@ export async function POST(
 
           if (product.image) meta.image = product.image;
           if (product.hoverImage) meta.hoverImage = product.hoverImage;
+          if (product.leftShoulderImage) meta.leftShoulderImage = product.leftShoulderImage;
+          if (product.rightShoulderImage) meta.rightShoulderImage = product.rightShoulderImage;
+          if (product.gallery) meta.gallery = product.gallery;
           if (product.printLayers) meta.printLayers = product.printLayers;
 
           if (hasCompareAtPrice) {

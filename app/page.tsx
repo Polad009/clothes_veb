@@ -102,7 +102,7 @@ export default function Home() {
       fabric: language === "en" ? "Heavy Twill & Natural Canvas" : language === "ru" ? "Плотный твил и натуральный холст" : language === "tr" ? "Kalın Dimi & Doğal Keten" : "Qalın Twill & Təbii Kətan",
       image: "/images/products/bmw-m-motorsport-cap/black_front.webp",
       link: "/collections?category=aksesuar",
-      count: language === "en" ? "4 Colors" : language === "ru" ? "4 Цвета" : language === "tr" ? "4 Renk" : "4 Rəng",
+      count: language === "en" ? "1 Model" : language === "ru" ? "1 Модель" : language === "tr" ? "1 Model" : "1 Model",
       tag: language === "en" ? "3D PRINT STUDIO" : language === "ru" ? "3D СТУДИЯ ПЕЧАТИ" : language === "tr" ? "3D BASKI STÜDYOSU" : "3D ÇAP STUDİYASI",
     },
   ];
