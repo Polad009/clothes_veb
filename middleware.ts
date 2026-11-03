@@ -32,8 +32,8 @@ function verifyTokenAtEdge(token: string | undefined | null): boolean {
   }
 }
 
-// ─── 404 HTML (matching the brand 404 page design) ──────────────────────────
-const NOT_FOUND_HTML = `<!DOCTYPE html><html lang="az"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>404 — Horvvalle Atelier</title><style>*{margin:0;padding:0;box-sizing:border-box}body{min-height:100vh;background:#090707;color:#fff;font-family:'Georgia',serif;display:flex;align-items:center;justify-content:center;text-align:center}.g{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:500px;height:500px;background:radial-gradient(circle,rgba(230,194,128,.1),transparent 70%);border-radius:50%;pointer-events:none}.c{max-width:480px;padding:2rem;position:relative;z-index:1}.b{display:inline-flex;align-items:center;gap:.5rem;padding:6px 14px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);font-size:11px;font-weight:600;letter-spacing:.22em;color:#E6C280;text-transform:uppercase;margin-bottom:1.5rem}h1{font-size:clamp(6rem,15vw,9rem);font-weight:700;letter-spacing:-.04em;background:linear-gradient(180deg,#fff,#d6d3d1,rgba(255,255,255,.1));-webkit-background-clip:text;background-clip:text;color:transparent}h2{font-size:1.5rem;font-weight:700;margin:.75rem 0}p{color:#a8a29e;font-size:.875rem;line-height:1.6;max-width:400px;margin:0 auto 2.5rem}.btns{display:flex;flex-wrap:wrap;gap:.75rem;justify-content:center}a{display:inline-flex;align-items:center;justify-content:center;padding:12px 28px;border-radius:12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;text-decoration:none;transition:all .2s}.pri{background:#E6C280;color:#000}.pri:hover{background:#fff}.sec{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#d6d3d1}.sec:hover{background:rgba(255,255,255,.1);color:#fff}.sup{margin-top:3rem;font-size:11px;color:#a8a29e}a.wh{color:#E6C280;text-decoration:underline;text-underline-offset:4px}a.wh:hover{color:#fff}</style></head><body><div class="g"></div><div class="c"><div class="b">✦ Horvvalle Atelier</div><h1>404</h1><h2>Səhifə Tapılmadı</h2><p>Axtardığınız səhifə silinmiş, ünvanı dəyişdirilmiş və ya hazırda mövcud deyil.</p><div class="btns"><a href="/collections" class="pri">Kolleksiyaya Keç</a><a href="/" class="sec">Ana Səhifə</a></div><div class="sup">Kömək lazımdır? <a href="https://wa.me/994557669050" target="_blank" rel="noopener" class="wh">Atelye Dəstək (WhatsApp)</a></div></div></body></html>`;
+// ─── Generic Default 404 (Brand-sız, sadə qara/ağ standart Vercel/Next.js tipli 404) ───
+const GENERIC_404_HTML = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>404: This page could not be found</title><style>body{color:#000;background:#fff;font-family:-apple-system,BlinkMacSystemFont,Roboto,"Segoe UI","Fira Sans",Avenir,"Helvetica Neue","Lucida Grande",sans-serif;height:100vh;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}}.d{display:flex;align-items:center}h1{display:inline-block;margin:0 20px 0 0;padding:0 23px 0 0;font-size:24px;font-weight:500;vertical-align:top;line-height:49px;border-right:1px solid rgba(128,128,128,.4)}h2{font-size:14px;font-weight:400;line-height:49px;margin:0}</style></head><body><div class="d"><h1>404</h1><h2>This page could not be found.</h2></div></body></html>`;
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -49,26 +49,20 @@ export function middleware(request: NextRequest) {
     const cookieToken = request.cookies.get('horvvalle_admin_token')?.value;
     const hasValidCookie = verifyTokenAtEdge(cookieToken);
 
-    if (hasValidCookie) {
-      // Authorized → let them through with security headers
-      const response = NextResponse.next();
-      applySecurityHeaders(response);
-      return response;
-    }
-
     // Step B: Check for the secret access key in query string
-    const accessKey = request.nextUrl.searchParams.get('access');
-    const expectedKey = process.env.ADMIN_ACCESS_KEY || 'horvvalle_portal_2026_xQ9mK';
+    const accessKey = request.nextUrl.searchParams.get('access')?.trim();
+    const expectedKey = (process.env.ADMIN_ACCESS_KEY || 'horvvalle_portal_2026_xQ9mK').trim();
+    const hasValidAccessKey = Boolean(accessKey && accessKey === expectedKey);
 
-    if (accessKey && accessKey === expectedKey) {
-      // Valid access key → let them see the login page
+    if (hasValidCookie || hasValidAccessKey) {
+      // Authorized → allow access to the admin page/html
       const response = NextResponse.next();
       applySecurityHeaders(response);
       return response;
     }
 
-    // Step C: No valid cookie AND no valid access key → return 404
-    return new NextResponse(NOT_FOUND_HTML, {
+    // Step C: No valid cookie AND no valid access key → return generic 404
+    return new NextResponse(GENERIC_404_HTML, {
       status: 404,
       headers: {
         'Content-Type': 'text/html; charset=utf-8',

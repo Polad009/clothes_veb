@@ -33,30 +33,35 @@ function verifyTokenServer(token: string | undefined | null): boolean {
 }
 
 interface AdminPageProps {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }> | { [key: string]: string | string[] | undefined };
 }
 
 export default async function AdminPage({ searchParams }: AdminPageProps) {
-  const params = await searchParams;
+  const resolvedParams = searchParams ? await Promise.resolve(searchParams) : {};
   const cookieStore = await cookies();
   const adminToken = cookieStore.get("horvvalle_admin_token")?.value;
   const hasValidCookie = verifyTokenServer(adminToken);
 
   // Check secret access key
-  const accessKey = typeof params.access === "string" ? params.access : "";
-  const expectedKey =
-    process.env.ADMIN_ACCESS_KEY || "horvvalle_portal_2026_xQ9mK";
-  const hasValidAccessKey = accessKey === expectedKey;
+  const rawAccess = resolvedParams.access;
+  const accessKey = typeof rawAccess === "string" ? rawAccess.trim() : "";
+  const expectedKey = (process.env.ADMIN_ACCESS_KEY || "horvvalle_portal_2026_xQ9mK").trim();
+  const hasValidAccessKey = Boolean(accessKey && accessKey === expectedKey);
 
   // If neither valid cookie nor valid access key → 404
   if (!hasValidCookie && !hasValidAccessKey) {
     notFound();
   }
 
+  // Pass access parameter to iframe if user authenticated via query key
+  const iframeSrc = hasValidAccessKey
+    ? `/admin.html?access=${encodeURIComponent(expectedKey)}`
+    : "/admin.html";
+
   return (
     <div className="fixed inset-0 z-[999999] w-screen h-screen bg-[#F8F9FA] overflow-hidden m-0 p-0">
       <iframe
-        src="/admin.html"
+        src={iframeSrc}
         className="w-full h-full border-none m-0 p-0 block"
         title="HORWALLE İdarəetmə Portalı"
       />
