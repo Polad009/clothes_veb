@@ -55,6 +55,7 @@ export async function GET() {
               colors: meta.colors || [],
               sizes: meta.sizes && meta.sizes.length > 0 ? meta.sizes : ['S', 'M', 'L', 'XL'],
               features: meta.features || [],
+              printLayers: meta.printLayers || [],
             };
           });
 
