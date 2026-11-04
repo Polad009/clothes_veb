@@ -73,6 +73,43 @@ export async function GET() {
       }
     }
 
+    // 2. Fetch live promo codes from Supabase cloud storage (persistent across serverless instances)
+    if (supabaseServer) {
+      try {
+        const { data: promoFile, error: promoErr } = await supabaseServer.storage
+          .from('product-images')
+          .download('config/promos.json');
+
+        if (!promoErr && promoFile) {
+          const promoText = await promoFile.text();
+          const cloudPromos = JSON.parse(promoText);
+          if (Array.isArray(cloudPromos)) {
+            data.promoCodes = cloudPromos;
+          }
+        }
+      } catch (promoSyncErr) {
+        console.warn('[StoreData] Promo cloud sync warning:', promoSyncErr);
+      }
+    }
+
+    // 3. Fetch live CMS content & settings from Supabase cloud storage
+    if (supabaseServer) {
+      try {
+        const { data: configFile, error: configErr } = await supabaseServer.storage
+          .from('product-images')
+          .download('config/store_config.json');
+
+        if (!configErr && configFile) {
+          const configText = await configFile.text();
+          const cloudConfig = JSON.parse(configText);
+          if (cloudConfig?.content) data.content = { ...data.content, ...cloudConfig.content };
+          if (cloudConfig?.settings) data.settings = { ...data.settings, ...cloudConfig.settings };
+        }
+      } catch (configSyncErr) {
+        console.warn('[StoreData] Config cloud sync warning:', configSyncErr);
+      }
+    }
+
     // SECURE SANITIZATION: Never leak customer orders or pod orders to public requests!
     const sanitizedPromoCodes = (data.promoCodes || []).map((p: any) => ({
       code: p.code,

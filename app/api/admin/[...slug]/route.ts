@@ -128,6 +128,38 @@ async function getEnrichedStoreData() {
         };
       });
     }
+    // 4. Fetch live promo codes from Supabase cloud storage
+    try {
+      const { data: promoFile, error: promoErr } = await supabaseServer.storage
+        .from('product-images')
+        .download('config/promos.json');
+
+      if (!promoErr && promoFile) {
+        const promoText = await promoFile.text();
+        const cloudPromos = JSON.parse(promoText);
+        if (Array.isArray(cloudPromos)) {
+          db.promoCodes = cloudPromos;
+        }
+      }
+    } catch (promoSyncErr) {
+      console.warn('[AdminAPI] Promo cloud sync warning:', promoSyncErr);
+    }
+
+    // 5. Fetch live CMS content & settings from Supabase cloud storage
+    try {
+      const { data: configFile, error: configErr } = await supabaseServer.storage
+        .from('product-images')
+        .download('config/store_config.json');
+
+      if (!configErr && configFile) {
+        const configText = await configFile.text();
+        const cloudConfig = JSON.parse(configText);
+        if (cloudConfig?.content) db.content = { ...db.content, ...cloudConfig.content };
+        if (cloudConfig?.settings) db.settings = { ...db.settings, ...cloudConfig.settings };
+      }
+    } catch (configSyncErr) {
+      console.warn('[AdminAPI] Config cloud sync warning:', configSyncErr);
+    }
   } catch (err) {
     console.warn('[AdminAPI] Enriched data sync warning:', err);
   }
@@ -544,6 +576,21 @@ export async function POST(
       if (settings) db.settings = { ...db.settings, ...settings };
       if (content) db.content = { ...db.content, ...content };
       writeStoreDb(db);
+
+      if (supabaseServer) {
+        try {
+          const configPayload = { content: db.content, settings: db.settings };
+          await supabaseServer.storage
+            .from('product-images')
+            .upload('config/store_config.json', Buffer.from(JSON.stringify(configPayload, null, 2)), {
+              contentType: 'application/json',
+              upsert: true,
+            });
+        } catch (confErr: any) {
+          console.warn('[AdminAPI] Failed to persist config to Supabase storage:', confErr.message);
+        }
+      }
+
       return NextResponse.json({ success: true, settings: db.settings, content: db.content });
     }
 
@@ -569,7 +616,10 @@ export async function POST(
     if (route === 'promos') {
       const promo = body;
       if (!db.promoCodes) db.promoCodes = [];
-      const index = db.promoCodes.findIndex((p: any) => p.id === promo.id || p.code === promo.code);
+      const cleanCode = (promo.code || '').trim().toUpperCase();
+      promo.code = cleanCode;
+
+      const index = db.promoCodes.findIndex((p: any) => p.id === promo.id || (p.code || '').toUpperCase() === cleanCode);
       if (index >= 0) {
         db.promoCodes[index] = { ...db.promoCodes[index], ...promo };
       } else {
@@ -577,6 +627,20 @@ export async function POST(
         db.promoCodes.unshift(promo);
       }
       writeStoreDb(db);
+
+      if (supabaseServer) {
+        try {
+          await supabaseServer.storage
+            .from('product-images')
+            .upload('config/promos.json', Buffer.from(JSON.stringify(db.promoCodes, null, 2)), {
+              contentType: 'application/json',
+              upsert: true,
+            });
+        } catch (supaPromoErr: any) {
+          console.warn('[AdminAPI] Failed to persist promo to Supabase storage:', supaPromoErr.message);
+        }
+      }
+
       return NextResponse.json({ success: true, promo });
     }
 
@@ -800,6 +864,20 @@ export async function DELETE(
     if (route === 'promos' && id) {
       db.promoCodes = (db.promoCodes || []).filter((p: any) => p.id !== id && p.code !== id);
       writeStoreDb(db);
+
+      if (supabaseServer) {
+        try {
+          await supabaseServer.storage
+            .from('product-images')
+            .upload('config/promos.json', Buffer.from(JSON.stringify(db.promoCodes, null, 2)), {
+              contentType: 'application/json',
+              upsert: true,
+            });
+        } catch (supaPromoErr: any) {
+          console.warn('[AdminAPI] Failed to update promo delete in Supabase storage:', supaPromoErr.message);
+        }
+      }
+
       return NextResponse.json({ success: true });
     }
 

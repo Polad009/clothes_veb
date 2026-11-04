@@ -444,7 +444,9 @@ export default function CheckoutPage() {
 
     setIsCheckingPromo(true);
     try {
-      const res = await fetch("/api/store/data");
+      const res = await fetch(`/api/store/data?_t=${Date.now()}`, {
+        cache: 'no-store',
+      });
       const data = await res.json();
       const promos: any[] = data.promoCodes || [];
 
