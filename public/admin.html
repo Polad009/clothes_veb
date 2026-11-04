@@ -3200,37 +3200,43 @@
     }
 
     function printBatchShippingLabels() {
-      const orders = (STORE_DATA.orders || []).filter(o => {
+      // Get all non-cancelled, non-delivered orders (or all orders if user chooses)
+      let orders = (STORE_DATA.orders || []).filter(o => {
         const s = (o.orderStatus || '').toLowerCase();
-        return !s.includes('çatdır') && !s.includes('catdir') && !s.includes('ləğv') && !s.includes('cancel');
+        return !s.includes('ləğv') && !s.includes('cancel');
       });
 
+      // If all are delivered or none, take all existing orders
       if (orders.length === 0) {
-        alert('Çap üçün aktiv yeni və ya göndərilməmiş sifariş tapılmadı.');
+        orders = STORE_DATA.orders || [];
+      }
+
+      if (orders.length === 0) {
+        alert('Çap üçün heç bir sifariş tapılmadı.');
         return;
       }
 
-      if (!confirm(`${orders.length} ədəd aktiv sifarişin kargo etiketi çap edilsin?`)) return;
+      // Open shipping label modal first so the container is present in DOM and visible
+      const modal = document.getElementById('shippingLabelModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
 
       const container = document.getElementById('printableShippingLabel');
 
       container.innerHTML = orders.map((o, idx) => `
-        <div style="${idx > 0 ? 'page-break-before: always;' : ''} min-height: 145mm;" class="p-3 bg-white border border-neutral-200 mb-4">
+        <div style="${idx > 0 ? 'page-break-before: always; break-before: page;' : ''} min-height: 145mm;" class="p-3 bg-white border-2 border-slate-900 mb-6">
           ${renderShippingLabelString(o)}
         </div>
       `).join('');
 
       document.body.classList.remove('printing-invoice');
+      document.body.classList.remove('printing-tax');
       document.body.classList.add('printing-label');
 
+      // Trigger print dialog
       setTimeout(() => {
         window.print();
-        if (currentShippingLabelOrder) {
-          renderShippingLabel(currentShippingLabelOrder);
-        } else if (orders[0]) {
-          renderShippingLabel(orders[0]);
-        }
-      }, 300);
+      }, 350);
     }
 
     function renderShippingLabelString(o) {
