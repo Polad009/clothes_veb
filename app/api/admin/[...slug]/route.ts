@@ -449,8 +449,10 @@ export async function POST(
         const mainFileName = `${cleanBase}_${uniqueSuffix}.png`;
         const mainFilePath = path.join(uploadsDir, mainFileName);
 
-        // Save high quality PNG
-        await sharp(buffer).png({ quality: 95 }).toFile(mainFilePath);
+        // Save high quality PNG locally (fallback or dev)
+        await sharp(buffer).png({ quality: 95 }).toFile(mainFilePath).catch((err) => {
+          console.warn('[Upload local file write skipped/warning]:', err?.message);
+        });
         const mainUrl = `/images/uploads/${mainFileName}`;
 
         // AUTOMATIC MOCKUP / PRINT DESIGN EXTRACTION
@@ -466,21 +468,68 @@ export async function POST(
             const printFileName = `${cleanBase}_print_layer_${uniqueSuffix}.png`;
             const printFilePath = path.join(uploadsDir, printFileName);
 
-            await sharp(buffer)
+            const printBuffer = await sharp(buffer)
               .extract({ left: cropL, top: cropT, width: cropW, height: cropH })
               .png({ quality: 95 })
-              .toFile(printFilePath);
+              .toBuffer();
 
-            printLayerUrl = `/images/uploads/${printFileName}`;
+            await sharp(printBuffer).toFile(printFilePath).catch(() => null);
+
+            if (supabaseServer) {
+              const { error: supaPrintErr } = await supabaseServer.storage
+                .from('product-images')
+                .upload(`prints/${printFileName}`, printBuffer, {
+                  contentType: 'image/png',
+                  upsert: true,
+                });
+              if (!supaPrintErr) {
+                const { data: supaPrintData } = supabaseServer.storage
+                  .from('product-images')
+                  .getPublicUrl(`prints/${printFileName}`);
+                if (supaPrintData?.publicUrl) {
+                  printLayerUrl = supaPrintData.publicUrl;
+                }
+              }
+            }
+            if (!printLayerUrl) {
+              printLayerUrl = `/images/uploads/${printFileName}`;
+            }
           }
         } catch (extractErr) {
           console.warn('[Upload] Print extraction skipped:', extractErr);
         }
 
+        // Upload main image to Supabase Storage (cloud CDN) for persistent serverless hosting
+        let finalMainUrl = mainUrl;
+        if (supabaseServer) {
+          try {
+            const optimizedBuffer = await sharp(buffer).png({ quality: 95 }).toBuffer();
+            const { error: supaErr } = await supabaseServer.storage
+              .from('product-images')
+              .upload(`products/${mainFileName}`, optimizedBuffer, {
+                contentType: 'image/png',
+                upsert: true,
+              });
+
+            if (!supaErr) {
+              const { data: supaData } = supabaseServer.storage
+                .from('product-images')
+                .getPublicUrl(`products/${mainFileName}`);
+              if (supaData?.publicUrl) {
+                finalMainUrl = supaData.publicUrl;
+              }
+            } else {
+              console.warn('[Upload Supabase Storage Warning]:', supaErr.message);
+            }
+          } catch (supaUploadEx: any) {
+            console.warn('[Upload Supabase Exception]:', supaUploadEx.message);
+          }
+        }
+
         return NextResponse.json({
           success: true,
-          url: mainUrl,
-          printLayerUrl: printLayerUrl || mainUrl,
+          url: finalMainUrl,
+          printLayerUrl: printLayerUrl || finalMainUrl,
           filename: mainFileName,
         });
       } catch (uploadErr: any) {

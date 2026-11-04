@@ -42,6 +42,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "*.horvvalle.com",
       },
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
+      },
     ],
   },
   webpack: (config) => {
