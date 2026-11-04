@@ -3402,7 +3402,7 @@
                     </div>
                     <div class="flex items-center gap-2 mt-3 pt-2 border-t border-slate-100">
                       <a href="${pl.url}" target="_blank" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[10px] font-bold flex-1 text-center">Bax</a>
-                      <a href="${pl.url}" download class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[10px] font-bold flex-1 text-center shadow-xs">Yüklə (PNG)</a>
+                      <button type="button" onclick="downloadAssetDirectly('${pl.url}', '${(pl.name || 'print-layer').replace(/[^a-zA-Z0-9_\-\.]/g, '_')}.png')" class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[10px] font-bold flex-1 text-center shadow-xs cursor-pointer">Yüklə (PNG)</button>
                     </div>
                   </div>
                 `).join('')}
@@ -3427,7 +3427,7 @@
                   </div>
                   <div class="flex items-center gap-1.5 mt-2">
                     <a href="${m.url}" target="_blank" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md text-[9px] font-bold flex-1 text-center">Bax</a>
-                    <a href="${m.url}" download class="px-2 py-1 bg-slate-900 hover:bg-black text-white rounded-md text-[9px] font-bold flex-1 text-center">Yüklə</a>
+                    <button type="button" onclick="downloadAssetDirectly('${m.url}', '${(m.name || 'mockup').replace(/[^a-zA-Z0-9_\-\.]/g, '_')}.png')" class="px-2 py-1 bg-slate-900 hover:bg-black text-white rounded-md text-[9px] font-bold flex-1 text-center cursor-pointer">Yüklə</button>
                   </div>
                 </div>
               `).join('')}
@@ -3539,6 +3539,30 @@
         } catch (err) {
           alert('Silinmə xətası: ' + err.message);
         }
+      }
+    }
+
+    async function downloadAssetDirectly(url, filename) {
+      try {
+        const res = await fetch(url);
+        const blob = await res.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename || 'download.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(blobUrl);
+      } catch (e) {
+        // Fallback for CORS or direct navigation
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename || 'download.png';
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
       }
     }
 
