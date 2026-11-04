@@ -152,6 +152,29 @@
         background: white;
       }
 
+      /* Printable Official Tax Report (A4 Landscape / Portrait) */
+      body.printing-tax #printableTaxReportContainer,
+      body.printing-tax #printableTaxReportContainer * {
+        visibility: visible;
+      }
+
+      body.printing-tax #printableTaxReportContainer {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: white;
+        padding: 15mm;
+        margin: 0;
+        border: none !important;
+        box-shadow: none !important;
+      }
+
+      body.printing-tax @page {
+        size: A4 portrait;
+        margin: 10mm;
+      }
+
       @page {
         size: 100mm 150mm;
         margin: 0;
@@ -370,6 +393,19 @@
             class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
             <i data-lucide="receipt" class="w-4 h-4 text-slate-400"></i>
             <span>Satış Təsdiqi</span>
+          </button>
+        </div>
+
+        <!-- MALİYYƏ VƏ VERGİ HESABATI (AR DVX UYĞUN) -->
+        <div class="space-y-1 pt-2 border-t border-slate-100">
+          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">
+            MALİYYƏ & VERGİ
+          </div>
+          <button onclick="switchTab('taxReports')" id="nav-taxReports"
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
+            <i data-lucide="landmark" class="w-4 h-4 text-emerald-600"></i>
+            <span>Vergi & Rüblük Hesabat</span>
+            <span class="ml-auto text-[9px] font-bold bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded">AR DVX</span>
           </button>
         </div>
 
@@ -1487,6 +1523,190 @@
         </div>
       </section>
 
+
+      <!-- ============================================================ -->
+      <!-- TAB: AZƏRBAYCAN VERGİ VƏ RÜBLÜK HESABAT (AR DVX) -->
+      <!-- ============================================================ -->
+      <section id="tab-taxReports" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-7xl w-full">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 mb-1">
+              <i data-lucide="shield-check" class="w-3 h-3 text-emerald-600"></i>
+              <span>AR DVX Uyğun · Sadələşdirilmiş Vergi</span>
+            </div>
+            <h1 class="text-2xl font-black text-slate-900 tracking-tight">RÜBLÜK VERGİ VƏ DÖVRİYYƏ HESABATI</h1>
+            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Dövlət Vergi Xidməti (e-taxes.gov.az) Bəyannaməsi Üçün Rəsmi Hesabat</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="exportTaxReportExcel()" class="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-xl font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
+              <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600"></i>
+              <span>Excel (CSV) İxrac Et</span>
+            </button>
+            <button onclick="printTaxReport()" class="px-4 py-2 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-xs transition cursor-pointer">
+              <i data-lucide="printer" class="w-4 h-4"></i>
+              <span>Rəsmi Çap Et</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Bar: Year, Quarter, Tax Mode -->
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs">
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Hesabat İli</label>
+            <select id="taxFilterYear" onchange="generateTaxReport()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-black">
+              <option value="2026" selected>2026-cı il</option>
+              <option value="2025">2025-ci il</option>
+              <option value="2024">2024-cü il</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Rüb (Dövr)</label>
+            <select id="taxFilterQuarter" onchange="generateTaxReport()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-black">
+              <option value="all">Bütün İl (Yekun İllik)</option>
+              <option value="q1">I Rüb (Yanvar - Mart)</option>
+              <option value="q2">II Rüb (Aprel - İyun)</option>
+              <option value="q3">III Rüb (İyul - Sentyabr)</option>
+              <option value="q4">IV Rüb (Oktyabr - Dekabr)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Vergi Dərəcəsi</label>
+            <select id="taxRateSelect" onchange="generateTaxReport()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-black">
+              <option value="2" selected>2% (Sadələşdirilmiş Vergi - Bakı)</option>
+              <option value="2_discount">1% (25% Güzəştli Nağdsız Dövr.)</option>
+              <option value="5">5% (Gəlir Vergisi - Mikro)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Sifariş Tipi</label>
+            <select id="taxOrderMode" onchange="generateTaxReport()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-black">
+              <option value="real_only" selected>Yalnız Real Sifarişlər (Rəsmi)</option>
+              <option value="all">Bütün Sifarişlər</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 4 Tax Metric Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">CƏM DÖVRİYYƏ (HASİLAT)</span>
+            <div id="taxCardTotalTurnover" class="text-2xl font-black text-slate-900 mt-2">0.00 ₼</div>
+            <div class="text-[10px] text-slate-500 mt-1">Seçilən rüb üzrə faktiki gəlir</div>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+            <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">NAĞDSIZ (KART / E-TİCARƏT)</span>
+            <div id="taxCardCardTurnover" class="text-2xl font-black text-emerald-700 mt-2">0.00 ₼</div>
+            <div class="text-[10px] text-emerald-600 mt-1">100% rəsmi bank/kart ödənişləri</div>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+            <span class="text-[10px] font-bold text-blue-600 uppercase tracking-wider">SİFARİŞ SAYI</span>
+            <div id="taxCardOrderCount" class="text-2xl font-black text-blue-900 mt-2">0 ədəd</div>
+            <div class="text-[10px] text-slate-500 mt-1">Uğurla tamamlanan satışlar</div>
+          </div>
+
+          <div class="bg-gradient-to-br from-emerald-950 to-slate-900 text-white p-5 rounded-2xl shadow-sm">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold text-emerald-300 uppercase tracking-wider">HESABLANAN VERGİ (DVX)</span>
+              <span id="taxRateBadge" class="text-[9px] font-black bg-emerald-500/30 text-emerald-300 px-1.5 py-0.5 rounded border border-emerald-400/30">2%</span>
+            </div>
+            <div id="taxCardTaxPayable" class="text-2xl font-black text-white mt-2">0.00 ₼</div>
+            <div class="text-[10px] text-emerald-200/80 mt-1">Büdcəyə ödəniləcək məbləğ</div>
+          </div>
+        </div>
+
+        <!-- Official Printable Tax Report Sheet -->
+        <div id="printableTaxReportContainer" class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6 space-y-6">
+          <!-- Report Header -->
+          <div class="border-b-2 border-slate-900 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <div class="text-xs font-bold text-slate-400 uppercase tracking-widest">AZƏRBAYCAN RESPUBLİKASI · DÖVLƏT VERGİ XİDMƏTİ BƏYANNAMƏ ARAYIŞI</div>
+              <h2 id="taxReportMainTitle" class="text-xl font-black text-slate-950 mt-1">2026-cı il I RÜB ÜZRƏ SADƏLƏŞDİRİLMİŞ VERGİ HESABATI</h2>
+              <div class="text-xs text-slate-600 mt-1">Vergi Ödəyicisi: <strong class="text-slate-950">HORVVALLE ATELIER (VÖEN: _____________)</strong></div>
+            </div>
+            <div class="text-right font-mono text-xs text-slate-500">
+              <div>Tarix: <strong id="taxReportGeneratedDate" class="text-slate-900">04.11.2026</strong></div>
+              <div>Hesabat Tipi: <strong class="text-emerald-700">Elektron Ticarət (Nağdsız)</strong></div>
+            </div>
+          </div>
+
+          <!-- Monthly breakdown table -->
+          <div>
+            <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider mb-2">1. Aylar Üzrə Dövrüyyə və Vergi Bölgüsü</h3>
+            <div class="overflow-x-auto rounded-xl border border-slate-200">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-500 uppercase font-bold text-[10px] tracking-wider border-b border-slate-200">
+                  <tr>
+                    <th class="p-3">Ay / Dövr</th>
+                    <th class="p-3">Sifariş Sayı</th>
+                    <th class="p-3">Nağdsız Dövrüyyə (Kart)</th>
+                    <th class="p-3">Nağd Dövrüyyə</th>
+                    <th class="p-3">Ümumi Hasilat (₼)</th>
+                    <th class="p-3 text-right">Vergi (₼)</th>
+                  </tr>
+                </thead>
+                <tbody id="taxMonthlyBreakdownBody" class="divide-y divide-slate-100">
+                  <!-- Populated by generateTaxReport() -->
+                </tbody>
+                <tfoot class="bg-slate-50 font-black border-t-2 border-slate-900 text-xs text-slate-900">
+                  <tr>
+                    <td class="p-3">YEKUN CƏM:</td>
+                    <td class="p-3" id="taxFootOrders">0</td>
+                    <td class="p-3 text-emerald-700" id="taxFootCard">0.00 ₼</td>
+                    <td class="p-3" id="taxFootCash">0.00 ₼</td>
+                    <td class="p-3 font-black text-sm" id="taxFootTurnover">0.00 ₼</td>
+                    <td class="p-3 text-right font-black text-sm text-emerald-800" id="taxFootTax">0.00 ₼</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+
+          <!-- Individual Order Ledger Table -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xs font-black text-slate-900 uppercase tracking-wider">2. Sifarişlərin Ətraflı Reyestri (Audit Jurnalı)</h3>
+              <span id="taxLedgerCountBadge" class="text-[10px] font-bold text-slate-500">0 qeyd</span>
+            </div>
+            <div class="overflow-x-auto rounded-xl border border-slate-200 max-h-96">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-500 uppercase font-bold text-[10px] tracking-wider border-b border-slate-200 sticky top-0">
+                  <tr>
+                    <th class="p-2.5">Sifariş №</th>
+                    <th class="p-2.5">Tarix</th>
+                    <th class="p-2.5">Müştəri</th>
+                    <th class="p-2.5">Ölkə / Şəhər</th>
+                    <th class="p-2.5">Ödəniş Üsulu</th>
+                    <th class="p-2.5">Məbləğ</th>
+                    <th class="p-2.5 text-right">Hesablanan Vergi</th>
+                  </tr>
+                </thead>
+                <tbody id="taxOrdersLedgerBody" class="divide-y divide-slate-100">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Official Tax Footnote & Signature block -->
+          <div class="pt-4 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-600">
+            <div>
+              <p class="text-[10px] leading-relaxed">
+                * Qeyd: Bu hesabat Azərbaycan Respublikasının Vergi Məcəlləsinin müvafiq maddələrinə uyğun olaraq elektron ticarət platformasında formalaşmışdır. Rəsmi rüblük bəyannamə üçün <strong>e-taxes.gov.az</strong> portalında Sadələşdirilmiş Vergi Bəyannaməsi bölməsinə daxil edilə bilər.
+              </p>
+            </div>
+            <div class="sm:text-right space-y-1">
+              <div>Mühasib / Rəhbər: ___________________ (İmza)</div>
+              <div class="text-[10px] text-slate-400">HORVVALLE Atelier Maliyyə Şöbəsi</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -1623,8 +1843,13 @@
 
       <!-- Action buttons -->
       <div class="flex items-center justify-between gap-2 p-2.5 bg-slate-50 rounded-xl border border-slate-200">
-        <div class="text-[11px] text-slate-600 font-medium">
-          Format: <strong class="text-slate-900">Standart 100x150 mm (A6)</strong>
+        <div class="flex items-center gap-2">
+          <span class="text-[11px] text-slate-600 font-medium">Format: <strong class="text-slate-900">100x150 mm</strong></span>
+          <div class="flex items-center p-0.5 bg-white border border-slate-200 rounded-lg text-[10px] font-bold">
+            <button type="button" onclick="setLabelLanguage('az')" id="lbl-lang-az" class="px-2 py-0.5 rounded bg-black text-white cursor-pointer">AZ</button>
+            <button type="button" onclick="setLabelLanguage('en')" id="lbl-lang-en" class="px-2 py-0.5 rounded text-slate-600 hover:text-black cursor-pointer">EN</button>
+            <button type="button" onclick="setLabelLanguage('bilingual')" id="lbl-lang-bi" class="px-2 py-0.5 rounded text-slate-600 hover:text-black cursor-pointer">AZ / EN</button>
+          </div>
         </div>
         <div class="flex items-center gap-2">
           <button type="button" onclick="executeShippingLabelPrint()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-sm transition cursor-pointer">
@@ -2903,6 +3128,25 @@
     // TERMAL KARGO ETİKETİ & BARKOD ÇAP SİSTEMİ (100x150mm)
     // ----------------------------------------------------
     let currentShippingLabelOrder = null;
+    let currentLabelLanguage = 'bilingual'; // 'az', 'en', 'bilingual'
+
+    function setLabelLanguage(lang) {
+      currentLabelLanguage = lang;
+      ['az', 'en', 'bi'].forEach(k => {
+        const btn = document.getElementById(`lbl-lang-${k}`);
+        if (!btn) return;
+        if ((k === 'bi' && lang === 'bilingual') || k === lang) {
+          btn.classList.add('bg-black', 'text-white');
+          btn.classList.remove('text-slate-600');
+        } else {
+          btn.classList.remove('bg-black', 'text-white');
+          btn.classList.add('text-slate-600');
+        }
+      });
+      if (currentShippingLabelOrder) {
+        renderShippingLabel(currentShippingLabelOrder);
+      }
+    }
 
     // Helper: Generate Code 128 / Barcode SVG markup
     function generateBarcodeSvg(code, height = 48) {
@@ -2919,7 +3163,6 @@
         bars += `<rect x="${x}" y="0" width="${w2}" height="${height}" fill="#000"/>`;
         x += parseFloat(w2) + parseFloat(space);
       }
-      // Stop bars
       bars += `<rect x="${x}" y="0" width="3" height="${height}" fill="#000"/>`;
       x += 5;
       bars += `<rect x="${x}" y="0" width="1.5" height="${height}" fill="#000"/>`;
@@ -2947,89 +3190,7 @@
     }
 
     function renderShippingLabel(o) {
-      const cust = o.customer || {};
-      const items = o.items || [];
-      const orderDate = new Date(o.date || Date.now()).toLocaleDateString('az-AZ');
-      const orderTime = new Date(o.date || Date.now()).toLocaleTimeString('az-AZ', { hour: '2-digit', minute: '2-digit' });
-      const tracking = o.trackingCode || o.id;
-
-      // Online store tracking URL for QR
-      const qrTargetUrl = `https://clothes-veb.vercel.app/track?orderId=${encodeURIComponent(o.id)}`;
-      const qrCodeImgSrc = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(qrTargetUrl)}&margin=1`;
-
-      const html = `
-        <div class="space-y-2.5 text-[11px] leading-tight text-black">
-          <!-- 1. BRAND HEADER & CARRIER ROUTING -->
-          <div class="flex items-center justify-between border-b-2 border-black pb-2">
-            <div>
-              <div class="font-black text-sm tracking-wider uppercase">HORVVALLE ATELIER</div>
-              <div class="text-[9px] text-neutral-600 font-bold uppercase tracking-widest">Bespoke Couture & Streetwear</div>
-              <div class="text-[9px] text-neutral-500 font-mono mt-0.5">Bakı, Azərbaycan · +994 50 000 00 00</div>
-            </div>
-            <div class="text-right">
-              <span class="inline-block px-2 py-1 bg-black text-white font-black text-xs uppercase tracking-wider rounded">
-                EXPRESS
-              </span>
-              <div class="text-[9px] font-mono text-neutral-600 mt-1 font-bold">${orderDate} ${orderTime}</div>
-            </div>
-          </div>
-
-          <!-- 2. MAIN BARCODE & TRACKING -->
-          <div class="border-b-2 border-black pb-2 text-center">
-            <div class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Kuryer İzləmə Barkodu (Code128)</div>
-            <div class="bg-white py-1">
-              ${generateBarcodeSvg(tracking, 46)}
-            </div>
-            <div class="font-mono font-black text-xs tracking-[0.25em] mt-1">${tracking}</div>
-          </div>
-
-          <!-- 3. RECIPIENT / DELIVERY ADDRESS (BÖYÜK VƏ AYDIN) -->
-          <div class="border-2 border-black rounded-lg p-2.5 bg-neutral-50/50">
-            <div class="flex items-center justify-between mb-1">
-              <span class="text-[9px] font-black uppercase tracking-wider text-neutral-500">Çatdırılma Ünvanı (Alıcı):</span>
-              <span class="text-[9px] font-bold px-1.5 py-0.2 bg-black text-white rounded">Şəhərdaxili</span>
-            </div>
-            <div class="font-black text-sm text-black tracking-tight">${cust.fullName || 'Müştəri'}</div>
-            <div class="font-bold text-xs text-black font-mono mt-0.5">Tel: ${cust.phone || '-'}</div>
-            <div class="text-xs font-semibold text-neutral-800 mt-1 leading-snug">
-              <strong>${cust.city || 'Bakı'}</strong>: ${cust.address || 'Ünvan qeyd olunmayıb'}
-            </div>
-          </div>
-
-          <!-- 4. PAYMENT STATUS (PREPAID / BÜTÜN ÖDƏNİŞLƏR ONLAYN QƏBUL EDİLİR) -->
-          <div class="border-2 border-black rounded-lg p-2 text-center bg-black text-white">
-            <div class="text-[9px] uppercase tracking-widest font-bold text-neutral-300">Ödəniş Vəziyyəti</div>
-            <div class="text-sm font-black tracking-wider uppercase mt-0.5">✓ ÖDƏNİLİB (PREPAID)</div>
-            <div class="text-[9px] text-neutral-200 mt-0.5 font-medium">Kuryer tərəfindən heç bir ödəniş tələb olunmur · Cəm: ${Number(o.total || 0).toFixed(2)} ₼</div>
-          </div>
-
-          <!-- 5. PACKAGE CONTENTS & QR CODE (2 COLS) -->
-          <div class="grid grid-cols-3 gap-2 border-b-2 border-black pb-2 items-center">
-            <div class="col-span-2 space-y-1">
-              <div class="text-[9px] font-black uppercase tracking-wider text-neutral-500">Bağlamanın Tərkibi:</div>
-              <div class="max-h-20 overflow-hidden space-y-0.5">
-                ${items.map(i => `
-                  <div class="text-[10px] text-neutral-900 leading-tight">
-                    • <strong>${i.quantity || 1}x</strong> ${i.name} <span class="font-mono text-neutral-500">(${i.size || 'L'} / ${i.color || 'Std'})</span>
-                  </div>
-                `).join('')}
-              </div>
-              <div class="text-[9px] text-neutral-500 mt-1">Sifariş №: <strong class="text-black font-mono">${o.id}</strong></div>
-            </div>
-            <div class="flex flex-col items-center justify-center text-center pl-1 border-l border-neutral-300">
-              <img src="${qrCodeImgSrc}" alt="QR" class="w-16 h-16 object-contain border border-neutral-300 p-0.5 rounded" />
-              <div class="text-[8px] font-bold text-neutral-500 mt-0.5 uppercase tracking-tighter">Canlı İzləmə</div>
-            </div>
-          </div>
-
-          <!-- 6. FOOTER NOTICE -->
-          <div class="text-center text-[8.5px] text-neutral-600 uppercase tracking-widest pt-0.5">
-            HORVVALLE ATELIER · ZƏRİF QABLAMA İLƏ TƏHVİL VERİN
-          </div>
-        </div>
-      `;
-
-      document.getElementById('printableShippingLabel').innerHTML = html;
+      document.getElementById('printableShippingLabel').innerHTML = renderShippingLabelString(o);
     }
 
     function executeShippingLabelPrint() {
@@ -3052,9 +3213,7 @@
       if (!confirm(`${orders.length} ədəd aktiv sifarişin kargo etiketi çap edilsin?`)) return;
 
       const container = document.getElementById('printableShippingLabel');
-      const originalHtml = container.innerHTML;
 
-      // Render all labels with page-break
       container.innerHTML = orders.map((o, idx) => `
         <div style="${idx > 0 ? 'page-break-before: always;' : ''} min-height: 145mm;" class="p-3 bg-white border border-neutral-200 mb-4">
           ${renderShippingLabelString(o)}
@@ -3066,7 +3225,6 @@
 
       setTimeout(() => {
         window.print();
-        // Restore single view
         if (currentShippingLabelOrder) {
           renderShippingLabel(currentShippingLabelOrder);
         } else if (orders[0]) {
@@ -3081,71 +3239,100 @@
       const orderDate = new Date(o.date || Date.now()).toLocaleDateString('az-AZ');
       const orderTime = new Date(o.date || Date.now()).toLocaleTimeString('az-AZ', { hour: '2-digit', minute: '2-digit' });
       const tracking = o.trackingCode || o.id;
+      const lang = currentLabelLanguage || 'bilingual';
+
+      // Detect international destination
+      const cityOrCountry = (cust.city || '').toLowerCase();
+      const isInternational = cityOrCountry.includes('turk') || cityOrCountry.includes('russia') || cityOrCountry.includes('usa') || cityOrCountry.includes('uk') || cityOrCountry.includes('germany') || cityOrCountry.includes('uae') || cityOrCountry.includes('dubai') || cityOrCountry.includes('xaric') || cityOrCountry.includes('intl');
+
       const qrTargetUrl = `https://clothes-veb.vercel.app/track?orderId=${encodeURIComponent(o.id)}`;
       const qrCodeImgSrc = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(qrTargetUrl)}&margin=1`;
 
+      // Multilingual Labels Dictionary
+      const t = {
+        sender: lang === 'en' ? 'SENDER / SHIP FROM:' : (lang === 'az' ? 'GÖNDƏRƏN:' : 'GÖNDƏRƏN / SENDER:'),
+        recipient: lang === 'en' ? 'DELIVERY ADDRESS / SHIP TO:' : (lang === 'az' ? 'ÇATDIRILMA ÜNVANI (ALICI):' : 'ÇATDIRILMA ÜNVANI / SHIP TO:'),
+        carrier: lang === 'en' ? 'COURIER TRACKING (CODE 128)' : (lang === 'az' ? 'KURYER İZLƏMƏ BARKODU (CODE128)' : 'KURYER İZLƏMƏ / TRACKING BARCODE'),
+        paymentTitle: lang === 'en' ? 'PAYMENT STATUS' : (lang === 'az' ? 'ÖDƏNİŞ VƏZİYYƏTİ' : 'ÖDƏNİŞ VƏZİYYƏTİ / PAYMENT STATUS'),
+        paidStamp: lang === 'en' ? '✓ FULLY PREPAID / PAID ONLINE' : (lang === 'az' ? '✓ ÖDƏNİLİB (PREPAID)' : '✓ ÖDƏNİLİB (PREPAID) / PAID ONLINE'),
+        noCollect: lang === 'en' ? 'DO NOT COLLECT MONEY · Already paid online' : (lang === 'az' ? 'Kuryer tərəfindən ödəniş tələb olunmur · Nağdsız ödənilib' : 'Kuryer ödəniş tələb etmir · DO NOT COLLECT CASH'),
+        contents: lang === 'en' ? 'PARCEL CONTENTS:' : (lang === 'az' ? 'BAĞLAMANIN TƏRKİBİ:' : 'BAĞLAMANIN TƏRKİBİ / CONTENTS:'),
+        orderNo: lang === 'en' ? 'Order #' : (lang === 'az' ? 'Sifariş №:' : 'Sifariş / Order #:'),
+        total: lang === 'en' ? 'Total:' : (lang === 'az' ? 'Cəm:' : 'Cəm / Total:'),
+        liveTrack: lang === 'en' ? 'Live Tracking' : (lang === 'az' ? 'Canlı İzləmə' : 'İzləmə / Track'),
+        intlBadge: isInternational ? (lang === 'az' ? 'BEYNƏLXALQ' : 'INTERNATIONAL') : (lang === 'az' ? 'ÖLKƏDAXİLİ' : 'DOMESTIC / EXPRESS'),
+        footer: lang === 'en' ? 'HORVVALLE ATELIER · LUXURY COUTURE GARMENT · HANDLE WITH CARE' : (lang === 'az' ? 'HORVVALLE ATELIER · ZƏRİF QABLAMA İLƏ TƏHVİL VERİN' : 'HORVVALLE ATELIER · LUXURY ATELIER · ZƏRİF QABLAMA / HANDLE WITH CARE')
+      };
+
       return `
-        <div class="space-y-2.5 text-[11px] leading-tight text-black">
+        <div class="space-y-2 text-[11px] leading-tight text-black">
+          <!-- 1. BRAND HEADER & CARRIER ROUTING -->
           <div class="flex items-center justify-between border-b-2 border-black pb-2">
             <div>
               <div class="font-black text-sm tracking-wider uppercase">HORVVALLE ATELIER</div>
               <div class="text-[9px] text-neutral-600 font-bold uppercase tracking-widest">Bespoke Couture & Streetwear</div>
-              <div class="text-[9px] text-neutral-500 font-mono mt-0.5">Bakı, Azərbaycan · +994 50 000 00 00</div>
+              <div class="text-[9px] text-neutral-500 font-mono mt-0.5">Baku, Azerbaijan · Tel: +994 50 000 00 00</div>
             </div>
             <div class="text-right">
-              <span class="inline-block px-2 py-1 bg-black text-white font-black text-xs uppercase tracking-wider rounded">
-                EXPRESS
+              <span class="inline-block px-2 py-0.5 bg-black text-white font-black text-[11px] uppercase tracking-wider rounded">
+                ${t.intlBadge}
               </span>
               <div class="text-[9px] font-mono text-neutral-600 mt-1 font-bold">${orderDate} ${orderTime}</div>
             </div>
           </div>
 
+          <!-- 2. MAIN BARCODE & TRACKING -->
           <div class="border-b-2 border-black pb-2 text-center">
-            <div class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Kuryer İzləmə Barkodu (Code128)</div>
+            <div class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">${t.carrier}</div>
             <div class="bg-white py-1">
-              ${generateBarcodeSvg(tracking, 46)}
+              ${generateBarcodeSvg(tracking, 44)}
             </div>
-            <div class="font-mono font-black text-xs tracking-[0.25em] mt-1">${tracking}</div>
+            <div class="font-mono font-black text-xs tracking-[0.25em] mt-0.5">${tracking}</div>
           </div>
 
+          <!-- 3. RECIPIENT / DELIVERY ADDRESS (BÖYÜK VƏ AYDIN AZ/EN) -->
           <div class="border-2 border-black rounded-lg p-2.5 bg-neutral-50/50">
             <div class="flex items-center justify-between mb-1">
-              <span class="text-[9px] font-black uppercase tracking-wider text-neutral-500">Çatdırılma Ünvanı (Alıcı):</span>
-              <span class="text-[9px] font-bold px-1.5 py-0.2 bg-black text-white rounded">Şəhərdaxili</span>
+              <span class="text-[9px] font-black uppercase tracking-wider text-neutral-500">${t.recipient}</span>
+              <span class="text-[8.5px] font-bold px-1.5 py-0.2 bg-black text-white rounded font-mono">${cust.city || 'Baku, AZ'}</span>
             </div>
-            <div class="font-black text-sm text-black tracking-tight">${cust.fullName || 'Müştəri'}</div>
-            <div class="font-bold text-xs text-black font-mono mt-0.5">Tel: ${cust.phone || '-'}</div>
-            <div class="text-xs font-semibold text-neutral-800 mt-1 leading-snug">
-              <strong>${cust.city || 'Bakı'}</strong>: ${cust.address || 'Ünvan qeyd olunmayıb'}
+            <div class="font-black text-sm text-black tracking-tight">${cust.fullName || 'Customer'}</div>
+            <div class="font-bold text-xs text-black font-mono mt-0.5">Tel / WhatsApp: ${cust.phone || '-'}</div>
+            <div class="text-xs font-semibold text-neutral-900 mt-1 leading-snug">
+              <strong>${cust.city || 'Baku'}</strong>: ${cust.address || 'Address not specified'}
             </div>
+            ${cust.notes ? `<div class="text-[9.5px] text-neutral-600 italic mt-1 border-t border-dashed border-neutral-300 pt-0.5">Note: "${cust.notes}"</div>` : ''}
           </div>
 
+          <!-- 4. PAYMENT STATUS (PREPAID / BÜTÜN ÖDƏNİŞLƏR ONLAYN QƏBUL EDİLİR) -->
           <div class="border-2 border-black rounded-lg p-2 text-center bg-black text-white">
-            <div class="text-[9px] uppercase tracking-widest font-bold text-neutral-300">Ödəniş Vəziyyəti</div>
-            <div class="text-sm font-black tracking-wider uppercase mt-0.5">✓ ÖDƏNİLİB (PREPAID)</div>
-            <div class="text-[9px] text-neutral-200 mt-0.5 font-medium">Kuryer tərəfindən heç bir ödəniş tələb olunmur · Cəm: ${Number(o.total || 0).toFixed(2)} ₼</div>
+            <div class="text-[8.5px] uppercase tracking-widest font-bold text-neutral-300">${t.paymentTitle}</div>
+            <div class="text-sm font-black tracking-wider uppercase mt-0.5">${t.paidStamp}</div>
+            <div class="text-[9px] text-neutral-200 mt-0.5 font-medium">${t.noCollect} · ${t.total} ${Number(o.total || 0).toFixed(2)} ₼</div>
           </div>
 
+          <!-- 5. PACKAGE CONTENTS & QR CODE (2 COLS) -->
           <div class="grid grid-cols-3 gap-2 border-b-2 border-black pb-2 items-center">
             <div class="col-span-2 space-y-1">
-              <div class="text-[9px] font-black uppercase tracking-wider text-neutral-500">Bağlamanın Tərkibi:</div>
+              <div class="text-[9px] font-black uppercase tracking-wider text-neutral-500">${t.contents}</div>
               <div class="max-h-20 overflow-hidden space-y-0.5">
                 ${items.map(i => `
                   <div class="text-[10px] text-neutral-900 leading-tight">
-                    • <strong>${i.quantity || 1}x</strong> ${i.name} <span class="font-mono text-neutral-500">(${i.size || 'L'} / ${i.color || 'Std'})</span>
+                    • <strong>${i.quantity || 1}x</strong> ${i.name} <span class="font-mono text-neutral-600">(${i.size || 'L'} / ${i.color || 'Std'})</span>
                   </div>
                 `).join('')}
               </div>
-              <div class="text-[9px] text-neutral-500 mt-1">Sifariş №: <strong class="text-black font-mono">${o.id}</strong></div>
+              <div class="text-[9px] text-neutral-600 mt-1">${t.orderNo} <strong class="text-black font-mono">${o.id}</strong></div>
             </div>
             <div class="flex flex-col items-center justify-center text-center pl-1 border-l border-neutral-300">
               <img src="${qrCodeImgSrc}" alt="QR" class="w-16 h-16 object-contain border border-neutral-300 p-0.5 rounded" />
-              <div class="text-[8px] font-bold text-neutral-500 mt-0.5 uppercase tracking-tighter">Canlı İzləmə</div>
+              <div class="text-[8px] font-bold text-neutral-600 mt-0.5 uppercase tracking-tighter">${t.liveTrack}</div>
             </div>
           </div>
 
-          <div class="text-center text-[8.5px] text-neutral-600 uppercase tracking-widest pt-0.5">
-            HORVVALLE ATELIER · ZƏRİF QABLAMA İLƏ TƏHVİL VERİN
+          <!-- 6. FOOTER NOTICE -->
+          <div class="text-center text-[8px] text-neutral-600 uppercase tracking-widest pt-0.5">
+            ${t.footer}
           </div>
         </div>
       `;
@@ -4063,6 +4250,7 @@
           else if (tabId === 'loyalty') renderLoyaltyTable();
           else if (tabId === 'promos') renderPromosTable();
           else if (tabId === 'podOrders') renderPodOrders();
+          else if (tabId === 'taxReports') generateTaxReport();
           else if (tabId === 'dashboard') { renderDashboardMetrics(); renderRecentOrders(); }
         } catch (e) {
           console.warn('Tab render error:', e);
@@ -4161,6 +4349,231 @@
         return { badgeClass: 'bg-indigo-50 text-indigo-700 border-indigo-200', dotClass: 'bg-indigo-500', label: 'Təsdiqləndi' };
       }
       return { badgeClass: 'bg-sky-50 text-sky-700 border-sky-200', dotClass: 'bg-sky-500', label: 'Yeni Sifariş' };
+    }
+
+    // ----------------------------------------------------
+    // AZƏRBAYCAN DÖVLƏT VERGİ XİDMƏTİ (AR DVX) RÜBLÜK HESABAT
+    // ----------------------------------------------------
+    let currentTaxReportData = {
+      orders: [],
+      turnover: 0,
+      cardTurnover: 0,
+      cashTurnover: 0,
+      taxPayable: 0,
+      year: 2026,
+      quarter: 'all'
+    };
+
+    function generateTaxReport() {
+      const year = Number(document.getElementById('taxFilterYear').value) || 2026;
+      const quarter = document.getElementById('taxFilterQuarter').value; // 'all', 'q1', 'q2', 'q3', 'q4'
+      const rateKey = document.getElementById('taxRateSelect').value; // '2', '2_discount', '5'
+      const orderMode = document.getElementById('taxOrderMode').value; // 'real_only', 'all'
+
+      let taxPercentage = 0.02;
+      let badgeLabel = '2%';
+      if (rateKey === '2_discount') {
+        taxPercentage = 0.01;
+        badgeLabel = '1% (Güzəştli)';
+      } else if (rateKey === '5') {
+        taxPercentage = 0.05;
+        badgeLabel = '5% (Mikro)';
+      }
+      document.getElementById('taxRateBadge').innerText = badgeLabel;
+
+      let allOrders = STORE_DATA.orders || [];
+
+      // Filter real vs all
+      if (orderMode === 'real_only') {
+        allOrders = allOrders.filter(o => o.isTest !== true && o.paymentStatus !== 'test_paid');
+      }
+
+      // Filter by Year
+      let filtered = allOrders.filter(o => {
+        const d = new Date(o.date || Date.now());
+        return d.getFullYear() === year;
+      });
+
+      // Filter by Quarter (months 0-indexed)
+      // Q1: Jan(0), Feb(1), Mar(2)
+      // Q2: Apr(3), May(4), Jun(5)
+      // Q3: Jul(6), Aug(7), Sep(8)
+      // Q4: Oct(9), Nov(10), Dec(11)
+      let quarterName = 'Bütün İl (Yekun İllik)';
+      let monthRange = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+
+      if (quarter === 'q1') {
+        monthRange = [0, 1, 2];
+        quarterName = 'I Rüb (Yanvar - Mart)';
+      } else if (quarter === 'q2') {
+        monthRange = [3, 4, 5];
+        quarterName = 'II Rüb (Aprel - İyun)';
+      } else if (quarter === 'q3') {
+        monthRange = [6, 7, 8];
+        quarterName = 'III Rüb (İyul - Sentyabr)';
+      } else if (quarter === 'q4') {
+        monthRange = [9, 10, 11];
+        quarterName = 'IV Rüb (Oktyabr - Dekabr)';
+      }
+
+      filtered = filtered.filter(o => {
+        const d = new Date(o.date || Date.now());
+        return monthRange.includes(d.getMonth());
+      });
+
+      // Calculate totals
+      let totalTurnover = 0;
+      let cardTurnover = 0;
+      let cashTurnover = 0;
+
+      filtered.forEach(o => {
+        const amt = Number(o.total || 0);
+        totalTurnover += amt;
+        const pm = (o.paymentMethod || '').toLowerCase();
+        if (pm.includes('çatdır') || pm.includes('nəğd') || pm.includes('nagd') || pm.includes('cash')) {
+          cashTurnover += amt;
+        } else {
+          cardTurnover += amt;
+        }
+      });
+
+      const taxPayable = totalTurnover * taxPercentage;
+
+      // Update Cards
+      document.getElementById('taxCardTotalTurnover').innerText = `${totalTurnover.toFixed(2)} ₼`;
+      document.getElementById('taxCardCardTurnover').innerText = `${cardTurnover.toFixed(2)} ₼`;
+      document.getElementById('taxCardOrderCount').innerText = `${filtered.length} ədəd`;
+      document.getElementById('taxCardTaxPayable').innerText = `${taxPayable.toFixed(2)} ₼`;
+
+      // Update Report Title
+      document.getElementById('taxReportMainTitle').innerText = `${year}-ci il ${quarterName.toUpperCase()} ÜZRƏ SADƏLƏŞDİRİLMİŞ VERGİ HESABATI`;
+      document.getElementById('taxReportGeneratedDate').innerText = new Date().toLocaleDateString('az-AZ');
+
+      // Group monthly
+      const azeMonths = [
+        'Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'İyun',
+        'İyul', 'Avqust', 'Sentyabr', 'Oktyabr', 'Noyabr', 'Dekabr'
+      ];
+
+      const monthlyMap = {};
+      monthRange.forEach(m => {
+        monthlyMap[m] = { name: azeMonths[m], count: 0, card: 0, cash: 0, total: 0 };
+      });
+
+      filtered.forEach(o => {
+        const m = new Date(o.date || Date.now()).getMonth();
+        if (monthlyMap[m]) {
+          const amt = Number(o.total || 0);
+          monthlyMap[m].count += 1;
+          monthlyMap[m].total += amt;
+          const pm = (o.paymentMethod || '').toLowerCase();
+          if (pm.includes('çatdır') || pm.includes('nəğd') || pm.includes('nagd') || pm.includes('cash')) {
+            monthlyMap[m].cash += amt;
+          } else {
+            monthlyMap[m].card += amt;
+          }
+        }
+      });
+
+      const monthRows = monthRange.map(m => {
+        const item = monthlyMap[m];
+        const mTax = item.total * taxPercentage;
+        return `
+          <tr class="hover:bg-slate-50/60 transition">
+            <td class="p-3 font-bold text-slate-900">${item.name} ${year}</td>
+            <td class="p-3 font-semibold text-slate-700">${item.count}</td>
+            <td class="p-3 font-bold text-emerald-700">${item.card.toFixed(2)} ₼</td>
+            <td class="p-3 text-slate-600">${item.cash.toFixed(2)} ₼</td>
+            <td class="p-3 font-black text-slate-900">${item.total.toFixed(2)} ₼</td>
+            <td class="p-3 text-right font-black text-emerald-800">${mTax.toFixed(2)} ₼</td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('taxMonthlyBreakdownBody').innerHTML = monthRows;
+      document.getElementById('taxFootOrders').innerText = filtered.length;
+      document.getElementById('taxFootCard').innerText = `${cardTurnover.toFixed(2)} ₼`;
+      document.getElementById('taxFootCash').innerText = `${cashTurnover.toFixed(2)} ₼`;
+      document.getElementById('taxFootTurnover').innerText = `${totalTurnover.toFixed(2)} ₼`;
+      document.getElementById('taxFootTax').innerText = `${taxPayable.toFixed(2)} ₼`;
+
+      // Populate Ledger Table
+      document.getElementById('taxLedgerCountBadge').innerText = `${filtered.length} sifariş tapıldı`;
+      const ledgerHtml = filtered.length === 0 ? `
+        <tr><td colspan="7" class="p-6 text-center text-slate-400">Seçilmiş dövrdə heç bir sifariş tapılmadı.</td></tr>
+      ` : filtered.map(o => {
+        const amt = Number(o.total || 0);
+        const itemTax = amt * taxPercentage;
+        const cust = o.customer || {};
+        const d = new Date(o.date || Date.now()).toLocaleDateString('az-AZ');
+        return `
+          <tr class="hover:bg-slate-50/60 transition">
+            <td class="p-2.5 font-bold font-mono text-slate-900">${o.id}</td>
+            <td class="p-2.5 text-slate-500 font-mono">${d}</td>
+            <td class="p-2.5 font-bold text-slate-800">${cust.fullName || 'Müştəri'}</td>
+            <td class="p-2.5 text-slate-600">${cust.city || 'Bakı'}</td>
+            <td class="p-2.5">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-800">${o.paymentMethod || 'Kart'}</span>
+            </td>
+            <td class="p-2.5 font-black text-slate-900">${amt.toFixed(2)} ₼</td>
+            <td class="p-2.5 text-right font-bold text-emerald-700">${itemTax.toFixed(2)} ₼</td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('taxOrdersLedgerBody').innerHTML = ledgerHtml;
+
+      currentTaxReportData = {
+        orders: filtered,
+        turnover: totalTurnover,
+        cardTurnover,
+        cashTurnover,
+        taxPayable,
+        year,
+        quarter: quarterName,
+        taxPercentage
+      };
+    }
+
+    function printTaxReport() {
+      document.body.classList.remove('printing-invoice');
+      document.body.classList.remove('printing-label');
+      document.body.classList.add('printing-tax');
+      window.print();
+    }
+
+    function exportTaxReportExcel() {
+      const data = currentTaxReportData.orders || [];
+      if (data.length === 0) {
+        alert('İxrac etmək üçün heç bir sifariş yoxdur.');
+        return;
+      }
+
+      // Generate UTF-8 BOM for Excel Azerbaijani character support
+      let csv = '\uFEFF';
+      csv += 'Sifaris ID,Tarix,Musteri,Telefon,Seher,Unvan,Odenis Usulu,Mebleg (AZN),Vergi (AZN)\n';
+
+      const taxRate = currentTaxReportData.taxPercentage || 0.02;
+      data.forEach(o => {
+        const cust = o.customer || {};
+        const d = new Date(o.date || Date.now()).toISOString().split('T')[0];
+        const amt = Number(o.total || 0).toFixed(2);
+        const t = (Number(o.total || 0) * taxRate).toFixed(2);
+        const cleanName = (cust.fullName || '').replace(/,/g, ' ');
+        const cleanCity = (cust.city || '').replace(/,/g, ' ');
+        const cleanAddress = (cust.address || '').replace(/,/g, ' ');
+        csv += `${o.id},${d},"${cleanName}","${cust.phone || ''}","${cleanCity}","${cleanAddress}","${o.paymentMethod || 'Kart'}",${amt},${t}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `HORVVALLE_Vergi_Hesabati_${currentTaxReportData.year}_${currentTaxReportData.quarter.replace(/[^a-zA-Z0-9]/g, '_')}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     }
 
     function setDateRange(range) {
