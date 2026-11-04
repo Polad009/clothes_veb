@@ -532,14 +532,20 @@ export async function POST(
         }
 
         // Upload main image to Supabase Storage (cloud CDN) for persistent serverless hosting
+        // Store original pristine binary buffer directly without lossy compression or resizing
         let finalMainUrl = mainUrl;
         if (supabaseServer) {
           try {
-            const optimizedBuffer = await sharp(buffer).png({ quality: 95 }).toBuffer();
+            const mimeType = originalName.toLowerCase().endsWith('.png')
+              ? 'image/png'
+              : originalName.toLowerCase().endsWith('.webp')
+              ? 'image/webp'
+              : 'image/jpeg';
+
             const { error: supaErr } = await supabaseServer.storage
               .from('product-images')
-              .upload(`products/${mainFileName}`, optimizedBuffer, {
-                contentType: 'image/png',
+              .upload(`products/${mainFileName}`, buffer, {
+                contentType: mimeType,
                 upsert: true,
               });
 
