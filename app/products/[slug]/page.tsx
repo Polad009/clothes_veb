@@ -277,7 +277,7 @@ export default function ProductDetailPage() {
                     fill
                     priority
                     sizes="(max-width: 640px) 100vw, 460px"
-                    className="object-cover transition-transform duration-500 ease-out group-hover:scale-105 pointer-events-none select-none"
+                    className="object-contain p-2 sm:p-4 transition-transform duration-500 ease-out group-hover:scale-105 pointer-events-none select-none"
                   />
                 </motion.div>
               </AnimatePresence>
