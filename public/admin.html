@@ -114,24 +114,47 @@
           transparent 13px);
     }
 
-    /* Print styles for invoices */
+    /* Print styles for invoices & shipping thermal labels */
     @media print {
       body * {
         visibility: hidden;
       }
 
-      #printableInvoice,
-      #printableInvoice * {
+      /* Printable POS Invoice */
+      body.printing-invoice #printableInvoice,
+      body.printing-invoice #printableInvoice * {
         visibility: visible;
       }
 
-      #printableInvoice {
+      body.printing-invoice #printableInvoice {
         position: absolute;
         left: 0;
         top: 0;
         width: 100%;
         background: white;
         padding: 20px;
+      }
+
+      /* Printable Thermal Shipping Label (100mm x 150mm standard / A6) */
+      body.printing-label #printableShippingLabel,
+      body.printing-label #printableShippingLabel * {
+        visibility: visible;
+      }
+
+      body.printing-label #printableShippingLabel {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100mm;
+        min-height: 148mm;
+        margin: 0;
+        padding: 0;
+        background: white;
+      }
+
+      @page {
+        size: 100mm 150mm;
+        margin: 0;
       }
 
       .no-print {
@@ -878,6 +901,12 @@
               Və Status İdarəetməsi</p>
           </div>
           <div class="flex items-center gap-2">
+            <button onclick="printBatchShippingLabels()"
+              class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+              title="Aktiv bütün sifarişlərin kargo etiketlərini ardıcıl çap et">
+              <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+              <span>Toplu Etiket Çapı</span>
+            </button>
             <button onclick="clearTestOrders()"
               class="px-3.5 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-xl font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
               title="Yalnız sınaq (test) sifarişlərini bazadan təmizləyir">
@@ -1577,6 +1606,51 @@
   </div>
 
 
+  <!-- ============================================================ -->
+  <!-- MODAL: TERMAL KARGO ETİKETİ & BARKOD ÇAPI (100x150mm) -->
+  <!-- ============================================================ -->
+  <div id="shippingLabelModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-slate-200 space-y-4 my-8">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div>
+          <span class="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full">Termal Kargo Etiketi</span>
+          <h3 class="font-black text-base text-slate-900 mt-1">Bağlama Çatdırılma Etiketi (100x150mm)</h3>
+        </div>
+        <button onclick="closeShippingLabelModal()" class="text-slate-400 hover:text-black cursor-pointer p-1.5 rounded-xl hover:bg-slate-100 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="flex items-center justify-between gap-2 p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+        <div class="text-[11px] text-slate-600 font-medium">
+          Format: <strong class="text-slate-900">Standart 100x150 mm (A6)</strong>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="executeShippingLabelPrint()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-sm transition cursor-pointer">
+            <i data-lucide="printer" class="w-4 h-4"></i>
+            <span>Çap Et (Print)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Printable Thermal Label Container -->
+      <div class="overflow-x-auto flex justify-center py-2 bg-slate-100 rounded-2xl p-3 border border-slate-200">
+        <div id="printableShippingLabel" class="w-[360px] bg-white text-black p-4 rounded-lg shadow-md border-2 border-slate-900 font-sans select-none box-border">
+          <!-- Rendered dynamically by renderShippingLabel() -->
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+        <span class="text-[11px] text-slate-400">Termal etiket printerləri (Zebra, Xprinter) və standart printerlərlə tam uyğundur.</span>
+        <button type="button" onclick="closeShippingLabelModal()" class="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs cursor-pointer">
+          Bağla
+        </button>
+      </div>
+    </div>
+  </div>
+
+
   <!-- CATEGORY ADD/EDIT MODAL -->
   <div id="categoryModal"
     class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs items-center justify-center p-4">
@@ -1972,7 +2046,10 @@
                 ${theme.label}
               </span>
             </td>
-            <td class="p-3 text-right">
+            <td class="p-3 text-right space-x-1 whitespace-nowrap">
+              <button onclick="openShippingLabelModal('${o.id}')" title="100x150mm Termal Kargo Etiketi" class="px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-[10px] transition cursor-pointer">
+                Etiket
+              </button>
               <button onclick="displayOrderInReceipt('${o.id}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[10px] transition cursor-pointer">
                 Faktura
               </button>
@@ -2300,7 +2377,11 @@
                 <option value="Ləğv edildi" ${o.orderStatus === 'Ləğv edildi' ? 'selected' : ''}>Ləğv edildi</option>
               </select>
             </td>
-            <td class="p-3.5 text-right space-x-1">
+            <td class="p-3.5 text-right space-x-1 whitespace-nowrap">
+              <button onclick="openShippingLabelModal('${o.id}')" title="100x150mm Termal Kargo Etiketi Çap Et" class="px-2.5 py-1 bg-emerald-600 text-white rounded-lg text-[10px] font-bold hover:bg-emerald-700 transition cursor-pointer inline-flex items-center gap-1 shadow-2xs">
+                <i data-lucide="tag" class="w-3 h-3"></i>
+                <span>Etiket</span>
+              </button>
               <button onclick="displayOrderInReceipt('${o.id}')" class="px-2.5 py-1 bg-slate-900 text-white rounded-lg text-[10px] font-bold hover:bg-black transition cursor-pointer">
                 Faktura
               </button>
@@ -2789,6 +2870,9 @@
       const o = (STORE_DATA.orders || []).find(x => x.id === orderId);
       if (!o) return;
 
+      document.body.classList.remove('printing-label');
+      document.body.classList.add('printing-invoice');
+
       document.getElementById('posReceiptOrderNo').innerText = `SİFARİŞ: ${o.id}`;
       document.getElementById('posReceiptDate').innerText = new Date(o.date || Date.now()).toLocaleString('az-AZ');
       document.getElementById('posReceiptCustName').innerText = o.customer?.fullName || 'Müştəri';
@@ -2812,6 +2896,259 @@
       document.getElementById('posReceiptBarcodeText').innerText = o.id;
 
       switchTab('posReceipt');
+    }
+
+
+    // ----------------------------------------------------
+    // TERMAL KARGO ETİKETİ & BARKOD ÇAP SİSTEMİ (100x150mm)
+    // ----------------------------------------------------
+    let currentShippingLabelOrder = null;
+
+    // Helper: Generate Code 128 / Barcode SVG markup
+    function generateBarcodeSvg(code, height = 48) {
+      const clean = String(code || 'HORVVALLE').replace(/[^a-zA-Z0-9\-]/g, '');
+      let bars = '';
+      let x = 6;
+      for (let i = 0; i < clean.length; i++) {
+        const charCode = clean.charCodeAt(i);
+        const w1 = ((charCode % 3) + 1.2).toFixed(1);
+        const w2 = (((charCode >> 1) % 3) + 1).toFixed(1);
+        const space = (((charCode >> 2) % 2) + 1.8).toFixed(1);
+        bars += `<rect x="${x}" y="0" width="${w1}" height="${height}" fill="#000"/>`;
+        x += parseFloat(w1) + parseFloat(space);
+        bars += `<rect x="${x}" y="0" width="${w2}" height="${height}" fill="#000"/>`;
+        x += parseFloat(w2) + parseFloat(space);
+      }
+      // Stop bars
+      bars += `<rect x="${x}" y="0" width="3" height="${height}" fill="#000"/>`;
+      x += 5;
+      bars += `<rect x="${x}" y="0" width="1.5" height="${height}" fill="#000"/>`;
+      x += 6;
+      return `<svg viewBox="0 0 ${Math.max(x, 160)} ${height}" class="w-full h-12" preserveAspectRatio="none">${bars}</svg>`;
+    }
+
+    function openShippingLabelModal(orderId) {
+      const o = (STORE_DATA.orders || []).find(x => x.id === orderId);
+      if (!o) {
+        alert('Sifariş tapılmadı!');
+        return;
+      }
+      currentShippingLabelOrder = o;
+      renderShippingLabel(o);
+      document.getElementById('shippingLabelModal').classList.remove('hidden');
+      document.getElementById('shippingLabelModal').classList.add('flex');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeShippingLabelModal() {
+      document.getElementById('shippingLabelModal').classList.add('hidden');
+      document.getElementById('shippingLabelModal').classList.remove('flex');
+      document.body.classList.remove('printing-label');
+    }
+
+    function renderShippingLabel(o) {
+      const cust = o.customer || {};
+      const items = o.items || [];
+      const orderDate = new Date(o.date || Date.now()).toLocaleDateString('az-AZ');
+      const orderTime = new Date(o.date || Date.now()).toLocaleTimeString('az-AZ', { hour: '2-digit', minute: '2-digit' });
+      const tracking = o.trackingCode || o.id;
+
+      // Online store tracking URL for QR
+      const qrTargetUrl = `https://clothes-veb.vercel.app/track?orderId=${encodeURIComponent(o.id)}`;
+      const qrCodeImgSrc = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(qrTargetUrl)}&margin=1`;
+
+      const html = `
+        <div class="space-y-2.5 text-[11px] leading-tight text-black">
+          <!-- 1. BRAND HEADER & CARRIER ROUTING -->
+          <div class="flex items-center justify-between border-b-2 border-black pb-2">
+            <div>
+              <div class="font-black text-sm tracking-wider uppercase">HORVVALLE ATELIER</div>
+              <div class="text-[9px] text-neutral-600 font-bold uppercase tracking-widest">Bespoke Couture & Streetwear</div>
+              <div class="text-[9px] text-neutral-500 font-mono mt-0.5">Bakı, Azərbaycan · +994 50 000 00 00</div>
+            </div>
+            <div class="text-right">
+              <span class="inline-block px-2 py-1 bg-black text-white font-black text-xs uppercase tracking-wider rounded">
+                EXPRESS
+              </span>
+              <div class="text-[9px] font-mono text-neutral-600 mt-1 font-bold">${orderDate} ${orderTime}</div>
+            </div>
+          </div>
+
+          <!-- 2. MAIN BARCODE & TRACKING -->
+          <div class="border-b-2 border-black pb-2 text-center">
+            <div class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Kuryer İzləmə Barkodu (Code128)</div>
+            <div class="bg-white py-1">
+              ${generateBarcodeSvg(tracking, 46)}
+            </div>
+            <div class="font-mono font-black text-xs tracking-[0.25em] mt-1">${tracking}</div>
+          </div>
+
+          <!-- 3. RECIPIENT / DELIVERY ADDRESS (BÖYÜK VƏ AYDIN) -->
+          <div class="border-2 border-black rounded-lg p-2.5 bg-neutral-50/50">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-[9px] font-black uppercase tracking-wider text-neutral-500">Çatdırılma Ünvanı (Alıcı):</span>
+              <span class="text-[9px] font-bold px-1.5 py-0.2 bg-black text-white rounded">Şəhərdaxili</span>
+            </div>
+            <div class="font-black text-sm text-black tracking-tight">${cust.fullName || 'Müştəri'}</div>
+            <div class="font-bold text-xs text-black font-mono mt-0.5">Tel: ${cust.phone || '-'}</div>
+            <div class="text-xs font-semibold text-neutral-800 mt-1 leading-snug">
+              <strong>${cust.city || 'Bakı'}</strong>: ${cust.address || 'Ünvan qeyd olunmayıb'}
+            </div>
+          </div>
+
+          <!-- 4. PAYMENT STATUS (PREPAID / BÜTÜN ÖDƏNİŞLƏR ONLAYN QƏBUL EDİLİR) -->
+          <div class="border-2 border-black rounded-lg p-2 text-center bg-black text-white">
+            <div class="text-[9px] uppercase tracking-widest font-bold text-neutral-300">Ödəniş Vəziyyəti</div>
+            <div class="text-sm font-black tracking-wider uppercase mt-0.5">✓ ÖDƏNİLİB (PREPAID)</div>
+            <div class="text-[9px] text-neutral-200 mt-0.5 font-medium">Kuryer tərəfindən heç bir ödəniş tələb olunmur · Cəm: ${Number(o.total || 0).toFixed(2)} ₼</div>
+          </div>
+
+          <!-- 5. PACKAGE CONTENTS & QR CODE (2 COLS) -->
+          <div class="grid grid-cols-3 gap-2 border-b-2 border-black pb-2 items-center">
+            <div class="col-span-2 space-y-1">
+              <div class="text-[9px] font-black uppercase tracking-wider text-neutral-500">Bağlamanın Tərkibi:</div>
+              <div class="max-h-20 overflow-hidden space-y-0.5">
+                ${items.map(i => `
+                  <div class="text-[10px] text-neutral-900 leading-tight">
+                    • <strong>${i.quantity || 1}x</strong> ${i.name} <span class="font-mono text-neutral-500">(${i.size || 'L'} / ${i.color || 'Std'})</span>
+                  </div>
+                `).join('')}
+              </div>
+              <div class="text-[9px] text-neutral-500 mt-1">Sifariş №: <strong class="text-black font-mono">${o.id}</strong></div>
+            </div>
+            <div class="flex flex-col items-center justify-center text-center pl-1 border-l border-neutral-300">
+              <img src="${qrCodeImgSrc}" alt="QR" class="w-16 h-16 object-contain border border-neutral-300 p-0.5 rounded" />
+              <div class="text-[8px] font-bold text-neutral-500 mt-0.5 uppercase tracking-tighter">Canlı İzləmə</div>
+            </div>
+          </div>
+
+          <!-- 6. FOOTER NOTICE -->
+          <div class="text-center text-[8.5px] text-neutral-600 uppercase tracking-widest pt-0.5">
+            HORVVALLE ATELIER · ZƏRİF QABLAMA İLƏ TƏHVİL VERİN
+          </div>
+        </div>
+      `;
+
+      document.getElementById('printableShippingLabel').innerHTML = html;
+    }
+
+    function executeShippingLabelPrint() {
+      document.body.classList.remove('printing-invoice');
+      document.body.classList.add('printing-label');
+      window.print();
+    }
+
+    function printBatchShippingLabels() {
+      const orders = (STORE_DATA.orders || []).filter(o => {
+        const s = (o.orderStatus || '').toLowerCase();
+        return !s.includes('çatdır') && !s.includes('catdir') && !s.includes('ləğv') && !s.includes('cancel');
+      });
+
+      if (orders.length === 0) {
+        alert('Çap üçün aktiv yeni və ya göndərilməmiş sifariş tapılmadı.');
+        return;
+      }
+
+      if (!confirm(`${orders.length} ədəd aktiv sifarişin kargo etiketi çap edilsin?`)) return;
+
+      const container = document.getElementById('printableShippingLabel');
+      const originalHtml = container.innerHTML;
+
+      // Render all labels with page-break
+      container.innerHTML = orders.map((o, idx) => `
+        <div style="${idx > 0 ? 'page-break-before: always;' : ''} min-height: 145mm;" class="p-3 bg-white border border-neutral-200 mb-4">
+          ${renderShippingLabelString(o)}
+        </div>
+      `).join('');
+
+      document.body.classList.remove('printing-invoice');
+      document.body.classList.add('printing-label');
+
+      setTimeout(() => {
+        window.print();
+        // Restore single view
+        if (currentShippingLabelOrder) {
+          renderShippingLabel(currentShippingLabelOrder);
+        } else if (orders[0]) {
+          renderShippingLabel(orders[0]);
+        }
+      }, 300);
+    }
+
+    function renderShippingLabelString(o) {
+      const cust = o.customer || {};
+      const items = o.items || [];
+      const orderDate = new Date(o.date || Date.now()).toLocaleDateString('az-AZ');
+      const orderTime = new Date(o.date || Date.now()).toLocaleTimeString('az-AZ', { hour: '2-digit', minute: '2-digit' });
+      const tracking = o.trackingCode || o.id;
+      const qrTargetUrl = `https://clothes-veb.vercel.app/track?orderId=${encodeURIComponent(o.id)}`;
+      const qrCodeImgSrc = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(qrTargetUrl)}&margin=1`;
+
+      return `
+        <div class="space-y-2.5 text-[11px] leading-tight text-black">
+          <div class="flex items-center justify-between border-b-2 border-black pb-2">
+            <div>
+              <div class="font-black text-sm tracking-wider uppercase">HORVVALLE ATELIER</div>
+              <div class="text-[9px] text-neutral-600 font-bold uppercase tracking-widest">Bespoke Couture & Streetwear</div>
+              <div class="text-[9px] text-neutral-500 font-mono mt-0.5">Bakı, Azərbaycan · +994 50 000 00 00</div>
+            </div>
+            <div class="text-right">
+              <span class="inline-block px-2 py-1 bg-black text-white font-black text-xs uppercase tracking-wider rounded">
+                EXPRESS
+              </span>
+              <div class="text-[9px] font-mono text-neutral-600 mt-1 font-bold">${orderDate} ${orderTime}</div>
+            </div>
+          </div>
+
+          <div class="border-b-2 border-black pb-2 text-center">
+            <div class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Kuryer İzləmə Barkodu (Code128)</div>
+            <div class="bg-white py-1">
+              ${generateBarcodeSvg(tracking, 46)}
+            </div>
+            <div class="font-mono font-black text-xs tracking-[0.25em] mt-1">${tracking}</div>
+          </div>
+
+          <div class="border-2 border-black rounded-lg p-2.5 bg-neutral-50/50">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-[9px] font-black uppercase tracking-wider text-neutral-500">Çatdırılma Ünvanı (Alıcı):</span>
+              <span class="text-[9px] font-bold px-1.5 py-0.2 bg-black text-white rounded">Şəhərdaxili</span>
+            </div>
+            <div class="font-black text-sm text-black tracking-tight">${cust.fullName || 'Müştəri'}</div>
+            <div class="font-bold text-xs text-black font-mono mt-0.5">Tel: ${cust.phone || '-'}</div>
+            <div class="text-xs font-semibold text-neutral-800 mt-1 leading-snug">
+              <strong>${cust.city || 'Bakı'}</strong>: ${cust.address || 'Ünvan qeyd olunmayıb'}
+            </div>
+          </div>
+
+          <div class="border-2 border-black rounded-lg p-2 text-center bg-black text-white">
+            <div class="text-[9px] uppercase tracking-widest font-bold text-neutral-300">Ödəniş Vəziyyəti</div>
+            <div class="text-sm font-black tracking-wider uppercase mt-0.5">✓ ÖDƏNİLİB (PREPAID)</div>
+            <div class="text-[9px] text-neutral-200 mt-0.5 font-medium">Kuryer tərəfindən heç bir ödəniş tələb olunmur · Cəm: ${Number(o.total || 0).toFixed(2)} ₼</div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 border-b-2 border-black pb-2 items-center">
+            <div class="col-span-2 space-y-1">
+              <div class="text-[9px] font-black uppercase tracking-wider text-neutral-500">Bağlamanın Tərkibi:</div>
+              <div class="max-h-20 overflow-hidden space-y-0.5">
+                ${items.map(i => `
+                  <div class="text-[10px] text-neutral-900 leading-tight">
+                    • <strong>${i.quantity || 1}x</strong> ${i.name} <span class="font-mono text-neutral-500">(${i.size || 'L'} / ${i.color || 'Std'})</span>
+                  </div>
+                `).join('')}
+              </div>
+              <div class="text-[9px] text-neutral-500 mt-1">Sifariş №: <strong class="text-black font-mono">${o.id}</strong></div>
+            </div>
+            <div class="flex flex-col items-center justify-center text-center pl-1 border-l border-neutral-300">
+              <img src="${qrCodeImgSrc}" alt="QR" class="w-16 h-16 object-contain border border-neutral-300 p-0.5 rounded" />
+              <div class="text-[8px] font-bold text-neutral-500 mt-0.5 uppercase tracking-tighter">Canlı İzləmə</div>
+            </div>
+          </div>
+
+          <div class="text-center text-[8.5px] text-neutral-600 uppercase tracking-widest pt-0.5">
+            HORVVALLE ATELIER · ZƏRİF QABLAMA İLƏ TƏHVİL VERİN
+          </div>
+        </div>
+      `;
     }
 
 
