@@ -27,7 +27,7 @@ const QUICK_SUGGESTIONS = [
 export function HeaderQuickSearch({ isLightMode, onOpenChange }: HeaderQuickSearchProps) {
   const router = useRouter();
   const { products } = useStoreData();
-  const { formatPrice } = useCurrency();
+  const { formatPrice, formatProductPrice } = useCurrency();
   const { t, language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -325,7 +325,7 @@ export function HeaderQuickSearch({ isLightMode, onOpenChange }: HeaderQuickSear
                             </div>
                             <div className="text-right shrink-0">
                               <span className="text-xs font-bold text-[#B08D57]">
-                                {formatPrice(p.price)}
+                                {formatProductPrice(p)}
                               </span>
                               <ChevronRight size={13} className="text-stone-400 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
                             </div>

@@ -36,7 +36,7 @@ export function Header({ className = "" }: HeaderProps) {
   const currentCategory = searchParams?.get("category") || null;
 
   const { totalCount, openCart } = useCart();
-  const { formatPrice } = useCurrency();
+  const { formatPrice, formatProductPrice } = useCurrency();
   const { user, profile, openAuthModal } = useAuth();
   const { products } = useStoreData();
   const { t } = useLanguage();
@@ -469,7 +469,7 @@ export function Header({ className = "" }: HeaderProps) {
                               <div className="text-[10px] text-stone-500 uppercase">{p.category} · {p.fit}</div>
                             </div>
                             <div className="text-right text-xs font-bold text-[#B08D57] shrink-0">
-                              {formatPrice(p.price)}
+                              {formatProductPrice(p)}
                             </div>
                           </Link>
                         ));

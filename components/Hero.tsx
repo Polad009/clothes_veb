@@ -125,7 +125,7 @@ const INITIAL_FALLBACK_PRODUCTS: HeroProductItem[] = [
 
 export function Hero() {
   const { products } = useStoreData();
-  const { formatPrice } = useCurrency();
+  const { formatPrice, formatProductPrice } = useCurrency();
   const { t, language } = useLanguage();
 
   const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -154,7 +154,7 @@ export function Hero() {
         category: p.category || "koynek",
         title: (p.name || "Horvvalle Couture").toUpperCase(),
         subtitle: localizeHeroFit(p.fit || p.composition || p.category, language),
-        price: formatPrice(p.price),
+        price: formatProductPrice(p),
         compareAtPrice: p.compareAtPrice ? formatPrice(p.compareAtPrice) : undefined,
         colorHex: primaryColor?.hex || palette.colorHex,
         image: bestImage,
@@ -165,7 +165,7 @@ export function Hero() {
         slug: p.slug || p.id,
       };
     });
-  }, [products, formatPrice]);
+  }, [products, formatPrice, formatProductPrice]);
 
   const total = heroProducts.length;
   const safeCurrentIndex = total > 0 ? currentIndex % total : 0;
