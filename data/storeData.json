@@ -342,43 +342,6 @@
       ],
       "id": "vtx-mvmi2ckz",
       "slug": "horwalle-angel-dust-vintage-hoodie"
-    },
-    {
-      "id": "vtx-bmw-m-cap",
-      "slug": "horwalle-bmw-m-motorsport-heavyweight-snapback-cap",
-      "name": "HORWALLE \"BMW M Motorsport\" Heavyweight Snapback Cap",
-      "refCode": "HV-BMW-CAP-01",
-      "description": "Horvvalle Atelye xüsusi istehsalı BMW M Motorsport snapback kepka. 100% daranmış sıx pambıq twill parça, orijinal BMW M üçrəngli vizor zolaqları və yüksək keyfiyyətli relyefli tikmə loqo detalı. Baş ölçüsünə görə arxadan asan tənzimlənir.",
-      "price": 29,
-      "compareAtPrice": 59,
-      "badge": "YENİ MODEL",
-      "category": "aksesuar",
-      "gender": "unisex",
-      "rating": 5,
-      "reviewCount": 24,
-      "composition": "100% Daranmış Qalın Pambıq Twill (340 GSM)",
-      "fit": "6 Panelli Strukturlaşdırılmış Snapback (Tənzimlənən kəmər)",
-      "care": "Əllə soyuq su ilə yuyulmalı, sıxılmamalıdır.",
-      "inStock": true,
-      "sizes": [
-        "STANDART (Tənzimlənən)"
-      ],
-      "colors": [
-        {
-          "name": "Qara (Obsidian Noir)",
-          "hex": "#1A1A1A",
-          "image": "/images/products/bmw-m-motorsport-cap/black_front.webp",
-          "hoverImage": "/images/products/bmw-m-motorsport-cap/black_front.webp",
-          "gallery": [
-            "/images/products/bmw-m-motorsport-cap/black_front.webp"
-          ]
-        }
-      ],
-      "image": "/images/products/bmw-m-motorsport-cap/black_front.webp",
-      "hoverImage": "/images/products/bmw-m-motorsport-cap/black_front.webp",
-      "gallery": [
-        "/images/products/bmw-m-motorsport-cap/black_front.webp"
-      ]
     }
   ],
   "orders": [
