@@ -24,6 +24,7 @@ import {
 import { playPurchaseSuccessSound } from "@/lib/soundEffects";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { CloudflareTurnstile } from "@/components/CloudflareTurnstile";
 
 const CHECKOUT_I18N = {
   az: {
@@ -278,6 +279,7 @@ export default function CheckoutPage() {
 
   // Payment Selection - default to card so bank fields are ready and strictly validated
   const [paymentMethod, setPaymentMethod] = useState<"apple_pay" | "google_pay" | "card">("card");
+  const [turnstileToken, setTurnstileToken] = useState<string>("");
   const isTestMode = process.env.NEXT_PUBLIC_PAYMENT_MODE === "test";
   const enableCod = process.env.NEXT_PUBLIC_ENABLE_COD !== "false";
   const [walletDebugMsg, setWalletDebugMsg] = useState<{ text: string; method?: string } | null>(null);
@@ -569,6 +571,7 @@ export default function CheckoutPage() {
           currency: currency || "AZN",
           orderStatus: chosenMethod === "cod" ? "Təsdiqləndi (COD)" : "Yeni Sifariş",
           total: finalTotal,
+          turnstileToken: turnstileToken || undefined,
         }),
       });
 
@@ -1549,6 +1552,12 @@ export default function CheckoutPage() {
                   )}
                 </div>
               </div>
+
+              {/* Cloudflare Turnstile Bot Defense Protection Widget */}
+              <CloudflareTurnstile
+                onVerify={(token) => setTurnstileToken(token)}
+                onExpire={() => setTurnstileToken("")}
+              />
 
               {/* Dynamic Action Button according to chosen payment method */}
               <button

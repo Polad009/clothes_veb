@@ -5,6 +5,8 @@ import { isAdminAuthenticated } from '@/lib/adminAuth';
 import { supabaseServer } from '@/lib/supabaseServer';
 import { sendOrderConfirmation, sendOrderStatusUpdate } from '@/lib/email/emailService';
 import { getActivePaymentProvider, PaymentMethod, PaymentRequest } from '@/lib/payments';
+import { verifyTurnstileToken } from '@/lib/turnstile';
+import { checkRateLimit } from '@/lib/rateLimiter';
 
 export const dynamic = 'force-dynamic';
 
@@ -102,8 +104,26 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    // 0. Security Layer: Rate Limiting & Anti-Flood Protection
+    const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown-client';
+    const rateCheck = checkRateLimit(`checkout_${clientIp}`, { limit: 10, windowMs: 60 * 1000 });
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: 'Həddindən artıq cəhd qeydə alındı. Zəhmət olmasa bir dəqiqə sonra təkrar yoxlayın.' },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
-    const { customer, items, paymentMethod: rawMethod, promoCode, currency: requestedCurrency } = body;
+    const { customer, items, paymentMethod: rawMethod, promoCode, currency: requestedCurrency, turnstileToken } = body;
+
+    // 0.1 Cloudflare Turnstile Bot Defense Verification
+    if (turnstileToken) {
+      const turnstileResult = await verifyTurnstileToken(turnstileToken, clientIp);
+      if (!turnstileResult.success) {
+        return NextResponse.json({ error: turnstileResult.error || 'Təhlükəsizlik yoxlanışından keçilmədi.' }, { status: 403 });
+      }
+    }
 
     if (!customer || !items || !items.length) {
       return NextResponse.json({ error: 'Müştəri məlumatları və səbət tələb olunur.' }, { status: 400 });

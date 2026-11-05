@@ -1,11 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { defaultPaymentProvider, validatePaymentEligibility } from "@/lib/payments/provider";
 import { PaymentRequest, OrderItem, PaymentMethod } from "@/lib/payments/types";
+import { verifyTurnstileToken } from "@/lib/turnstile";
+import { checkRateLimit } from "@/lib/rateLimiter";
 
 export async function POST(req: NextRequest) {
   try {
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown-client";
+    const rateCheck = checkRateLimit(`checkout_api_${clientIp}`, { limit: 12, windowMs: 60 * 1000 });
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { success: false, message: "Həddindən artıq sorğu göndərildi. Zəhmət olmasa bir qədər gözləyin." },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
-    const { customer, method, items } = body as {
+    const { customer, method, items, turnstileToken } = body as {
       customer: {
         fullName: string;
         phone: string;
@@ -15,7 +26,18 @@ export async function POST(req: NextRequest) {
       };
       method: PaymentMethod;
       items: OrderItem[];
+      turnstileToken?: string;
     };
+
+    if (turnstileToken) {
+      const turnstileCheck = await verifyTurnstileToken(turnstileToken, clientIp);
+      if (!turnstileCheck.success) {
+        return NextResponse.json(
+          { success: false, message: turnstileCheck.error || "Təhlükəsizlik bot yoxlaması təsdiqlənmədi." },
+          { status: 403 }
+        );
+      }
+    }
 
     // 1. Basic validation
     if (!customer?.fullName || !customer?.phone || !customer?.address) {

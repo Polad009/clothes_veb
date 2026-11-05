@@ -104,6 +104,22 @@ function applySecurityHeaders(response: NextResponse) {
     'Permissions-Policy',
     'camera=(), microphone=(), geolocation=(), payment=(self)'
   );
+  // Content Security Policy (CSP) with Cloudflare Challenges / Turnstile & Payment Gateway Support
+  const csp = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://pay.google.com https://cdn.tailwindcss.com https://unpkg.com https://www.googletagmanager.com",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "img-src 'self' blob: data: https: http:",
+    "font-src 'self' https://fonts.gstatic.com data:",
+    "connect-src 'self' https://challenges.cloudflare.com https://*.supabase.co https://api.qrserver.com https://epoint.az https://www.google-analytics.com",
+    "frame-src 'self' https://challenges.cloudflare.com https://pay.google.com https://epoint.az",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self' https://epoint.az",
+  ].join('; ');
+
+  response.headers.set('Content-Security-Policy', csp);
+
   if (process.env.NODE_ENV === 'production') {
     response.headers.set(
       'Strict-Transport-Security',
