@@ -79,7 +79,7 @@ export function UnifiedLocaleDropdown({
   const currentCurr = CURRENCY_CONFIG[currency] || CURRENCY_CONFIG.AZN;
 
   const languagesList: LanguageInfo[] = Object.values(LANGUAGES);
-  const currenciesList: CurrencyCode[] = ["AZN", "USD", "EUR"];
+  const currenciesList: CurrencyCode[] = ["AZN", "USD"];
 
   const isDark = variant === "dark";
 

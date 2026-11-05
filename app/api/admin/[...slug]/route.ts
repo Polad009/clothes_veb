@@ -106,6 +106,7 @@ async function getEnrichedStoreData() {
           name: sp.name,
           refCode: meta.refCode || sp.slug,
           price: Number(sp.price),
+          internationalPrice: meta.internationalPrice != null && meta.internationalPrice !== '' ? Number(meta.internationalPrice) : (sp.international_price != null ? Number(sp.international_price) : undefined),
           compareAtPrice: meta.compareAtPrice != null && meta.compareAtPrice !== '' ? Number(meta.compareAtPrice) : undefined,
           category: sp.category,
           gender: sp.gender || 'unisex',

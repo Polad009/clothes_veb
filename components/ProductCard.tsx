@@ -18,7 +18,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product, variant = "light", priority = false }: ProductCardProps) {
   const { addItem } = useCart();
-  const { formatPrice } = useCurrency();
+  const { formatPrice, formatProductPrice } = useCurrency();
   const { language, t } = useLanguage();
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
@@ -47,6 +47,7 @@ export function ProductCard({ product, variant = "light", priority = false }: Pr
       productId: product.id,
       name: product.name,
       price: product.price,
+      internationalPrice: product.internationalPrice,
       size: size,
       color: activeColor.name,
       image: activeColor.image,
@@ -335,7 +336,7 @@ export function ProductCard({ product, variant = "light", priority = false }: Pr
                   : "text-sm font-bold text-stone-900"
               }
             >
-              {formatPrice(product.price)}
+              {formatProductPrice(product)}
             </span>
             {product.compareAtPrice && (
               <span

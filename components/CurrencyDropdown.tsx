@@ -112,8 +112,7 @@ export interface CurrencyOption {
 
 export const CURRENCIES: CurrencyOption[] = [
   { code: "AZN", symbol: "₼", label: "Manat", countryName: "Azərbaycan" },
-  { code: "USD", symbol: "$", label: "Dollar", countryName: "ABŞ" },
-  { code: "EUR", symbol: "€", label: "Avro", countryName: "Avropa" },
+  { code: "USD", symbol: "$", label: "Dollar", countryName: "ABŞ / Qlobal" },
 ];
 
 export function renderCurrencyFlag(code: string, className = "w-5 h-3.5") {

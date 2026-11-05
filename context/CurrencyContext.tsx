@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 
-export type CurrencyCode = "AZN" | "USD" | "EUR";
+export type CurrencyCode = "AZN" | "USD";
 
 export interface CurrencyInfo {
   code: CurrencyCode;
@@ -26,13 +26,6 @@ export const CURRENCY_CONFIG: Record<CurrencyCode, CurrencyInfo> = {
     label: "USD ($) - Dollar",
     flag: "🇺🇸",
     rateAgainstAzn: 1 / 1.70, // 1 USD = 1.70 AZN => 1 AZN = ~0.588 USD
-  },
-  EUR: {
-    code: "EUR",
-    symbol: "€",
-    label: "EUR (€) - Avro",
-    flag: "🇪🇺",
-    rateAgainstAzn: 1 / 1.85, // 1 EUR = 1.85 AZN => 1 AZN = ~0.541 EUR
   },
 };
 
@@ -134,19 +127,18 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     if (currency === "USD") {
       return `$${converted.toFixed(2)}`;
     }
-    if (currency === "EUR") {
-      return `€${converted.toFixed(2)}`;
-    }
     return `${converted.toFixed(2)} ₼`;
   };
 
   // Dual pricing calculation:
   // If user is in Azerbaijan or has chosen AZN: return product.price
-  // If user is international or has chosen USD/EUR: return product.internationalPrice (or fallback to converted)
+  // If user is international or has chosen USD: return product.internationalPrice (or fallback to converted)
   const getProductPrice = (product: { price: number; internationalPrice?: number }): number => {
     if (!product) return 0;
     const aznPrice = Number(product.price) || 0;
-    const intlPrice = product.internationalPrice ? Number(product.internationalPrice) : null;
+    const intlPrice = product.internationalPrice != null && product.internationalPrice !== undefined
+      ? Number(product.internationalPrice)
+      : null;
 
     if (currency === "AZN") {
       return aznPrice;
@@ -154,11 +146,6 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
 
     if (currency === "USD") {
       return intlPrice !== null && !isNaN(intlPrice) ? intlPrice : convertPrice(aznPrice);
-    }
-
-    if (currency === "EUR") {
-      const baseUsd = intlPrice !== null && !isNaN(intlPrice) ? intlPrice : convertPrice(aznPrice);
-      return baseUsd * 0.92;
     }
 
     return aznPrice;
@@ -170,9 +157,6 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
 
     if (currency === "USD") {
       return `$${finalAmount.toFixed(2)}`;
-    }
-    if (currency === "EUR") {
-      return `€${finalAmount.toFixed(2)}`;
     }
     return `${finalAmount.toFixed(2)} ₼`;
   };

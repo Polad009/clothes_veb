@@ -33,7 +33,7 @@ import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 export default function ProductDetailPage() {
   const params = useParams();
   const slug = params?.slug as string;
-  const { formatPrice } = useCurrency();
+  const { formatPrice, formatProductPrice } = useCurrency();
   const { language, t } = useLanguage();
 
   // Məhsula klikləyəndə səhifənin ən yuxarıdan açılmasını təmin et
@@ -189,6 +189,7 @@ export default function ProductDetailPage() {
       productId: product.id,
       name: product.name,
       price: product.price,
+      internationalPrice: product.internationalPrice,
       size: selectedSize,
       color: activeColor.name,
       image: activeColor.image,
@@ -351,7 +352,7 @@ export default function ProductDetailPage() {
               {/* Price */}
               <div className="flex items-center gap-3 mt-4">
                 <span className="text-3xl sm:text-4xl font-light text-stone-900 tracking-tight">
-                  {formatPrice(product.price)}
+                  {formatProductPrice(product)}
                 </span>
                 {product.compareAtPrice && (
                   <span className="text-lg text-stone-400 line-through">

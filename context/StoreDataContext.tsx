@@ -46,6 +46,7 @@ export function normalizeProduct(p: any): Product {
     refCode: p.refCode || "",
     description: p.description || "",
     price: Number(p.price) || 0,
+    internationalPrice: p.internationalPrice != null && p.internationalPrice !== '' ? Number(p.internationalPrice) : undefined,
     compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : undefined,
     badge: p.badge || undefined,
     category: p.category || "koynek",

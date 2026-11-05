@@ -71,7 +71,7 @@ const CART_I18N = {
 
 export function CartDrawer() {
   const router = useRouter();
-  const { formatPrice } = useCurrency();
+  const { formatPrice, getProductPrice, currency } = useCurrency();
   const { t, language } = useLanguage();
   const langKey = (language as "az" | "en" | "ru" | "tr") || "az";
   const cT = CART_I18N[langKey] || CART_I18N.az;
@@ -85,12 +85,17 @@ export function CartDrawer() {
     totalCount,
   } = useCart();
 
+  const effectiveTotal = items.reduce(
+    (sum, item) => sum + getProductPrice(item) * item.quantity,
+    0
+  );
+
   const FREE_SHIPPING_THRESHOLD = 60;
   const progressPercent = Math.min(
     100,
-    Math.round((totalPrice / FREE_SHIPPING_THRESHOLD) * 100)
+    Math.round(((effectiveTotal > 0 ? effectiveTotal : totalPrice) / FREE_SHIPPING_THRESHOLD) * 100)
   );
-  const remainingForFree = Math.max(0, FREE_SHIPPING_THRESHOLD - totalPrice);
+  const remainingForFree = Math.max(0, FREE_SHIPPING_THRESHOLD - (effectiveTotal > 0 ? effectiveTotal : totalPrice));
 
   useBodyScrollLock(isOpen);
 
@@ -266,7 +271,7 @@ export function CartDrawer() {
                           </div>
 
                           <span className="text-sm font-bold text-[#1A1517]">
-                            {formatPrice(item.price * item.quantity)}
+                            {currency === "USD" ? `$${(getProductPrice(item) * item.quantity).toFixed(2)}` : `${(getProductPrice(item) * item.quantity).toFixed(2)} ₼`}
                           </span>
                         </div>
                       </div>
@@ -281,7 +286,9 @@ export function CartDrawer() {
                   <div className="space-y-1.5 text-xs text-[#5C5247]">
                     <div className="flex justify-between">
                       <span>{t.action.subtotal || "Məhsulların cəmi"}:</span>
-                      <span className="font-bold text-[#1A1517]">{formatPrice(totalPrice)}</span>
+                      <span className="font-bold text-[#1A1517]">
+                        {currency === "USD" ? `$${effectiveTotal.toFixed(2)}` : `${effectiveTotal.toFixed(2)} ₼`}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span>{t.checkout.delivery}:</span>
@@ -291,7 +298,9 @@ export function CartDrawer() {
                     </div>
                     <div className="flex justify-between text-base font-normal text-[#1A1517] font-eb-garamond pt-2 border-t border-[#E8E2D8]">
                       <span>{t.track?.total || "Yekun Məbləğ"}:</span>
-                      <span className="font-bold text-xl text-[#B08D57]">{formatPrice(totalPrice)}</span>
+                      <span className="font-bold text-xl text-[#B08D57]">
+                        {currency === "USD" ? `$${effectiveTotal.toFixed(2)}` : `${effectiveTotal.toFixed(2)} ₼`}
+                      </span>
                     </div>
                   </div>
 
