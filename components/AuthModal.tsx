@@ -6,6 +6,7 @@ import { X, Lock, Mail, User as UserIcon, AlertCircle, ArrowRight, Check } from 
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
+import { CloudflareTurnstile } from "@/components/CloudflareTurnstile";
 
 export function AuthModal() {
   const {
@@ -23,6 +24,7 @@ export function AuthModal() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -222,6 +224,12 @@ export function AuthModal() {
               />
             </div>
           </div>
+
+          {/* Cloudflare Turnstile Verification */}
+          <CloudflareTurnstile
+            onVerify={(token) => setTurnstileToken(token)}
+            onExpire={() => setTurnstileToken("")}
+          />
 
           <button
             type="submit"
