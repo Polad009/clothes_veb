@@ -3869,27 +3869,26 @@
       else if (lower.includes('dust') || lower.includes('vintage-hoodie')) foundKey = 'dust';
       else if (lower.includes('bmw') || lower.includes('motorsport')) foundKey = 'bmw';
 
-      let data = foundKey ? PRODUCT_PRINT_MAP[foundKey] : null;
+      const presetData = foundKey ? PRODUCT_PRINT_MAP[foundKey] : null;
 
-      if (!data && prod) {
-        data = {
-          title: prod.name,
-          printLayers: (prod.printLayers && prod.printLayers.length > 0) ? prod.printLayers : [],
-          mockups: [
-            { name: 'Ön Görünüş', url: prod.image || '/images/hero/black-tee.jpg' },
-            ...(prod.hoverImage ? [{ name: 'Arxa Görünüş', url: prod.hoverImage }] : [])
-          ]
-        };
-      } else if (data && prod && prod.printLayers && prod.printLayers.length > 0) {
-        // Merge preset print layers with any custom uploaded layers
-        data = {
-          ...data,
-          title: prod.name || data.title,
-          printLayers: [...prod.printLayers, ...data.printLayers.filter(pl => !prod.printLayers.some(cpl => cpl.url === pl.url))]
-        };
-      } else if (!data) {
-        data = PRODUCT_PRINT_MAP['bmw'];
+      // Determine print layers:
+      // If product has explicit printLayers array (even empty []), prioritize it
+      let effectiveLayers = [];
+      if (prod && Array.isArray(prod.printLayers)) {
+        effectiveLayers = [...prod.printLayers];
+      } else if (presetData && Array.isArray(presetData.printLayers)) {
+        effectiveLayers = [...presetData.printLayers];
       }
+
+      let data = {
+        title: (prod && prod.name) || (presetData && presetData.title) || 'Məhsul Çap Faylları',
+        printLayers: effectiveLayers,
+        mockups: (presetData && presetData.mockups) || [
+          { name: 'Ön Görünüş', url: (prod && prod.image) || '/images/hero/black-tee.jpg' },
+          ...((prod && prod.hoverImage) ? [{ name: 'Arxa Görünüş', url: prod.hoverImage }] : [])
+        ]
+      };
+
       document.getElementById('printModalTitle').innerText = data.title;
 
       const html = `
@@ -4047,7 +4046,23 @@
       if (!confirm('Bu çap qatını silmək istədiyinizə əminsiniz?')) return;
 
       const prod = currentPrintModalProduct;
-      const layers = Array.isArray(prod.printLayers) ? [...prod.printLayers] : [];
+      // If prod.printLayers is not set yet, initialize from currently displayed layers
+      let layers = [];
+      if (Array.isArray(prod.printLayers)) {
+        layers = [...prod.printLayers];
+      } else {
+        const lower = String(prod.slug || prod.id || '').toLowerCase();
+        let foundKey = '';
+        if (lower.includes('mclaren')) foundKey = 'mclaren';
+        else if (lower.includes('angelus') || lower.includes('polo')) foundKey = 'angelus';
+        else if (lower.includes('dust') || lower.includes('vintage-hoodie')) foundKey = 'dust';
+        else if (lower.includes('bmw') || lower.includes('motorsport')) foundKey = 'bmw';
+        const preset = foundKey ? PRODUCT_PRINT_MAP[foundKey] : null;
+        if (preset && Array.isArray(preset.printLayers)) {
+          layers = [...preset.printLayers];
+        }
+      }
+
       if (index >= 0 && index < layers.length) {
         layers.splice(index, 1);
         prod.printLayers = layers;
@@ -4065,6 +4080,8 @@
               STORE_DATA.products[idx].printLayers = layers;
             }
             openPrintModal(prod.slug || prod.id);
+          } else {
+            alert('Yadda saxlanılarkən xəta: ' + (saveResult.error || 'Naməlum'));
           }
         } catch (err) {
           alert('Silinmə xətası: ' + err.message);
