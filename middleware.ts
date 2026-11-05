@@ -32,11 +32,59 @@ function verifyTokenAtEdge(token: string | undefined | null): boolean {
   }
 }
 
+// ─── Edge DDoS & Rate Limiting Protection ────────────────────────────────────
+// In-memory sliding window cache for Edge network to block automated DDoS floods
+const ipHitCounter = new Map<string, { count: number; resetAt: number }>();
+
+function isRateLimited(ip: string, limit = 60, windowMs = 60 * 1000): boolean {
+  const now = Date.now();
+  const entry = ipHitCounter.get(ip);
+  if (!entry || now > entry.resetAt) {
+    ipHitCounter.set(ip, { count: 1, resetAt: now + windowMs });
+    return false;
+  }
+  if (entry.count >= limit) {
+    return true;
+  }
+  entry.count += 1;
+  return false;
+}
+
 // ─── Generic Default 404 (Brand-sız, sadə qara/ağ standart Vercel/Next.js tipli 404) ───
 const GENERIC_404_HTML = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>404: This page could not be found</title><style>body{color:#000;background:#fff;font-family:-apple-system,BlinkMacSystemFont,Roboto,"Segoe UI","Fira Sans",Avenir,"Helvetica Neue","Lucida Grande",sans-serif;height:100vh;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}}.d{display:flex;align-items:center}h1{display:inline-block;margin:0 20px 0 0;padding:0 23px 0 0;font-size:24px;font-weight:500;vertical-align:top;line-height:49px;border-right:1px solid rgba(128,128,128,.4)}h2{font-size:14px;font-weight:400;line-height:49px;margin:0}</style></head><body><div class="d"><h1>404</h1><h2>This page could not be found.</h2></div></body></html>`;
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // GLOBAL EDGE DDOS & FLOOD PROTECTION
+  // Automatically throttles aggressive bot attacks and HTTP floods before hitting routes
+  // ═══════════════════════════════════════════════════════════════════════════
+  const clientIp =
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    request.headers.get('x-real-ip') ||
+    'global-client';
+
+  // API routes: Max 60 requests per minute per IP
+  // Static pages: Max 150 requests per minute per IP
+  const isApi = pathname.startsWith('/api/');
+  const maxAllowed = isApi ? 60 : 150;
+
+  if (isRateLimited(clientIp, maxAllowed, 60 * 1000)) {
+    return new NextResponse(
+      JSON.stringify({
+        error: 'Too Many Requests',
+        message: 'DDoS mühafizəsi: Həddindən artıq sorğu aşkar edildi. Zəhmət olmasa bir qədər gözləyin.',
+      }),
+      {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': '60',
+        },
+      }
+    );
+  }
 
   // ═══════════════════════════════════════════════════════════════════════════
   // 0. ADMIN PANEL PROTECTION — completely hide /admin from unauthorized users
