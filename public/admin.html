@@ -2015,6 +2015,16 @@
     let CURRENT_ORDER_FILTER = 'all';
     const AUTH_TOKEN_KEY = 'horvvalle_admin_token';
 
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
     function getAdminToken() {
       return localStorage.getItem(AUTH_TOKEN_KEY) || sessionStorage.getItem(AUTH_TOKEN_KEY) || '';
     }
@@ -2543,13 +2553,13 @@
             </td>
             <td class="p-3.5">
               <div class="font-bold text-slate-900 flex items-center gap-1.5">
-                <span>${cust.fullName || 'Müştəri'}</span>
+                <span>${escapeHtml(cust.fullName || 'Müştəri')}</span>
                 ${o.source ? `<span class="px-1.5 py-0.2 rounded text-[8px] font-bold bg-emerald-50 text-emerald-700">Bulud</span>` : ''}
               </div>
               <div class="flex items-center gap-1.5 mt-0.5">
-                <span class="text-[10px] text-slate-500 font-mono">${cust.phone || '-'}</span>
+                <span class="text-[10px] text-slate-500 font-mono">${escapeHtml(cust.phone || '-')}</span>
                 ${cust.phone && cust.phone.replace(/\D/g, '').length >= 7 ? `
-                  <a href="https://wa.me/${cust.phone.replace(/\D/g, '')}?text=${encodeURIComponent('Salam ' + (cust.fullName || '') + ', HORVVALLE atelyesindən #' + o.id + ' nömrəli sifarişinizlə bağlı əlaqə saxlayırıq.')}" 
+                  <a href="https://wa.me/${cust.phone.replace(/\D/g, '')}?text=${encodeURIComponent('Salam ' + (cust.fullName || '') + ', Horwalle atelyesindən #' + o.id + ' nömrəli sifarişinizlə bağlı əlaqə saxlayırıq.')}" 
                     target="_blank" 
                     class="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-1.5 py-0.5 rounded transition"
                     title="Müştəriyə WhatsApp ilə yaz">
@@ -2557,10 +2567,10 @@
                   </a>
                 ` : ''}
               </div>
-              <div class="text-[10px] text-slate-400 truncate max-w-[150px]">${cust.city || 'Bakı'}, ${cust.address || '-'}</div>
+              <div class="text-[10px] text-slate-400 truncate max-w-[150px]">${escapeHtml(cust.city || 'Bakı')}, ${escapeHtml(cust.address || '-')}</div>
             </td>
             <td class="p-3.5">
-              <div class="text-xs text-slate-700 max-w-[200px] truncate">${(o.items || []).map(i => `${i.quantity}x ${i.name} (${i.size || 'L'})`).join(', ')}</div>
+              <div class="text-xs text-slate-700 max-w-[200px] truncate">${(o.items || []).map(i => `${i.quantity}x ${escapeHtml(i.name)} (${escapeHtml(i.size || 'L')})`).join(', ')}</div>
             </td>
             <td class="p-3.5 font-black text-slate-900">
               <div>${Number(o.total || 0).toFixed(2)} ₼</div>
