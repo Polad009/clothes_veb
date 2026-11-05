@@ -4,7 +4,7 @@ export const metadata: Metadata = {
   title: "Sifariş İzləmə | Horvvalle Atelier",
   description: "Horvvalle sifarişinizi unikal izləmə kodu ilə real vaxt rejimində izləyin.",
   alternates: {
-    canonical: "https://horvvalle.com/track",
+    canonical: "https://www.horwalle.com/track",
   },
 };
 

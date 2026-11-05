@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: "Məxfilik Siyasəti | Horvvalle Atelier",
   description: "Horvvalle Atelier-də fərdi məlumatların qorunması, çərəzlər və məxfilik siyasəti.",
   alternates: {
-    canonical: "https://horvvalle.com/privacy",
+    canonical: "https://www.horwalle.com/privacy",
   },
 };
 

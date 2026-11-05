@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: "İstifadə Şərtləri & Qaydalar | Horvvalle Atelier",
   description: "Horvvalle Atelier onlayn mağaza və atelye xidmətlərinin istifadə şərtləri, qaytarılma və çatdırılma qaydaları.",
   alternates: {
-    canonical: "https://horvvalle.com/terms",
+    canonical: "https://www.horwalle.com/terms",
   },
 };
 

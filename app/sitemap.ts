@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 import { MOCK_PRODUCTS } from "@/data/products";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://horvvalle.com";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.horwalle.com";
 
   // Base static routes
   const staticRoutes: MetadataRoute.Sitemap = [

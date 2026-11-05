@@ -28,16 +28,16 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://horvvalle.com"),
+  metadataBase: new URL("https://www.horwalle.com"),
   title: {
-    default: "Horvvalle — Lüks Geyim & Fərdi Atelye | Rəsmi Mağaza",
-    template: "%s | Horvvalle",
+    default: "Horwalle (Horvvalle) — Lüks Geyim & Fərdi Atelye | Rəsmi Mağaza",
+    template: "%s | Horwalle Atelier",
   },
   alternates: {
-    canonical: "https://horvvalle.com",
+    canonical: "https://www.horwalle.com",
   },
   verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || "",
+    google: "PAZrvm8cUAb0FsO13SzE-2mG5DVfRdT8P5eP4xF7SwI",
   },
   robots: {
     index: true,
@@ -58,10 +58,14 @@ export const metadata: Metadata = {
     shortcut: "/brand/favicon.png?v=3",
     apple: "/brand/favicon.png?v=3",
   },
-  description: "Horvvalle — Sənin ölçün, sənin üslubun. Atelyedə hər geyim ölçünə görə tikilir, istədiyin dizayn isə canlı 3D çapla köynəyə köçürülür.",
+  description: "Horwalle (Horvvalle Atelier) — Sənin ölçün, sənin üslubun. Atelyedə hər geyim ölçünə görə tikilir, istədiyin dizayn isə canlı 3D çapla köynəyə köçürülür.",
   keywords: [
+    "Horwalle",
+    "www.horwalle.com",
+    "Horwalle atelye",
     "Horvvalle",
     "Horvvalle atelye",
+    "Horwalle baku",
     "Lüks kişi köynəkləri",
     "3iplik premium hudi",
     "Chino şalvar",
@@ -73,24 +77,24 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "az_AZ",
-    url: "https://horvvalle.com",
-    siteName: "Horvvalle Atelier",
-    title: "Horvvalle — Lüks Geyim & Fərdi Atelye",
-    description: "Horvvalle — Sənin ölçün, sənin üslubun. Atelyedə hər geyim ölçünə görə tikilir, istədiyin dizayn isə canlı 3D çapla köynəyə köçürülür.",
+    url: "https://www.horwalle.com",
+    siteName: "Horwalle Atelier",
+    title: "Horwalle (Horvvalle) — Lüks Geyim & Fərdi Atelye",
+    description: "Horwalle (Horvvalle Atelier) — Sənin ölçün, sənin üslubun. Atelyedə hər geyim ölçünə görə tikilir, istədiyin dizayn isə canlı 3D çapla köynəyə köçürülür.",
     images: [
       {
-        url: "https://horvvalle.com/images/salvar-and-shortik-showcase.webp",
+        url: "https://www.horwalle.com/images/salvar-and-shortik-showcase.webp",
         width: 1200,
         height: 630,
-        alt: "Horvvalle Atelier Luxury Fashion",
+        alt: "Horwalle Atelier Luxury Fashion",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Horvvalle — Lüks Geyim & Fərdi Atelye",
-    description: "Horvvalle — Sənin ölçün, sənin üslubun. Atelyedə hər geyim ölçünə görə tikilir, istədiyin dizayn isə canlı 3D çapla köynəyə köçürülür.",
-    images: ["https://horvvalle.com/images/salvar-and-shortik-showcase.webp"],
+    title: "Horwalle (Horvvalle) — Lüks Geyim & Fərdi Atelye",
+    description: "Horwalle (Horvvalle Atelier) — Sənin ölçün, sənin üslubun. Atelyedə hər geyim ölçünə görə tikilir, istədiyin dizayn isə canlı 3D çapla köynəyə köçürülür.",
+    images: ["https://www.horwalle.com/images/salvar-and-shortik-showcase.webp"],
   },
 };
 

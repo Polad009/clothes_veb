@@ -1,16 +1,16 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "3D İnteraktiv Çap Studiyası | Horvvalle Atelier",
+  title: "3D İnteraktiv Çap Studiyası | Horwalle Atelier",
   description: "Öz dizaynını, loqonu və ya istədiyin qrafikanı 3D formatda köynəyə yerləşdir və canlı fərdi atelye sifarişi ver.",
   alternates: {
-    canonical: "https://horvvalle.com/studio",
+    canonical: "https://www.horwalle.com/studio",
   },
   openGraph: {
-    title: "3D İnteraktiv Çap Studiyası | Horvvalle Atelier",
+    title: "3D İnteraktiv Çap Studiyası | Horwalle Atelier",
     description: "Öz dizaynını, loqonu və ya istədiyin qrafikanı 3D formatda köynəyə yerləşdir və canlı fərdi atelye sifarişi ver.",
-    url: "https://horvvalle.com/studio",
-    images: ["https://horvvalle.com/images/salvar-and-shortik-showcase.webp"],
+    url: "https://www.horwalle.com/studio",
+    images: ["https://www.horwalle.com/images/salvar-and-shortik-showcase.webp"],
   },
 };
 

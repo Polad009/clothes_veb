@@ -4,7 +4,7 @@ export const metadata: Metadata = {
   title: "Sifarişi Rəsmiləşdir | Horvvalle Atelier",
   description: "Təhlükəsiz ödəniş və operativ çatdırılma ilə sifarişi tamamlayın.",
   alternates: {
-    canonical: "https://horvvalle.com/checkout",
+    canonical: "https://www.horwalle.com/checkout",
   },
   robots: {
     index: false,
