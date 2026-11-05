@@ -17,6 +17,7 @@ export interface Product {
   refCode?: string;
   description: string;
   price: number;
+  internationalPrice?: number;
   compareAtPrice?: number;
   badge?: string;
   category: 'koynek' | 'hudi' | 'salvar' | 'aksesuar' | string;

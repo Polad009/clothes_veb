@@ -9,6 +9,7 @@ import { Search, X, Box, ChevronRight } from "lucide-react";
 import { MOCK_PRODUCTS, Product } from "@/data/products";
 import { useStoreData } from "@/context/StoreDataContext";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface HeaderQuickSearchProps {
   isLightMode: boolean;
@@ -27,6 +28,7 @@ export function HeaderQuickSearch({ isLightMode, onOpenChange }: HeaderQuickSear
   const router = useRouter();
   const { products } = useStoreData();
   const { formatPrice } = useCurrency();
+  const { t, language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
@@ -141,10 +143,10 @@ export function HeaderQuickSearch({ isLightMode, onOpenChange }: HeaderQuickSear
               ? "bg-stone-100 hover:bg-stone-200/80 border-stone-200/80 text-stone-700"
               : "bg-white/15 hover:bg-white/25 border-white/25 text-white"
           } ${isOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}
-          aria-label="Axtarış"
+          aria-label={t.nav.search || "Axtarış"}
         >
           <Search size={14} className={isLightMode ? "text-stone-600" : "text-[#E6C280]"} />
-          <span>Axtarış</span>
+          <span>{t.nav.search || "Axtarış"}</span>
         </button>
 
         {/* Mobile Search Icon Button */}
@@ -156,7 +158,7 @@ export function HeaderQuickSearch({ isLightMode, onOpenChange }: HeaderQuickSear
               ? "bg-stone-100 hover:bg-stone-200 text-stone-800 border-stone-200"
               : "bg-white/15 hover:bg-white/25 text-white border-white/20"
           } ${isOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}
-          aria-label="Axtarış"
+          aria-label={t.nav.search || "Axtarış"}
         >
           <Search size={15} className={isLightMode ? "text-stone-600" : "text-[#E6C280]"} />
         </button>
@@ -195,7 +197,7 @@ export function HeaderQuickSearch({ isLightMode, onOpenChange }: HeaderQuickSear
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Axtarın..."
+                placeholder={t.nav.searchPlaceholder || (language === "en" ? "Search products..." : "Axtarın...")}
                 className="w-full bg-transparent text-xs sm:text-sm font-medium focus:outline-none placeholder-stone-400"
               />
 
@@ -244,9 +246,11 @@ export function HeaderQuickSearch({ isLightMode, onOpenChange }: HeaderQuickSear
                 <div className="space-y-2">
                   <div className="flex items-center justify-between px-1 pb-1 border-b border-stone-200/70">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
-                      Tövsiyə Olunanlar
+                      {language === "en" ? "Suggestions" : language === "ru" ? "Рекомендации" : language === "tr" ? "Öneriler" : "Tövsiyə Olunanlar"}
                     </span>
-                    <span className="text-[10px] font-mono text-stone-400">Esc ilə bağla</span>
+                    <span className="text-[10px] font-mono text-stone-400">
+                      {language === "en" ? "Esc to close" : language === "ru" ? "Esc закрыть" : language === "tr" ? "Esc ile kapat" : "Esc ilə bağla"}
+                    </span>
                   </div>
 
                   <div className="flex flex-wrap gap-1.5 pt-1">
@@ -272,7 +276,7 @@ export function HeaderQuickSearch({ isLightMode, onOpenChange }: HeaderQuickSear
                 <div className="space-y-2">
                   <div className="flex items-center justify-between px-1 pb-1 border-b border-stone-200/70">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
-                      Nəticələr ({matchingProducts.length})
+                      {language === "en" ? `Results (${matchingProducts.length})` : language === "ru" ? `Результаты (${matchingProducts.length})` : language === "tr" ? `Sonuçlar (${matchingProducts.length})` : `Nəticələr (${matchingProducts.length})`}
                     </span>
                     <button
                       type="button"
@@ -284,7 +288,7 @@ export function HeaderQuickSearch({ isLightMode, onOpenChange }: HeaderQuickSear
                         isLightMode ? "text-stone-700 hover:text-black" : "text-white/80 hover:text-white"
                       }`}
                     >
-                      Hamısına bax
+                      {language === "en" ? "View all" : language === "ru" ? "Смотреть все" : language === "tr" ? "Tümünü gör" : "Hamısına bax"}
                     </button>
                   </div>
 
@@ -332,7 +336,7 @@ export function HeaderQuickSearch({ isLightMode, onOpenChange }: HeaderQuickSear
                   ) : (
                     <div className="py-5 text-center">
                       <p className="text-xs text-stone-500 font-medium">
-                        "{query}" üçün nəticə tapılmadı.
+                        {language === "en" ? `No results for "${query}"` : language === "ru" ? `Ничего не найдено по запросу "${query}"` : language === "tr" ? `"${query}" için sonuç bulunamadı` : `"${query}" üçün nəticə tapılmadı.`}
                       </p>
                       <button
                         type="button"
@@ -342,7 +346,7 @@ export function HeaderQuickSearch({ isLightMode, onOpenChange }: HeaderQuickSear
                         }}
                         className="mt-2 text-xs font-semibold text-[#B08D57] underline cursor-pointer"
                       >
-                        Bütün kolleksiyaya bax
+                        {language === "en" ? "Explore full collection" : language === "ru" ? "Смотреть всю коллекцию" : language === "tr" ? "Tüm koleksiyonu incele" : "Bütün kolleksiyaya bax"}
                       </button>
                     </div>
                   )}

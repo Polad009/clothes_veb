@@ -151,7 +151,8 @@
             "/images/uploads/bmw_hoodie_white_back_v3.png"
           ]
         }
-      ]
+      ],
+      "internationalPrice": 14
     },
     {
       "id": "vtx-fec6739b",
@@ -227,7 +228,8 @@
             "/images/uploads/mclaren_tee_white_right_v2.png"
           ]
         }
-      ]
+      ],
+      "internationalPrice": 20
     },
     {
       "name": "HORVVALLE Angelus Heavyweight Vintage Polo",
@@ -301,7 +303,8 @@
         }
       ],
       "id": "vtx-mvmliyrt",
-      "slug": "horwalle-angelus-heavyweight-vintage-polo"
+      "slug": "horwalle-angelus-heavyweight-vintage-polo",
+      "internationalPrice": 23
     },
     {
       "name": "HORWALLE Angel Dust Vintage Hoodie",
@@ -341,7 +344,8 @@
         }
       ],
       "id": "vtx-mvmi2ckz",
-      "slug": "horwalle-angel-dust-vintage-hoodie"
+      "slug": "horwalle-angel-dust-vintage-hoodie",
+      "internationalPrice": 33
     }
   ],
   "orders": [],

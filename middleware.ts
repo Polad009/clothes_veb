@@ -121,10 +121,48 @@ export function middleware(request: NextRequest) {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // 1. Standard security headers for all other routes
+  // 1. Standard security headers and Geo detection for all other routes
   // ═══════════════════════════════════════════════════════════════════════════
   const response = NextResponse.next();
   applySecurityHeaders(response);
+
+  // Geo detection (Vercel Edge / Cloudflare)
+  const country =
+    request.headers.get('x-vercel-ip-country')?.toUpperCase() ||
+    request.headers.get('cf-ipcountry')?.toUpperCase() ||
+    (request as any).geo?.country?.toUpperCase() ||
+    '';
+
+  if (country) {
+    response.headers.set('x-horwalle-country', country);
+    response.cookies.set('horwalle_geo_country', country, {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7,
+      sameSite: 'lax',
+    });
+
+    // Auto set default language cookie if user hasn't explicitly chosen one yet
+    const userLangCookie = request.cookies.get('horvvalle_user_language_v1')?.value;
+    if (!userLangCookie) {
+      const defaultLang = country === 'AZ' ? 'az' : 'en';
+      response.cookies.set('horvvalle_user_language_v1', defaultLang, {
+        path: '/',
+        maxAge: 60 * 60 * 24 * 30,
+        sameSite: 'lax',
+      });
+    }
+
+    // Auto set default currency cookie if user hasn't chosen one yet
+    const userCurrencyCookie = request.cookies.get('atelier_selected_currency_v1')?.value;
+    if (!userCurrencyCookie) {
+      const defaultCurr = country === 'AZ' ? 'AZN' : 'USD';
+      response.cookies.set('atelier_selected_currency_v1', defaultCurr, {
+        path: '/',
+        maxAge: 60 * 60 * 24 * 30,
+        sameSite: 'lax',
+      });
+    }
+  }
 
   // 2. Extra API defense against scanning or probing
   if (pathname.startsWith('/api/admin') && !pathname.includes('/api/admin/login')) {

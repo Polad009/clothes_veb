@@ -402,6 +402,11 @@ export async function POST(
           if (product.rightShoulderImage) meta.rightShoulderImage = product.rightShoulderImage;
           if (product.gallery) meta.gallery = product.gallery;
           if (product.printLayers) meta.printLayers = product.printLayers;
+          if (product.internationalPrice != null && product.internationalPrice !== '') {
+            meta.internationalPrice = Number(product.internationalPrice);
+          } else if (product.internationalPrice === '' || product.internationalPrice === null) {
+            delete meta.internationalPrice;
+          }
 
           if (hasCompareAtPrice) {
             meta.compareAtPrice = parsedCompareAtPrice;

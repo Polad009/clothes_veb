@@ -239,7 +239,7 @@ export function Header({ className = "" }: HeaderProps) {
                     : isLightMode ? "text-stone-700" : "text-[#E6C280]"
                 }
               />
-              <span>3D Studiya</span>
+              <span>{t.nav.studio || "3D Studiya"}</span>
             </Link>
           </nav>
 
@@ -267,11 +267,11 @@ export function Header({ className = "" }: HeaderProps) {
                     ? "bg-white text-stone-900 border-stone-200 hover:bg-stone-50"
                     : "bg-white/10 text-white border-white/20 hover:bg-white/20"
                 }`}
-                title="Hesabım"
+                title={t.nav.account || "Hesabım"}
               >
                 <User size={15} className="text-[#B08D57]" />
                 <span className="hidden md:inline text-xs font-semibold max-w-[80px] truncate">
-                  {profile?.full_name?.split(" ")[0] || user.email?.split("@")[0] || "Hesabım"}
+                  {profile?.full_name?.split(" ")[0] || user.email?.split("@")[0] || t.nav.account || "Hesabım"}
                 </span>
               </Link>
             ) : (
@@ -283,10 +283,12 @@ export function Header({ className = "" }: HeaderProps) {
                     ? "bg-white text-stone-900 border-stone-200 hover:bg-stone-50"
                     : "bg-white/10 text-white border-white/20 hover:bg-white/20"
                 }`}
-                aria-label="Daxil ol"
+                aria-label={t.nav.login || "Daxil ol"}
               >
                 <User size={15} />
-                <span className="hidden md:inline text-xs font-semibold">Daxil ol</span>
+                <span className="hidden md:inline text-xs font-semibold">
+                  {t.nav.login?.split("/")[0]?.trim() || t.nav.login || "Daxil ol"}
+                </span>
               </button>
             )}
 
@@ -299,10 +301,10 @@ export function Header({ className = "" }: HeaderProps) {
                   ? "bg-stone-900 text-white hover:bg-black border-stone-900"
                   : "bg-white text-black hover:bg-white/90 border-white"
               }`}
-              aria-label={`Səbət (${totalCount})`}
+              aria-label={`${t.nav.cart || "Səbət"} (${totalCount})`}
             >
               <ShoppingBag size={15} className={isLightMode ? "text-white" : "text-[#2E1A22]"} />
-              <span className="hidden sm:inline text-xs font-semibold">Səbət</span>
+              <span className="hidden sm:inline text-xs font-semibold">{t.nav.cart || "Səbət"}</span>
               {totalCount > 0 && (
                 <span
                   className={`min-w-[17px] h-[17px] px-1 rounded-full text-white text-[9.5px] font-bold flex items-center justify-center ${

@@ -9,6 +9,7 @@ export interface CartItem {
   productId: string;
   name: string;
   price: number;
+  internationalPrice?: number;
   quantity: number;
   type: OrderItemType; // 'ready' or 'custom'
   size: string;

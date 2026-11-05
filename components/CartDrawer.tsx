@@ -26,9 +26,9 @@ const CART_I18N = {
   az: {
     cartTitle: "Səbətiniz",
     freeDeliveryBanner: "Bakı və Sumqayıt daxili çatdırılma PULSUZ",
-    emptyDesc: "{cT.emptyDesc}",
+    emptyDesc: "Köynək, hudi, şalvar və aksesuarlarımıza nəzər salın və ya 3D studiyada öz geyimini yarat.",
     studioBtn: "Fərdi Dizayn Studiyası",
-    customBadge: "{cT.customBadge}",
+    customBadge: "FƏRDİ",
     customOrder: "Fərdi Çap Sifarişi",
     fastBuyApple: "ilə Sürətli Al",
     deliveryFreeBaku: "PULSUZ (Bakı & Sumqayıt)",

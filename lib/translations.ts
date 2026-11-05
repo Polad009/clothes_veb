@@ -17,6 +17,8 @@ export interface Translations {
     account: string;
     searchPlaceholder: string;
     searchBtn: string;
+    search: string;
+    cart: string;
     menuTitle: string;
     categories: string;
     securePayment: string;
@@ -250,6 +252,8 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       account: "Müştəri Hesabı",
       searchPlaceholder: "Məhsul və ya model axtar...",
       searchBtn: "Axtar",
+      search: "Axtarış",
+      cart: "Səbət",
       menuTitle: "Geyim & Çap Studiyası",
       categories: "Kolleksiyalar",
       securePayment: "Təhlükəsiz Ödəniş",
@@ -473,6 +477,8 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       account: "Customer Account",
       searchPlaceholder: "Search products or styles...",
       searchBtn: "Search",
+      search: "Search",
+      cart: "Cart",
       menuTitle: "Apparel & Print Atelier",
       categories: "Categories",
       securePayment: "Secure Checkout",
@@ -696,6 +702,8 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       account: "Личный Кабинет",
       searchPlaceholder: "Поиск товаров и моделей...",
       searchBtn: "Поиск",
+      search: "Поиск",
+      cart: "Корзина",
       menuTitle: "Одежда и Студия Печати",
       categories: "Коллекции",
       securePayment: "Безопасная Оплата",
@@ -919,6 +927,8 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       account: "Müşteri Hesabı",
       searchPlaceholder: "Ürün veya model ara...",
       searchBtn: "Ara",
+      search: "Arama",
+      cart: "Sepet",
       menuTitle: "Giyim & Baskı Atölyesi",
       categories: "Koleksiyonlar",
       securePayment: "Güvenli Ödeme",

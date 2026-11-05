@@ -52,11 +52,14 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/brand/favicon-32x32.png?v=3", sizes: "32x32", type: "image/png" },
-      { url: "/brand/favicon.png?v=3", sizes: "512x512", type: "image/png" },
+      { url: "/brand/favicon-32x32.png?v=4", sizes: "32x32", type: "image/png" },
+      { url: "/brand/favicon.png?v=4", sizes: "512x512", type: "image/png" },
     ],
-    shortcut: "/brand/favicon.png?v=3",
-    apple: "/brand/favicon.png?v=3",
+    shortcut: [{ url: "/brand/favicon.png?v=4", type: "image/png" }],
+    apple: [{ url: "/brand/favicon.png?v=4", sizes: "512x512", type: "image/png" }],
+    other: [
+      { rel: "icon", url: "/brand/favicon.png?v=4", type: "image/png" },
+    ],
   },
   description: "Horwalle (Horvvalle Atelier) — Sənin ölçün, sənin üslubun. Atelyedə hər geyim ölçünə görə tikilir, istədiyin dizayn isə canlı 3D çapla köynəyə köçürülür.",
   keywords: [
@@ -83,7 +86,7 @@ export const metadata: Metadata = {
     description: "Horwalle (Horvvalle Atelier) — Sənin ölçün, sənin üslubun. Atelyedə hər geyim ölçünə görə tikilir, istədiyin dizayn isə canlı 3D çapla köynəyə köçürülür.",
     images: [
       {
-        url: "https://www.horwalle.com/images/salvar-and-shortik-showcase.webp",
+        url: "https://www.horwalle.com/images/categories/salvar-and-shortik-showcase.webp",
         width: 1200,
         height: 630,
         alt: "Horwalle Atelier Luxury Fashion",
@@ -94,7 +97,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Horwalle (Horvvalle) — Lüks Geyim & Fərdi Atelye",
     description: "Horwalle (Horvvalle Atelier) — Sənin ölçün, sənin üslubun. Atelyedə hər geyim ölçünə görə tikilir, istədiyin dizayn isə canlı 3D çapla köynəyə köçürülür.",
-    images: ["https://www.horwalle.com/images/salvar-and-shortik-showcase.webp"],
+    images: ["https://www.horwalle.com/images/categories/salvar-and-shortik-showcase.webp"],
   },
 };
 

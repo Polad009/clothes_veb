@@ -1752,10 +1752,17 @@
               <option value="aksesuar">Aksesuar</option>
             </select>
           </div>
-          <div>
-            <label class="block font-bold text-slate-700 mb-1">Qiymət (₼) *</label>
+          <div class="space-y-1">
+            <label class="block font-bold text-slate-700 mb-1">Azərbaycan Qiyməti (₼ AZN) *</label>
             <input type="number" step="0.01" id="prodPrice" required placeholder="79.00"
               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+            <p class="text-[10px] text-slate-400">Azərbaycandan daxil olan müştərilərə göstərilən qiymət.</p>
+          </div>
+          <div class="space-y-1">
+            <label class="block font-bold text-slate-700 mb-1">Beynəlxalq Qiymət ($ USD) *</label>
+            <input type="number" step="0.01" id="prodInternationalPrice" placeholder="59.00"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+            <p class="text-[10px] text-slate-400">Azərbaycandan kənar bütün ölkələrdən daxil olanlara göstərilən qiymət.</p>
           </div>
           <div>
             <label class="block font-bold text-slate-700 mb-1">Köhnə Qiymət (Endirimli) (₼)</label>
@@ -2321,8 +2328,9 @@
             </td>
             <td class="p-3.5 font-medium text-slate-600 uppercase text-[10px]">${p.category || 'Geyim'}</td>
             <td class="p-3.5 font-bold text-slate-900">
-              ${Number(p.price || 0).toFixed(2)} ₼
-              ${p.compareAtPrice ? `<span class="line-through text-slate-400 text-[10px] ml-1">${Number(p.compareAtPrice).toFixed(2)} ₼</span>` : ''}
+              <div class="text-xs text-slate-900">${Number(p.price || 0).toFixed(2)} ₼</div>
+              <div class="text-[11px] font-semibold text-emerald-700">$${p.internationalPrice != null ? Number(p.internationalPrice).toFixed(2) : (Number(p.price || 0) / 1.70).toFixed(2)} USD</div>
+              ${p.compareAtPrice ? `<span class="line-through text-slate-400 text-[10px]">${Number(p.compareAtPrice).toFixed(2)} ₼</span>` : ''}
             </td>
             <td class="p-3.5">
               <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${p.inStock !== false ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
@@ -3702,6 +3710,7 @@
       document.getElementById('prodEditId').value = '';
       document.getElementById('prodName').value = '';
       document.getElementById('prodPrice').value = '';
+      document.getElementById('prodInternationalPrice').value = '';
       document.getElementById('prodComparePrice').value = '';
       document.getElementById('prodImage').value = '';
       document.getElementById('prodHoverImage').value = '';
@@ -3730,6 +3739,7 @@
       document.getElementById('prodName').value = p.name || '';
       document.getElementById('prodCategory').value = p.category || 'koynek';
       document.getElementById('prodPrice').value = p.price != null ? p.price : '';
+      document.getElementById('prodInternationalPrice').value = p.internationalPrice != null ? p.internationalPrice : '';
       document.getElementById('prodComparePrice').value = (p.compareAtPrice != null && p.compareAtPrice !== '') ? p.compareAtPrice : '';
       document.getElementById('prodDesc').value = p.description || '';
 
@@ -4135,6 +4145,8 @@
       const name = document.getElementById('prodName').value.trim();
       const category = document.getElementById('prodCategory').value;
       const price = Number(document.getElementById('prodPrice').value) || 0;
+      const intlPriceRaw = document.getElementById('prodInternationalPrice').value.trim();
+      const internationalPrice = (intlPriceRaw !== '' && !isNaN(Number(intlPriceRaw))) ? Number(intlPriceRaw) : null;
       const compareRaw = document.getElementById('prodComparePrice').value.trim();
       const compareAtPrice = (compareRaw !== '' && !isNaN(Number(compareRaw))) ? Number(compareRaw) : null;
       const description = document.getElementById('prodDesc').value.trim();
@@ -4172,6 +4184,7 @@
         name,
         category,
         price,
+        internationalPrice,
         compareAtPrice: compareAtPrice,
         image: firstColor.image || existing?.image || '',
         hoverImage: firstColor.hoverImage || existing?.hoverImage || '',

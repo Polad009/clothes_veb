@@ -63,6 +63,13 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // 1. Check if user already manually selected a language
     try {
+      // Check cookies first (set by edge middleware)
+      const matchCookie = document.cookie.match(/horvvalle_user_language_v1=([^;]+)/);
+      const cookieLang = matchCookie ? (matchCookie[1].trim() as LanguageCode) : null;
+      if (cookieLang && LANGUAGES[cookieLang]) {
+        setLanguageState(cookieLang);
+      }
+
       const stored = localStorage.getItem(STORAGE_KEY) as LanguageCode | null;
       if (stored && LANGUAGES[stored]) {
         setLanguageState(stored);
@@ -73,55 +80,59 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       // ignore
     }
 
-    // 2. If no saved language, detect automatically via IP Geolocation
+    // 2. If no saved language, detect automatically via Edge Geo API / IP Geolocation
     const detectFromIpAndLocale = async () => {
       let resolvedCountry: string | null = null;
       let matchedLang: LanguageCode | null = null;
 
       try {
-        // Fast, privacy-friendly IP country detection endpoint
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 2000);
-
-        const res = await fetch("https://api.country.is/", {
-          signal: controller.signal,
-          cache: "no-store",
-        });
-        clearTimeout(timeoutId);
-
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.country) {
-            resolvedCountry = String(data.country).toUpperCase();
+        // Fast internal Edge endpoint
+        const geoRes = await fetch("/api/geo", { cache: "no-store" });
+        if (geoRes.ok) {
+          const geoData = await geoRes.json();
+          if (geoData && geoData.country) {
+            resolvedCountry = String(geoData.country).toUpperCase();
             setDetectedCountry(resolvedCountry);
-
-            // Country to Language Mapping:
-            if (resolvedCountry === "AZ") {
-              matchedLang = "az";
-            } else if (resolvedCountry === "TR") {
-              matchedLang = "tr";
-            } else if (
-              ["RU", "BY", "KZ", "KG", "UZ", "TJ", "UA"].includes(resolvedCountry)
-            ) {
-              matchedLang = "ru";
-            } else {
-              matchedLang = "en"; // Global / US / Europe / Rest of World
-            }
+            matchedLang = geoData.defaultLang as LanguageCode;
           }
         }
       } catch (e) {
-        // IP lookup timed out or failed (e.g. ad-blocker), fallback to browser locale
+        // ignore fallback
       }
 
-      // 3. Fallback to browser locale (navigator.language)
+      // External fallback if internal geo didn't resolve country
+      if (!resolvedCountry) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 2000);
+          const res = await fetch("https://api.country.is/", {
+            signal: controller.signal,
+            cache: "no-store",
+          });
+          clearTimeout(timeoutId);
+
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.country) {
+              resolvedCountry = String(data.country).toUpperCase();
+              setDetectedCountry(resolvedCountry);
+              if (resolvedCountry === "AZ") {
+                matchedLang = "az";
+              } else {
+                matchedLang = "en";
+              }
+            }
+          }
+        } catch {
+          // ignore
+        }
+      }
+
+      // Fallback to browser locale (navigator.language)
       if (!matchedLang && typeof navigator !== "undefined") {
         const nav = (navigator.language || "").toLowerCase();
         if (nav.startsWith("az")) {
           matchedLang = "az";
-        } else if (nav.startsWith("tr")) {
-          matchedLang = "tr";
-        } else if (nav.startsWith("ru")) {
-          matchedLang = "ru";
         } else {
           matchedLang = "en";
         }
@@ -142,6 +153,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     setIsAutoDetected(false);
     try {
       localStorage.setItem(STORAGE_KEY, code);
+      document.cookie = `${STORAGE_KEY}=${code}; path=/; max-age=2592000; SameSite=Lax`;
     } catch {
       // ignore
     }
