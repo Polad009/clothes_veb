@@ -4,8 +4,8 @@ import { Metadata } from "next";
 import { Scale, ArrowLeft, RefreshCw, Truck, CreditCard, ShieldCheck } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "İstifadə Şərtləri & Qaydalar | Horvvalle Atelier",
-  description: "Horvvalle Atelier onlayn mağaza və atelye xidmətlərinin istifadə şərtləri, qaytarılma və çatdırılma qaydaları.",
+  title: "İstifadə Şərtləri & Qaydalar | Horwalle Atelier",
+  description: "Horwalle Atelier onlayn mağaza və atelye xidmətlərinin istifadə şərtləri, qaytarılma və çatdırılma qaydaları.",
   alternates: {
     canonical: "https://www.horwalle.com/terms",
   },
@@ -34,7 +34,7 @@ export default function TermsPage() {
             İstifadə Şərtləri
           </h1>
           <p className="text-stone-400 text-sm sm:text-base leading-relaxed">
-            Horvvalle Atelier veb-saytından istifadə etməklə və ya sifariş verməklə aşağıdakı rəsmi şərtləri qəbul etmiş sayılırsınız.
+            Horwalle Atelier veb-saytından istifadə etməklə və ya sifariş verməklə aşağıdakı rəsmi şərtləri qəbul etmiş sayılırsınız.
           </p>
         </div>
 
@@ -47,7 +47,7 @@ export default function TermsPage() {
               <h2 className="text-xl font-serif font-bold">1. Ümumi Müddəalar</h2>
             </div>
             <p className="mb-3 text-stone-400">
-              Bu müqavilə Horvvalle Atelier ilə alıcı arasında bağlanmış rəsmi elektron təklif (oferta) xarakteri daşıyır.
+              Bu müqavilə Horwalle Atelier ilə alıcı arasında bağlanmış rəsmi elektron təklif (oferta) xarakteri daşıyır.
             </p>
             <p className="text-stone-400">
               Alıcı sayt üzərindən hazır kolleksiyadan geyim sifariş edə və ya 3D İnteraktiv Çap Studiyasından istifadə edərək fərdi dizaynlı məhsul hazırlada bilər.

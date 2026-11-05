@@ -12,18 +12,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!product) {
     return {
-      title: "Məhsul | Horvvalle Atelier",
-      description: "Horvvalle Atelier eksklüziv kolleksiyası.",
+      title: "Məhsul | Horwalle Atelier",
+      description: "Horwalle Atelier eksklüziv kolleksiyası.",
       alternates: {
         canonical: `https://horvvalle.com/products/${params.slug}`,
       },
     };
   }
 
-  const title = `${product.name} | Horvvalle Atelier`;
+  const title = `${product.name} | Horwalle Atelier`;
   const description =
     product.description ||
-    `${product.name} — 100% premium keyfiyyət və fərdi dərzilik kəsimi ilə Horvvalle Atelier-də.`;
+    `${product.name} — 100% premium keyfiyyət və fərdi dərzilik kəsimi ilə Horwalle Atelier-də.`;
   const canonicalUrl = `https://horvvalle.com/products/${params.slug}`;
 
   // Find primary image
@@ -49,7 +49,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: canonicalUrl,
       title,
       description,
-      siteName: "Horvvalle Atelier",
+      siteName: "Horwalle Atelier",
       images: [
         {
           url: fullImageUrl,

@@ -4,8 +4,8 @@ import { Metadata } from "next";
 import { ShieldCheck, ArrowLeft, Lock, Eye, FileText, HelpCircle } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Məxfilik Siyasəti | Horvvalle Atelier",
-  description: "Horvvalle Atelier-də fərdi məlumatların qorunması, çərəzlər və məxfilik siyasəti.",
+  title: "Məxfilik Siyasəti | Horwalle Atelier",
+  description: "Horwalle Atelier-də fərdi məlumatların qorunması, çərəzlər və məxfilik siyasəti.",
   alternates: {
     canonical: "https://www.horwalle.com/privacy",
   },
@@ -34,7 +34,7 @@ export default function PrivacyPage() {
             Məxfilik Siyasəti
           </h1>
           <p className="text-stone-400 text-sm sm:text-base leading-relaxed">
-            Son yenilənmə tarixi: <span className="text-[#E6C280]">Noyabr 2026</span>. Horvvalle Atelier olaraq fərdi məlumatlarınızın toxunulmazlığına və məxfiliyinə ən yüksək səviyyədə zəmanət veririk.
+            Son yenilənmə tarixi: <span className="text-[#E6C280]">Noyabr 2026</span>. Horwalle Atelier olaraq fərdi məlumatlarınızın toxunulmazlığına və məxfiliyinə ən yüksək səviyyədə zəmanət veririk.
           </p>
         </div>
 

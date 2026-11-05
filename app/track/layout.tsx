@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Sifariş İzləmə | Horvvalle Atelier",
+  title: "Sifariş İzləmə | Horwalle Atelier",
   description: "Horvvalle sifarişinizi unikal izləmə kodu ilə real vaxt rejimində izləyin.",
   alternates: {
     canonical: "https://www.horwalle.com/track",
