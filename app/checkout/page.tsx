@@ -1553,12 +1553,6 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* Cloudflare Turnstile Bot Defense Protection Widget */}
-              <CloudflareTurnstile
-                onVerify={(token) => setTurnstileToken(token)}
-                onExpire={() => setTurnstileToken("")}
-              />
-
               {/* Dynamic Action Button according to chosen payment method */}
               <button
                 type="submit"

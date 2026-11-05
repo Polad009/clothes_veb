@@ -225,12 +225,6 @@ export function AuthModal() {
             </div>
           </div>
 
-          {/* Cloudflare Turnstile Verification */}
-          <CloudflareTurnstile
-            onVerify={(token) => setTurnstileToken(token)}
-            onExpire={() => setTurnstileToken("")}
-          />
-
           <button
             type="submit"
             disabled={isSubmitting}
