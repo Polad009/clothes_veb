@@ -130,29 +130,40 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     return `${converted.toFixed(2)} ₼`;
   };
 
-  // Dual pricing calculation:
-  // If user is in Azerbaijan or has chosen AZN: return product.price
-  // If user is international or has chosen USD: return product.internationalPrice (or fallback to converted)
+  // Dual pricing calculation strictly tied to user GEO-LOCATION:
+  // 1. If detected country is Azerbaijan (isAzerbaijan === true):
+  //    - Base product price is ALWAYS product.price (AZN).
+  //    - If user prefers viewing in USD, convert that AZN price via rate.
+  // 2. If detected country is International (isAzerbaijan === false):
+  //    - User gets the official internationalPrice ($ USD) set in Admin Panel.
+  //    - If user switches to AZN view, convert that USD price to AZN.
   const getProductPrice = (product: { price: number; internationalPrice?: number }): number => {
     if (!product) return 0;
     const aznPrice = Number(product.price) || 0;
-    const intlPrice = product.internationalPrice != null && product.internationalPrice !== undefined
+    const intlPrice = product.internationalPrice != null && product.internationalPrice !== undefined && !isNaN(Number(product.internationalPrice))
       ? Number(product.internationalPrice)
       : null;
 
-    if (currency === "AZN") {
-      return aznPrice;
+    if (isAzerbaijan) {
+      // User is physically in Azerbaijan
+      if (currency === "AZN") {
+        return aznPrice;
+      }
+      // If user in AZ manually chooses USD, convert Azerbaijan price
+      return convertPrice(aznPrice);
+    } else {
+      // User is physically outside Azerbaijan (International)
+      const targetUsdPrice = intlPrice !== null ? intlPrice : convertPrice(aznPrice);
+      if (currency === "USD") {
+        return targetUsdPrice;
+      }
+      // If international user manually chooses AZN view
+      return targetUsdPrice * 1.70;
     }
-
-    if (currency === "USD") {
-      return intlPrice !== null && !isNaN(intlPrice) ? intlPrice : convertPrice(aznPrice);
-    }
-
-    return aznPrice;
   };
 
   const formatProductPrice = (product: { price: number; internationalPrice?: number }): string => {
-    if (!product) return "0.00 ₼";
+    if (!product) return currency === "USD" ? "$0.00" : "0.00 ₼";
     const finalAmount = getProductPrice(product);
 
     if (currency === "USD") {

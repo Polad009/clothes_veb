@@ -252,7 +252,7 @@ const CHECKOUT_I18N = {
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, totalPrice, clearCart } = useCart();
-  const { formatPrice, currency } = useCurrency();
+  const { formatPrice, getProductPrice, currency, isAzerbaijan } = useCurrency();
   const { t, language } = useLanguage();
   const langKey = (language as "az" | "en" | "ru" | "tr") || "az";
   const cT = CHECKOUT_I18N[langKey] || CHECKOUT_I18N.az;
@@ -320,11 +320,17 @@ export default function CheckoutPage() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [shakingField, setShakingField] = useState<string | null>(null);
 
+  // Effective cart total calculated according to user's region (AZN vs International USD)
+  const effectiveSubtotal = items.reduce(
+    (sum, item) => sum + getProductPrice(item) * item.quantity,
+    0
+  );
+
   // Free delivery for Baku & Sumqayit regardless of cart amount
   const isFreeZone = /^(bak[ıi]|sumqay[ıi]t)/i.test(city.trim());
-  const shippingCost = isFreeZone ? 0 : (totalPrice >= 60 ? 0 : 5);
-  const discountAmount = promoDiscountAmount > 0 ? promoDiscountAmount : (totalPrice * discountPercent) / 100;
-  const finalTotal = Math.max(0, totalPrice - discountAmount + shippingCost);
+  const shippingCost = isFreeZone ? 0 : (effectiveSubtotal >= 60 ? 0 : 5);
+  const discountAmount = promoDiscountAmount > 0 ? promoDiscountAmount : (effectiveSubtotal * discountPercent) / 100;
+  const finalTotal = Math.max(0, effectiveSubtotal - discountAmount + shippingCost);
   const hasCustomItems = items.some((i) => i.type === "custom");
 
   const clearFieldError = (field: string) => {
@@ -551,7 +557,7 @@ export default function CheckoutPage() {
             name: i.name,
             size: i.size,
             color: i.color,
-            price: i.price,
+            price: getProductPrice(i),
             quantity: i.quantity,
             isCustom: i.type === "custom",
             customData: i.customData || null,
@@ -564,7 +570,7 @@ export default function CheckoutPage() {
               : chosenMethod === "cod"
               ? "Çatdırılmada Ödəniş (COD)"
               : "Bank Kartı (Visa/Mastercard)",
-          subtotal: totalPrice,
+          subtotal: effectiveSubtotal,
           shipping: shippingCost,
           discount: discountAmount,
           promoCode: appliedPromoCode || null,
@@ -1570,17 +1576,17 @@ export default function CheckoutPage() {
                 ) : paymentMethod === "apple_pay" ? (
                   <>
                     <ApplePayLogo className="h-5 w-auto" variant="dark" />
-                    <span className="font-semibold tracking-normal lowercase first-letter:uppercase">ilə ödə — {formatPrice(finalTotal)}</span>
+                    <span className="font-semibold tracking-normal lowercase first-letter:uppercase">ilə ödə — {currency === "USD" ? `$${finalTotal.toFixed(2)}` : `${finalTotal.toFixed(2)} ₼`}</span>
                   </>
                 ) : paymentMethod === "google_pay" ? (
                   <>
                     <GooglePayLogo className="h-5 w-auto" />
-                    <span className="font-semibold tracking-normal lowercase first-letter:uppercase">ilə ödə — {formatPrice(finalTotal)}</span>
+                    <span className="font-semibold tracking-normal lowercase first-letter:uppercase">ilə ödə — {currency === "USD" ? `$${finalTotal.toFixed(2)}` : `${finalTotal.toFixed(2)} ₼`}</span>
                   </>
                 ) : (
                   <>
                     <Lock size={15} />
-                    <span>{t.checkout.confirmOrder} — {formatPrice(finalTotal)}</span>
+                    <span>{t.checkout.confirmOrder} — {currency === "USD" ? `$${finalTotal.toFixed(2)}` : `${finalTotal.toFixed(2)} ₼`}</span>
                   </>
                 )}
               </button>
@@ -1617,7 +1623,7 @@ export default function CheckoutPage() {
                       )}
                     </div>
                     <div className="text-xs font-bold text-stone-900">
-                      {formatPrice(item.price * item.quantity)}
+                      {currency === "USD" ? `$${(getProductPrice(item) * item.quantity).toFixed(2)}` : `${(getProductPrice(item) * item.quantity).toFixed(2)} ₼`}
                     </div>
                   </div>
                 ))}
@@ -1682,14 +1688,18 @@ export default function CheckoutPage() {
               <div className="pt-3 border-t border-stone-100 text-xs text-stone-600 space-y-2">
                 <div className="flex justify-between">
                   <span>{t.checkout.itemsTotal}:</span>
-                  <span className="font-bold text-stone-900">{formatPrice(totalPrice)}</span>
+                  <span className="font-bold text-stone-900">
+                    {currency === "USD" ? `$${effectiveSubtotal.toFixed(2)}` : `${effectiveSubtotal.toFixed(2)} ₼`}
+                  </span>
                 </div>
                 {discountAmount > 0 && (
                   <div className="flex justify-between text-emerald-700">
                     <span>
                       {language === "az" ? "Endirim" : language === "ru" ? "Скидка" : language === "tr" ? "İndirim" : "Discount"} {appliedPromoCode ? `(${appliedPromoCode})` : ""}:
                     </span>
-                    <span className="font-bold">-{formatPrice(discountAmount)}</span>
+                    <span className="font-bold">
+                      -{currency === "USD" ? `$${discountAmount.toFixed(2)}` : `${discountAmount.toFixed(2)} ₼`}
+                    </span>
                   </div>
                 )}
                 <div className="flex justify-between">
@@ -1700,13 +1710,15 @@ export default function CheckoutPage() {
                         {t.checkout.free} {isFreeZone ? "(Bakı & Sumqayıt)" : ""}
                       </span>
                     ) : (
-                      formatPrice(shippingCost)
+                      currency === "USD" ? `$${shippingCost.toFixed(2)}` : `${shippingCost.toFixed(2)} ₼`
                     )}
                   </span>
                 </div>
                 <div className="flex justify-between text-base font-normal text-stone-900 pt-2 border-t border-stone-100">
                   <span>{t.checkout.grandTotal}:</span>
-                  <span className="font-eb-garamond text-2xl font-normal text-stone-900">{formatPrice(finalTotal)}</span>
+                  <span className="font-eb-garamond text-2xl font-normal text-stone-900">
+                    {currency === "USD" ? `$${finalTotal.toFixed(2)}` : `${finalTotal.toFixed(2)} ₼`}
+                  </span>
                 </div>
               </div>
             </div>
