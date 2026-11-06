@@ -1,29 +1,43 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import crypto from 'crypto';
 
-// ─── Admin Token Verification (lightweight, runs at edge) ────────────────────
+// ─── Lightweight WebCrypto HMAC-SHA256 for Edge Middleware ──────────────────
 const ADMIN_JWT_SECRET =
   process.env.ADMIN_JWT_SECRET || 'horvvalle_super_secure_admin_secret_key_2026_98124';
 
-function verifyTokenAtEdge(token: string | undefined | null): boolean {
+async function verifyTokenAtEdge(token: string | undefined | null): Promise<boolean> {
   if (!token || typeof token !== 'string') return false;
   const parts = token.split('.');
   if (parts.length !== 3) return false;
 
   const [header, payload, signature] = parts;
   try {
-    const expectedSignature = crypto
-      .createHmac('sha256', ADMIN_JWT_SECRET)
-      .update(`${header}.${payload}`)
-      .digest('base64url');
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      enc.encode(ADMIN_JWT_SECRET),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+    const sigBuf = await crypto.subtle.sign('HMAC', key, enc.encode(`${header}.${payload}`));
+    const bytes = new Uint8Array(sigBuf);
+    let binary = '';
+    for (let i = 0; i < bytes.byteLength; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    const expectedSignature = btoa(binary)
+      .replace(/=/g, '')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_');
 
     if (signature !== expectedSignature) return false;
 
     // Decode payload to check expiry
     let base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
     while (base64.length % 4) base64 += '=';
-    const data = JSON.parse(Buffer.from(base64, 'base64').toString('utf-8'));
+    const jsonStr = atob(base64);
+    const data = JSON.parse(jsonStr);
     if (!data.exp || data.exp < Date.now()) return false;
 
     return true;
@@ -33,7 +47,6 @@ function verifyTokenAtEdge(token: string | undefined | null): boolean {
 }
 
 // ─── Edge DDoS & Rate Limiting Protection ────────────────────────────────────
-// In-memory sliding window cache for Edge network to block automated DDoS floods
 const ipHitCounter = new Map<string, { count: number; resetAt: number }>();
 
 function isRateLimited(ip: string, limit = 60, windowMs = 60 * 1000): boolean {
@@ -53,7 +66,7 @@ function isRateLimited(ip: string, limit = 60, windowMs = 60 * 1000): boolean {
 // ─── Generic Default 404 (Brand-sız, sadə qara/ağ standart Vercel/Next.js tipli 404) ───
 const GENERIC_404_HTML = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>404: This page could not be found</title><style>body{color:#000;background:#fff;font-family:-apple-system,BlinkMacSystemFont,Roboto,"Segoe UI","Fira Sans",Avenir,"Helvetica Neue","Lucida Grande",sans-serif;height:100vh;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}}.d{display:flex;align-items:center}h1{display:inline-block;margin:0 20px 0 0;padding:0 23px 0 0;font-size:24px;font-weight:500;vertical-align:top;line-height:49px;border-right:1px solid rgba(128,128,128,.4)}h2{font-size:14px;font-weight:400;line-height:49px;margin:0}</style></head><body><div class="d"><h1>404</h1><h2>This page could not be found.</h2></div></body></html>`;
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -65,10 +78,10 @@ export function middleware(request: NextRequest) {
     request.headers.get('x-real-ip') ||
     'global-client';
 
-  // API routes: Max 60 requests per minute per IP
-  // Static pages: Max 150 requests per minute per IP
+  // API routes: Max 120 requests per minute per IP (allowing real-time chat)
+  // Static pages: Max 300 requests per minute per IP
   const isApi = pathname.startsWith('/api/');
-  const maxAllowed = isApi ? 60 : 150;
+  const maxAllowed = isApi ? 120 : 300;
 
   if (isRateLimited(clientIp, maxAllowed, 60 * 1000)) {
     return new NextResponse(
@@ -95,7 +108,7 @@ export function middleware(request: NextRequest) {
   if (isAdminPage || isAdminHtml) {
     // Step A: Check for a valid admin cookie (already logged in)
     const cookieToken = request.cookies.get('horvvalle_admin_token')?.value;
-    const hasValidCookie = verifyTokenAtEdge(cookieToken);
+    const hasValidCookie = await verifyTokenAtEdge(cookieToken);
 
     // Step B: Check for the secret access key in query string
     const accessKey = request.nextUrl.searchParams.get('access')?.trim();
@@ -190,7 +203,6 @@ function applySecurityHeaders(response: NextResponse) {
     'Permissions-Policy',
     'camera=(), microphone=(), geolocation=(), payment=(self)'
   );
-  // Content Security Policy (CSP) with Cloudflare Challenges / Turnstile & Payment Gateway Support
   const csp = [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://pay.google.com https://cdn.tailwindcss.com https://unpkg.com https://www.googletagmanager.com",
@@ -216,13 +228,6 @@ function applySecurityHeaders(response: NextResponse) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - images / public static files
-     */
     '/((?!_next/static|_next/image|favicon.ico|images/).*)',
   ],
 };

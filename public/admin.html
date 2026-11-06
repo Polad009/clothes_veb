@@ -234,7 +234,8 @@
               class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-2.5 text-sm text-slate-900 focus:bg-white focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition"
               placeholder="••••••••••••" />
             <button type="button" onclick="togglePasswordVisibility()"
-              class="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-700 cursor-pointer">
+              class="absolute right-3 top-2.5 p-1 rounded-lg hover:bg-slate-200/70 text-slate-500 hover:text-black transition cursor-pointer"
+              title="Şifrəni göstər / gizlət">
               <i id="passwordEyeIcon" data-lucide="eye" class="w-4 h-4"></i>
             </button>
           </div>
@@ -2149,14 +2150,15 @@
     function togglePasswordVisibility() {
       const input = document.getElementById('loginPassword');
       const icon = document.getElementById('passwordEyeIcon');
+      if (!input) return;
       if (input.type === 'password') {
         input.type = 'text';
-        icon.setAttribute('data-lucide', 'eye-off');
+        if (icon) icon.setAttribute('data-lucide', 'eye-off');
       } else {
         input.type = 'password';
-        icon.setAttribute('data-lucide', 'eye');
+        if (icon) icon.setAttribute('data-lucide', 'eye');
       }
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
     }
 
     async function handleLoginSubmit(e) {
