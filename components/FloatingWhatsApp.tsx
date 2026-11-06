@@ -304,24 +304,24 @@ export function FloatingWhatsApp() {
       )}
 
       {/* ─── FLOATING ACTION BUTTONS STACK ──────────────────────────────────── */}
-      <div className="flex flex-col items-center gap-2.5">
+      <div className="flex flex-col items-center gap-3">
         {/* 1. TOP BUTTON: LIVE CHAT TRIGGER */}
         <button
           type="button"
           onClick={() => setIsChatOpen(!isChatOpen)}
           aria-label="Canlı Dəstək Çatını Aç"
-          className="relative group flex items-center justify-center w-13 h-13 rounded-full bg-[#111111] hover:bg-black text-white shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 ring-2 ring-stone-900/10 cursor-pointer"
+          className="relative group flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#111111] hover:bg-black text-white shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 ring-4 ring-black/10 cursor-pointer"
         >
           {isChatOpen ? (
-            <X size={22} className="text-white" />
+            <X size={26} className="text-white" />
           ) : (
             <>
-              <MessageCircle size={22} className="text-white" />
+              <MessageCircle size={28} className="text-white" />
               {/* Online Green Indicator */}
-              <span className="absolute top-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white" />
+              <span className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
               {/* Unread badge counter */}
               {unreadCount > 0 && (
-                <span className="absolute -top-1.5 -left-1.5 px-1.5 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-bold shadow-md animate-pulse">
+                <span className="absolute -top-1.5 -left-1.5 px-2 py-0.5 rounded-full bg-rose-600 text-white text-[11px] font-bold shadow-md animate-pulse">
                   {unreadCount}
                 </span>
               )}
@@ -329,7 +329,7 @@ export function FloatingWhatsApp() {
           )}
 
           {/* Tooltip on hover */}
-          <span className="hidden group-hover:sm:block absolute right-15 bg-stone-900 text-white text-[11px] font-semibold px-2.5 py-1 rounded-xl shadow-lg whitespace-nowrap pointer-events-none">
+          <span className="hidden group-hover:sm:block absolute right-18 bg-stone-900 text-white text-xs font-semibold px-3 py-1.5 rounded-xl shadow-xl whitespace-nowrap pointer-events-none">
             {isChatOpen ? "Bağla" : "Canlı Dəstək (Onlayn)"}
           </span>
         </button>
@@ -340,16 +340,16 @@ export function FloatingWhatsApp() {
           target="_blank"
           rel="noopener noreferrer"
           aria-label={`WhatsApp ilə əlaqə saxlayın: ${phoneNumber}`}
-          className="relative group flex items-center justify-center w-13 h-13 rounded-full bg-[#25D366] hover:bg-[#20bd5a] text-white shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 ring-2 ring-[#25D366]/20 cursor-pointer"
+          className="relative group flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#25D366] hover:bg-[#20bd5a] text-white shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 ring-4 ring-[#25D366]/25 cursor-pointer"
         >
           {/* Subtle radar pulse glow */}
-          <span className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-20" />
+          <span className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-25" />
 
           {/* Official WhatsApp Logo Icon */}
-          <WhatsAppBrandIcon className="w-6 h-6 text-white relative z-10" />
+          <WhatsAppBrandIcon className="w-8 h-8 text-white relative z-10" />
 
           {/* Tooltip on hover */}
-          <span className="hidden group-hover:sm:block absolute right-15 bg-[#25D366] text-white text-[11px] font-semibold px-2.5 py-1 rounded-xl shadow-lg whitespace-nowrap pointer-events-none">
+          <span className="hidden group-hover:sm:block absolute right-18 bg-[#25D366] text-white text-xs font-semibold px-3 py-1.5 rounded-xl shadow-xl whitespace-nowrap pointer-events-none">
             WhatsApp Dəstək
           </span>
         </a>

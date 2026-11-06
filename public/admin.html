@@ -377,7 +377,7 @@
             <i data-lucide="mail" class="w-4 h-4 text-amber-500"></i>
             <span>Kütləvi E-poçt & Kampaniya</span>
           </button>
-          <button onclick="window.location.href='/admin/live-chat'" id="nav-liveChat"
+          <button onclick="switchTab('liveChat')" id="nav-liveChat"
             class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
             <i data-lucide="message-circle" class="w-4 h-4 text-emerald-500"></i>
             <span>Canlı Çat Dəstək</span>
@@ -1708,6 +1708,53 @@
             <div class="sm:text-right space-y-1">
               <div>Mühasib / Rəhbər: ___________________ (İmza)</div>
               <div class="text-[10px] text-slate-400">HORVVALLE Atelier Maliyyə Şöbəsi</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- SLIDE 13: CANLI ÇAT DƏSTƏK (LIVE CHAT SUPPORT) -->
+      <!-- ============================================================ -->
+      <section id="tab-liveChat" class="tab-pane hidden p-4 sm:p-6 space-y-4 max-w-7xl w-full">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl font-black text-slate-900 tracking-tight">CANLI DƏSTƏK & ÇAT</h1>
+            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Müştərilərlə Real-Vaxt Ünsiyyət və Operativ Cavablar</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> SİSTEM ONLAYNDIR
+            </span>
+            <button onclick="loadLiveChatThreads()" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition cursor-pointer" title="Yenilə">
+              <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col md:flex-row h-[680px]">
+          <!-- Left: Threads List -->
+          <div class="w-full md:w-80 border-b md:border-b-0 md:border-r border-slate-200 flex flex-col bg-slate-50/50">
+            <div class="p-3.5 border-b border-slate-200 bg-white">
+              <div class="relative">
+                <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+                <input type="text" id="liveChatSearch" oninput="filterLiveChatThreads(this.value)" placeholder="Müştəri axtar..." 
+                  class="w-full pl-9 pr-3 py-1.5 bg-slate-100 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:border-black transition">
+              </div>
+            </div>
+            <div id="liveChatThreadsList" class="flex-1 overflow-y-auto divide-y divide-slate-100">
+              <div class="p-8 text-center text-xs text-slate-400">Yüklənir...</div>
+            </div>
+          </div>
+
+          <!-- Right: Chat Window -->
+          <div id="liveChatConversationPanel" class="flex-1 flex flex-col bg-white">
+            <div class="flex-1 flex flex-col items-center justify-center text-slate-400 p-8 text-center">
+              <div class="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-300 mb-3">
+                <i data-lucide="message-circle" class="w-8 h-8"></i>
+              </div>
+              <h3 class="text-sm font-bold text-slate-700 mb-1">Söhbət Seçilməyib</h3>
+              <p class="text-xs text-slate-400 max-w-sm">Cavab vermək üçün sol paneldən hər hansı bir müştəri müraciətini seçin.</p>
             </div>
           </div>
         </div>
@@ -4303,6 +4350,7 @@
           else if (tabId === 'promos') renderPromosTable();
           else if (tabId === 'podOrders') renderPodOrders();
           else if (tabId === 'taxReports') generateTaxReport();
+          else if (tabId === 'liveChat') loadLiveChatThreads();
           else if (tabId === 'dashboard') { renderDashboardMetrics(); renderRecentOrders(); }
         } catch (e) {
           console.warn('Tab render error:', e);
@@ -4316,24 +4364,36 @@
     // ----------------------------------------------------
     // SETTINGS & CONTENT FORMS
     // ----------------------------------------------------
-    function populateSettingsForm() {
+    function populateSettingsForm(force = false) {
       if (!STORE_DATA) return;
       const s = STORE_DATA.settings || {};
       const c = STORE_DATA.content || {};
 
-      document.getElementById('settingStoreName').value = s.storeName || 'HORVVALLE';
-      document.getElementById('settingTagline').value = s.tagline || 'Lüks Dərzi & Streetwear';
-      document.getElementById('settingContactPhone').value = s.contactPhone || '+994 55-766-90-50';
-      document.getElementById('settingContactEmail').value = s.contactEmail || 'atelier@horwalle.com';
-      document.getElementById('settingShippingThreshold').value = s.freeShippingThreshold || 60;
-      document.getElementById('settingCourierRate').value = s.courierRate || 4;
+      const storeNameEl = document.getElementById('settingStoreName');
+      const taglineEl = document.getElementById('settingTagline');
+      const phoneEl = document.getElementById('settingContactPhone');
+      const emailEl = document.getElementById('settingContactEmail');
+      const thresholdEl = document.getElementById('settingShippingThreshold');
+      const courierEl = document.getElementById('settingCourierRate');
+
+      // Do not overwrite user input if the field is currently being edited (focused) unless force is true
+      if (storeNameEl && (force || document.activeElement !== storeNameEl)) storeNameEl.value = s.storeName || 'HORVVALLE';
+      if (taglineEl && (force || document.activeElement !== taglineEl)) taglineEl.value = s.tagline || 'Lüks Dərzi & Streetwear';
+      if (phoneEl && (force || document.activeElement !== phoneEl)) phoneEl.value = s.contactPhone || '+994 55-766-90-50';
+      if (emailEl && (force || document.activeElement !== emailEl)) emailEl.value = s.contactEmail || 'atelier@horwalle.com';
+      if (thresholdEl && (force || document.activeElement !== thresholdEl)) thresholdEl.value = s.freeShippingThreshold || 60;
+      if (courierEl && (force || document.activeElement !== courierEl)) courierEl.value = s.courierRate || 4;
+
+      const heroHeadEl = document.getElementById('heroHeadlineInput');
+      const heroSubEl = document.getElementById('heroSubheadlineInput');
+      const annEl = document.getElementById('announcementTextInput');
 
       if (c.hero) {
-        document.getElementById('heroHeadlineInput').value = c.hero.headline || '';
-        document.getElementById('heroSubheadlineInput').value = c.hero.subheadline || '';
+        if (heroHeadEl && (force || document.activeElement !== heroHeadEl)) heroHeadEl.value = c.hero.headline || '';
+        if (heroSubEl && (force || document.activeElement !== heroSubEl)) heroSubEl.value = c.hero.subheadline || '';
       }
       if (c.announcements && c.announcements.length > 0) {
-        document.getElementById('announcementTextInput').value = c.announcements[0];
+        if (annEl && (force || document.activeElement !== annEl)) annEl.value = c.announcements[0];
       }
     }
 
@@ -4667,6 +4727,245 @@
     function applyDateFilter() {
       renderDashboardMetrics();
       alert('✓ Tarix filtri tətbiq edildi.');
+    }
+
+    // ----------------------------------------------------
+    // LIVE CHAT SUPPORT IN ADMIN PANEL
+    // ----------------------------------------------------
+    let activeChatSessionId = null;
+    let chatPollInterval = null;
+    let allChatThreads = [];
+
+    // Pleasant web audio chime for incoming messages
+    function playAdminChatChime() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(659.25, now);
+        osc.frequency.setValueAtTime(987.77, now + 0.08);
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.2, now + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.45);
+      } catch (e) {}
+    }
+
+    async function loadLiveChatThreads() {
+      try {
+        const res = await fetch('/api/chat/threads');
+        if (!res.ok) return;
+        const data = await res.json();
+        allChatThreads = data.threads || [];
+        renderLiveChatThreads(allChatThreads);
+
+        // Update badge counter
+        const totalUnread = allChatThreads.reduce((sum, t) => sum + (t.unreadAdmin || 0), 0);
+        const badgeEl = document.getElementById('badge-livechat-count');
+        if (badgeEl) {
+          if (totalUnread > 0) {
+            badgeEl.innerText = totalUnread;
+            badgeEl.classList.remove('hidden');
+          } else {
+            badgeEl.classList.add('hidden');
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to load chat threads:', e);
+      }
+    }
+
+    function filterLiveChatThreads(query) {
+      if (!query || !query.trim()) {
+        renderLiveChatThreads(allChatThreads);
+        return;
+      }
+      const q = query.toLowerCase().trim();
+      const filtered = allChatThreads.filter(t => 
+        (t.customerName && t.customerName.toLowerCase().includes(q)) ||
+        (t.lastMessage && t.lastMessage.toLowerCase().includes(q))
+      );
+      renderLiveChatThreads(filtered);
+    }
+
+    function renderLiveChatThreads(threads) {
+      const listEl = document.getElementById('liveChatThreadsList');
+      if (!listEl) return;
+
+      if (!threads || threads.length === 0) {
+        listEl.innerHTML = `
+          <div class="p-8 text-center text-xs text-slate-400">
+            Hələ heç bir müştəri müraciəti yoxdur.
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = threads.map(t => {
+        const isActive = t.sessionId === activeChatSessionId;
+        const unread = t.unreadAdmin || 0;
+        const timeStr = t.lastMessageAt ? new Date(t.lastMessageAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+        return `
+          <div onclick="selectLiveChatSession('${escapeHtml(t.sessionId)}')" 
+            class="p-3.5 flex items-start gap-3 cursor-pointer transition ${isActive ? 'bg-black text-white' : 'hover:bg-slate-100/80 bg-white'}">
+            <div class="relative shrink-0 mt-0.5">
+              <div class="w-9 h-9 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-800'} flex items-center justify-center font-bold text-xs uppercase">
+                ${escapeHtml((t.customerName || 'M')[0])}
+              </div>
+              <span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 ${isActive ? 'border-black' : 'border-white'} ${t.customerOnline ? 'bg-emerald-500' : 'bg-slate-300'}"></span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-1 mb-0.5">
+                <span class="font-bold text-xs truncate ${isActive ? 'text-white' : 'text-slate-900'}">${escapeHtml(t.customerName || 'Müştəri')}</span>
+                <span class="text-[10px] shrink-0 ${isActive ? 'text-white/60' : 'text-slate-400'}">${timeStr}</span>
+              </div>
+              <p class="text-xs truncate ${isActive ? 'text-white/80' : 'text-slate-500'}">${escapeHtml(t.lastMessage || 'Söhbət başladıldı')}</p>
+            </div>
+            ${unread > 0 && !isActive ? `
+              <span class="shrink-0 text-[10px] font-bold bg-rose-600 text-white px-1.5 py-0.5 rounded-full">
+                ${unread}
+              </span>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    let lastKnownAdminMsgCount = 0;
+
+    async function selectLiveChatSession(sessionId) {
+      activeChatSessionId = sessionId;
+      renderLiveChatThreads(allChatThreads);
+
+      if (chatPollInterval) clearInterval(chatPollInterval);
+      await fetchAndRenderActiveConversation();
+      chatPollInterval = setInterval(fetchAndRenderActiveConversation, 2500);
+    }
+
+    async function fetchAndRenderActiveConversation() {
+      if (!activeChatSessionId) return;
+
+      try {
+        const res = await fetch(`/api/chat?sessionId=${encodeURIComponent(activeChatSessionId)}&role=admin`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const thread = data.thread || {};
+        const messages = data.messages || [];
+
+        // Play sound if new incoming customer message arrived
+        if (messages.length > lastKnownAdminMsgCount && lastKnownAdminMsgCount > 0) {
+          const lastMsg = messages[messages.length - 1];
+          if (lastMsg && lastMsg.sender === 'customer') {
+            playAdminChatChime();
+          }
+        }
+        lastKnownAdminMsgCount = messages.length;
+
+        renderConversationWindow(thread, messages);
+      } catch (e) {
+        console.warn('Poll active chat error:', e);
+      }
+    }
+
+    function renderConversationWindow(thread, messages) {
+      const panel = document.getElementById('liveChatConversationPanel');
+      if (!panel) return;
+
+      const isTyping = thread.isTypingCustomer;
+      const isOnline = thread.customerOnline;
+
+      panel.innerHTML = `
+        <!-- Header -->
+        <div class="p-3.5 px-5 border-b border-slate-200 flex items-center justify-between bg-white">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-sm text-slate-800 uppercase">
+              ${escapeHtml((thread.customerName || 'M')[0])}
+            </div>
+            <div>
+              <div class="font-bold text-xs text-slate-900 flex items-center gap-2">
+                <span>${escapeHtml(thread.customerName || 'Müştəri')}</span>
+                ${thread.customerEmail ? `<span class="text-[10px] text-slate-400 font-normal">(${escapeHtml(thread.customerEmail)})</span>` : ''}
+              </div>
+              <div class="text-[10px] flex items-center gap-1.5 mt-0.5">
+                <span class="w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-slate-300'}"></span>
+                <span class="${isOnline ? 'text-emerald-700 font-medium' : 'text-slate-400'}">
+                  ${isOnline ? 'Onlayn (Saytda aktivdir)' : 'Offline'}
+                </span>
+                ${isTyping ? '<span class="text-amber-600 font-bold ml-2 animate-pulse">● Müştəri yazır...</span>' : ''}
+              </div>
+            </div>
+          </div>
+          <span class="text-[10px] text-slate-400">ID: ${escapeHtml(thread.sessionId || '')}</span>
+        </div>
+
+        <!-- Messages Area -->
+        <div id="liveChatMessagesContainer" class="flex-1 p-5 overflow-y-auto space-y-3 bg-[#FAF9F6]">
+          ${messages.map(m => {
+            const isAdmin = m.sender === 'admin';
+            const timeStr = m.timestamp ? new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+            return `
+              <div class="flex flex-col ${isAdmin ? 'items-end' : 'items-start'}">
+                <div class="max-w-[78%] px-4 py-2.5 rounded-2xl text-xs leading-relaxed shadow-xs ${
+                  isAdmin 
+                    ? 'bg-black text-white rounded-br-xs' 
+                    : 'bg-white text-slate-900 border border-slate-200/90 rounded-bl-xs'
+                }">
+                  <p class="whitespace-pre-wrap break-words">${escapeHtml(m.text)}</p>
+                </div>
+                <span class="text-[9.5px] text-slate-400 mt-1 px-1">${timeStr} · ${isAdmin ? 'Siz (Admin)' : 'Müştəri'}</span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+
+        <!-- Footer Input -->
+        <form onsubmit="handleSendAdminChatMessage(event)" class="p-3.5 bg-white border-t border-slate-200 flex items-center gap-2">
+          <input type="text" id="adminChatTextInput" placeholder="Müştəriyə operativ cavab yazın..." 
+            class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs focus:bg-white focus:outline-none focus:border-black font-medium transition" />
+          <button type="submit" class="px-5 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+            <span>Göndər</span>
+            <i data-lucide="send" class="w-3.5 h-3.5"></i>
+          </button>
+        </form>
+      `;
+
+      if (window.lucide) lucide.createIcons();
+
+      // Auto scroll to bottom
+      const container = document.getElementById('liveChatMessagesContainer');
+      if (container) container.scrollTop = container.scrollHeight;
+    }
+
+    async function handleSendAdminChatMessage(e) {
+      e.preventDefault();
+      const input = document.getElementById('adminChatTextInput');
+      if (!input || !activeChatSessionId) return;
+      const text = input.value.trim();
+      if (!text) return;
+
+      input.value = '';
+
+      try {
+        await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: activeChatSessionId,
+            sender: 'admin',
+            text: text
+          })
+        });
+        await fetchAndRenderActiveConversation();
+      } catch (err) {
+        alert('Mesaj göndərilmədi: ' + err.message);
+      }
     }
 
     // Auto-polling for new orders every 10 seconds
