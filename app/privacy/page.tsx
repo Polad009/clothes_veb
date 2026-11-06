@@ -104,7 +104,7 @@ export default function PrivacyPage() {
               <p className="text-stone-400 text-xs sm:text-sm">Məlumatlarınızın silinməsi və ya dəqiqləşdirilməsi üçün birbaşa bizimlə əlaqə saxlayın.</p>
             </div>
             <a
-              href="https://wa.me/994557669050"
+              href="https://wa.me/994103283152"
               target="_blank"
               rel="noopener noreferrer"
               className="px-5 py-2.5 rounded-xl bg-[#E6C280] text-black font-semibold text-xs uppercase tracking-wider hover:bg-white transition-colors shrink-0"

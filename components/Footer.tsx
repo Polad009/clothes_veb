@@ -121,14 +121,14 @@ export function Footer() {
             {/* Direct Support & WhatsApp */}
             <div className="pt-2">
               <a
-                href="https://wa.me/994557669050"
+                href="https://wa.me/994103283152"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-white/5 hover:bg-emerald-950/40 border border-white/10 hover:border-emerald-500/40 text-stone-300 hover:text-white transition group"
               >
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span className="text-[11px]">
-                  WhatsApp VIP: <strong className="text-emerald-400 font-mono tracking-wider">+994 55-766-90-50</strong>
+                  WhatsApp VIP: <strong className="text-emerald-400 font-mono tracking-wider">+994 10 328 31 52</strong>
                 </span>
               </a>
             </div>

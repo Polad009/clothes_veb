@@ -29,12 +29,17 @@ interface ChatThread {
   createdAt: number;
 }
 
-// In-memory fast fallback cache
+// In-memory cache WITH short TTL to avoid serving stale data in serverless instances
+const cacheTimestamps: Record<string, number> = {};
 const memoryThreads: Record<string, ChatThread> = {};
 const memoryMessages: Record<string, ChatMessage[]> = {};
 
-async function getThreadFromStorage(sessionId: string): Promise<ChatThread | null> {
-  if (memoryThreads[sessionId]) return memoryThreads[sessionId];
+async function getThreadFromStorage(sessionId: string, bypassCache = false): Promise<ChatThread | null> {
+  const now = Date.now();
+  if (!bypassCache && memoryThreads[sessionId] && cacheTimestamps[`t_${sessionId}`] && (now - cacheTimestamps[`t_${sessionId}`] < 800)) {
+    return memoryThreads[sessionId];
+  }
+
   try {
     const { data, error } = await supabaseServer.storage
       .from(BUCKET)
@@ -43,14 +48,16 @@ async function getThreadFromStorage(sessionId: string): Promise<ChatThread | nul
       const text = await data.text();
       const parsed = JSON.parse(text);
       memoryThreads[sessionId] = parsed;
+      cacheTimestamps[`t_${sessionId}`] = now;
       return parsed;
     }
   } catch (e) {}
-  return null;
+  return memoryThreads[sessionId] || null;
 }
 
 async function saveThreadToStorage(thread: ChatThread) {
   memoryThreads[thread.sessionId] = thread;
+  cacheTimestamps[`t_${thread.sessionId}`] = Date.now();
   try {
     await supabaseServer.storage
       .from(BUCKET)
@@ -61,8 +68,12 @@ async function saveThreadToStorage(thread: ChatThread) {
   } catch (e) {}
 }
 
-async function getMessagesFromStorage(sessionId: string): Promise<ChatMessage[]> {
-  if (memoryMessages[sessionId]) return memoryMessages[sessionId];
+async function getMessagesFromStorage(sessionId: string, bypassCache = false): Promise<ChatMessage[]> {
+  const now = Date.now();
+  if (!bypassCache && memoryMessages[sessionId] && cacheTimestamps[`m_${sessionId}`] && (now - cacheTimestamps[`m_${sessionId}`] < 800)) {
+    return memoryMessages[sessionId];
+  }
+
   try {
     const { data, error } = await supabaseServer.storage
       .from(BUCKET)
@@ -70,15 +81,18 @@ async function getMessagesFromStorage(sessionId: string): Promise<ChatMessage[]>
     if (!error && data) {
       const text = await data.text();
       const parsed = JSON.parse(text);
-      memoryMessages[sessionId] = Array.isArray(parsed) ? parsed : [];
-      return memoryMessages[sessionId];
+      const list = Array.isArray(parsed) ? parsed : [];
+      memoryMessages[sessionId] = list;
+      cacheTimestamps[`m_${sessionId}`] = now;
+      return list;
     }
   } catch (e) {}
-  return [];
+  return memoryMessages[sessionId] || [];
 }
 
 async function saveMessagesToStorage(sessionId: string, messages: ChatMessage[]) {
   memoryMessages[sessionId] = messages;
+  cacheTimestamps[`m_${sessionId}`] = Date.now();
   try {
     await supabaseServer.storage
       .from(BUCKET)
@@ -101,7 +115,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'sessionId required' }, { status: 400 });
     }
 
-    let thread = await getThreadFromStorage(sessionId);
+    let thread = await getThreadFromStorage(sessionId, true);
     if (!thread) {
       thread = {
         sessionId,
@@ -145,14 +159,16 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    const messages = await getMessagesFromStorage(sessionId);
+    const messages = await getMessagesFromStorage(sessionId, true);
 
-    return NextResponse.json({
+    const res = NextResponse.json({
       success: true,
       thread,
       messages,
       serverTime: Date.now(),
     });
+    res.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    return res;
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
@@ -173,7 +189,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Message cannot be empty' }, { status: 400 });
     }
 
-    let thread = await getThreadFromStorage(sessionId);
+    let thread = await getThreadFromStorage(sessionId, true);
     if (!thread) {
       thread = {
         sessionId,
@@ -208,7 +224,7 @@ export async function POST(req: NextRequest) {
 
     await saveThreadToStorage(thread);
 
-    const messages = await getMessagesFromStorage(sessionId);
+    const messages = await getMessagesFromStorage(sessionId, true);
     const newMsg: ChatMessage = {
       id: `msg_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
       sender,
@@ -225,11 +241,13 @@ export async function POST(req: NextRequest) {
 
     await saveMessagesToStorage(sessionId, messages);
 
-    return NextResponse.json({
+    const res = NextResponse.json({
       success: true,
       message: newMsg,
       thread,
     });
+    res.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    return res;
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

@@ -51,7 +51,7 @@ export default function NotFound() {
         <div className="mt-12 text-xs text-stone-300">
           Kömək lazımdır?{" "}
           <a
-            href="https://wa.me/994557669050"
+            href="https://wa.me/994103283152"
             target="_blank"
             rel="noopener noreferrer"
             className="text-[#E6C280] underline underline-offset-4 hover:text-white transition"

@@ -482,7 +482,7 @@ export default function ProductDetailPage() {
 
               {/* WhatsApp Direct Order / Consultation Button */}
               <a
-                href={`https://wa.me/994557669050?text=${encodeURIComponent(
+                href={`https://wa.me/994103283152?text=${encodeURIComponent(
                   `Salam! HORWALLE-də "${product.name}" (${selectedSize}, ${activeColor?.name || ""}) haqqında məlumat almaq və ya sifariş etmək istəyirəm.`
                 )}`}
                 target="_blank"
@@ -490,7 +490,7 @@ export default function ProductDetailPage() {
                 className="w-full py-3 rounded-full bg-emerald-50 hover:bg-emerald-100/90 text-emerald-800 border border-emerald-300/80 font-bold text-xs transition-all flex items-center justify-center gap-2 active:scale-98 shadow-2xs cursor-pointer"
               >
                 <MessageCircle size={15} className="text-emerald-600 fill-emerald-600" />
-                <span>WhatsApp Dəstək (+994 55-766-90-50)</span>
+                <span>WhatsApp Dəstək (+994 10 328 31 52)</span>
               </a>
             </motion.div>
 

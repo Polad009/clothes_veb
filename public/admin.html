@@ -4379,7 +4379,7 @@
       // Do not overwrite user input if the field is currently being edited (focused) unless force is true
       if (storeNameEl && (force || document.activeElement !== storeNameEl)) storeNameEl.value = s.storeName || 'HORVVALLE';
       if (taglineEl && (force || document.activeElement !== taglineEl)) taglineEl.value = s.tagline || 'Lüks Dərzi & Streetwear';
-      if (phoneEl && (force || document.activeElement !== phoneEl)) phoneEl.value = s.contactPhone || '+994 55-766-90-50';
+      if (phoneEl && (force || document.activeElement !== phoneEl)) phoneEl.value = s.contactPhone || '+994 10 328 31 52';
       if (emailEl && (force || document.activeElement !== emailEl)) emailEl.value = s.contactEmail || 'atelier@horwalle.com';
       if (thresholdEl && (force || document.activeElement !== thresholdEl)) thresholdEl.value = s.freeShippingThreshold || 60;
       if (courierEl && (force || document.activeElement !== courierEl)) courierEl.value = s.courierRate || 4;
@@ -4839,34 +4839,40 @@
     }
 
     let lastKnownAdminMsgCount = 0;
+    let adminHasInitializedSound = false;
+    let adminTypingTimeout = null;
 
     async function selectLiveChatSession(sessionId) {
+      if (activeChatSessionId === sessionId) return;
       activeChatSessionId = sessionId;
+      lastKnownAdminMsgCount = 0;
+      adminHasInitializedSound = false;
       renderLiveChatThreads(allChatThreads);
 
       if (chatPollInterval) clearInterval(chatPollInterval);
       await fetchAndRenderActiveConversation();
-      chatPollInterval = setInterval(fetchAndRenderActiveConversation, 2500);
+      chatPollInterval = setInterval(fetchAndRenderActiveConversation, 1500);
     }
 
     async function fetchAndRenderActiveConversation() {
       if (!activeChatSessionId) return;
 
       try {
-        const res = await fetch(`/api/chat?sessionId=${encodeURIComponent(activeChatSessionId)}&role=admin`);
+        const res = await fetch(`/api/chat?sessionId=${encodeURIComponent(activeChatSessionId)}&role=admin&_t=${Date.now()}`);
         if (!res.ok) return;
         const data = await res.json();
         const thread = data.thread || {};
         const messages = data.messages || [];
 
         // Play sound if new incoming customer message arrived
-        if (messages.length > lastKnownAdminMsgCount && lastKnownAdminMsgCount > 0) {
+        if (messages.length > lastKnownAdminMsgCount && adminHasInitializedSound) {
           const lastMsg = messages[messages.length - 1];
           if (lastMsg && lastMsg.sender === 'customer') {
             playAdminChatChime();
           }
         }
         lastKnownAdminMsgCount = messages.length;
+        adminHasInitializedSound = true;
 
         renderConversationWindow(thread, messages);
       } catch (e) {
@@ -4874,12 +4880,26 @@
       }
     }
 
+    function handleAdminTyping() {
+      if (!activeChatSessionId) return;
+      if (adminTypingTimeout) clearTimeout(adminTypingTimeout);
+      fetch(`/api/chat?sessionId=${encodeURIComponent(activeChatSessionId)}&role=admin&typing=true`).catch(() => {});
+      adminTypingTimeout = setTimeout(() => {
+        fetch(`/api/chat?sessionId=${encodeURIComponent(activeChatSessionId)}&role=admin&typing=false`).catch(() => {});
+      }, 2500);
+    }
+
     function renderConversationWindow(thread, messages) {
       const panel = document.getElementById('liveChatConversationPanel');
       if (!panel) return;
 
-      const isTyping = thread.isTypingCustomer;
-      const isOnline = thread.customerOnline;
+      const isTyping = Boolean(thread.isTypingCustomer);
+      const isOnline = Boolean(thread.customerOnline);
+
+      // Check if conversation container already exists to avoid re-rendering entire structure and losing focus
+      const container = document.getElementById('liveChatMessagesContainer');
+      const input = document.getElementById('adminChatTextInput');
+      const currentInputValue = input ? input.value : '';
 
       panel.innerHTML = `
         <!-- Header -->
@@ -4898,7 +4918,16 @@
                 <span class="${isOnline ? 'text-emerald-700 font-medium' : 'text-slate-400'}">
                   ${isOnline ? 'Onlayn (Saytda aktivdir)' : 'Offline'}
                 </span>
-                ${isTyping ? '<span class="text-amber-600 font-bold ml-2 animate-pulse">● Müştəri yazır...</span>' : ''}
+                ${isTyping ? `
+                  <span class="inline-flex items-center gap-1 text-amber-600 font-bold ml-2 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 animate-pulse">
+                    <span>Müştəri yazır</span>
+                    <span class="inline-flex gap-0.5 items-center">
+                      <span class="w-1 h-1 bg-amber-600 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                      <span class="w-1 h-1 bg-amber-600 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                      <span class="w-1 h-1 bg-amber-600 rounded-full animate-bounce"></span>
+                    </span>
+                  </span>
+                ` : ''}
               </div>
             </div>
           </div>
@@ -4927,7 +4956,8 @@
 
         <!-- Footer Input -->
         <form onsubmit="handleSendAdminChatMessage(event)" class="p-3.5 bg-white border-t border-slate-200 flex items-center gap-2">
-          <input type="text" id="adminChatTextInput" placeholder="Müştəriyə operativ cavab yazın..." 
+          <input type="text" id="adminChatTextInput" oninput="handleAdminTyping()" placeholder="Müştəriyə operativ cavab yazın..." 
+            value="${escapeHtml(currentInputValue)}"
             class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs focus:bg-white focus:outline-none focus:border-black font-medium transition" />
           <button type="submit" class="px-5 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
             <span>Göndər</span>
@@ -4937,6 +4967,18 @@
       `;
 
       if (window.lucide) lucide.createIcons();
+
+      // Auto scroll to bottom
+      const newContainer = document.getElementById('liveChatMessagesContainer');
+      if (newContainer) newContainer.scrollTop = newContainer.scrollHeight;
+
+      // Restore focus to input if user was typing
+      const newInput = document.getElementById('adminChatTextInput');
+      if (newInput && document.activeElement && document.activeElement.id === 'adminChatTextInput') {
+        newInput.focus();
+        newInput.setSelectionRange(newInput.value.length, newInput.value.length);
+      }
+    }
 
       // Auto scroll to bottom
       const container = document.getElementById('liveChatMessagesContainer');

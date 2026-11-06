@@ -32,11 +32,12 @@ export function FloatingWhatsApp() {
   const [sessionId, setSessionId] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const lastKnownMsgIdRef = useRef<string>("");
+  const hasInitializedSoundRef = useRef<boolean>(false);
   const typingTimeoutRef = useRef<any>(null);
 
-  const phoneNumber = "+994 55-766-90-50";
+  const phoneNumber = "+994 10 328 31 52";
   const whatsappUrl =
-    "https://wa.me/994557669050?text=" +
+    "https://wa.me/994103283152?text=" +
     encodeURIComponent("Salam! Horwalle atelyesinə yazıram. Məhsul və ya sifarişlə bağlı kömək edə bilərsiniz?");
 
   // Initialize unique customer session ID
@@ -54,7 +55,7 @@ export function FloatingWhatsApp() {
     setSessionId(sid);
   }, []);
 
-  // Poll for messages and admin status
+  // Poll for messages and admin status (Fast 1.5s interval for instant real-time sync)
   useEffect(() => {
     if (!sessionId) return;
 
@@ -62,7 +63,7 @@ export function FloatingWhatsApp() {
 
     const pollChat = async () => {
       try {
-        const res = await fetch(`/api/chat?sessionId=${sessionId}&role=customer`);
+        const res = await fetch(`/api/chat?sessionId=${sessionId}&role=customer&_t=${Date.now()}`);
         if (res.ok) {
           const data = await res.json();
           if (data && data.success && active) {
@@ -72,19 +73,26 @@ export function FloatingWhatsApp() {
 
             const fetchedMessages: Message[] = data.messages || [];
             
-            // Check for new message sound
+            // Check for new message sound — only play if we already had initialized messages to prevent false alarm on page load
             if (fetchedMessages.length > 0) {
               const lastMsg = fetchedMessages[fetchedMessages.length - 1];
-              if (lastKnownMsgIdRef.current && lastMsg.id !== lastKnownMsgIdRef.current && lastMsg.sender === "admin") {
+              if (hasInitializedSoundRef.current && lastKnownMsgIdRef.current && lastMsg.id !== lastKnownMsgIdRef.current && lastMsg.sender === "admin") {
                 playMessageReceivedSound();
                 if (!isChatOpen) {
                   setUnreadCount((prev) => prev + 1);
                 }
               }
               lastKnownMsgIdRef.current = lastMsg.id;
+              hasInitializedSoundRef.current = true;
             }
 
-            setMessages(fetchedMessages);
+            // Replace messages only if count or last id changed to prevent flicker
+            setMessages((prev) => {
+              if (prev.length === fetchedMessages.length && prev[prev.length - 1]?.id === fetchedMessages[fetchedMessages.length - 1]?.id) {
+                return prev;
+              }
+              return fetchedMessages;
+            });
           }
         }
       } catch (e) {
@@ -93,7 +101,7 @@ export function FloatingWhatsApp() {
     };
 
     pollChat();
-    const interval = setInterval(pollChat, 3000);
+    const interval = setInterval(pollChat, 1500);
     return () => {
       active = false;
       clearInterval(interval);
@@ -181,7 +189,7 @@ export function FloatingWhatsApp() {
         <div
           role="dialog"
           aria-label="Horwalle Canlı Dəstək"
-          className="w-[calc(100vw-2.5rem)] sm:w-[360px] h-[480px] bg-white rounded-3xl shadow-2xl border border-stone-200/90 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-bottom-right"
+          className="w-[calc(100vw-2.5rem)] sm:w-[380px] h-[500px] bg-white rounded-3xl shadow-2xl border border-stone-200/90 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-bottom-right"
         >
           {/* Header */}
           <div className="bg-[#111111] text-white p-4 flex items-center justify-between border-b border-stone-800">
@@ -264,11 +272,11 @@ export function FloatingWhatsApp() {
               );
             })}
 
-            {/* Admin typing indicator */}
+            {/* Admin typing indicator animation */}
             {isTypingAdmin && (
-              <div className="flex items-center gap-1.5 text-xs text-stone-500 bg-white/80 border border-stone-200 px-3 py-1.5 rounded-full w-fit">
-                <span className="text-[11px] font-medium text-stone-600">Operator yazır</span>
-                <span className="flex gap-1 items-center">
+              <div className="flex items-center gap-2 text-xs text-stone-600 bg-white/90 border border-stone-200/90 px-3.5 py-2 rounded-2xl w-fit shadow-xs animate-in fade-in slide-in-from-bottom-2 duration-200">
+                <span className="text-[11px] font-medium text-stone-700">Operator yazır</span>
+                <span className="flex gap-1 items-center pt-0.5">
                   <span className="w-1.5 h-1.5 bg-[#B08D57] rounded-full animate-bounce [animation-delay:-0.3s]" />
                   <span className="w-1.5 h-1.5 bg-[#B08D57] rounded-full animate-bounce [animation-delay:-0.15s]" />
                   <span className="w-1.5 h-1.5 bg-[#B08D57] rounded-full animate-bounce" />
@@ -303,14 +311,14 @@ export function FloatingWhatsApp() {
         </div>
       )}
 
-      {/* ─── FLOATING ACTION BUTTONS STACK ──────────────────────────────────── */}
+      {/* ─── FLOATING ACTION BUTTONS STACK (Without hover tooltips) ───────────── */}
       <div className="flex flex-col items-center gap-3">
         {/* 1. TOP BUTTON: LIVE CHAT TRIGGER */}
         <button
           type="button"
           onClick={() => setIsChatOpen(!isChatOpen)}
-          aria-label="Canlı Dəstək Çatını Aç"
-          className="relative group flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#111111] hover:bg-black text-white shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 ring-4 ring-black/10 cursor-pointer"
+          aria-label="Canlı Dəstək"
+          className="relative flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#111111] hover:bg-black text-white shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 ring-4 ring-black/10 cursor-pointer"
         >
           {isChatOpen ? (
             <X size={26} className="text-white" />
@@ -327,11 +335,6 @@ export function FloatingWhatsApp() {
               )}
             </>
           )}
-
-          {/* Tooltip on hover */}
-          <span className="hidden group-hover:sm:block absolute right-18 bg-stone-900 text-white text-xs font-semibold px-3 py-1.5 rounded-xl shadow-xl whitespace-nowrap pointer-events-none">
-            {isChatOpen ? "Bağla" : "Canlı Dəstək (Onlayn)"}
-          </span>
         </button>
 
         {/* 2. BOTTOM BUTTON: OFFICIAL WHATSAPP TRIGGER */}
@@ -339,19 +342,14 @@ export function FloatingWhatsApp() {
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label={`WhatsApp ilə əlaqə saxlayın: ${phoneNumber}`}
-          className="relative group flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#25D366] hover:bg-[#20bd5a] text-white shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 ring-4 ring-[#25D366]/25 cursor-pointer"
+          aria-label={`WhatsApp: ${phoneNumber}`}
+          className="relative flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#25D366] hover:bg-[#20bd5a] text-white shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 ring-4 ring-[#25D366]/25 cursor-pointer"
         >
           {/* Subtle radar pulse glow */}
           <span className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-25" />
 
           {/* Official WhatsApp Logo Icon */}
           <WhatsAppBrandIcon className="w-8 h-8 text-white relative z-10" />
-
-          {/* Tooltip on hover */}
-          <span className="hidden group-hover:sm:block absolute right-18 bg-[#25D366] text-white text-xs font-semibold px-3 py-1.5 rounded-xl shadow-xl whitespace-nowrap pointer-events-none">
-            WhatsApp Dəstək
-          </span>
         </a>
       </div>
     </aside>

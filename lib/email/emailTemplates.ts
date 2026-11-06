@@ -32,7 +32,7 @@ export function getEmailBaseWrapper(contentHtml: string): string {
     </div>
     <div class="footer">
       <p style="margin: 0 0 6px 0;"><strong>HORVVALLE Baku</strong> — Nizami küç. 44, Bakı, Azərbaycan</p>
-      <p style="margin: 0;">Müştəri xidməti: +994 55 766 90 50 · <a href="https://horvvalle.com" style="color: #111011; text-decoration: underline;">horvvalle.com</a></p>
+      <p style="margin: 0;">Müştəri xidməti: +994 10 328 31 52 · <a href="https://horvvalle.com" style="color: #111011; text-decoration: underline;">horvvalle.com</a></p>
     </div>
   </div>
 </body>

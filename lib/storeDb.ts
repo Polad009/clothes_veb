@@ -203,7 +203,7 @@ export function readStoreDb(): StoreData {
         currency: "AZN",
         currencySymbol: "₼",
         contactEmail: "info@horvvalle.com",
-        contactPhone: "+994 55-766-90-50",
+        contactPhone: "+994 10 328 31 52",
       },
       content: {
         announcements: [],

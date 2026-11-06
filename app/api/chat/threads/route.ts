@@ -13,7 +13,9 @@ export async function GET(req: NextRequest) {
       .list(CHAT_PREFIX, { limit: 100, sortBy: { column: 'updated_at', order: 'desc' } });
 
     if (error) {
-      return NextResponse.json({ threads: [] });
+      const res = NextResponse.json({ success: true, threads: [] });
+      res.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+      return res;
     }
 
     const threadFiles = (files || []).filter((f) => f.name.startsWith('thread_'));
@@ -36,10 +38,12 @@ export async function GET(req: NextRequest) {
     // Sort by most recent message
     threads.sort((a, b) => (b.lastMessageAt || 0) - (a.lastMessageAt || 0));
 
-    return NextResponse.json({
+    const res = NextResponse.json({
       success: true,
       threads,
     });
+    res.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    return res;
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

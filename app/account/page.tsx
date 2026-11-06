@@ -269,7 +269,7 @@ export default function AccountPage() {
                 7/24 VIP Support
               </p>
               <a
-                href="https://wa.me/994557669050"
+                href="https://wa.me/994103283152"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center w-full py-2.5 rounded-full bg-[#E6C280] text-black font-bold text-xs uppercase tracking-wider hover:bg-[#d4b06d] transition"
