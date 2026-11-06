@@ -233,10 +233,13 @@
             <input type="password" id="loginPassword" required
               class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-2.5 text-sm text-slate-900 focus:bg-white focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition"
               placeholder="••••••••••••" />
-            <button type="button" onclick="togglePasswordVisibility()"
+            <button type="button" id="togglePasswordBtn" onclick="togglePasswordVisibility()"
               class="absolute right-3 top-2.5 p-1 rounded-lg hover:bg-slate-200/70 text-slate-500 hover:text-black transition cursor-pointer"
               title="Şifrəni göstər / gizlət">
-              <i id="passwordEyeIcon" data-lucide="eye" class="w-4 h-4"></i>
+              <svg id="eyeIconSvg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
             </button>
           </div>
         </div>
@@ -2149,16 +2152,24 @@
 
     function togglePasswordVisibility() {
       const input = document.getElementById('loginPassword');
-      const icon = document.getElementById('passwordEyeIcon');
-      if (!input) return;
+      const btn = document.getElementById('togglePasswordBtn');
+      if (!input || !btn) return;
       if (input.type === 'password') {
         input.type = 'text';
-        if (icon) icon.setAttribute('data-lucide', 'eye-off');
+        btn.innerHTML = `<svg class="w-4 h-4 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m15 18-.722-3.25"></path>
+          <path d="M2 8a10.645 10.645 0 0 0 20 0"></path>
+          <path d="m20 15-1.726-2.05"></path>
+          <path d="m4 15 1.726-2.05"></path>
+          <path d="m9 18 .722-3.25"></path>
+        </svg>`;
       } else {
         input.type = 'password';
-        if (icon) icon.setAttribute('data-lucide', 'eye');
+        btn.innerHTML = `<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>`;
       }
-      if (window.lucide) lucide.createIcons();
     }
 
     async function handleLoginSubmit(e) {

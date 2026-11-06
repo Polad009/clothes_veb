@@ -54,9 +54,11 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   }
 
   // Pass access parameter to iframe if user authenticated via query key
+  // Add build/timestamp cache-buster to prevent stale cached admin.html in browser
+  const cacheBuster = `v=2026.04.${Date.now()}`;
   const iframeSrc = hasValidAccessKey
-    ? `/admin.html?access=${encodeURIComponent(expectedKey)}`
-    : "/admin.html";
+    ? `/admin.html?access=${encodeURIComponent(expectedKey)}&${cacheBuster}`
+    : `/admin.html?${cacheBuster}`;
 
   return (
     <div className="fixed inset-0 z-[999999] w-screen h-screen bg-[#F8F9FA] overflow-hidden m-0 p-0">
