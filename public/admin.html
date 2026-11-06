@@ -377,6 +377,12 @@
             <i data-lucide="mail" class="w-4 h-4 text-amber-500"></i>
             <span>Kütləvi E-poçt & Kampaniya</span>
           </button>
+          <button onclick="window.location.href='/admin/live-chat'" id="nav-liveChat"
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
+            <i data-lucide="message-circle" class="w-4 h-4 text-emerald-500"></i>
+            <span>Canlı Çat Dəstək</span>
+            <span id="badge-livechat-count" class="ml-auto text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full hidden">0</span>
+          </button>
         </div>
 
         <!-- 10. OFLAYN MAĞAZA -->
@@ -4320,6 +4326,7 @@
       document.getElementById('settingContactPhone').value = s.contactPhone || '+994 55-766-90-50';
       document.getElementById('settingContactEmail').value = s.contactEmail || 'atelier@horwalle.com';
       document.getElementById('settingShippingThreshold').value = s.freeShippingThreshold || 60;
+      document.getElementById('settingCourierRate').value = s.courierRate || 4;
 
       if (c.hero) {
         document.getElementById('heroHeadlineInput').value = c.hero.headline || '';
@@ -4336,15 +4343,22 @@
       const contactPhone = document.getElementById('settingContactPhone').value;
       const contactEmail = document.getElementById('settingContactEmail').value;
       const freeShippingThreshold = Number(document.getElementById('settingShippingThreshold').value) || 60;
+      const courierRate = Number(document.getElementById('settingCourierRate').value) || 4;
 
       try {
         const res = await fetch('/api/admin/content', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ settings: { storeName, tagline, contactPhone, contactEmail, freeShippingThreshold } })
+          body: JSON.stringify({ settings: { storeName, tagline, contactPhone, contactEmail, freeShippingThreshold, courierRate } })
         });
         const r = await res.json();
-        if (r.success) alert('✓ Parametrlər yeniləndi!');
+        if (r.success) {
+          alert('✓ Parametrlər uğurla yeniləndi!');
+          // Update in-memory store
+          if (STORE_DATA) STORE_DATA.settings = { ...(STORE_DATA.settings || {}), storeName, tagline, contactPhone, contactEmail, freeShippingThreshold, courierRate };
+        } else {
+          alert('Xəta: ' + (r.error || 'Naməlum xəta'));
+        }
       } catch (e) {
         alert('Xəta: ' + e.message);
       }
