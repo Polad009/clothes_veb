@@ -2137,6 +2137,7 @@
           document.getElementById('loginScreen').classList.add('hidden');
           document.getElementById('mainApp').classList.remove('hidden');
           loadData();
+          loadLiveChatThreads();
         } else {
           localStorage.removeItem(AUTH_TOKEN_KEY);
           sessionStorage.removeItem(AUTH_TOKEN_KEY);
@@ -4885,10 +4886,28 @@
       activeChatSessionId = sessionId;
       lastKnownAdminMsgCount = 0;
       adminHasInitializedSound = false;
+
+      // Optimistically clear unread badge locally for this thread
+      const th = allChatThreads.find(t => t.sessionId === sessionId);
+      if (th && th.unreadAdmin > 0) {
+        th.unreadAdmin = 0;
+        const totalUnread = allChatThreads.reduce((sum, t) => sum + (t.unreadAdmin || 0), 0);
+        const badgeEl = document.getElementById('badge-livechat-count');
+        if (badgeEl) {
+          if (totalUnread > 0) {
+            badgeEl.innerText = totalUnread;
+            badgeEl.classList.remove('hidden');
+          } else {
+            badgeEl.classList.add('hidden');
+          }
+        }
+      }
       renderLiveChatThreads(allChatThreads);
 
       if (chatPollInterval) clearInterval(chatPollInterval);
       await fetchAndRenderActiveConversation();
+      // Also refresh the threads list in background to sync server unread counts
+      loadLiveChatThreads();
       chatPollInterval = setInterval(fetchAndRenderActiveConversation, 1500);
     }
 
@@ -5043,12 +5062,13 @@
       }
     }
 
-    // Auto-polling for new orders every 10 seconds
+    // Auto-polling for new orders and live chat every 8 seconds
     setInterval(() => {
       if (document.getElementById('mainApp') && !document.getElementById('mainApp').classList.contains('hidden')) {
         loadData();
+        loadLiveChatThreads();
       }
-    }, 10000);
+    }, 8000);
 
     // Initial load
     if (document.readyState === 'loading') {
