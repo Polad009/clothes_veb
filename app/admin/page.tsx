@@ -38,27 +38,22 @@ interface AdminPageProps {
 
 export default async function AdminPage({ searchParams }: AdminPageProps) {
   const resolvedParams = searchParams ? await Promise.resolve(searchParams) : {};
-  const cookieStore = await cookies();
-  const adminToken = cookieStore.get("horvvalle_admin_token")?.value;
-  const hasValidCookie = verifyTokenServer(adminToken);
 
-  // Check secret access key
+  // Check secret access key strictly: MUST be present in URL
   const rawAccess = resolvedParams.access;
   const accessKey = typeof rawAccess === "string" ? rawAccess.trim() : "";
   const expectedKey = (process.env.ADMIN_ACCESS_KEY || "horvvalle_portal_2026_xQ9mK").trim();
   const hasValidAccessKey = Boolean(accessKey && accessKey === expectedKey);
 
-  // If neither valid cookie nor valid access key → 404
-  if (!hasValidCookie && !hasValidAccessKey) {
+  // If secret access key is missing or invalid → 404
+  if (!hasValidAccessKey) {
     notFound();
   }
 
-  // Pass access parameter to iframe if user authenticated via query key
+  // Pass access parameter to iframe
   // Add build/timestamp cache-buster to prevent stale cached admin.html in browser
   const cacheBuster = `v=2026.04.${Date.now()}`;
-  const iframeSrc = hasValidAccessKey
-    ? `/admin.html?access=${encodeURIComponent(expectedKey)}&${cacheBuster}`
-    : `/admin.html?${cacheBuster}`;
+  const iframeSrc = `/admin.html?access=${encodeURIComponent(expectedKey)}&${cacheBuster}`;
 
   return (
     <div className="fixed inset-0 z-[999999] w-screen h-screen bg-[#F8F9FA] overflow-hidden m-0 p-0">

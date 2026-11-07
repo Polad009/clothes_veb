@@ -59,29 +59,22 @@ export function verifyAdminCredentials(user: string, pass: string): boolean {
   const cleanUser = (user || '').trim().toLowerCase();
   const cleanPass = (pass || '').trim();
 
-  // Allowed admin usernames
-  const validUsers = [ADMIN_USER, 'admin', 'horvvalle', 'horwalle'].filter(Boolean);
-  if (!validUsers.includes(cleanUser)) {
+  // Exactly check configured username from env (fallback to 'admin')
+  const expectedUser = (process.env.ADMIN_USERNAME || 'admin').trim().toLowerCase();
+  if (cleanUser !== expectedUser) {
     return false;
   }
 
-  // Allowed passwords: env takes priority, plus valid brand passwords
-  const validPasses = [
-    ADMIN_PASS,
-    'horvvallle2006@2026',
-    'horvvalle2006@2026',
-  ].filter(Boolean);
-
-  const cleanPassHash = crypto.createHash('sha256').update(cleanPass).digest();
-
-  for (const target of validPasses) {
-    const targetHash = crypto.createHash('sha256').update(target).digest();
-    if (crypto.timingSafeEqual(cleanPassHash, targetHash)) {
-      return true;
-    }
+  // Exactly check configured password from env
+  const expectedPass = (process.env.ADMIN_PASSWORD || 'horvvallle2006@2026').trim();
+  if (!expectedPass) {
+    return false;
   }
 
-  return false;
+  const cleanPassHash = crypto.createHash('sha256').update(cleanPass).digest();
+  const targetHash = crypto.createHash('sha256').update(expectedPass).digest();
+
+  return crypto.timingSafeEqual(cleanPassHash, targetHash);
 }
 
 export function createAdminToken(username: string): string {

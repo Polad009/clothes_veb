@@ -106,23 +106,19 @@ export async function middleware(request: NextRequest) {
   const isAdminHtml = pathname === '/admin.html';
 
   if (isAdminPage || isAdminHtml) {
-    // Step A: Check for a valid admin cookie (already logged in)
-    const cookieToken = request.cookies.get('horvvalle_admin_token')?.value;
-    const hasValidCookie = await verifyTokenAtEdge(cookieToken);
-
-    // Step B: Check for the secret access key in query string
+    // Check for the secret access key in query string
     const accessKey = request.nextUrl.searchParams.get('access')?.trim();
     const expectedKey = (process.env.ADMIN_ACCESS_KEY || 'horvvalle_portal_2026_xQ9mK').trim();
     const hasValidAccessKey = Boolean(accessKey && accessKey === expectedKey);
 
-    if (hasValidCookie || hasValidAccessKey) {
-      // Authorized → allow access to the admin page/html
+    if (hasValidAccessKey) {
+      // Authorized via secret access key → allow access to the admin page/html
       const response = NextResponse.next();
       applySecurityHeaders(response);
       return response;
     }
 
-    // Step C: No valid cookie AND no valid access key → return generic 404
+    // No valid access key in URL → return generic 404 (always hide /admin unless secret access key is in URL)
     return new NextResponse(GENERIC_404_HTML, {
       status: 404,
       headers: {
