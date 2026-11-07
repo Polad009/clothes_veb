@@ -21,36 +21,49 @@
 
   <style>
     :root {
-      --glass-bg: rgba(255, 255, 255, 0.75);
-      --glass-card: rgba(255, 255, 255, 0.78);
-      --glass-card-hover: rgba(255, 255, 255, 0.92);
-      --glass-border: rgba(255, 255, 255, 0.85);
-      --glass-border-subtle: rgba(226, 232, 240, 0.7);
-      --glass-shadow: 0 16px 40px -10px rgba(100, 116, 139, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.9) inset;
-      --glass-glow: 0 20px 50px -10px rgba(99, 102, 241, 0.18);
+      /* STEP 3 – PROPER GLASSMORPHISM TOKENS */
+      --glass-bg: rgba(255, 255, 255, 0.45);
+      --glass-card: rgba(255, 255, 255, 0.52);
+      --glass-card-hover: rgba(255, 255, 255, 0.72);
+      --glass-strong: rgba(255, 255, 255, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.65);
+      --glass-border-subtle: rgba(255, 255, 255, 0.35);
+      --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+      --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08), 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+      --glass-shadow-hover: 0 14px 40px -4px rgba(31, 38, 135, 0.14), 0 2px 6px 0 rgba(0, 0, 0, 0.04);
+      --sidebar-easing: cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    /* Ambient Liquid Mesh Background */
     html {
       scroll-behavior: smooth;
     }
 
+    /* STEP 2 – SINGLE STATIC FIXED BACKGROUND LAYER (NO filter: blur, hardware-accelerated) */
     body {
-      background-color: #f1f5f9;
-      background-image: 
-        radial-gradient(at 0% 0%, rgba(199, 210, 254, 0.6) 0px, transparent 50%),
-        radial-gradient(at 100% 0%, rgba(254, 215, 170, 0.5) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(204, 251, 241, 0.6) 0px, transparent 50%),
-        radial-gradient(at 0% 100%, rgba(251, 207, 232, 0.5) 0px, transparent 50%),
-        radial-gradient(at 50% 50%, rgba(224, 231, 255, 0.4) 0px, transparent 60%);
       color: #0f172a;
       font-family: 'Plus Jakarta Sans', 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       -webkit-font-smoothing: antialiased;
-      background-attachment: fixed;
       min-height: 100vh;
       position: relative;
+      background-color: #f8fafc;
       overflow-x: hidden;
-      scroll-behavior: smooth;
+    }
+
+    /* Hardware-accelerated pre-baked radial gradients without any CPU filter: blur */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      transform: translateZ(0);
+      background:
+        radial-gradient(circle at 10% 10%, rgba(199, 210, 254, 0.55) 0%, transparent 42%),
+        radial-gradient(circle at 90% 12%, rgba(254, 215, 170, 0.45) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(204, 251, 241, 0.5) 0%, transparent 45%),
+        radial-gradient(circle at 15% 90%, rgba(251, 207, 232, 0.45) 0%, transparent 42%),
+        radial-gradient(circle at 50% 50%, rgba(224, 231, 255, 0.35) 0%, transparent 50%),
+        #f8fafc;
     }
 
     main, aside, .overflow-y-auto, .overflow-x-auto, #liveChatMessagesContainer, #liveChatThreadsList {
@@ -58,120 +71,125 @@
       -webkit-overflow-scrolling: touch;
     }
 
-    /* Floating Liquid Blobs Animation */
-    .liquid-blob {
-      position: fixed;
-      border-radius: 9999px;
-      filter: blur(80px);
-      opacity: 0.6;
-      pointer-events: none;
-      z-index: 0;
-      mix-blend-mode: multiply;
-      animation: floatLiquid 20s infinite alternate ease-in-out;
-    }
-
-    .liquid-blob-1 {
-      top: -10%;
-      left: 15%;
-      width: 480px;
-      height: 480px;
-      background: radial-gradient(circle, rgba(165, 180, 252, 0.8) 0%, rgba(199, 210, 254, 0.2) 70%);
-      animation-duration: 18s;
-    }
-
-    .liquid-blob-2 {
-      top: 40%;
-      right: -5%;
-      width: 520px;
-      height: 520px;
-      background: radial-gradient(circle, rgba(253, 186, 116, 0.7) 0%, rgba(254, 215, 170, 0.2) 70%);
-      animation-duration: 22s;
-      animation-delay: -5s;
-    }
-
-    .liquid-blob-3 {
-      bottom: -10%;
-      left: 25%;
-      width: 550px;
-      height: 550px;
-      background: radial-gradient(circle, rgba(153, 246, 228, 0.75) 0%, rgba(204, 251, 241, 0.2) 70%);
-      animation-duration: 26s;
-      animation-delay: -10s;
-    }
-
-    @keyframes floatLiquid {
-      0% {
-        transform: translate(0px, 0px) scale(1) rotate(0deg);
-      }
-      33% {
-        transform: translate(60px, -40px) scale(1.08) rotate(6deg);
-      }
-      66% {
-        transform: translate(-40px, 50px) scale(0.94) rotate(-6deg);
-      }
-      100% {
-        transform: translate(30px, 20px) scale(1.04) rotate(4deg);
-      }
-    }
-
-    /* True Liquid Glass Panels */
-    .glass-card {
+    /* STEP 3 – REUSABLE GLASS CLASSES (Optimized ≤ 12px blur, contain: layout paint) */
+    .glass-card, .glass {
       background: var(--glass-card);
-      backdrop-filter: blur(24px) saturate(180%);
-      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      backdrop-filter: blur(12px) saturate(140%);
+      -webkit-backdrop-filter: blur(12px) saturate(140%);
       border: 1px solid var(--glass-border);
-      box-shadow: var(--glass-shadow);
+      box-shadow: var(--glass-shadow), var(--glass-highlight);
       border-radius: 1.5rem;
-      transform: translateZ(0);
-      will-change: transform;
+      contain: layout paint;
       color: #0f172a;
       position: relative;
     }
 
-    .glass-card-hover {
-      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .glass-card-hover:hover {
-      transform: translateY(-3px);
-      background: var(--glass-card-hover);
-      border-color: rgba(255, 255, 255, 1);
-      box-shadow: 0 22px 50px -10px rgba(100, 116, 139, 0.2), 0 0 0 1px #fff inset;
+    /* Fallback for browsers without backdrop-filter support */
+    @supports not (backdrop-filter: blur(12px)) {
+      .glass-card, .glass {
+        background: rgba(255, 255, 255, 0.92);
+      }
     }
 
-    /* Collapsible Sidebar Styles - Ultra Smooth Transitions */
-    #adminSidebar {
-      transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1), transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), padding 0.35s ease;
-      will-change: width, transform;
+    .glass-strong {
+      background: var(--glass-strong);
+      backdrop-filter: blur(14px) saturate(160%);
+      -webkit-backdrop-filter: blur(14px) saturate(160%);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow), var(--glass-highlight);
     }
+
+    .glass-card-hover {
+      transition: transform 0.28s var(--sidebar-easing), box-shadow 0.28s var(--sidebar-easing), background-color 0.28s var(--sidebar-easing);
+      will-change: transform;
+    }
+    .glass-card-hover:hover {
+      transform: translateY(-2px);
+      background: var(--glass-card-hover);
+      box-shadow: var(--glass-shadow-hover), var(--glass-highlight);
+    }
+
+    /* STEP 1 – SIDEBAR SMOOTH OPEN/CLOSE (GPU-FRIENDLY, NO LAYOUT JANK) */
+    #adminSidebar {
+      width: 16.5rem; /* 264px */
+      transition: width 300ms var(--sidebar-easing);
+      will-change: width;
+      contain: layout paint;
+      position: relative;
+    }
+
+    /* Smooth Chevron 180° rotation */
+    #sidebarCollapseIcon {
+      transition: transform 300ms var(--sidebar-easing);
+      will-change: transform;
+    }
+
+    /* Labels / Text / Badge staggered fading without content-shift */
     #adminSidebar .nav-label,
     #adminSidebar .nav-section-title,
     #adminSidebar .nav-badge,
-    #adminSidebar #sidebarLogoExpanded,
-    #adminSidebar #sidebarLogoCollapsed {
-      transition: opacity 0.25s ease, transform 0.25s ease;
+    #adminSidebar #sidebarLogoExpanded {
+      display: inline-block;
+      white-space: nowrap;
+      overflow: hidden;
+      max-width: 200px;
+      opacity: 1;
+      transform: translateX(0);
+      transition: opacity 220ms var(--sidebar-easing), transform 220ms var(--sidebar-easing), max-width 300ms var(--sidebar-easing);
+      will-change: opacity, transform, max-width;
     }
+
+    #adminSidebar #sidebarLogoCollapsed {
+      display: none;
+      opacity: 0;
+      transform: scale(0.85);
+      transition: opacity 220ms var(--sidebar-easing), transform 220ms var(--sidebar-easing);
+      will-change: opacity, transform;
+    }
+
+    /* Collapsed Sidebar Rail */
     body.sidebar-collapsed #adminSidebar {
       width: 4.75rem; /* ~76px */
     }
+
+    body.sidebar-collapsed #adminSidebar #sidebarCollapseIcon {
+      transform: rotate(180deg);
+    }
+
     body.sidebar-collapsed #adminSidebar .nav-label,
     body.sidebar-collapsed #adminSidebar .nav-section-title,
     body.sidebar-collapsed #adminSidebar .nav-badge,
     body.sidebar-collapsed #adminSidebar #sidebarLogoExpanded {
-      display: none !important;
-      opacity: 0;
+      max-width: 0 !important;
+      opacity: 0 !important;
+      transform: translateX(-8px) !important;
+      pointer-events: none;
     }
+
     body.sidebar-collapsed #adminSidebar #sidebarLogoCollapsed {
-      display: block !important;
-      opacity: 1;
+      display: flex !important;
+      opacity: 1 !important;
+      transform: scale(1) !important;
     }
+
     body.sidebar-collapsed #adminSidebar .nav-item {
       justify-content: center;
       padding-left: 0.5rem;
       padding-right: 0.5rem;
     }
-    #sidebarLogoCollapsed {
-      display: none;
-      opacity: 0;
+
+    /* Respect prefers-reduced-motion */
+    @media (prefers-reduced-motion: reduce) {
+      #adminSidebar,
+      #sidebarCollapseIcon,
+      #adminSidebar .nav-label,
+      #adminSidebar .nav-section-title,
+      #adminSidebar .nav-badge,
+      #adminSidebar #sidebarLogoExpanded,
+      #adminSidebar #sidebarLogoCollapsed,
+      .glass-card-hover {
+        transition: none !important;
+      }
     }
 
     .font-brand {
@@ -198,45 +216,30 @@
     }
 
     @keyframes shake {
-      0%,
-      100% {
-        transform: translateX(0);
-      }
-
-      20%,
-      60% {
-        transform: translateX(-6px);
-      }
-
-      40%,
-      80% {
-        transform: translateX(6px);
-      }
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
     }
 
     .shake-anim {
       animation: shake 0.4s ease-in-out;
     }
 
-    /* Vibrant Multi-Color Glass Stripes */
+    /* Vibrant Multi-Color Glass Stripes with Accessible Contrast */
     .stripe-top-green {
       border-top: 3.5px solid #10b981;
-      box-shadow: 0 12px 30px -5px rgba(16, 185, 129, 0.15), var(--glass-shadow);
     }
 
     .stripe-top-navy {
       border-top: 3.5px solid #3b82f6;
-      box-shadow: 0 12px 30px -5px rgba(59, 130, 246, 0.15), var(--glass-shadow);
     }
 
     .stripe-top-amber {
       border-top: 3.5px solid #f59e0b;
-      box-shadow: 0 12px 30px -5px rgba(245, 158, 11, 0.15), var(--glass-shadow);
     }
 
     .stripe-top-dark {
       border-top: 3.5px solid #0f172a;
-      box-shadow: 0 12px 30px -5px rgba(15, 23, 42, 0.15), var(--glass-shadow);
     }
 
     .stripe-left-green {
@@ -338,11 +341,6 @@
 </head>
 
 <body class="min-h-screen antialiased flex flex-col relative">
-
-  <!-- Ambient Liquid Glass Blobs for Dynamic Glassmorphic Refraction -->
-  <div class="liquid-blob liquid-blob-1"></div>
-  <div class="liquid-blob liquid-blob-2"></div>
-  <div class="liquid-blob liquid-blob-3"></div>
 
   <!-- ============================================================ -->
   <!-- 1. LOGIN SCREEN (Glassmorphism Split Layout — Şəkildəki Dizayn) -->
@@ -451,7 +449,7 @@
     <!-- ---------------------------------------------------- -->
     <!-- LEFT SIDEBAR (Şüşəli Glass Naviqasiya Paneli) -->
     <!-- ---------------------------------------------------- -->
-    <aside id="adminSidebar" class="fixed inset-y-0 left-0 z-40 w-72 md:w-64 glass-card border-r border-white/80 m-0 md:m-3 md:mb-3 md:rounded-3xl flex flex-col shrink-0 transform -translate-x-full md:translate-x-0 md:static transition-all duration-300 ease-in-out shadow-2xl overflow-hidden">
+    <aside id="adminSidebar" class="fixed inset-y-0 left-0 z-40 glass-card border-r border-white/60 m-0 md:m-3 md:mb-3 md:rounded-3xl flex flex-col shrink-0 transform -translate-x-full md:translate-x-0 md:static overflow-hidden">
 
       <!-- Logo Header with Collapse Toggle & Mobile Close Button -->
       <div class="h-16 sm:h-20 flex items-center justify-between border-b border-slate-200/60 px-4 bg-white/40 backdrop-blur-md">
@@ -2447,15 +2445,29 @@
 
 
     // ----------------------------------------------------
-    // DATA FETCHING & SYNCHRONIZATION
+    // DATA FETCHING & SYNCHRONIZATION (PARALLEL NON-BLOCKING)
     // ----------------------------------------------------
     async function loadData() {
       try {
-        const res = await fetch('/api/admin/data');
-        const data = await res.json();
-        if (!data) return;
-        STORE_DATA = data;
-        renderAll();
+        const [adminRes, chatRes] = await Promise.allSettled([
+          fetch('/api/admin/data'),
+          fetch('/api/chat/threads?_t=' + Date.now())
+        ]);
+
+        if (adminRes.status === 'fulfilled' && adminRes.value.ok) {
+          const data = await adminRes.value.json();
+          if (data) {
+            STORE_DATA = data;
+            renderAll();
+          }
+        }
+
+        if (chatRes.status === 'fulfilled' && chatRes.value.ok) {
+          const chatData = await chatRes.value.json();
+          if (chatData && chatData.threads) {
+            processChatThreads(chatData.threads);
+          }
+        }
       } catch (err) {
         console.error('Data loading error:', err);
       }
@@ -4595,7 +4607,13 @@
         }
       }
 
-      if (window.lucide) lucide.createIcons();
+      if (window.lucide && targetPane) {
+        try {
+          lucide.createIcons({ root: targetPane });
+        } catch (e) {
+          lucide.createIcons();
+        }
+      }
     }
 
 
@@ -4998,49 +5016,53 @@
       } catch (e) {}
     }
 
+    function processChatThreads(freshThreads) {
+      if (!Array.isArray(freshThreads)) return;
+
+      // Check if ANY customer sent a new message across ALL threads
+      let hasNewIncomingMessage = false;
+      freshThreads.forEach(t => {
+        const sid = t.sessionId;
+        const lastMsg = t.lastMessage || '';
+        const lastTime = t.lastMessageAt || 0;
+        const key = lastTime + '_' + lastMsg;
+
+        if (globalChatAudioInitialized) {
+          const previousKey = threadLastMessageMap.get(sid);
+          if (previousKey && previousKey !== key && t.unreadAdmin > 0) {
+            hasNewIncomingMessage = true;
+          }
+        }
+        threadLastMessageMap.set(sid, key);
+      });
+
+      if (globalChatAudioInitialized && hasNewIncomingMessage) {
+        playAdminChatChime();
+      }
+      globalChatAudioInitialized = true;
+
+      allChatThreads = freshThreads;
+      renderLiveChatThreads(allChatThreads);
+
+      // Update badge counter
+      const totalUnread = allChatThreads.reduce((sum, t) => sum + (t.unreadAdmin || 0), 0);
+      const badgeEl = document.getElementById('badge-livechat-count');
+      if (badgeEl) {
+        if (totalUnread > 0) {
+          badgeEl.innerText = totalUnread;
+          badgeEl.classList.remove('hidden');
+        } else {
+          badgeEl.classList.add('hidden');
+        }
+      }
+    }
+
     async function loadLiveChatThreads() {
       try {
         const res = await fetch('/api/chat/threads?_t=' + Date.now());
         if (!res.ok) return;
         const data = await res.json();
-        const freshThreads = data.threads || [];
-
-        // Check if ANY customer sent a new message across ALL threads
-        let hasNewIncomingMessage = false;
-        freshThreads.forEach(t => {
-          const sid = t.sessionId;
-          const lastMsg = t.lastMessage || '';
-          const lastTime = t.lastMessageAt || 0;
-          const key = lastTime + '_' + lastMsg;
-
-          if (globalChatAudioInitialized) {
-            const previousKey = threadLastMessageMap.get(sid);
-            if (previousKey && previousKey !== key && t.unreadAdmin > 0) {
-              hasNewIncomingMessage = true;
-            }
-          }
-          threadLastMessageMap.set(sid, key);
-        });
-
-        if (globalChatAudioInitialized && hasNewIncomingMessage) {
-          playAdminChatChime();
-        }
-        globalChatAudioInitialized = true;
-
-        allChatThreads = freshThreads;
-        renderLiveChatThreads(allChatThreads);
-
-        // Update badge counter
-        const totalUnread = allChatThreads.reduce((sum, t) => sum + (t.unreadAdmin || 0), 0);
-        const badgeEl = document.getElementById('badge-livechat-count');
-        if (badgeEl) {
-          if (totalUnread > 0) {
-            badgeEl.innerText = totalUnread;
-            badgeEl.classList.remove('hidden');
-          } else {
-            badgeEl.classList.add('hidden');
-          }
-        }
+        processChatThreads(data.threads || []);
       } catch (e) {
         console.warn('Failed to load chat threads:', e);
       }
@@ -5489,24 +5511,20 @@
       }
     }
 
-    // Sidebar Collapse / Expand Toggle
+    // Sidebar Collapse / Expand Toggle (Local State - Zero Dashboard Re-renders)
     function toggleSidebarCollapse() {
       const isCollapsed = document.body.classList.toggle('sidebar-collapsed');
-      localStorage.setItem('horwalle_admin_sidebar_collapsed', isCollapsed ? 'true' : 'false');
-      const icon = document.getElementById('sidebarCollapseIcon');
-      if (icon) {
-        icon.style.transform = isCollapsed ? 'rotate(180deg)' : 'rotate(0deg)';
-      }
+      try {
+        localStorage.setItem('horwalle_admin_sidebar_collapsed', isCollapsed ? 'true' : 'false');
+      } catch (e) {}
     }
 
     function initSidebarState() {
-      if (localStorage.getItem('horwalle_admin_sidebar_collapsed') === 'true') {
-        document.body.classList.add('sidebar-collapsed');
-        const icon = document.getElementById('sidebarCollapseIcon');
-        if (icon) {
-          icon.style.transform = 'rotate(180deg)';
+      try {
+        if (localStorage.getItem('horwalle_admin_sidebar_collapsed') === 'true') {
+          document.body.classList.add('sidebar-collapsed');
         }
-      }
+      } catch (e) {}
     }
 
     // Auto-polling for new orders and live chat every 8 seconds
