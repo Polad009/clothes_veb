@@ -20,11 +20,42 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
+    :root {
+      --glass-bg: rgba(255, 255, 255, 0.72);
+      --glass-border: rgba(255, 255, 255, 0.75);
+      --glass-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+    }
+
     body {
-      background-color: #F8F9FA;
-      color: #111827;
+      background: radial-gradient(at 0% 0%, rgba(224, 231, 255, 0.45) 0px, transparent 50%),
+                  radial-gradient(at 100% 0%, rgba(254, 243, 199, 0.4) 0px, transparent 50%),
+                  radial-gradient(at 100% 100%, rgba(209, 250, 229, 0.45) 0px, transparent 50%),
+                  radial-gradient(at 0% 100%, rgba(252, 231, 243, 0.4) 0px, transparent 50%),
+                  #F3F5F9;
+      color: #0F172A;
       font-family: 'Instrument Sans', 'Inter', -apple-system, sans-serif;
       -webkit-font-smoothing: antialiased;
+      background-attachment: fixed;
+      min-height: 100vh;
+    }
+
+    .glass-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      border-radius: 1.25rem;
+      transform: translateZ(0);
+      will-change: transform;
+    }
+
+    .glass-card-hover {
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glass-card-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 34px -5px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.9) inset;
     }
 
     .font-brand {
@@ -38,7 +69,7 @@
     }
 
     ::-webkit-scrollbar-track {
-      background: #f1f5f9;
+      background: rgba(241, 245, 249, 0.6);
     }
 
     ::-webkit-scrollbar-thumb {
@@ -51,7 +82,6 @@
     }
 
     @keyframes shake {
-
       0%,
       100% {
         transform: translateX(0);
@@ -72,29 +102,33 @@
       animation: shake 0.4s ease-in-out;
     }
 
-    /* Exact Accent Stripes matching JANAB / Yusif Babazada Design */
+    /* Vibrant Multi-Color Stripes with Glass Glow */
     .stripe-top-green {
-      border-top: 4px solid #10b981;
+      border-top: 3px solid #10b981;
+      box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.12), var(--glass-shadow);
     }
 
     .stripe-top-navy {
-      border-top: 4px solid #1e3a8a;
+      border-top: 3px solid #3b82f6;
+      box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.12), var(--glass-shadow);
     }
 
     .stripe-top-amber {
-      border-top: 4px solid #f59e0b;
+      border-top: 3px solid #f59e0b;
+      box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.12), var(--glass-shadow);
     }
 
     .stripe-top-dark {
-      border-top: 4px solid #111827;
+      border-top: 3px solid #0f172a;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.12), var(--glass-shadow);
     }
 
     .stripe-left-green {
-      border-left: 5px solid #10b981;
+      border-left: 4px solid #10b981;
     }
 
     .stripe-left-navy {
-      border-left: 5px solid #1e3a8a;
+      border-left: 4px solid #3b82f6;
     }
 
     /* Barcode lines styling */
@@ -192,33 +226,37 @@
   <!-- ============================================================ -->
   <!-- 1. LOGIN SCREEN (Şifrəli Giriş Sistemi) -->
   <!-- ============================================================ -->
-  <div id="loginScreen" class="fixed inset-0 z-50 bg-[#F4F5F7] flex items-center justify-center p-4">
+  <div id="loginScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
     <div id="loginCard"
-      class="w-full max-w-md bg-white rounded-3xl p-8 sm:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.08)] border border-slate-100 flex flex-col items-center text-center">
+      class="w-full max-w-md glass-card p-8 sm:p-10 shadow-2xl flex flex-col items-center text-center relative overflow-hidden">
+      <!-- Glow ambient backdrop inside card -->
+      <div class="absolute -top-24 -left-24 w-48 h-48 bg-indigo-500/15 rounded-full blur-2xl pointer-events-none"></div>
+      <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-amber-500/15 rounded-full blur-2xl pointer-events-none"></div>
+
       <!-- Brand Logo (Image 3) -->
-      <div class="mb-5 flex flex-col items-center">
+      <div class="mb-5 flex flex-col items-center relative z-10">
         <img 
           src="/brand/horwalle_logo_black.png?v=2" 
           alt="HORWALLE" 
           class="h-16 w-auto object-contain mb-1 transition-transform duration-300 hover:scale-105" 
           onerror="this.src='/brand/logo-horizontal-black.png'"
         />
-        <p class="text-[9.5px] tracking-[0.28em] text-slate-400 font-semibold uppercase mt-1">Atelier Couture · İdarəetmə</p>
+        <p class="text-[9.5px] tracking-[0.28em] text-slate-500 font-semibold uppercase mt-1">Atelier Couture · İdarəetmə</p>
       </div>
 
-      <div class="w-12 h-1 bg-neutral-900 rounded-full mb-6"></div>
+      <div class="w-12 h-1 bg-gradient-to-r from-indigo-500 via-amber-500 to-emerald-500 rounded-full mb-6"></div>
 
       <h2 class="text-xl font-bold text-slate-900 tracking-tight">İdarəetmə Panelinə Giriş</h2>
       <p class="text-xs text-slate-500 mt-1 mb-6">Yalnız rəsmi mağaza inzibatçıları üçün təhlükəsiz giriş</p>
 
       <!-- Login Form -->
-      <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="w-full space-y-4 text-left">
+      <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="w-full space-y-4 text-left relative z-10">
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">İstifadəçi Adı</label>
           <div class="relative">
             <i data-lucide="user" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
             <input type="text" id="loginUsername" value="admin" required
-              class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:bg-white focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition"
+              class="w-full bg-white/70 border border-white/80 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 shadow-xs transition"
               placeholder="admin" />
           </div>
         </div>
@@ -226,12 +264,12 @@
         <div>
           <div class="flex items-center justify-between mb-1.5">
             <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">İnzibatçı Şifrəsi</label>
-            <span class="text-[10px] text-slate-400 font-semibold">Təhlükəsiz Giriş</span>
+            <span class="text-[10px] text-indigo-600 font-semibold bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">Təhlükəsiz Giriş</span>
           </div>
           <div class="relative">
             <i data-lucide="lock" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
             <input type="password" id="loginPassword" required
-              class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-2.5 text-sm text-slate-900 focus:bg-white focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition"
+              class="w-full bg-white/70 border border-white/80 rounded-xl pl-10 pr-10 py-2.5 text-sm text-slate-900 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 shadow-xs transition"
               placeholder="••••••••••••" />
             <button type="button" id="togglePasswordBtn" onclick="togglePasswordVisibility()"
               class="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg hover:bg-slate-200/70 text-slate-500 hover:text-black transition cursor-pointer"
@@ -245,7 +283,7 @@
         </div>
 
         <div id="loginError"
-          class="hidden text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-xl p-3 flex items-center gap-2">
+          class="hidden text-xs text-rose-600 bg-rose-50/90 border border-rose-200 rounded-xl p-3 flex items-center gap-2">
           <i data-lucide="alert-circle" class="w-4 h-4 shrink-0 text-rose-500"></i>
           <span id="loginErrorText">Daxil edilmiş şifrə yanlışdır.</span>
         </div>
@@ -258,16 +296,16 @@
         </div>
 
         <button type="submit" id="loginSubmitBtn"
-          class="w-full py-3 bg-black hover:bg-neutral-800 active:scale-[0.99] text-white rounded-xl font-bold text-sm transition shadow-sm flex items-center justify-center gap-2 cursor-pointer mt-2">
+          class="w-full py-3 bg-gradient-to-r from-slate-900 to-slate-800 hover:from-black hover:to-neutral-900 active:scale-[0.99] text-white rounded-xl font-bold text-sm transition shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer mt-2">
           <i data-lucide="log-in" class="w-4 h-4"></i>
           <span>Daxil Ol</span>
         </button>
       </form>
 
       <div
-        class="mt-6 pt-5 border-t border-slate-100 w-full flex items-center justify-between text-[11px] text-slate-400">
+        class="mt-6 pt-5 border-t border-slate-200/60 w-full flex items-center justify-between text-[11px] text-slate-500 relative z-10">
         <span>Horvvalle V2.4 Portal</span>
-        <span class="flex items-center gap-1.5 text-emerald-600 font-medium">
+        <span class="flex items-center gap-1.5 text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sistem Aktivdir
         </span>
       </div>
@@ -284,158 +322,163 @@
     <div id="sidebarBackdrop" onclick="closeMobileSidebar()" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-30 hidden md:hidden transition-opacity"></div>
 
     <!-- ---------------------------------------------------- -->
-    <!-- LEFT SIDEBAR (Şəkildəki 10 menyu bəndi ilə) -->
+    <!-- LEFT SIDEBAR (Şüşəli Glass Naviqasiya Paneli) -->
     <!-- ---------------------------------------------------- -->
-    <aside id="adminSidebar" class="fixed inset-y-0 left-0 z-40 w-72 md:w-64 bg-white border-r border-[#EEEEEE] flex flex-col shrink-0 transform -translate-x-full md:translate-x-0 md:static transition-transform duration-300 ease-in-out shadow-2xl md:shadow-none">
+    <aside id="adminSidebar" class="fixed inset-y-0 left-0 z-40 w-72 md:w-64 glass-card border-r border-white/60 m-0 md:m-3 md:mb-3 md:rounded-3xl flex flex-col shrink-0 transform -translate-x-full md:translate-x-0 md:static transition-all duration-300 ease-in-out shadow-2xl overflow-hidden">
 
       <!-- Logo Header with Mobile Close Button -->
-      <div class="h-16 sm:h-20 flex items-center justify-between border-b border-[#F0F0F0] px-5">
+      <div class="h-16 sm:h-20 flex items-center justify-between border-b border-slate-200/50 px-5 bg-white/40 backdrop-blur-xs">
         <img 
           src="/brand/logo-horizontal-black.png?v=2" 
           alt="HORWALLE" 
           class="h-7 max-w-[170px] object-contain transition-transform duration-300 hover:scale-[1.02]" 
           onerror="this.src='/brand/horwalle_logo_black.png'"
         />
-        <button type="button" onclick="closeMobileSidebar()" class="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer" aria-label="Menyunu Bağla">
+        <button type="button" onclick="closeMobileSidebar()" class="md:hidden p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-white/60 transition cursor-pointer" aria-label="Menyunu Bağla">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
       <!-- Navigation Links -->
-      <div class="p-4 flex-1 space-y-6 overflow-y-auto">
+      <div class="p-3.5 flex-1 space-y-5 overflow-y-auto">
 
         <!-- 1. DASHBOARD (Primary Active Tab) -->
         <div>
           <button onclick="switchTab('dashboard')" id="nav-dashboard"
-            class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition bg-black text-white shadow-xs cursor-pointer">
-            <i data-lucide="layout-grid" class="w-4 h-4"></i>
+            class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-xs uppercase tracking-wider transition bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-md hover:shadow-lg cursor-pointer">
+            <i data-lucide="layout-grid" class="w-4 h-4 text-indigo-400"></i>
             <span>DASHBOARD</span>
           </button>
         </div>
 
         <!-- 2 & 3. KATALOQ İDARƏETMƏSİ -->
         <div class="space-y-1">
-          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">
-            KATALOQ İDARƏETMƏSİ
+          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-1.5 flex items-center justify-between">
+            <span>KATALOQ İDARƏETMƏSİ</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
           </div>
           <button onclick="switchTab('products')" id="nav-products"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
-            <i data-lucide="package" class="w-4 h-4 text-slate-400"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
+            <i data-lucide="package" class="w-4 h-4 text-emerald-600"></i>
             <span>Məhsul Portfeli</span>
             <span id="badge-products-count"
-              class="ml-auto text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">0</span>
+              class="ml-auto text-[10px] font-bold bg-white/80 border border-slate-200/60 text-slate-700 px-2 py-0.5 rounded-full shadow-2xs">0</span>
           </button>
           <button onclick="switchTab('categories')" id="nav-categories"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
-            <i data-lucide="layers" class="w-4 h-4 text-slate-400"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
+            <i data-lucide="layers" class="w-4 h-4 text-emerald-600"></i>
             <span>Kateqoriyalar</span>
           </button>
         </div>
 
         <!-- 4 & 5. MƏZMUN -->
         <div class="space-y-1">
-          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">
-            MƏZMUN
+          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-1.5 flex items-center justify-between">
+            <span>MƏZMUN</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
           </div>
           <button onclick="switchTab('staticPages')" id="nav-staticPages"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
-            <i data-lucide="file-text" class="w-4 h-4 text-slate-400"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
+            <i data-lucide="file-text" class="w-4 h-4 text-blue-500"></i>
             <span>Statik Səhifələr</span>
           </button>
           <button onclick="switchTab('about')" id="nav-about"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
-            <i data-lucide="info" class="w-4 h-4 text-slate-400"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
+            <i data-lucide="info" class="w-4 h-4 text-blue-500"></i>
             <span>Haqqımızda</span>
           </button>
         </div>
 
         <!-- 6, 7, 8, 9. SATIŞ & LOYALLIQ -->
         <div class="space-y-1">
-          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">
-            SATIŞ & LOYALLIQ
+          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-1.5 flex items-center justify-between">
+            <span>SATIŞ & LOYALLIQ</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
           </div>
           <button onclick="switchTab('orders')" id="nav-orders"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
-            <i data-lucide="shopping-bag" class="w-4 h-4 text-slate-400"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
+            <i data-lucide="shopping-bag" class="w-4 h-4 text-amber-500"></i>
             <span>Onlayn Sifarişlər</span>
             <span id="badge-orders-count"
-              class="ml-auto text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">0</span>
+              class="ml-auto text-[10px] font-bold bg-amber-100/80 text-amber-900 border border-amber-200/70 px-2 py-0.5 rounded-full shadow-2xs">0</span>
           </button>
           <button onclick="switchTab('customers')" id="nav-customers"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
-            <i data-lucide="users" class="w-4 h-4 text-slate-400"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
+            <i data-lucide="users" class="w-4 h-4 text-indigo-500"></i>
             <span>Müştəri Bazası</span>
           </button>
           <button onclick="switchTab('loyalty')" id="nav-loyalty"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
-            <i data-lucide="gem" class="w-4 h-4 text-slate-400"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
+            <i data-lucide="gem" class="w-4 h-4 text-purple-500"></i>
             <span>Loyallıq Terminalı</span>
           </button>
           <button onclick="switchTab('promos')" id="nav-promos"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
-            <i data-lucide="tag" class="w-4 h-4 text-slate-400"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
+            <i data-lucide="tag" class="w-4 h-4 text-rose-500"></i>
             <span>Reklam Kodları</span>
           </button>
           <button onclick="switchTab('broadcast')" id="nav-broadcast"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
             <i data-lucide="mail" class="w-4 h-4 text-amber-500"></i>
             <span>Kütləvi E-poçt & Kampaniya</span>
           </button>
           <button onclick="switchTab('liveChat')" id="nav-liveChat"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
             <i data-lucide="message-circle" class="w-4 h-4 text-emerald-500"></i>
             <span>Canlı Çat Dəstək</span>
-            <span id="badge-livechat-count" class="ml-auto text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full hidden">0</span>
+            <span id="badge-livechat-count" class="ml-auto text-[10px] font-bold bg-emerald-100/90 text-emerald-900 border border-emerald-200/80 px-2 py-0.5 rounded-full hidden shadow-2xs">0</span>
           </button>
         </div>
 
         <!-- 10. OFLAYN MAĞAZA -->
         <div class="space-y-1">
-          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">
-            OFLAYN MAĞAZA
+          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-1.5 flex items-center justify-between">
+            <span>OFLAYN MAĞAZA</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
           </div>
           <button onclick="switchTab('posBarcode')" id="nav-posBarcode"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
-            <i data-lucide="scan-barcode" class="w-4 h-4 text-slate-400"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
+            <i data-lucide="scan-barcode" class="w-4 h-4 text-cyan-600"></i>
             <span>Barkod Skaner</span>
           </button>
           <button onclick="switchTab('posReceipt')" id="nav-posReceipt"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
-            <i data-lucide="receipt" class="w-4 h-4 text-slate-400"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
+            <i data-lucide="receipt" class="w-4 h-4 text-cyan-600"></i>
             <span>Satış Təsdiqi</span>
           </button>
         </div>
 
         <!-- MALİYYƏ VƏ VERGİ HESABATI (AR DVX UYĞUN) -->
-        <div class="space-y-1 pt-2 border-t border-slate-100">
-          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">
-            MALİYYƏ & VERGİ
+        <div class="space-y-1 pt-2 border-t border-slate-200/50">
+          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-1.5 flex items-center justify-between">
+            <span>MALİYYƏ & VERGİ</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
           </div>
           <button onclick="switchTab('taxReports')" id="nav-taxReports"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
             <i data-lucide="landmark" class="w-4 h-4 text-emerald-600"></i>
             <span>Vergi & Rüblük Hesabat</span>
-            <span class="ml-auto text-[9px] font-bold bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded">AR DVX</span>
+            <span class="ml-auto text-[9px] font-bold bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded border border-emerald-200 shadow-2xs">AR DVX</span>
           </button>
         </div>
 
         <!-- ƏLAVƏ: FƏRDİ ÇAP STUDİYASI (POD) -->
-        <div class="space-y-1 pt-2 border-t border-slate-100">
+        <div class="space-y-1 pt-2 border-t border-slate-200/50">
           <button onclick="switchTab('podOrders')" id="nav-podOrders"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
             <i data-lucide="sparkles" class="w-4 h-4 text-indigo-500"></i>
             <span>Fərdi Çap (POD)</span>
             <span id="badge-pod-count"
-              class="ml-auto text-[10px] font-bold bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full">0</span>
+              class="ml-auto text-[10px] font-bold bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full shadow-2xs">0</span>
           </button>
         </div>
 
       </div>
 
-      <!-- SİSTEMDƏN ÇIXIŞ BUTTON (Şəkildəki sol ən aşağı qırmızı düymə) -->
-      <div class="p-4 border-t border-[#F0F0F0]">
+      <!-- SİSTEMDƏN ÇIXIŞ BUTTON -->
+      <div class="p-3.5 border-t border-slate-200/50 bg-white/40 backdrop-blur-xs">
         <button onclick="handleLogout()"
-          class="w-full py-2.5 px-4 rounded-xl border border-rose-300 text-rose-600 hover:bg-rose-50 font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs">
+          class="w-full py-2.5 px-4 rounded-xl border border-rose-200/80 bg-rose-50/70 text-rose-600 hover:bg-rose-100 font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs">
           <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
           <span>SİSTEMDƏN ÇIXIŞ</span>
         </button>
@@ -449,31 +492,34 @@
     <!-- ---------------------------------------------------- -->
     <main class="flex-1 flex flex-col overflow-y-auto">
 
-      <!-- TOP BAR (Şəkildəki yuxarı zolaq) -->
-      <header class="h-16 sm:h-20 bg-white border-b border-[#EEEEEE] px-4 sm:px-8 flex items-center justify-between sticky top-0 z-20">
+      <!-- TOP BAR (Glass Header) -->
+      <header class="h-16 sm:h-20 glass-card border-b border-white/60 mx-3 sm:mx-6 mt-3 px-4 sm:px-8 flex items-center justify-between sticky top-3 z-30 shadow-md">
         <div class="flex items-center gap-3">
-          <button id="mobileSidebarToggle" type="button" onclick="toggleMobileSidebar()" class="md:hidden p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 transition cursor-pointer" aria-label="Menyu">
+          <button id="mobileSidebarToggle" type="button" onclick="toggleMobileSidebar()" class="md:hidden p-2 rounded-xl bg-white/70 hover:bg-white text-slate-800 transition cursor-pointer shadow-2xs" aria-label="Menyu">
             <i data-lucide="menu" class="w-5 h-5"></i>
           </button>
-          <h2 class="text-sm sm:text-lg font-black text-slate-900 tracking-wider uppercase">ANALİTİK PANEL</h2>
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-500"></span>
+            <h2 class="text-sm sm:text-base font-black text-slate-900 tracking-wider uppercase">HORWALLE ATELIER · ANALİTİKA</h2>
+          </div>
         </div>
 
         <!-- Admin Profile Pill -->
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-3 sm:gap-4">
           <a href="/" target="_blank"
-            class="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-black bg-slate-50 hover:bg-slate-100 border border-slate-200 px-3.5 py-1.5 rounded-full transition cursor-pointer">
-            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            class="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-black bg-white/80 hover:bg-white border border-white/90 px-3.5 py-1.5 rounded-full transition shadow-2xs cursor-pointer">
+            <i data-lucide="external-link" class="w-3.5 h-3.5 text-indigo-500"></i>
             <span>Mağazaya Keç</span>
           </a>
 
-          <div class="flex items-center gap-2.5 bg-slate-50 border border-slate-200/80 rounded-full px-3.5 py-1.5">
-            <div class="w-7 h-7 rounded-full bg-black text-white flex items-center justify-center font-bold text-xs">
-              <i data-lucide="user" class="w-3.5 h-3.5"></i>
+          <div class="flex items-center gap-2.5 bg-white/80 border border-white/90 shadow-2xs rounded-full px-3.5 py-1.5">
+            <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-slate-900 to-slate-800 text-white flex items-center justify-center font-bold text-xs shadow-xs">
+              <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-400"></i>
             </div>
             <div class="text-left pr-1">
               <div class="text-xs font-bold text-slate-900 leading-tight">Polad · Baş Admin</div>
               <div class="text-[9.5px] font-bold text-emerald-600 flex items-center gap-1 leading-none mt-0.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> AKTİV
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> PORTAL AKTİV
               </div>
             </div>
           </div>
@@ -496,28 +542,28 @@
           <!-- Filter Toolbar -->
           <div class="flex flex-wrap items-center gap-2 text-xs">
             <!-- GÜN / HƏFTƏ / AY Pills -->
-            <div class="bg-slate-100 p-1 rounded-xl flex items-center gap-1 border border-slate-200/60">
+            <div class="glass-card p-1 rounded-2xl flex items-center gap-1 border border-white/80 shadow-xs">
               <button onclick="setDateRange('gun')" id="filter-gun"
-                class="filter-range-btn px-3 py-1.5 rounded-lg font-bold text-slate-600 hover:text-black transition cursor-pointer">GÜN</button>
+                class="filter-range-btn px-3 py-1.5 rounded-xl font-bold text-slate-600 hover:text-black transition cursor-pointer">GÜN</button>
               <button onclick="setDateRange('hefte')" id="filter-hefte"
-                class="filter-range-btn px-3 py-1.5 rounded-lg font-bold text-slate-600 hover:text-black transition cursor-pointer">HƏFTƏ</button>
+                class="filter-range-btn px-3 py-1.5 rounded-xl font-bold text-slate-600 hover:text-black transition cursor-pointer">HƏFTƏ</button>
               <button onclick="setDateRange('ay')" id="filter-ay"
-                class="filter-range-btn px-3 py-1.5 rounded-lg font-bold bg-white text-black shadow-2xs border border-slate-200/80 cursor-pointer">AY</button>
+                class="filter-range-btn px-3 py-1.5 rounded-xl font-bold bg-slate-900 text-white shadow-xs cursor-pointer">AY</button>
             </div>
 
             <!-- Date range pickers -->
             <div
-              class="flex items-center gap-1 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-slate-600 shadow-2xs">
+              class="glass-card flex items-center gap-1 px-3 py-1.5 text-slate-600 shadow-xs">
               <input type="date" id="startDatePicker"
                 class="bg-transparent text-xs text-slate-800 outline-none cursor-pointer">
-              <span class="text-slate-400">-</span>
+              <span class="text-slate-400 font-bold">-</span>
               <input type="date" id="endDatePicker"
                 class="bg-transparent text-xs text-slate-800 outline-none cursor-pointer">
             </div>
 
             <!-- TƏTBİQ ET Button -->
             <button onclick="applyDateFilter()"
-              class="px-4 py-2 bg-black hover:bg-neutral-800 active:scale-98 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition shadow-2xs cursor-pointer">
+              class="px-4 py-2 bg-gradient-to-r from-slate-900 to-slate-800 hover:from-black hover:to-neutral-900 active:scale-98 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition shadow-sm hover:shadow-md cursor-pointer">
               TƏTBİQ ET
             </button>
           </div>
@@ -529,13 +575,13 @@
 
           <!-- Card 1: Kassa (Tamamlanmış) -->
           <div
-            class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs stripe-top-green flex flex-col justify-between">
+            class="glass-card glass-card-hover p-5 stripe-top-green flex flex-col justify-between">
             <div>
               <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">KASSA (TAMAMLANMIŞ)</div>
               <div id="stat-kassa-val" class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">0.00 ₼</div>
             </div>
             <div
-              class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-emerald-600 tracking-wider uppercase">
+              class="mt-4 pt-3 border-t border-slate-200/50 flex items-center justify-between text-[10px] font-bold text-emerald-600 tracking-wider uppercase">
               <span>STATUS: ÇATDIRILDI / ÖDƏNİLDİ</span>
               <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-500"></i>
             </div>
@@ -543,27 +589,27 @@
 
           <!-- Card 2: Kuryerdə (Yolda) -->
           <div
-            class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs stripe-top-navy flex flex-col justify-between">
+            class="glass-card glass-card-hover p-5 stripe-top-navy flex flex-col justify-between">
             <div>
               <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">KURYERDƏ (YOLDA)</div>
               <div id="stat-kuryer-val" class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">0.00 ₼</div>
             </div>
             <div
-              class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-indigo-700 tracking-wider uppercase">
+              class="mt-4 pt-3 border-t border-slate-200/50 flex items-center justify-between text-[10px] font-bold text-blue-600 tracking-wider uppercase">
               <span>STATUS: KURYERƏ VERİLDİ</span>
-              <i data-lucide="truck" class="w-3.5 h-3.5 text-indigo-600"></i>
+              <i data-lucide="truck" class="w-3.5 h-3.5 text-blue-500"></i>
             </div>
           </div>
 
           <!-- Card 3: Gözləmədə (Yeni) -->
           <div
-            class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs stripe-top-amber flex flex-col justify-between">
+            class="glass-card glass-card-hover p-5 stripe-top-amber flex flex-col justify-between">
             <div>
               <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">GÖZLƏMƏDƏ (YENİ)</div>
               <div id="stat-gozleme-val" class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">0.00 ₼</div>
             </div>
             <div
-              class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-amber-600 tracking-wider uppercase">
+              class="mt-4 pt-3 border-t border-slate-200/50 flex items-center justify-between text-[10px] font-bold text-amber-600 tracking-wider uppercase">
               <span>STATUS: YENİ / TƏSDİQ</span>
               <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-500"></i>
             </div>
@@ -571,13 +617,13 @@
 
           <!-- Card 4: Ümumi Aktiv Dövriyyə -->
           <div
-            class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs stripe-top-dark flex flex-col justify-between">
+            class="glass-card glass-card-hover p-5 stripe-top-dark flex flex-col justify-between">
             <div>
               <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">ÜMUMİ AKTİV DÖVRİYYƏ</div>
               <div id="stat-dovriyye-val" class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">0.00 ₼</div>
             </div>
             <div
-              class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-slate-400 tracking-wider uppercase">
+              class="mt-4 pt-3 border-t border-slate-200/50 flex items-center justify-between text-[10px] font-bold text-slate-400 tracking-wider uppercase">
               <span>LƏĞVLƏR DAXİL DEYİL</span>
               <i data-lucide="trending-up" class="w-3.5 h-3.5 text-slate-400"></i>
             </div>
@@ -591,7 +637,7 @@
 
           <!-- Card 1: Qapıda Ödəniş Dövriyyəsi -->
           <div
-            class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs stripe-left-green flex flex-col justify-between">
+            class="glass-card glass-card-hover p-6 stripe-left-green flex flex-col justify-between">
             <div>
               <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">QAPIDA ÖDƏNİŞ DÖVRİYYƏSİ</div>
               <div id="stat-qapida-val" class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">0.00 ₼</div>
@@ -605,56 +651,56 @@
 
           <!-- Card 2: Onlayn Ödəniş Dövriyyəsi -->
           <div
-            class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs stripe-left-navy flex flex-col justify-between">
+            class="glass-card glass-card-hover p-6 stripe-left-navy flex flex-col justify-between">
             <div>
               <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">ONLAYN ÖDƏNİŞ DÖVRİYYƏSİ</div>
               <div id="stat-onlayn-val" class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">0.00 ₼</div>
             </div>
             <div
-              class="mt-6 pt-3 border-t border-slate-100 text-[10.5px] font-bold text-slate-500 uppercase tracking-wide flex items-center justify-between">
+              class="mt-6 pt-3 border-t border-slate-200/50 text-[10.5px] font-bold text-slate-500 uppercase tracking-wide flex items-center justify-between">
               <span>SAYT ÜZƏRİNDƏN KART VƏ YA TAKSİTLƏ EDİLƏN ÖDƏNİŞLƏR</span>
-              <i data-lucide="credit-card" class="w-4 h-4 text-indigo-700"></i>
+              <i data-lucide="credit-card" class="w-4 h-4 text-blue-600"></i>
             </div>
           </div>
 
         </div>
 
 
-        <!-- ROW 3: 3 BOTTOM SUMMARY CARDS (Şəkildəki aşağı 3 kart) -->
+        <!-- ROW 3: 3 BOTTOM SUMMARY CARDS (Glass Kartlar) -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
           <!-- SİFARİŞ SAYI -->
-          <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex items-center justify-between">
+          <div class="glass-card glass-card-hover p-5 flex items-center justify-between">
             <div>
               <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">SİFARİŞ SAYI</div>
               <div id="stat-sifaris-sayi" class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">0</div>
             </div>
             <div
-              class="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-700">
+              class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-50 to-amber-100/80 border border-amber-200/60 flex items-center justify-center text-amber-700 shadow-2xs">
               <i data-lucide="shopping-bag" class="w-6 h-6 stroke-1.5"></i>
             </div>
           </div>
 
           <!-- AKTİV İNVENTAR -->
-          <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex items-center justify-between">
+          <div class="glass-card glass-card-hover p-5 flex items-center justify-between">
             <div>
               <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">AKTİV İNVENTAR</div>
               <div id="stat-inventar-sayi" class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">0</div>
             </div>
             <div
-              class="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-700">
+              class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-50 to-emerald-100/80 border border-emerald-200/60 flex items-center justify-center text-emerald-700 shadow-2xs">
               <i data-lucide="box" class="w-6 h-6 stroke-1.5"></i>
             </div>
           </div>
 
           <!-- MÜŞTƏRİ BAZASI -->
-          <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex items-center justify-between">
+          <div class="glass-card glass-card-hover p-5 flex items-center justify-between">
             <div>
               <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">MÜŞTƏRİ BAZASI</div>
               <div id="stat-musteri-sayi" class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">0</div>
             </div>
             <div
-              class="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-700">
+              class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-50 to-indigo-100/80 border border-indigo-200/60 flex items-center justify-center text-indigo-700 shadow-2xs">
               <i data-lucide="users" class="w-6 h-6 stroke-1.5"></i>
             </div>
           </div>
@@ -662,8 +708,8 @@
         </div>
 
 
-        <!-- RECENT ACTIVITY TABLE (Tez Baxış) -->
-        <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+        <!-- RECENT ACTIVITY TABLE (Glass Kart) -->
+        <div class="glass-card p-6 space-y-4">
           <div class="flex items-center justify-between">
             <div>
               <h3 class="font-bold text-sm text-slate-900 uppercase tracking-wider">Son Gələn Sifarişlər</h3>
@@ -1601,25 +1647,25 @@
 
         <!-- 4 Tax Metric Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+          <div class="glass-card glass-card-hover p-5 border-t-2 border-slate-700">
             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">CƏM DÖVRİYYƏ (HASİLAT)</span>
             <div id="taxCardTotalTurnover" class="text-2xl font-black text-slate-900 mt-2">0.00 ₼</div>
             <div class="text-[10px] text-slate-500 mt-1">Seçilən rüb üzrə faktiki gəlir</div>
           </div>
 
-          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+          <div class="glass-card glass-card-hover p-5 border-t-2 border-emerald-500">
             <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">NAĞDSIZ (KART / E-TİCARƏT)</span>
             <div id="taxCardCardTurnover" class="text-2xl font-black text-emerald-700 mt-2">0.00 ₼</div>
             <div class="text-[10px] text-emerald-600 mt-1">100% rəsmi bank/kart ödənişləri</div>
           </div>
 
-          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+          <div class="glass-card glass-card-hover p-5 border-t-2 border-blue-500">
             <span class="text-[10px] font-bold text-blue-600 uppercase tracking-wider">SİFARİŞ SAYI</span>
             <div id="taxCardOrderCount" class="text-2xl font-black text-blue-900 mt-2">0 ədəd</div>
             <div class="text-[10px] text-slate-500 mt-1">Uğurla tamamlanan satışlar</div>
           </div>
 
-          <div class="bg-gradient-to-br from-emerald-950 to-slate-900 text-white p-5 rounded-2xl shadow-sm">
+          <div class="glass-card glass-card-hover bg-gradient-to-br from-emerald-900/90 to-slate-900/95 text-white p-5 border border-emerald-500/30 shadow-lg">
             <div class="flex items-center justify-between">
               <span class="text-[10px] font-bold text-emerald-300 uppercase tracking-wider">HESABLANAN VERGİ (DVX)</span>
               <span id="taxRateBadge" class="text-[9px] font-black bg-emerald-500/30 text-emerald-300 px-1.5 py-0.5 rounded border border-emerald-400/30">2%</span>
@@ -1718,43 +1764,46 @@
       </section>
 
       <!-- ============================================================ -->
-      <!-- SLIDE 13: CANLI ÇAT DƏSTƏK (LIVE CHAT SUPPORT) -->
+      <!-- SLIDE 13: CANLI ÇAT DƏSTƏK (LIVE CHAT SUPPORT - GLASS REDESIGN) -->
       <!-- ============================================================ -->
       <section id="tab-liveChat" class="tab-pane hidden p-4 sm:p-6 space-y-4 max-w-7xl w-full">
         <div class="flex items-center justify-between">
           <div>
-            <h1 class="text-2xl font-black text-slate-900 tracking-tight">CANLI DƏSTƏK & ÇAT</h1>
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <h1 class="text-2xl font-black text-slate-900 tracking-tight">CANLI DƏSTƏK & ÇAT</h1>
+            </div>
             <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Müştərilərlə Real-Vaxt Ünsiyyət və Operativ Cavablar</p>
           </div>
           <div class="flex items-center gap-2">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100/90 text-emerald-800 border border-emerald-200 shadow-2xs">
               <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> SİSTEM ONLAYNDIR
             </span>
-            <button onclick="loadLiveChatThreads()" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition cursor-pointer" title="Yenilə">
+            <button onclick="loadLiveChatThreads()" class="p-2 glass-card hover:bg-white text-slate-700 transition cursor-pointer shadow-2xs" title="Yenilə">
               <i data-lucide="refresh-cw" class="w-4 h-4"></i>
             </button>
           </div>
         </div>
 
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col md:flex-row h-[680px]">
-          <!-- Left: Threads List -->
-          <div class="w-full md:w-80 border-b md:border-b-0 md:border-r border-slate-200 flex flex-col bg-slate-50/50">
-            <div class="p-3.5 border-b border-slate-200 bg-white">
+        <div class="glass-card shadow-lg overflow-hidden flex flex-col md:flex-row h-[700px] border border-white/70">
+          <!-- Left: Threads List (Glass Column) -->
+          <div class="w-full md:w-80 border-b md:border-b-0 md:border-r border-slate-200/60 flex flex-col bg-white/40 backdrop-blur-xs">
+            <div class="p-3.5 border-b border-slate-200/60 bg-white/50">
               <div class="relative">
                 <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
                 <input type="text" id="liveChatSearch" oninput="filterLiveChatThreads(this.value)" placeholder="Müştəri axtar..." 
-                  class="w-full pl-9 pr-3 py-1.5 bg-slate-100 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:border-black transition">
+                  class="w-full pl-9 pr-3 py-1.5 bg-white/80 border border-slate-200/70 rounded-xl text-xs focus:bg-white focus:outline-none focus:border-slate-900 transition shadow-2xs">
               </div>
             </div>
-            <div id="liveChatThreadsList" class="flex-1 overflow-y-auto divide-y divide-slate-100">
+            <div id="liveChatThreadsList" class="flex-1 overflow-y-auto divide-y divide-slate-100/70">
               <div class="p-8 text-center text-xs text-slate-400">Yüklənir...</div>
             </div>
           </div>
 
-          <!-- Right: Chat Window -->
-          <div id="liveChatConversationPanel" class="flex-1 flex flex-col bg-white">
+          <!-- Right: Chat Window (Glass Panel) -->
+          <div id="liveChatConversationPanel" class="flex-1 flex flex-col bg-white/70 backdrop-blur-sm">
             <div class="flex-1 flex flex-col items-center justify-center text-slate-400 p-8 text-center">
-              <div class="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-300 mb-3">
+              <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-50 to-emerald-50 border border-slate-200/60 flex items-center justify-center text-indigo-400 mb-3 shadow-xs">
                 <i data-lucide="message-circle" class="w-8 h-8"></i>
               </div>
               <h3 class="text-sm font-bold text-slate-700 mb-1">Söhbət Seçilməyib</h3>
@@ -5045,15 +5094,15 @@
       // First time rendering or thread switched: full render
       panel.innerHTML = `
         <!-- Header -->
-        <div class="p-3.5 px-5 border-b border-slate-200 flex items-center justify-between bg-white shrink-0">
+        <div class="p-3.5 px-5 border-b border-slate-200/60 flex items-center justify-between bg-white/60 backdrop-blur-xs shrink-0">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-sm text-slate-800 uppercase">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-slate-900 to-slate-800 flex items-center justify-center font-bold text-sm text-amber-400 uppercase shadow-xs">
               ${escapeHtml((thread.customerName || 'M')[0])}
             </div>
             <div>
               <div class="font-bold text-xs text-slate-900 flex items-center gap-2">
                 <span>${escapeHtml(thread.customerName || 'Müştəri')}</span>
-                ${thread.customerEmail ? `<span class="text-[10px] text-slate-400 font-normal">(${escapeHtml(thread.customerEmail)})</span>` : ''}
+                ${thread.customerEmail ? `<span class="text-[10px] text-slate-500 font-normal">(${escapeHtml(thread.customerEmail)})</span>` : ''}
               </div>
               <div id="chatHeaderStatus" class="text-[10px] flex items-center gap-1.5 mt-0.5">
                 <span class="w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-slate-300'}"></span>
@@ -5076,7 +5125,7 @@
           <div class="flex items-center gap-3">
             <span class="text-[10px] text-slate-400">ID: ${escapeHtml(thread.sessionId || '')}</span>
             <button onclick="deleteLiveChatSession(event, '${escapeHtml(thread.sessionId || '')}')" 
-              class="px-2.5 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 transition text-xs font-semibold flex items-center gap-1 cursor-pointer border border-rose-200"
+              class="px-2.5 py-1 rounded-xl bg-rose-50/90 hover:bg-rose-100 text-rose-600 transition text-xs font-semibold flex items-center gap-1 cursor-pointer border border-rose-200/80 shadow-2xs"
               title="Bu çatı həmişəlik sil">
               <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
               <span>Çatı Sil</span>
@@ -5084,8 +5133,8 @@
           </div>
         </div>
 
-        <!-- Messages Area -->
-        <div id="liveChatMessagesContainer" data-msg-count="${messages.length}" class="flex-1 p-5 overflow-y-auto space-y-3 bg-[#FAF9F6]">
+        <!-- Messages Area (Soft Glass Backdrop) -->
+        <div id="liveChatMessagesContainer" data-msg-count="${messages.length}" class="flex-1 p-5 overflow-y-auto space-y-3 bg-[#FAF9F6]/60 backdrop-blur-2xs">
           ${thread.isClosed ? `
             <div class="p-3 bg-rose-50 border border-rose-200 rounded-xl text-center text-xs text-rose-700 font-medium">
               Bu söhbət müştəri tərəfindən yekunlaşdırılıb. Müştəri yeni söhbət başlatmadan ona cavab yazmaq mümkün deyil.
