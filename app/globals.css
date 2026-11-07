@@ -7,10 +7,12 @@
     --background: #1C0D05;
     --foreground: #ffffff;
     
-    /* Luxury Font Family Bindings */
-    --font-eb-garamond: 'EB Garamond', Garamond, Georgia, serif;
-    --font-fraunces: 'Fraunces', 'Playfair Display', Georgia, serif;
-    --font-instrument: 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    /* Luxury Font Family Bindings (Free Faces Integration) */
+    --font-serif-display: 'Instrument Serif', 'EB Garamond', Georgia, serif;
+    --font-sans-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    --font-eb-garamond: 'Instrument Serif', 'EB Garamond', Garamond, Georgia, serif;
+    --font-fraunces: 'Instrument Serif', 'Fraunces', Georgia, serif;
+    --font-instrument: 'Plus Jakarta Sans', 'Instrument Sans', sans-serif;
     
     /* Horvvalle Dark Atelier Theme Tokens */
     --atelier-bg: #2A1406;
@@ -65,13 +67,18 @@
   body {
     background-color: #FAF7F2;
     color: #1A1517;
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", sans-serif;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden !important;
     max-width: 100vw;
     min-height: 100vh;
     position: relative;
+  }
+
+  h1, h2, .font-serif, .font-display {
+    font-family: 'Instrument Serif', 'EB Garamond', Georgia, serif;
+    letter-spacing: -0.01em;
   }
 
   ::selection {

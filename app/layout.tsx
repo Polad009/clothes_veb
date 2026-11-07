@@ -116,12 +116,12 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           rel="preload"
-          href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..700;1,400..700&family=Fraunces:opsz,wght@9..144,300..900&family=Instrument+Sans:wght@400..700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..700;1,400..700&family=Fraunces:opsz,wght@9..144,300..900&family=Instrument+Sans:wght@400..700&family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
           as="style"
         />
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..700;1,400..700&family=Fraunces:opsz,wght@9..144,300..900&family=Instrument+Sans:wght@400..700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..700;1,400..700&family=Fraunces:opsz,wght@9..144,300..900&family=Instrument+Sans:wght@400..700&family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
         />
         <link rel="icon" type="image/png" sizes="32x32" href="/brand/favicon-32x32.png?v=3" />
         <link rel="icon" type="image/png" sizes="512x512" href="/brand/favicon.png?v=3" />

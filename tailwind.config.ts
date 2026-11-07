@@ -35,19 +35,29 @@ const config: Config = {
       },
       fontFamily: {
         sans: [
+          '"Plus Jakarta Sans"',
           "-apple-system",
           "BlinkMacSystemFont",
-          '"SF Pro Display"',
           '"SF Pro Text"',
           '"Inter"',
-          '"Segoe UI"',
-          "Roboto",
           "sans-serif",
         ],
         display: [
+          '"Instrument Serif"',
+          '"EB Garamond"',
+          "Georgia",
+          "serif",
+        ],
+        serif: [
+          '"Instrument Serif"',
+          '"EB Garamond"',
+          "Georgia",
+          "serif",
+        ],
+        body: [
+          '"Plus Jakarta Sans"',
           "-apple-system",
           "BlinkMacSystemFont",
-          '"SF Pro Display"',
           '"Inter"',
           "sans-serif",
         ],
