@@ -21,46 +21,111 @@
 
   <style>
     :root {
-      --glass-bg: rgba(30, 20, 15, 0.55);
-      --glass-card: rgba(45, 28, 18, 0.45);
-      --glass-card-hover: rgba(65, 40, 25, 0.6);
-      --glass-border: rgba(230, 194, 128, 0.16);
-      --glass-border-light: rgba(255, 255, 255, 0.1);
-      --glass-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
-      --accent-amber: #F59E0B;
-      --accent-gold: #E6C280;
+      --glass-bg: rgba(255, 255, 255, 0.75);
+      --glass-card: rgba(255, 255, 255, 0.78);
+      --glass-card-hover: rgba(255, 255, 255, 0.92);
+      --glass-border: rgba(255, 255, 255, 0.85);
+      --glass-border-subtle: rgba(226, 232, 240, 0.7);
+      --glass-shadow: 0 16px 40px -10px rgba(100, 116, 139, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+      --glass-glow: 0 20px 50px -10px rgba(99, 102, 241, 0.18);
     }
 
+    /* Ambient Liquid Mesh Background */
     body {
-      background: radial-gradient(circle at 50% 0%, #2e170c 0%, #170c06 45%, #0a0503 100%);
-      color: #F8FAFC;
-      font-family: 'Instrument Sans', 'Inter', -apple-system, sans-serif;
+      background-color: #f1f5f9;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(199, 210, 254, 0.6) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(254, 215, 170, 0.5) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(204, 251, 241, 0.6) 0px, transparent 50%),
+        radial-gradient(at 0% 100%, rgba(251, 207, 232, 0.5) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(224, 231, 255, 0.4) 0px, transparent 60%);
+      color: #0f172a;
+      font-family: 'Plus Jakarta Sans', 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       -webkit-font-smoothing: antialiased;
       background-attachment: fixed;
       min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
     }
 
-    /* Reference Image 3: Warm Translucent Glass Panels */
+    /* Floating Liquid Blobs Animation */
+    .liquid-blob {
+      position: fixed;
+      border-radius: 9999px;
+      filter: blur(80px);
+      opacity: 0.6;
+      pointer-events: none;
+      z-index: 0;
+      mix-blend-mode: multiply;
+      animation: floatLiquid 20s infinite alternate ease-in-out;
+    }
+
+    .liquid-blob-1 {
+      top: -10%;
+      left: 15%;
+      width: 480px;
+      height: 480px;
+      background: radial-gradient(circle, rgba(165, 180, 252, 0.8) 0%, rgba(199, 210, 254, 0.2) 70%);
+      animation-duration: 18s;
+    }
+
+    .liquid-blob-2 {
+      top: 40%;
+      right: -5%;
+      width: 520px;
+      height: 520px;
+      background: radial-gradient(circle, rgba(253, 186, 116, 0.7) 0%, rgba(254, 215, 170, 0.2) 70%);
+      animation-duration: 22s;
+      animation-delay: -5s;
+    }
+
+    .liquid-blob-3 {
+      bottom: -10%;
+      left: 25%;
+      width: 550px;
+      height: 550px;
+      background: radial-gradient(circle, rgba(153, 246, 228, 0.75) 0%, rgba(204, 251, 241, 0.2) 70%);
+      animation-duration: 26s;
+      animation-delay: -10s;
+    }
+
+    @keyframes floatLiquid {
+      0% {
+        transform: translate(0px, 0px) scale(1) rotate(0deg);
+      }
+      33% {
+        transform: translate(60px, -40px) scale(1.08) rotate(6deg);
+      }
+      66% {
+        transform: translate(-40px, 50px) scale(0.94) rotate(-6deg);
+      }
+      100% {
+        transform: translate(30px, 20px) scale(1.04) rotate(4deg);
+      }
+    }
+
+    /* True Liquid Glass Panels */
     .glass-card {
       background: var(--glass-card);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
       border: 1px solid var(--glass-border);
       box-shadow: var(--glass-shadow);
       border-radius: 1.5rem;
       transform: translateZ(0);
       will-change: transform;
-      color: #F8FAFC;
+      color: #0f172a;
+      position: relative;
     }
 
     .glass-card-hover {
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .glass-card-hover:hover {
-      transform: translateY(-2px);
+      transform: translateY(-3px);
       background: var(--glass-card-hover);
-      border-color: rgba(230, 194, 128, 0.3);
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.55), 0 0 20px rgba(245, 158, 11, 0.15);
+      border-color: rgba(255, 255, 255, 1);
+      box-shadow: 0 22px 50px -10px rgba(100, 116, 139, 0.2), 0 0 0 1px #fff inset;
     }
 
     /* Collapsible Sidebar Styles */
@@ -99,16 +164,16 @@
     }
 
     ::-webkit-scrollbar-track {
-      background: rgba(15, 8, 4, 0.6);
+      background: rgba(241, 245, 249, 0.6);
     }
 
     ::-webkit-scrollbar-thumb {
-      background: rgba(230, 194, 128, 0.25);
+      background: #cbd5e1;
       border-radius: 9999px;
     }
 
     ::-webkit-scrollbar-thumb:hover {
-      background: rgba(230, 194, 128, 0.45);
+      background: #94a3b8;
     }
 
     @keyframes shake {
@@ -132,33 +197,33 @@
       animation: shake 0.4s ease-in-out;
     }
 
-    /* Luxury Warm Amber Glass Stripes */
+    /* Vibrant Multi-Color Glass Stripes */
     .stripe-top-green {
-      border-top: 3px solid #10b981;
-      box-shadow: 0 10px 30px -5px rgba(16, 185, 129, 0.25), var(--glass-shadow);
+      border-top: 3.5px solid #10b981;
+      box-shadow: 0 12px 30px -5px rgba(16, 185, 129, 0.15), var(--glass-shadow);
     }
 
     .stripe-top-navy {
-      border-top: 3px solid #38bdf8;
-      box-shadow: 0 10px 30px -5px rgba(56, 189, 248, 0.25), var(--glass-shadow);
+      border-top: 3.5px solid #3b82f6;
+      box-shadow: 0 12px 30px -5px rgba(59, 130, 246, 0.15), var(--glass-shadow);
     }
 
     .stripe-top-amber {
-      border-top: 3px solid #f59e0b;
-      box-shadow: 0 10px 30px -5px rgba(245, 158, 11, 0.25), var(--glass-shadow);
+      border-top: 3.5px solid #f59e0b;
+      box-shadow: 0 12px 30px -5px rgba(245, 158, 11, 0.15), var(--glass-shadow);
     }
 
     .stripe-top-dark {
-      border-top: 3px solid #d97706;
-      box-shadow: 0 10px 30px -5px rgba(217, 119, 6, 0.25), var(--glass-shadow);
+      border-top: 3.5px solid #0f172a;
+      box-shadow: 0 12px 30px -5px rgba(15, 23, 42, 0.15), var(--glass-shadow);
     }
 
     .stripe-left-green {
-      border-left: 4px solid #10b981;
+      border-left: 4.5px solid #10b981;
     }
 
     .stripe-left-navy {
-      border-left: 4px solid #38bdf8;
+      border-left: 4.5px solid #3b82f6;
     }
 
     /* Barcode lines styling */
@@ -251,7 +316,12 @@
   </style>
 </head>
 
-<body class="min-h-screen antialiased flex flex-col">
+<body class="min-h-screen antialiased flex flex-col relative">
+
+  <!-- Ambient Liquid Glass Blobs for Dynamic Glassmorphic Refraction -->
+  <div class="liquid-blob liquid-blob-1"></div>
+  <div class="liquid-blob liquid-blob-2"></div>
+  <div class="liquid-blob liquid-blob-3"></div>
 
   <!-- ============================================================ -->
   <!-- 1. LOGIN SCREEN (Glassmorphism Split Layout — Şəkildəki Dizayn) -->
@@ -360,39 +430,38 @@
     <!-- ---------------------------------------------------- -->
     <!-- LEFT SIDEBAR (Şüşəli Glass Naviqasiya Paneli) -->
     <!-- ---------------------------------------------------- -->
-    <aside id="adminSidebar" class="fixed inset-y-0 left-0 z-40 w-72 md:w-64 glass-card border-r border-[rgba(230,194,128,0.18)] m-0 md:m-3 md:mb-3 md:rounded-3xl flex flex-col shrink-0 transform -translate-x-full md:translate-x-0 md:static transition-all duration-300 ease-in-out shadow-2xl overflow-hidden">
+    <aside id="adminSidebar" class="fixed inset-y-0 left-0 z-40 w-72 md:w-64 glass-card border-r border-white/80 m-0 md:m-3 md:mb-3 md:rounded-3xl flex flex-col shrink-0 transform -translate-x-full md:translate-x-0 md:static transition-all duration-300 ease-in-out shadow-2xl overflow-hidden">
 
       <!-- Logo Header with Collapse Toggle & Mobile Close Button -->
-      <div class="h-16 sm:h-20 flex items-center justify-between border-b border-white/10 px-4 bg-black/20 backdrop-blur-md">
+      <div class="h-16 sm:h-20 flex items-center justify-between border-b border-slate-200/60 px-4 bg-white/40 backdrop-blur-md">
         <!-- Logo for Expanded View -->
         <div id="sidebarLogoExpanded" class="flex items-center gap-2 overflow-hidden">
           <img 
-            src="/brand/horwalle_logo_transparent.png" 
+            src="/brand/logo-horizontal-black.png?v=3" 
             alt="HORWALLE" 
-            class="h-7 w-auto object-contain brightness-0 invert drop-shadow-[0_2px_8px_rgba(245,158,11,0.3)] transition-transform duration-300 hover:scale-[1.03]" 
-            onerror="this.src='/brand/horwalle_official_logo.png'"
+            class="h-7 max-w-[170px] object-contain transition-transform duration-300 hover:scale-[1.02]" 
+            onerror="this.src='/brand/horwalle_logo_black.png'"
           />
         </div>
 
         <!-- Logo for Collapsed View (Minimal Monogram Icon) -->
         <div id="sidebarLogoCollapsed" class="hidden mx-auto">
           <img 
-            src="/brand/icon-light.png" 
+            src="/brand/favicon.png" 
             alt="H" 
             class="h-7 w-7 object-contain drop-shadow" 
-            onerror="this.src='/brand/favicon.png'"
           />
         </div>
 
         <!-- Toggle Collapse Button (Desktop) & Close Button (Mobile) -->
         <div class="flex items-center gap-1">
           <button type="button" onclick="toggleSidebarCollapse()" 
-            class="hidden md:flex p-1.5 rounded-xl text-stone-400 hover:text-amber-300 hover:bg-white/10 transition cursor-pointer" 
+            class="hidden md:flex p-1.5 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-200/50 transition cursor-pointer" 
             title="Paneli kiçilt / genişləndir">
             <i id="sidebarCollapseIcon" data-lucide="chevron-left" class="w-4 h-4 transition-transform duration-300"></i>
           </button>
           <button type="button" onclick="closeMobileSidebar()" 
-            class="md:hidden p-1.5 rounded-xl text-stone-400 hover:text-white hover:bg-white/10 transition cursor-pointer" 
+            class="md:hidden p-1.5 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-200/50 transition cursor-pointer" 
             aria-label="Menyunu Bağla">
             <i data-lucide="x" class="w-5 h-5"></i>
           </button>
@@ -405,140 +474,140 @@
         <!-- 1. DASHBOARD (Primary Active Tab) -->
         <div>
           <button onclick="switchTab('dashboard')" id="nav-dashboard"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition bg-gradient-to-r from-amber-600/80 to-amber-700/80 text-white shadow-[0_4px_15px_rgba(217,119,6,0.3)] hover:shadow-[0_6px_20px_rgba(217,119,6,0.4)] cursor-pointer">
-            <i data-lucide="layout-grid" class="w-4 h-4 text-amber-200 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-md hover:shadow-lg cursor-pointer">
+            <i data-lucide="layout-grid" class="w-4 h-4 text-indigo-400 shrink-0"></i>
             <span class="nav-label">DASHBOARD</span>
           </button>
         </div>
 
         <!-- 2 & 3. KATALOQ İDARƏETMƏSİ -->
         <div class="space-y-1">
-          <div class="nav-section-title text-[10px] font-bold text-stone-400 uppercase tracking-wider px-3 mb-1.5 flex items-center justify-between">
+          <div class="nav-section-title text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-1.5 flex items-center justify-between">
             <span>KATALOQ İDARƏETMƏSİ</span>
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
           </div>
           <button onclick="switchTab('products')" id="nav-products"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-stone-300 hover:text-white hover:bg-white/10 transition cursor-pointer">
-            <i data-lucide="package" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
+            <i data-lucide="package" class="w-4 h-4 text-emerald-600 shrink-0"></i>
             <span class="nav-label">Məhsul Portfeli</span>
             <span id="badge-products-count"
-              class="nav-badge ml-auto text-[10px] font-bold bg-white/10 border border-white/15 text-stone-200 px-2 py-0.5 rounded-full">0</span>
+              class="nav-badge ml-auto text-[10px] font-bold bg-white/80 border border-slate-200/60 text-slate-700 px-2 py-0.5 rounded-full shadow-2xs">0</span>
           </button>
           <button onclick="switchTab('categories')" id="nav-categories"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-stone-300 hover:text-white hover:bg-white/10 transition cursor-pointer">
-            <i data-lucide="layers" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
+            <i data-lucide="layers" class="w-4 h-4 text-emerald-600 shrink-0"></i>
             <span class="nav-label">Kateqoriyalar</span>
           </button>
         </div>
 
         <!-- 4 & 5. MƏZMUN -->
         <div class="space-y-1">
-          <div class="nav-section-title text-[10px] font-bold text-stone-400 uppercase tracking-wider px-3 mb-1.5 flex items-center justify-between">
+          <div class="nav-section-title text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-1.5 flex items-center justify-between">
             <span>MƏZMUN</span>
-            <span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
           </div>
           <button onclick="switchTab('staticPages')" id="nav-staticPages"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-stone-300 hover:text-white hover:bg-white/10 transition cursor-pointer">
-            <i data-lucide="file-text" class="w-4 h-4 text-sky-400 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
+            <i data-lucide="file-text" class="w-4 h-4 text-blue-500 shrink-0"></i>
             <span class="nav-label">Statik Səhifələr</span>
           </button>
           <button onclick="switchTab('about')" id="nav-about"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-stone-300 hover:text-white hover:bg-white/10 transition cursor-pointer">
-            <i data-lucide="info" class="w-4 h-4 text-sky-400 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
+            <i data-lucide="info" class="w-4 h-4 text-blue-500 shrink-0"></i>
             <span class="nav-label">Haqqımızda</span>
           </button>
         </div>
 
         <!-- 6, 7, 8, 9. SATIŞ & LOYALLIQ -->
         <div class="space-y-1">
-          <div class="nav-section-title text-[10px] font-bold text-stone-400 uppercase tracking-wider px-3 mb-1.5 flex items-center justify-between">
+          <div class="nav-section-title text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-1.5 flex items-center justify-between">
             <span>SATIŞ & LOYALLIQ</span>
-            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
           </div>
           <button onclick="switchTab('orders')" id="nav-orders"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-stone-300 hover:text-white hover:bg-white/10 transition cursor-pointer">
-            <i data-lucide="shopping-bag" class="w-4 h-4 text-amber-400 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
+            <i data-lucide="shopping-bag" class="w-4 h-4 text-amber-500 shrink-0"></i>
             <span class="nav-label">Onlayn Sifarişlər</span>
             <span id="badge-orders-count"
-              class="nav-badge ml-auto text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full">0</span>
+              class="nav-badge ml-auto text-[10px] font-bold bg-amber-100/90 text-amber-900 border border-amber-200/80 px-2 py-0.5 rounded-full shadow-2xs">0</span>
           </button>
           <button onclick="switchTab('customers')" id="nav-customers"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-stone-300 hover:text-white hover:bg-white/10 transition cursor-pointer">
-            <i data-lucide="users" class="w-4 h-4 text-indigo-400 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
+            <i data-lucide="users" class="w-4 h-4 text-indigo-500 shrink-0"></i>
             <span class="nav-label">Müştəri Bazası</span>
           </button>
           <button onclick="switchTab('loyalty')" id="nav-loyalty"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-stone-300 hover:text-white hover:bg-white/10 transition cursor-pointer">
-            <i data-lucide="gem" class="w-4 h-4 text-purple-400 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
+            <i data-lucide="gem" class="w-4 h-4 text-purple-500 shrink-0"></i>
             <span class="nav-label">Loyallıq Terminalı</span>
           </button>
           <button onclick="switchTab('promos')" id="nav-promos"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-stone-300 hover:text-white hover:bg-white/10 transition cursor-pointer">
-            <i data-lucide="tag" class="w-4 h-4 text-rose-400 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
+            <i data-lucide="tag" class="w-4 h-4 text-rose-500 shrink-0"></i>
             <span class="nav-label">Reklam Kodları</span>
           </button>
           <button onclick="switchTab('broadcast')" id="nav-broadcast"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-stone-300 hover:text-white hover:bg-white/10 transition cursor-pointer">
-            <i data-lucide="mail" class="w-4 h-4 text-amber-400 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
+            <i data-lucide="mail" class="w-4 h-4 text-amber-500 shrink-0"></i>
             <span class="nav-label">Kütləvi E-poçt & Kampaniya</span>
           </button>
           <button onclick="switchTab('liveChat')" id="nav-liveChat"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-stone-300 hover:text-white hover:bg-white/10 transition cursor-pointer">
-            <i data-lucide="message-circle" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
+            <i data-lucide="message-circle" class="w-4 h-4 text-emerald-500 shrink-0"></i>
             <span class="nav-label">Canlı Çat Dəstək</span>
-            <span id="badge-livechat-count" class="nav-badge ml-auto text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full hidden">0</span>
+            <span id="badge-livechat-count" class="nav-badge ml-auto text-[10px] font-bold bg-emerald-100/90 text-emerald-900 border border-emerald-200/80 px-2 py-0.5 rounded-full hidden shadow-2xs">0</span>
           </button>
         </div>
 
         <!-- 10. OFLAYN MAĞAZA -->
         <div class="space-y-1">
-          <div class="nav-section-title text-[10px] font-bold text-stone-400 uppercase tracking-wider px-3 mb-1.5 flex items-center justify-between">
+          <div class="nav-section-title text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-1.5 flex items-center justify-between">
             <span>OFLAYN MAĞAZA</span>
             <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
           </div>
           <button onclick="switchTab('posBarcode')" id="nav-posBarcode"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-stone-300 hover:text-white hover:bg-white/10 transition cursor-pointer">
-            <i data-lucide="scan-barcode" class="w-4 h-4 text-cyan-400 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
+            <i data-lucide="scan-barcode" class="w-4 h-4 text-cyan-600 shrink-0"></i>
             <span class="nav-label">Barkod Skaner</span>
           </button>
           <button onclick="switchTab('posReceipt')" id="nav-posReceipt"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-stone-300 hover:text-white hover:bg-white/10 transition cursor-pointer">
-            <i data-lucide="receipt" class="w-4 h-4 text-cyan-400 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
+            <i data-lucide="receipt" class="w-4 h-4 text-cyan-600 shrink-0"></i>
             <span class="nav-label">Satış Təsdiqi</span>
           </button>
         </div>
 
         <!-- MALİYYƏ VƏ VERGİ HESABATI (AR DVX UYĞUN) -->
-        <div class="space-y-1 pt-2 border-t border-white/10">
-          <div class="nav-section-title text-[10px] font-bold text-stone-400 uppercase tracking-wider px-3 mb-1.5 flex items-center justify-between">
+        <div class="space-y-1 pt-2 border-t border-slate-200/60">
+          <div class="nav-section-title text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-1.5 flex items-center justify-between">
             <span>MALİYYƏ & VERGİ</span>
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
           </div>
           <button onclick="switchTab('taxReports')" id="nav-taxReports"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-stone-300 hover:text-white hover:bg-white/10 transition cursor-pointer">
-            <i data-lucide="landmark" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
+            <i data-lucide="landmark" class="w-4 h-4 text-emerald-600 shrink-0"></i>
             <span class="nav-label">Vergi & Rüblük Hesabat</span>
-            <span class="nav-badge ml-auto text-[9px] font-bold bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded border border-emerald-500/30">AR DVX</span>
+            <span class="nav-badge ml-auto text-[9px] font-bold bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded border border-emerald-200 shadow-2xs">AR DVX</span>
           </button>
         </div>
 
         <!-- ƏLAVƏ: FƏRDİ ÇAP STUDİYASI (POD) -->
-        <div class="space-y-1 pt-2 border-t border-white/10">
+        <div class="space-y-1 pt-2 border-t border-slate-200/60">
           <button onclick="switchTab('podOrders')" id="nav-podOrders"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-stone-300 hover:text-white hover:bg-white/10 transition cursor-pointer">
-            <i data-lucide="sparkles" class="w-4 h-4 text-indigo-400 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
+            <i data-lucide="sparkles" class="w-4 h-4 text-indigo-500 shrink-0"></i>
             <span class="nav-label">Fərdi Çap (POD)</span>
             <span id="badge-pod-count"
-              class="nav-badge ml-auto text-[10px] font-bold bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full">0</span>
+              class="nav-badge ml-auto text-[10px] font-bold bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full shadow-2xs">0</span>
           </button>
         </div>
 
       </div>
 
       <!-- SİSTEMDƏN ÇIXIŞ BUTTON -->
-      <div class="p-3 border-t border-white/10 bg-black/20 backdrop-blur-md">
+      <div class="p-3 border-t border-slate-200/60 bg-white/40 backdrop-blur-md">
         <button onclick="handleLogout()"
-          class="w-full py-2.5 px-3 rounded-xl border border-rose-500/30 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20 font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-xs">
+          class="w-full py-2.5 px-3 rounded-xl border border-rose-200/80 bg-rose-50/70 text-rose-600 hover:bg-rose-100 font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs">
           <i data-lucide="log-out" class="w-3.5 h-3.5 shrink-0"></i>
           <span class="nav-label">SİSTEMDƏN ÇIXIŞ</span>
         </button>
@@ -553,33 +622,33 @@
     <main class="flex-1 flex flex-col overflow-y-auto">
 
       <!-- TOP BAR (Glass Header) -->
-      <header class="h-16 sm:h-20 glass-card border-b border-[rgba(230,194,128,0.18)] mx-3 sm:mx-6 mt-3 px-4 sm:px-8 flex items-center justify-between sticky top-3 z-30 shadow-xl">
+      <header class="h-16 sm:h-20 glass-card border-b border-white/80 mx-3 sm:mx-6 mt-3 px-4 sm:px-8 flex items-center justify-between sticky top-3 z-30 shadow-md">
         <div class="flex items-center gap-3">
-          <button id="mobileSidebarToggle" type="button" onclick="toggleMobileSidebar()" class="md:hidden p-2 rounded-xl bg-white/10 hover:bg-white/20 text-stone-200 transition cursor-pointer" aria-label="Menyu">
+          <button id="mobileSidebarToggle" type="button" onclick="toggleMobileSidebar()" class="md:hidden p-2 rounded-xl bg-white/70 hover:bg-white text-slate-800 transition cursor-pointer shadow-2xs" aria-label="Menyu">
             <i data-lucide="menu" class="w-5 h-5"></i>
           </button>
           <div class="flex items-center gap-2.5">
-            <span class="w-2.5 h-2.5 rounded-full bg-gradient-to-tr from-amber-400 to-amber-600 shadow-[0_0_10px_rgba(245,158,11,0.5)]"></span>
-            <h2 class="text-xs sm:text-sm font-black text-white tracking-widest uppercase">HORWALLE ATELIER · ANALİTİKA</h2>
+            <span class="w-2.5 h-2.5 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-500 shadow-sm"></span>
+            <h2 class="text-xs sm:text-sm font-black text-slate-900 tracking-wider uppercase">HORWALLE ATELIER · ANALİTİKA</h2>
           </div>
         </div>
 
         <!-- Admin Profile Pill -->
         <div class="flex items-center gap-3 sm:gap-4">
           <a href="/" target="_blank"
-            class="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-stone-200 hover:text-white bg-white/10 hover:bg-white/15 border border-white/15 px-4 py-1.5 rounded-full transition cursor-pointer">
-            <i data-lucide="external-link" class="w-3.5 h-3.5 text-amber-400"></i>
+            class="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-black bg-white/80 hover:bg-white border border-white/90 px-4 py-1.5 rounded-full transition shadow-2xs cursor-pointer">
+            <i data-lucide="external-link" class="w-3.5 h-3.5 text-indigo-500"></i>
             <span>Mağazaya Keç</span>
           </a>
 
-          <div class="flex items-center gap-2.5 bg-black/30 border border-white/10 shadow-lg rounded-full px-4 py-1.5">
-            <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-amber-600 to-amber-800 text-white flex items-center justify-center font-bold text-xs shadow-md">
-              <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-200"></i>
+          <div class="flex items-center gap-2.5 bg-white/80 border border-white/90 shadow-2xs rounded-full px-4 py-1.5">
+            <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-slate-900 to-slate-800 text-white flex items-center justify-center font-bold text-xs shadow-xs">
+              <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-400"></i>
             </div>
             <div class="text-left pr-1">
-              <div class="text-xs font-bold text-white leading-tight">Polad · Baş Admin</div>
-              <div class="text-[9.5px] font-bold text-emerald-400 flex items-center gap-1 leading-none mt-0.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> PORTAL AKTİV
+              <div class="text-xs font-bold text-slate-900 leading-tight">Polad · Baş Admin</div>
+              <div class="text-[9.5px] font-bold text-emerald-600 flex items-center gap-1 leading-none mt-0.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> PORTAL AKTİV
               </div>
             </div>
           </div>
@@ -592,58 +661,58 @@
       <!-- ============================================================ -->
       <section id="tab-dashboard" class="tab-pane p-6 sm:p-8 space-y-6 max-w-7xl w-full">
 
-        <!-- Header & Date Filter Toolbar (Image 3 Inspiration) -->
+        <!-- Header & Date Filter Toolbar -->
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
-            <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">İDARƏETMƏ PANELİ</h1>
-            <p class="text-xs font-bold text-amber-300/80 tracking-wider uppercase mt-1">ANALİTİKA VƏ SATIŞ HESABATI</p>
+            <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">İDARƏETMƏ PANELİ</h1>
+            <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">ANALİTİKA VƏ SATIŞ HESABATI</p>
           </div>
 
-          <!-- Filter Toolbar (Image 3 Smooth Frosted Pills) -->
+          <!-- Filter Toolbar -->
           <div class="flex flex-wrap items-center gap-2 text-xs">
             <!-- GÜN / HƏFTƏ / AY Pills -->
-            <div class="glass-card p-1 rounded-2xl flex items-center gap-1 border border-white/10 shadow-lg bg-black/30">
+            <div class="glass-card p-1 rounded-2xl flex items-center gap-1 border border-white/80 shadow-xs">
               <button onclick="setDateRange('gun')" id="filter-gun"
-                class="filter-range-btn px-3 py-1.5 rounded-xl font-bold text-stone-300 hover:text-white transition cursor-pointer">GÜN</button>
+                class="filter-range-btn px-3 py-1.5 rounded-xl font-bold text-slate-600 hover:text-black transition cursor-pointer">GÜN</button>
               <button onclick="setDateRange('hefte')" id="filter-hefte"
-                class="filter-range-btn px-3 py-1.5 rounded-xl font-bold text-stone-300 hover:text-white transition cursor-pointer">HƏFTƏ</button>
+                class="filter-range-btn px-3 py-1.5 rounded-xl font-bold text-slate-600 hover:text-black transition cursor-pointer">HƏFTƏ</button>
               <button onclick="setDateRange('ay')" id="filter-ay"
-                class="filter-range-btn px-3 py-1.5 rounded-xl font-bold bg-amber-500 text-stone-950 shadow-md cursor-pointer">AY</button>
+                class="filter-range-btn px-3 py-1.5 rounded-xl font-bold bg-slate-900 text-white shadow-xs cursor-pointer">AY</button>
             </div>
 
             <!-- Date range pickers -->
             <div
-              class="glass-card flex items-center gap-1 px-3 py-1.5 text-stone-300 shadow-md border border-white/10 bg-black/30">
+              class="glass-card flex items-center gap-1 px-3 py-1.5 text-slate-600 shadow-xs">
               <input type="date" id="startDatePicker"
-                class="bg-transparent text-xs text-stone-200 outline-none cursor-pointer">
-              <span class="text-stone-500 font-bold">-</span>
+                class="bg-transparent text-xs text-slate-800 outline-none cursor-pointer">
+              <span class="text-slate-400 font-bold">-</span>
               <input type="date" id="endDatePicker"
-                class="bg-transparent text-xs text-stone-200 outline-none cursor-pointer">
+                class="bg-transparent text-xs text-slate-800 outline-none cursor-pointer">
             </div>
 
             <!-- TƏTBİQ ET Button -->
             <button onclick="applyDateFilter()"
-              class="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 active:scale-98 text-stone-950 rounded-xl font-extrabold text-xs uppercase tracking-wider transition shadow-[0_4px_15px_rgba(245,158,11,0.3)] cursor-pointer">
+              class="px-4 py-2 bg-gradient-to-r from-slate-900 to-slate-800 hover:from-black hover:to-neutral-900 active:scale-98 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition shadow-sm hover:shadow-md cursor-pointer">
               TƏTBİQ ET
             </button>
           </div>
         </div>
 
 
-        <!-- ROW 1: 4 STATUS / CASH FLOW CARDS (Image 3 Glassy Warm Cards) -->
+        <!-- ROW 1: 4 STATUS / CASH FLOW CARDS -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
           <!-- Card 1: Kassa (Tamamlanmış) -->
           <div
             class="glass-card glass-card-hover p-5 stripe-top-green flex flex-col justify-between">
             <div>
-              <div class="text-[11px] font-bold text-stone-400 uppercase tracking-wider">KASSA (TAMAMLANMIŞ)</div>
-              <div id="stat-kassa-val" class="text-2xl sm:text-3xl font-black text-white mt-2">0.00 ₼</div>
+              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">KASSA (TAMAMLANMIŞ)</div>
+              <div id="stat-kassa-val" class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">0.00 ₼</div>
             </div>
             <div
-              class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-[10px] font-bold text-emerald-400 tracking-wider uppercase">
+              class="mt-4 pt-3 border-t border-slate-200/50 flex items-center justify-between text-[10px] font-bold text-emerald-600 tracking-wider uppercase">
               <span>STATUS: ÇATDIRILDI / ÖDƏNİLDİ</span>
-              <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-500"></i>
             </div>
           </div>
 
@@ -651,13 +720,13 @@
           <div
             class="glass-card glass-card-hover p-5 stripe-top-navy flex flex-col justify-between">
             <div>
-              <div class="text-[11px] font-bold text-stone-400 uppercase tracking-wider">KURYERDƏ (YOLDA)</div>
-              <div id="stat-kuryer-val" class="text-2xl sm:text-3xl font-black text-white mt-2">0.00 ₼</div>
+              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">KURYERDƏ (YOLDA)</div>
+              <div id="stat-kuryer-val" class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">0.00 ₼</div>
             </div>
             <div
-              class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-[10px] font-bold text-sky-400 tracking-wider uppercase">
+              class="mt-4 pt-3 border-t border-slate-200/50 flex items-center justify-between text-[10px] font-bold text-blue-600 tracking-wider uppercase">
               <span>STATUS: KURYERƏ VERİLDİ</span>
-              <i data-lucide="truck" class="w-3.5 h-3.5 text-sky-400"></i>
+              <i data-lucide="truck" class="w-3.5 h-3.5 text-blue-500"></i>
             </div>
           </div>
 
@@ -665,13 +734,13 @@
           <div
             class="glass-card glass-card-hover p-5 stripe-top-amber flex flex-col justify-between">
             <div>
-              <div class="text-[11px] font-bold text-stone-400 uppercase tracking-wider">GÖZLƏMƏDƏ (YENİ)</div>
-              <div id="stat-gozleme-val" class="text-2xl sm:text-3xl font-black text-white mt-2">0.00 ₼</div>
+              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">GÖZLƏMƏDƏ (YENİ)</div>
+              <div id="stat-gozleme-val" class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">0.00 ₼</div>
             </div>
             <div
-              class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-[10px] font-bold text-amber-400 tracking-wider uppercase">
+              class="mt-4 pt-3 border-t border-slate-200/50 flex items-center justify-between text-[10px] font-bold text-amber-600 tracking-wider uppercase">
               <span>STATUS: YENİ / TƏSDİQ</span>
-              <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-400"></i>
+              <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-500"></i>
             </div>
           </div>
 
@@ -679,33 +748,33 @@
           <div
             class="glass-card glass-card-hover p-5 stripe-top-dark flex flex-col justify-between">
             <div>
-              <div class="text-[11px] font-bold text-stone-400 uppercase tracking-wider">ÜMUMİ AKTİV DÖVRİYYƏ</div>
-              <div id="stat-dovriyye-val" class="text-2xl sm:text-3xl font-black text-amber-300 mt-2">0.00 ₼</div>
+              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">ÜMUMİ AKTİV DÖVRİYYƏ</div>
+              <div id="stat-dovriyye-val" class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">0.00 ₼</div>
             </div>
             <div
-              class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-[10px] font-bold text-stone-400 tracking-wider uppercase">
+              class="mt-4 pt-3 border-t border-slate-200/50 flex items-center justify-between text-[10px] font-bold text-slate-400 tracking-wider uppercase">
               <span>LƏĞVLƏR DAXİL DEYİL</span>
-              <i data-lucide="trending-up" class="w-3.5 h-3.5 text-amber-400"></i>
+              <i data-lucide="trending-up" class="w-3.5 h-3.5 text-slate-400"></i>
             </div>
           </div>
 
         </div>
 
 
-        <!-- ROW 2: 2 WIDE PAYMENT METHOD CARDS (Şəkildəki sol zolaqlı ödəniş kartları) -->
+        <!-- ROW 2: 2 WIDE PAYMENT METHOD CARDS -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
           <!-- Card 1: Qapıda Ödəniş Dövriyyəsi -->
           <div
             class="glass-card glass-card-hover p-6 stripe-left-green flex flex-col justify-between">
             <div>
-              <div class="text-[11px] font-bold text-stone-400 uppercase tracking-wider">QAPIDA ÖDƏNİŞ DÖVRİYYƏSİ</div>
-              <div id="stat-qapida-val" class="text-2xl sm:text-3xl font-black text-white mt-2">0.00 ₼</div>
+              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">QAPIDA ÖDƏNİŞ DÖVRİYYƏSİ</div>
+              <div id="stat-qapida-val" class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">0.00 ₼</div>
             </div>
             <div
-              class="mt-6 pt-3 border-t border-white/10 text-[10.5px] font-bold text-stone-300 uppercase tracking-wide flex items-center justify-between">
+              class="mt-6 pt-3 border-t border-slate-100 text-[10.5px] font-bold text-slate-500 uppercase tracking-wide flex items-center justify-between">
               <span>QAPIDA NƏĞD VƏ YA KARTLA EDİLƏN ÖDƏNİŞLƏR</span>
-              <i data-lucide="banknote" class="w-4 h-4 text-emerald-400"></i>
+              <i data-lucide="banknote" class="w-4 h-4 text-emerald-600"></i>
             </div>
           </div>
 
@@ -713,13 +782,13 @@
           <div
             class="glass-card glass-card-hover p-6 stripe-left-navy flex flex-col justify-between">
             <div>
-              <div class="text-[11px] font-bold text-stone-400 uppercase tracking-wider">ONLAYN ÖDƏNİŞ DÖVRİYYƏSİ</div>
-              <div id="stat-onlayn-val" class="text-2xl sm:text-3xl font-black text-white mt-2">0.00 ₼</div>
+              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">ONLAYN ÖDƏNİŞ DÖVRİYYƏSİ</div>
+              <div id="stat-onlayn-val" class="text-2xl sm:text-3xl font-black text-slate-900 mt-2">0.00 ₼</div>
             </div>
             <div
-              class="mt-6 pt-3 border-t border-white/10 text-[10.5px] font-bold text-stone-300 uppercase tracking-wide flex items-center justify-between">
+              class="mt-6 pt-3 border-t border-slate-200/50 text-[10.5px] font-bold text-slate-500 uppercase tracking-wide flex items-center justify-between">
               <span>SAYT ÜZƏRİNDƏN KART VƏ YA TAKSİTLƏ EDİLƏN ÖDƏNİŞLƏR</span>
-              <i data-lucide="credit-card" class="w-4 h-4 text-sky-400"></i>
+              <i data-lucide="credit-card" class="w-4 h-4 text-blue-600"></i>
             </div>
           </div>
 
@@ -732,11 +801,11 @@
           <!-- SİFARİŞ SAYI -->
           <div class="glass-card glass-card-hover p-5 flex items-center justify-between">
             <div>
-              <div class="text-[11px] font-bold text-stone-400 uppercase tracking-wider">SİFARİŞ SAYI</div>
-              <div id="stat-sifaris-sayi" class="text-2xl sm:text-3xl font-black text-white mt-1">0</div>
+              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">SİFARİŞ SAYI</div>
+              <div id="stat-sifaris-sayi" class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">0</div>
             </div>
             <div
-              class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-300 shadow-lg">
+              class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-50 to-amber-100/80 border border-amber-200/60 flex items-center justify-center text-amber-700 shadow-2xs">
               <i data-lucide="shopping-bag" class="w-6 h-6 stroke-1.5"></i>
             </div>
           </div>
@@ -744,11 +813,11 @@
           <!-- AKTİV İNVENTAR -->
           <div class="glass-card glass-card-hover p-5 flex items-center justify-between">
             <div>
-              <div class="text-[11px] font-bold text-stone-400 uppercase tracking-wider">AKTİV İNVENTAR</div>
-              <div id="stat-inventar-sayi" class="text-2xl sm:text-3xl font-black text-white mt-1">0</div>
+              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">AKTİV İNVENTAR</div>
+              <div id="stat-inventar-sayi" class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">0</div>
             </div>
             <div
-              class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-300 shadow-lg">
+              class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-50 to-emerald-100/80 border border-emerald-200/60 flex items-center justify-center text-emerald-700 shadow-2xs">
               <i data-lucide="box" class="w-6 h-6 stroke-1.5"></i>
             </div>
           </div>
@@ -756,11 +825,11 @@
           <!-- MÜŞTƏRİ BAZASI -->
           <div class="glass-card glass-card-hover p-5 flex items-center justify-between">
             <div>
-              <div class="text-[11px] font-bold text-stone-400 uppercase tracking-wider">MÜŞTƏRİ BAZASI</div>
-              <div id="stat-musteri-sayi" class="text-2xl sm:text-3xl font-black text-white mt-1">0</div>
+              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">MÜŞTƏRİ BAZASI</div>
+              <div id="stat-musteri-sayi" class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">0</div>
             </div>
             <div
-              class="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-300 shadow-lg">
+              class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-50 to-indigo-100/80 border border-indigo-200/60 flex items-center justify-center text-indigo-700 shadow-2xs">
               <i data-lucide="users" class="w-6 h-6 stroke-1.5"></i>
             </div>
           </div>
@@ -772,11 +841,11 @@
         <div class="glass-card p-6 space-y-4">
           <div class="flex items-center justify-between">
             <div>
-              <h3 class="font-bold text-sm text-white uppercase tracking-wider">Son Gələn Sifarişlər</h3>
-              <p class="text-xs text-stone-400">Canlı sifariş axını və dərhal status təyini</p>
+              <h3 class="font-bold text-sm text-slate-900 uppercase tracking-wider">Son Gələn Sifarişlər</h3>
+              <p class="text-xs text-slate-400">Canlı sifariş axını və dərhal status təyini</p>
             </div>
             <button onclick="switchTab('orders')"
-              class="text-xs font-bold text-amber-300 hover:text-amber-200 hover:underline flex items-center gap-1 cursor-pointer">
+              class="text-xs font-bold text-slate-900 hover:underline flex items-center gap-1 cursor-pointer">
               <span>Hamısına bax</span>
               <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
             </button>
@@ -785,7 +854,7 @@
           <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
               <thead
-                class="bg-black/30 text-amber-200/70 uppercase font-bold text-[10px] tracking-wider border-b border-white/10">
+                class="bg-slate-50 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-slate-100">
                 <tr>
                   <th class="p-3">Sifariş №</th>
                   <th class="p-3">Müştəri</th>
@@ -796,7 +865,7 @@
                   <th class="p-3 text-right">Əməliyyat</th>
                 </tr>
               </thead>
-              <tbody id="dashboardRecentOrders" class="divide-y divide-white/5 text-stone-200">
+              <tbody id="dashboardRecentOrders" class="divide-y divide-slate-100">
                 <!-- Dynamically populated -->
               </tbody>
             </table>
@@ -1945,7 +2014,7 @@
               </div>
               <button type="button" onclick="addNewProductColor()" class="px-3.5 py-1.5 bg-black hover:bg-slate-800 text-white rounded-xl font-bold text-xs cursor-pointer inline-flex items-center gap-1.5 shadow-2xs transition">
                 <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-                <span>+ Yeni Rəng Əlavə Et</span>
+                <span>Yeni Rəng Əlavə Et</span>
               </button>
             </div>
 
@@ -3096,7 +3165,7 @@
           </td>
           <td class="p-3.5 text-right">
             <button onclick="quickAddBonusToPhone('${l.phone}', '${l.fullName}')" class="px-3 py-1 bg-black hover:bg-neutral-800 text-white text-[10px] font-bold rounded-lg cursor-pointer">
-              + Bonus Yüklə
+              Bonus Yüklə
             </button>
           </td>
         </tr>
@@ -3747,7 +3816,7 @@
                 </div>
                 <button type="button" onclick="triggerColorGalleryUpload(${idx})" class="text-[10.5px] bg-slate-900 hover:bg-black text-white px-3 py-1.5 rounded-xl font-bold cursor-pointer inline-flex items-center gap-1.5 shadow-2xs">
                   <i data-lucide="plus" class="w-3 h-3"></i>
-                  <span>+ Foto Əlavə Et</span>
+                  <span>Foto Əlavə Et</span>
                 </button>
               </div>
 
