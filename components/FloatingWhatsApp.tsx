@@ -253,6 +253,8 @@ export function FloatingWhatsApp() {
               }
               lastKnownMsgIdRef.current = lastMsg.id;
               hasInitializedSoundRef.current = true;
+            } else {
+              hasInitializedSoundRef.current = true;
             }
 
             // Sync messages list cleanly preserving pending local optimistic messages
@@ -290,7 +292,7 @@ export function FloatingWhatsApp() {
     };
   }, [sessionId, isChatOpen]);
 
-  // Reset unread count when opening chat & lock body scroll on mobile
+  // Reset unread count when opening chat & lock background scroll on all devices
   useEffect(() => {
     if (isChatOpen) {
       setUnreadCount(0);
@@ -298,14 +300,23 @@ export function FloatingWhatsApp() {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 100);
 
-      // Prevent background page from scrolling when chat is open on mobile
+      // Stop background page scrolling on desktop (Lenis) and mobile (body overflow)
       const originalOverflow = document.body.style.overflow;
-      if (window.innerWidth < 640) {
-        document.body.style.overflow = "hidden";
+      document.body.style.overflow = "hidden";
+
+      if (typeof window !== "undefined" && (window as any).__lenis) {
+        try {
+          (window as any).__lenis.stop();
+        } catch {}
       }
 
       return () => {
         document.body.style.overflow = originalOverflow;
+        if (typeof window !== "undefined" && (window as any).__lenis) {
+          try {
+            (window as any).__lenis.start();
+          } catch {}
+        }
       };
     }
   }, [isChatOpen]);

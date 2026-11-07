@@ -26,6 +26,10 @@ export function playMessageReceivedSound() {
     const ctx = getAudioContext();
     if (!ctx) return;
 
+    if (ctx.state === "suspended") {
+      ctx.resume().catch(() => {});
+    }
+
     const now = ctx.currentTime;
     
     // First note: E5 (659.25 Hz)
@@ -34,7 +38,7 @@ export function playMessageReceivedSound() {
     osc1.type = "sine";
     osc1.frequency.setValueAtTime(659.25, now);
     gain1.gain.setValueAtTime(0, now);
-    gain1.gain.linearRampToValueAtTime(0.18, now + 0.02);
+    gain1.gain.linearRampToValueAtTime(0.28, now + 0.02);
     gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
     osc1.connect(gain1);
     gain1.connect(ctx.destination);
@@ -47,12 +51,12 @@ export function playMessageReceivedSound() {
     osc2.type = "sine";
     osc2.frequency.setValueAtTime(987.77, now + 0.08);
     gain2.gain.setValueAtTime(0, now + 0.08);
-    gain2.gain.linearRampToValueAtTime(0.22, now + 0.1);
-    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+    gain2.gain.linearRampToValueAtTime(0.32, now + 0.1);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
     osc2.connect(gain2);
     gain2.connect(ctx.destination);
     osc2.start(now + 0.08);
-    osc2.stop(now + 0.5);
+    osc2.stop(now + 0.55);
   } catch (e) {
     // Ignore audio autoplay restrictions
   }
