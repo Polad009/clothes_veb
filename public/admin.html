@@ -4879,25 +4879,34 @@
         const timeStr = t.lastMessageAt ? new Date(t.lastMessageAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
         return `
           <div onclick="selectLiveChatSession('${escapeHtml(t.sessionId)}')" 
-            class="p-3.5 flex items-start gap-3 cursor-pointer transition ${isActive ? 'bg-black text-white' : 'hover:bg-slate-100/80 bg-white'}">
+            class="group p-3.5 flex items-start gap-3 cursor-pointer transition relative ${isActive ? 'bg-black text-white' : 'hover:bg-slate-100/80 bg-white'}">
             <div class="relative shrink-0 mt-0.5">
               <div class="w-9 h-9 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-800'} flex items-center justify-center font-bold text-xs uppercase">
                 ${escapeHtml((t.customerName || 'M')[0])}
               </div>
               <span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 ${isActive ? 'border-black' : 'border-white'} ${t.customerOnline ? 'bg-emerald-500' : 'bg-slate-300'}"></span>
             </div>
-            <div class="flex-1 min-w-0">
+            <div class="flex-1 min-w-0 pr-6">
               <div class="flex items-center justify-between gap-1 mb-0.5">
                 <span class="font-bold text-xs truncate ${isActive ? 'text-white' : 'text-slate-900'}">${escapeHtml(t.customerName || 'Müştəri')}</span>
                 <span class="text-[10px] shrink-0 ${isActive ? 'text-white/60' : 'text-slate-400'}">${timeStr}</span>
               </div>
-              <p class="text-xs truncate ${isActive ? 'text-white/80' : 'text-slate-500'}">${escapeHtml(t.lastMessage || 'Söhbət başladıldı')}</p>
+              <p class="text-xs truncate ${isActive ? 'text-white/80' : 'text-slate-500'}">
+                ${t.isClosed ? '<span class="text-rose-400 font-medium">[Bitib] </span>' : ''}${escapeHtml(t.lastMessage || 'Söhbət başladıldı')}
+              </p>
             </div>
-            ${unread > 0 && !isActive ? `
-              <span class="shrink-0 text-[10px] font-bold bg-rose-600 text-white px-1.5 py-0.5 rounded-full">
-                ${unread}
-              </span>
-            ` : ''}
+            <div class="flex items-center gap-1 shrink-0">
+              ${unread > 0 && !isActive ? `
+                <span class="text-[10px] font-bold bg-rose-600 text-white px-1.5 py-0.5 rounded-full">
+                  ${unread}
+                </span>
+              ` : ''}
+              <button onclick="deleteLiveChatSession(event, '${escapeHtml(t.sessionId)}')" 
+                class="p-1 rounded-lg hover:bg-rose-500/20 text-slate-400 hover:text-rose-600 transition" 
+                title="Çatı sil">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
           </div>
         `;
       }).join('');
@@ -5064,11 +5073,24 @@
               </div>
             </div>
           </div>
-          <span class="text-[10px] text-slate-400">ID: ${escapeHtml(thread.sessionId || '')}</span>
+          <div class="flex items-center gap-3">
+            <span class="text-[10px] text-slate-400">ID: ${escapeHtml(thread.sessionId || '')}</span>
+            <button onclick="deleteLiveChatSession(event, '${escapeHtml(thread.sessionId || '')}')" 
+              class="px-2.5 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 transition text-xs font-semibold flex items-center gap-1 cursor-pointer border border-rose-200"
+              title="Bu çatı həmişəlik sil">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              <span>Çatı Sil</span>
+            </button>
+          </div>
         </div>
 
         <!-- Messages Area -->
         <div id="liveChatMessagesContainer" data-msg-count="${messages.length}" class="flex-1 p-5 overflow-y-auto space-y-3 bg-[#FAF9F6]">
+          ${thread.isClosed ? `
+            <div class="p-3 bg-rose-50 border border-rose-200 rounded-xl text-center text-xs text-rose-700 font-medium">
+              Bu söhbət müştəri tərəfindən yekunlaşdırılıb. Müştəri yeni söhbət başlatmadan ona cavab yazmaq mümkün deyil.
+            </div>
+          ` : ''}
           ${messages.map(m => {
             const isAdmin = m.sender === 'admin';
             const timeStr = m.timestamp ? new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
@@ -5088,15 +5110,21 @@
         </div>
 
         <!-- Footer Input -->
-        <form onsubmit="handleSendAdminChatMessage(event)" class="p-3.5 bg-white border-t border-slate-200 flex items-center gap-2 shrink-0">
-          <input type="text" id="adminChatTextInput" oninput="handleAdminTyping()" placeholder="Müştəriyə operativ cavab yazın... (Enter ilə göndər)" 
-            autocomplete="off"
-            class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs focus:bg-white focus:outline-none focus:border-black font-medium transition" />
-          <button type="submit" id="adminChatSendBtn" class="px-5 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
-            <span>Göndər</span>
-            <i data-lucide="send" class="w-3.5 h-3.5"></i>
-          </button>
-        </form>
+        ${thread.isClosed ? `
+          <div class="p-3.5 bg-slate-100 border-t border-slate-200 text-center text-xs text-slate-500 font-medium">
+            Söhbət bağlanıb. Müştəri yeni söhbət başladana qədər mesaj göndərilə bilməz.
+          </div>
+        ` : `
+          <form onsubmit="handleSendAdminChatMessage(event)" class="p-3.5 bg-white border-t border-slate-200 flex items-center gap-2 shrink-0">
+            <input type="text" id="adminChatTextInput" oninput="handleAdminTyping()" placeholder="Müştəriyə operativ cavab yazın... (Enter ilə göndər)" 
+              autocomplete="off"
+              class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs focus:bg-white focus:outline-none focus:border-black font-medium transition" />
+            <button type="submit" id="adminChatSendBtn" class="px-5 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+              <span>Göndər</span>
+              <i data-lucide="send" class="w-3.5 h-3.5"></i>
+            </button>
+          </form>
+        `}
       `;
 
       if (window.lucide) lucide.createIcons();
@@ -5136,7 +5164,7 @@
       }
 
       try {
-        await fetch('/api/chat', {
+        const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -5145,10 +5173,56 @@
             text: text
           })
         });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          if (errData.isClosed) {
+            alert('Bu söhbət müştəri tərəfindən yekunlaşdırılıb. Müştəri yeni söhbət başlatmadan ona cavab yazmaq mümkün deyil.');
+          }
+        }
         await fetchAndRenderActiveConversation(false);
         loadLiveChatThreads();
       } catch (err) {
         console.warn('Mesaj göndərmə xətası:', err);
+      }
+    }
+
+    async function deleteLiveChatSession(e, sessionId) {
+      if (e) e.stopPropagation();
+      if (!sessionId) return;
+      if (!confirm('Bu çatı və bütün mesaj tarixçəsini həmişəlik silmək istədiyinizdən əminsiniz?')) {
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/chat/threads?sessionId=${encodeURIComponent(sessionId)}`, {
+          method: 'DELETE',
+        });
+        if (res.ok) {
+          allChatThreads = allChatThreads.filter(t => t.sessionId !== sessionId);
+          if (activeChatSessionId === sessionId) {
+            activeChatSessionId = null;
+            if (chatPollInterval) clearInterval(chatPollInterval);
+            const panel = document.getElementById('liveChatConversationPanel');
+            if (panel) {
+              panel.innerHTML = `
+                <div class="flex-1 flex flex-col items-center justify-center text-slate-400 p-8 text-center">
+                  <div class="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-300 mb-3">
+                    <i data-lucide="message-circle" class="w-8 h-8"></i>
+                  </div>
+                  <h3 class="text-sm font-bold text-slate-700 mb-1">Söhbət Seçilməyib</h3>
+                  <p class="text-xs text-slate-400 max-w-sm">Cavab vermək üçün sol paneldən hər hansı bir müştəri müraciətini seçin.</p>
+                </div>
+              `;
+              if (window.lucide) lucide.createIcons();
+            }
+          }
+          renderLiveChatThreads(allChatThreads);
+          loadLiveChatThreads();
+        } else {
+          alert('Çat silinərkən xəta baş verdi');
+        }
+      } catch (err) {
+        alert('Şəbəkə xətası: ' + err.message);
       }
     }
 

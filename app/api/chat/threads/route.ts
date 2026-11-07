@@ -48,3 +48,29 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+
+// DELETE /api/chat/threads?sessionId=... (Delete entire chat thread + messages from Supabase)
+export async function DELETE(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const sessionId = searchParams.get('sessionId');
+
+    if (!sessionId) {
+      return NextResponse.json({ error: 'sessionId required' }, { status: 400 });
+    }
+
+    const filesToRemove = [
+      `${CHAT_PREFIX}/thread_${sessionId}.json`,
+      `${CHAT_PREFIX}/messages_${sessionId}.json`,
+    ];
+
+    const { error } = await supabaseServer.storage.from(BUCKET).remove(filesToRemove);
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, deletedSessionId: sessionId });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}

@@ -255,16 +255,25 @@ export function FloatingWhatsApp() {
               hasInitializedSoundRef.current = true;
             }
 
-            // Sync messages list
+            // Sync messages list cleanly preserving pending local optimistic messages
             setMessages((prev) => {
-              if (
-                prev.length === fetchedMessages.length &&
-                prev[prev.length - 1]?.id === fetchedMessages[fetchedMessages.length - 1]?.id &&
-                prev[prev.length - 1]?.status === fetchedMessages[fetchedMessages.length - 1]?.status
-              ) {
-                return prev;
+              const pendingTemps = prev.filter((m) => m.id.startsWith("temp_"));
+              if (pendingTemps.length === 0) {
+                if (
+                  prev.length === fetchedMessages.length &&
+                  prev[prev.length - 1]?.id === fetchedMessages[fetchedMessages.length - 1]?.id &&
+                  prev[prev.length - 1]?.status === fetchedMessages[fetchedMessages.length - 1]?.status
+                ) {
+                  return prev;
+                }
+                return fetchedMessages;
               }
-              return fetchedMessages;
+
+              // Filter out temp messages that are now present in fetchedMessages
+              const remainingTemps = pendingTemps.filter(
+                (temp) => !fetchedMessages.some((fm) => fm.text === temp.text && Math.abs(fm.timestamp - temp.timestamp) < 10000)
+              );
+              return [...fetchedMessages, ...remainingTemps];
             });
           }
         }

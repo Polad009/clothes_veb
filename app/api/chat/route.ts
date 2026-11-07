@@ -283,6 +283,15 @@ export async function POST(req: NextRequest) {
     }
 
     let thread = await getThreadFromStorage(sessionId, true);
+
+    // If chat is already closed/ended, reject any new messages from both customer and admin!
+    if (thread && thread.isClosed) {
+      return NextResponse.json(
+        { error: 'Bu söhbət yekunlaşdırılıb. Zəhmət olmasa yeni söhbət başladın.', isClosed: true },
+        { status: 403 }
+      );
+    }
+
     if (!thread) {
       thread = {
         sessionId,
