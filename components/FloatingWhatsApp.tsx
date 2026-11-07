@@ -108,15 +108,32 @@ export function FloatingWhatsApp() {
     };
   }, [sessionId, isChatOpen]);
 
-  // Reset unread count when opening chat
+  // Reset unread count when opening chat & lock body scroll on mobile
   useEffect(() => {
     if (isChatOpen) {
       setUnreadCount(0);
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 100);
+
+      // Prevent background page from scrolling when chat is open on mobile
+      const originalOverflow = document.body.style.overflow;
+      if (window.innerWidth < 640) {
+        document.body.style.overflow = "hidden";
+      }
+
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
     }
-  }, [isChatOpen, messages]);
+  }, [isChatOpen]);
+
+  // Scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (isChatOpen) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, isChatOpen]);
 
   // Handle customer typing notification
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -189,10 +206,10 @@ export function FloatingWhatsApp() {
         <div
           role="dialog"
           aria-label="Horwalle Canlı Dəstək"
-          className="w-[calc(100vw-2.5rem)] sm:w-[380px] h-[500px] bg-white rounded-3xl shadow-2xl border border-stone-200/90 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-bottom-right"
+          className="fixed inset-x-3 bottom-24 sm:static sm:inset-auto w-[calc(100vw-1.5rem)] sm:w-[380px] h-[calc(100dvh-7.5rem)] sm:h-[520px] max-h-[640px] bg-white rounded-3xl shadow-2xl border border-stone-200/90 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-bottom-right z-50 overscroll-contain"
         >
           {/* Header */}
-          <div className="bg-[#111111] text-white p-4 flex items-center justify-between border-b border-stone-800">
+          <div className="bg-[#111111] text-white p-4 flex items-center justify-between border-b border-stone-800 shrink-0">
             <div className="flex items-center gap-3">
               <div className="relative">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#94713A] to-[#E6C280] p-0.5 shadow-md">
@@ -235,7 +252,7 @@ export function FloatingWhatsApp() {
           </div>
 
           {/* Messages Container */}
-          <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-[#FAF7F2]/60">
+          <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-[#FAF7F2]/60 overscroll-contain">
             {/* Welcome banner */}
             <div className="text-center py-2">
               <span className="text-[11px] bg-white border border-stone-200/80 px-3 py-1 rounded-full text-stone-500 shadow-2xs font-medium">

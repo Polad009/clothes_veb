@@ -4774,6 +4774,8 @@
     let activeChatSessionId = null;
     let chatPollInterval = null;
     let allChatThreads = [];
+    const threadLastMessageMap = new Map();
+    let globalChatAudioInitialized = false;
 
     // Pleasant web audio chime for incoming messages
     function playAdminChatChime() {
@@ -4799,10 +4801,34 @@
 
     async function loadLiveChatThreads() {
       try {
-        const res = await fetch('/api/chat/threads');
+        const res = await fetch('/api/chat/threads?_t=' + Date.now());
         if (!res.ok) return;
         const data = await res.json();
-        allChatThreads = data.threads || [];
+        const freshThreads = data.threads || [];
+
+        // Check if ANY customer sent a new message across ALL threads
+        let hasNewIncomingMessage = false;
+        freshThreads.forEach(t => {
+          const sid = t.sessionId;
+          const lastMsg = t.lastMessage || '';
+          const lastTime = t.lastMessageAt || 0;
+          const key = lastTime + '_' + lastMsg;
+
+          if (globalChatAudioInitialized) {
+            const previousKey = threadLastMessageMap.get(sid);
+            if (previousKey && previousKey !== key && t.unreadAdmin > 0) {
+              hasNewIncomingMessage = true;
+            }
+          }
+          threadLastMessageMap.set(sid, key);
+        });
+
+        if (globalChatAudioInitialized && hasNewIncomingMessage) {
+          playAdminChatChime();
+        }
+        globalChatAudioInitialized = true;
+
+        allChatThreads = freshThreads;
         renderLiveChatThreads(allChatThreads);
 
         // Update badge counter
@@ -4905,13 +4931,13 @@
       renderLiveChatThreads(allChatThreads);
 
       if (chatPollInterval) clearInterval(chatPollInterval);
-      await fetchAndRenderActiveConversation();
+      await fetchAndRenderActiveConversation(true);
       // Also refresh the threads list in background to sync server unread counts
       loadLiveChatThreads();
       chatPollInterval = setInterval(fetchAndRenderActiveConversation, 1500);
     }
 
-    async function fetchAndRenderActiveConversation() {
+    async function fetchAndRenderActiveConversation(forceFullRender = false) {
       if (!activeChatSessionId) return;
 
       try {
@@ -4921,7 +4947,7 @@
         const thread = data.thread || {};
         const messages = data.messages || [];
 
-        // Play sound if new incoming customer message arrived
+        // Play sound if new incoming customer message arrived in the ACTIVE thread
         if (messages.length > lastKnownAdminMsgCount && adminHasInitializedSound) {
           const lastMsg = messages[messages.length - 1];
           if (lastMsg && lastMsg.sender === 'customer') {
@@ -4931,7 +4957,7 @@
         lastKnownAdminMsgCount = messages.length;
         adminHasInitializedSound = true;
 
-        renderConversationWindow(thread, messages);
+        renderConversationWindow(thread, messages, forceFullRender);
       } catch (e) {
         console.warn('Poll active chat error:', e);
       }
@@ -4946,21 +4972,71 @@
       }, 2500);
     }
 
-    function renderConversationWindow(thread, messages) {
+    function renderConversationWindow(thread, messages, forceFullRender = false) {
       const panel = document.getElementById('liveChatConversationPanel');
       if (!panel) return;
 
       const isTyping = Boolean(thread.isTypingCustomer);
       const isOnline = Boolean(thread.customerOnline);
 
-      // Check if conversation container already exists to avoid re-rendering entire structure and losing focus
-      const container = document.getElementById('liveChatMessagesContainer');
-      const input = document.getElementById('adminChatTextInput');
-      const currentInputValue = input ? input.value : '';
+      const existingContainer = document.getElementById('liveChatMessagesContainer');
+      const existingInput = document.getElementById('adminChatTextInput');
 
+      // If already rendered and not forced, only update header status and messages list! Never wipe the input field!
+      if (existingContainer && existingInput && !forceFullRender) {
+        // Update online status badge & typing indicator smoothly
+        const statusEl = document.getElementById('chatHeaderStatus');
+        if (statusEl) {
+          statusEl.innerHTML = `
+            <span class="w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-slate-300'}"></span>
+            <span class="${isOnline ? 'text-emerald-700 font-medium' : 'text-slate-400'}">
+              ${isOnline ? 'Onlayn (Saytda aktivdir)' : 'Offline'}
+            </span>
+            ${isTyping ? `
+              <span class="inline-flex items-center gap-1 text-amber-600 font-bold ml-2 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 animate-pulse">
+                <span>Müştəri yazır</span>
+                <span class="inline-flex gap-0.5 items-center">
+                  <span class="w-1 h-1 bg-amber-600 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                  <span class="w-1 h-1 bg-amber-600 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                  <span class="w-1 h-1 bg-amber-600 rounded-full animate-bounce"></span>
+                </span>
+              </span>
+            ` : ''}
+          `;
+        }
+
+        // Only update messages HTML if message count changed or new message arrived
+        const currentMsgCount = existingContainer.dataset.msgCount ? parseInt(existingContainer.dataset.msgCount) : 0;
+        if (currentMsgCount !== messages.length) {
+          const wasScrolledToBottom = existingContainer.scrollHeight - existingContainer.scrollTop - existingContainer.clientHeight < 60;
+          existingContainer.innerHTML = messages.map(m => {
+            const isAdmin = m.sender === 'admin';
+            const timeStr = m.timestamp ? new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+            return `
+              <div class="flex flex-col ${isAdmin ? 'items-end' : 'items-start'}">
+                <div class="max-w-[78%] px-4 py-2.5 rounded-2xl text-xs leading-relaxed shadow-xs ${
+                  isAdmin 
+                    ? 'bg-black text-white rounded-br-xs' 
+                    : 'bg-white text-slate-900 border border-slate-200/90 rounded-bl-xs'
+                }">
+                  <p class="whitespace-pre-wrap break-words">${escapeHtml(m.text)}</p>
+                </div>
+                <span class="text-[9.5px] text-slate-400 mt-1 px-1">${timeStr} · ${isAdmin ? 'Siz (Admin)' : 'Müştəri'}</span>
+              </div>
+            `;
+          }).join('');
+          existingContainer.dataset.msgCount = messages.length;
+          if (wasScrolledToBottom) {
+            existingContainer.scrollTop = existingContainer.scrollHeight;
+          }
+        }
+        return;
+      }
+
+      // First time rendering or thread switched: full render
       panel.innerHTML = `
         <!-- Header -->
-        <div class="p-3.5 px-5 border-b border-slate-200 flex items-center justify-between bg-white">
+        <div class="p-3.5 px-5 border-b border-slate-200 flex items-center justify-between bg-white shrink-0">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-sm text-slate-800 uppercase">
               ${escapeHtml((thread.customerName || 'M')[0])}
@@ -4970,7 +5046,7 @@
                 <span>${escapeHtml(thread.customerName || 'Müştəri')}</span>
                 ${thread.customerEmail ? `<span class="text-[10px] text-slate-400 font-normal">(${escapeHtml(thread.customerEmail)})</span>` : ''}
               </div>
-              <div class="text-[10px] flex items-center gap-1.5 mt-0.5">
+              <div id="chatHeaderStatus" class="text-[10px] flex items-center gap-1.5 mt-0.5">
                 <span class="w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-slate-300'}"></span>
                 <span class="${isOnline ? 'text-emerald-700 font-medium' : 'text-slate-400'}">
                   ${isOnline ? 'Onlayn (Saytda aktivdir)' : 'Offline'}
@@ -4992,7 +5068,7 @@
         </div>
 
         <!-- Messages Area -->
-        <div id="liveChatMessagesContainer" class="flex-1 p-5 overflow-y-auto space-y-3 bg-[#FAF9F6]">
+        <div id="liveChatMessagesContainer" data-msg-count="${messages.length}" class="flex-1 p-5 overflow-y-auto space-y-3 bg-[#FAF9F6]">
           ${messages.map(m => {
             const isAdmin = m.sender === 'admin';
             const timeStr = m.timestamp ? new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
@@ -5012,11 +5088,11 @@
         </div>
 
         <!-- Footer Input -->
-        <form onsubmit="handleSendAdminChatMessage(event)" class="p-3.5 bg-white border-t border-slate-200 flex items-center gap-2">
-          <input type="text" id="adminChatTextInput" oninput="handleAdminTyping()" placeholder="Müştəriyə operativ cavab yazın..." 
-            value="${escapeHtml(currentInputValue)}"
+        <form onsubmit="handleSendAdminChatMessage(event)" class="p-3.5 bg-white border-t border-slate-200 flex items-center gap-2 shrink-0">
+          <input type="text" id="adminChatTextInput" oninput="handleAdminTyping()" placeholder="Müştəriyə operativ cavab yazın... (Enter ilə göndər)" 
+            autocomplete="off"
             class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs focus:bg-white focus:outline-none focus:border-black font-medium transition" />
-          <button type="submit" class="px-5 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
+          <button type="submit" id="adminChatSendBtn" class="px-5 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
             <span>Göndər</span>
             <i data-lucide="send" class="w-3.5 h-3.5"></i>
           </button>
@@ -5025,26 +5101,39 @@
 
       if (window.lucide) lucide.createIcons();
 
-      // Auto scroll to bottom
       const newContainer = document.getElementById('liveChatMessagesContainer');
       if (newContainer) newContainer.scrollTop = newContainer.scrollHeight;
 
-      // Restore focus to input if user was typing
       const newInput = document.getElementById('adminChatTextInput');
-      if (newInput && document.activeElement && document.activeElement.id === 'adminChatTextInput') {
-        newInput.focus();
-        newInput.setSelectionRange(newInput.value.length, newInput.value.length);
-      }
+      if (newInput) newInput.focus();
     }
 
     async function handleSendAdminChatMessage(e) {
-      e.preventDefault();
+      if (e) e.preventDefault();
       const input = document.getElementById('adminChatTextInput');
       if (!input || !activeChatSessionId) return;
       const text = input.value.trim();
       if (!text) return;
 
       input.value = '';
+      input.focus();
+
+      // Optimistically append message to screen instantly without waiting for network!
+      const container = document.getElementById('liveChatMessagesContainer');
+      if (container) {
+        const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'flex flex-col items-end';
+        msgDiv.innerHTML = `
+          <div class="max-w-[78%] px-4 py-2.5 rounded-2xl text-xs leading-relaxed shadow-xs bg-black text-white rounded-br-xs">
+            <p class="whitespace-pre-wrap break-words">${escapeHtml(text)}</p>
+          </div>
+          <span class="text-[9.5px] text-slate-400 mt-1 px-1">${timeStr} · Siz (Admin)</span>
+        `;
+        container.appendChild(msgDiv);
+        container.scrollTop = container.scrollHeight;
+        container.dataset.msgCount = (parseInt(container.dataset.msgCount || '0') + 1).toString();
+      }
 
       try {
         await fetch('/api/chat', {
@@ -5056,9 +5145,10 @@
             text: text
           })
         });
-        await fetchAndRenderActiveConversation();
+        await fetchAndRenderActiveConversation(false);
+        loadLiveChatThreads();
       } catch (err) {
-        alert('Mesaj göndərilmədi: ' + err.message);
+        console.warn('Mesaj göndərmə xətası:', err);
       }
     }
 
