@@ -49,7 +49,7 @@
       overflow-x: hidden;
     }
 
-    /* Hardware-accelerated pre-baked radial gradients without any CPU filter: blur */
+    /* Hardware-accelerated background without complex stacked radial gradients */
     body::before {
       content: "";
       position: fixed;
@@ -58,11 +58,9 @@
       pointer-events: none;
       transform: translateZ(0);
       background:
-        radial-gradient(circle at 10% 10%, rgba(199, 210, 254, 0.55) 0%, transparent 42%),
-        radial-gradient(circle at 90% 12%, rgba(254, 215, 170, 0.45) 0%, transparent 40%),
-        radial-gradient(circle at 85% 85%, rgba(204, 251, 241, 0.5) 0%, transparent 45%),
-        radial-gradient(circle at 15% 90%, rgba(251, 207, 232, 0.45) 0%, transparent 42%),
-        radial-gradient(circle at 50% 50%, rgba(224, 231, 255, 0.35) 0%, transparent 50%),
+        radial-gradient(circle at 10% 10%, rgba(199, 210, 254, 0.45) 0%, transparent 45%),
+        radial-gradient(circle at 90% 12%, rgba(254, 215, 170, 0.35) 0%, transparent 45%),
+        radial-gradient(circle at 85% 85%, rgba(204, 251, 241, 0.4) 0%, transparent 50%),
         #f8fafc;
     }
 
@@ -149,7 +147,10 @@
 
     /* Collapsed Sidebar Rail */
     body.sidebar-collapsed #adminSidebar {
-      width: 4.75rem; /* ~76px */
+      width: 4.5rem !important; /* ~72px */
+      min-width: 4.5rem !important;
+      padding-left: 0.35rem !important;
+      padding-right: 0.35rem !important;
     }
 
     body.sidebar-collapsed #adminSidebar #sidebarCollapseIcon {
@@ -160,10 +161,15 @@
     body.sidebar-collapsed #adminSidebar .nav-section-title,
     body.sidebar-collapsed #adminSidebar .nav-badge,
     body.sidebar-collapsed #adminSidebar #sidebarLogoExpanded {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
       max-width: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
       opacity: 0 !important;
-      transform: translateX(-8px) !important;
-      pointer-events: none;
+      transform: none !important;
+      pointer-events: none !important;
     }
 
     body.sidebar-collapsed #adminSidebar #sidebarLogoCollapsed {
@@ -172,10 +178,33 @@
       transform: scale(1) !important;
     }
 
+    body.sidebar-collapsed #adminSidebar .h-16 {
+      padding-left: 0.5rem !important;
+      padding-right: 0.5rem !important;
+      justify-content: center !important;
+      gap: 0.5rem !important;
+    }
+
     body.sidebar-collapsed #adminSidebar .nav-item {
-      justify-content: center;
-      padding-left: 0.5rem;
-      padding-right: 0.5rem;
+      width: 2.75rem !important;
+      height: 2.75rem !important;
+      margin: 0.35rem auto !important;
+      padding: 0 !important;
+      gap: 0 !important;
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      border-radius: 0.875rem !important;
+      box-sizing: border-box !important;
+      position: relative !important;
+    }
+
+    body.sidebar-collapsed #adminSidebar .nav-item i,
+    body.sidebar-collapsed #adminSidebar .nav-item svg {
+      margin: 0 !important;
+      position: static !important;
+      display: block !important;
+      flex-shrink: 0 !important;
     }
 
     /* Respect prefers-reduced-motion */
@@ -2476,16 +2505,33 @@
     function renderAll() {
       if (!STORE_DATA) return;
       try { renderDashboardMetrics(); } catch(e) { console.warn('renderDashboardMetrics error:', e); }
-      try { renderRecentOrders(); } catch(e) { console.warn('renderRecentOrders error:', e); }
-      try { renderProductsTable(); } catch(e) { console.warn('renderProductsTable error:', e); }
-      try { renderCategories(); } catch(e) { console.warn('renderCategories error:', e); }
-      try { renderOrdersTable(); } catch(e) { console.warn('renderOrdersTable error:', e); }
-      try { renderCustomersTable(); } catch(e) { console.warn('renderCustomersTable error:', e); }
-      try { renderLoyaltyTable(); } catch(e) { console.warn('renderLoyaltyTable error:', e); }
-      try { renderPromosTable(); } catch(e) { console.warn('renderPromosTable error:', e); }
-      try { renderPodOrders(); } catch(e) { console.warn('renderPodOrders error:', e); }
+      
+      // OPTIMIZATION: Only render the currently active/visible tab to avoid massive DOM thrashing and OS freeze!
+      const activePane = document.querySelector('.tab-pane:not(.hidden)');
+      if (activePane && activePane.id) {
+        const tabId = activePane.id.replace('tab-', '');
+        try {
+          if (tabId === 'dashboard') { renderRecentOrders(); }
+          else if (tabId === 'products') { renderProductsTable(); }
+          else if (tabId === 'categories') { renderCategories(); }
+          else if (tabId === 'orders') { renderOrdersTable(); }
+          else if (tabId === 'customers') { renderCustomersTable(); }
+          else if (tabId === 'loyalty') { renderLoyaltyTable(); }
+          else if (tabId === 'promos') { renderPromosTable(); }
+          else if (tabId === 'podOrders') { renderPodOrders(); }
+          else if (tabId === 'taxReports') { generateTaxReport(); }
+          else if (tabId === 'liveChat') { loadLiveChatThreads(); }
+        } catch(e) { console.warn('Active tab render error:', e); }
+      }
+      
       try { populateSettingsForm(); } catch(e) { console.warn('populateSettingsForm error:', e); }
-      try { if (window.lucide) lucide.createIcons(); } catch(e) {}
+      try { 
+        if (window.lucide && activePane) {
+          lucide.createIcons({ root: activePane });
+        } else if (window.lucide) {
+          lucide.createIcons();
+        }
+      } catch(e) {}
     }
 
 
