@@ -16,10 +16,53 @@
   <link
     href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Instrument+Sans:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap"
     rel="stylesheet">
-  <!-- Lucide Icons -->
+  <!-- Lucide Icons & Lenis Smooth Scroll Engine -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/lenis@1.1.20/dist/lenis.min.js"></script>
 
   <style>
+    /* Lenis Smooth Scroll Engine Support */
+    html.lenis, html.lenis body {
+      height: auto;
+    }
+    .lenis.lenis-smooth {
+      scroll-behavior: auto !important;
+    }
+    .lenis.lenis-smooth [data-lenis-prevent] {
+      overscroll-behavior: contain;
+    }
+    .lenis.lenis-stopped {
+      overflow: hidden;
+    }
+
+    /* Scroll Reveal & Tab Transitions */
+    .tab-pane {
+      animation: tabFadeIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      will-change: opacity, transform;
+    }
+
+    @keyframes tabFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .reveal-card {
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1), transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: opacity, transform;
+    }
+
+    .reveal-card.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
     :root {
       /* STEP 3 – PROPER GLASSMORPHISM TOKENS */
       --glass-bg: rgba(255, 255, 255, 0.45);
@@ -667,7 +710,7 @@
     <!-- ---------------------------------------------------- -->
     <!-- RIGHT MAIN CONTENT AREA -->
     <!-- ---------------------------------------------------- -->
-    <main class="flex-1 flex flex-col overflow-y-auto">
+    <main id="adminMainContent" class="flex-1 flex flex-col overflow-y-auto">
 
       <!-- TOP BAR (Glass Header) -->
       <header class="h-16 sm:h-20 glass-card border-b border-white/80 mx-3 sm:mx-6 mt-3 px-4 sm:px-8 flex items-center justify-between sticky top-3 z-30 shadow-md">
@@ -4627,6 +4670,15 @@
 
       if (targetPane) {
         targetPane.classList.remove('hidden');
+        if (adminLenis) {
+          try {
+            adminLenis.scrollTo(0, { immediate: true });
+            setTimeout(() => {
+              adminLenis.resize();
+              initScrollReveal();
+            }, 100);
+          } catch(e) {}
+        }
       } else {
         console.warn('Tab pane not found for tabId:', tabId);
       }
@@ -5581,17 +5633,84 @@
       }
     }, 8000);
 
+    // ----------------------------------------------------
+    // LENIS BUTTER-SMOOTH INERTIA SCROLL ENGINE (SAYT İLƏ EYNİ)
+    // ----------------------------------------------------
+    let adminLenis = null;
+
+    function initAdminLenis() {
+      if (typeof Lenis === 'undefined') return;
+      const isMobile = window.innerWidth < 768 || 'ontouchstart' in window;
+      if (isMobile) return;
+
+      const mainContent = document.getElementById('adminMainContent');
+      if (!mainContent) return;
+
+      try {
+        adminLenis = new Lenis({
+          wrapper: mainContent,
+          content: mainContent.firstElementChild || mainContent,
+          duration: 1.15,
+          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+          orientation: 'vertical',
+          gestureOrientation: 'vertical',
+          smoothWheel: true,
+          wheelMultiplier: 0.95,
+          syncTouch: false,
+        });
+
+        function raf(time) {
+          if (adminLenis) adminLenis.raf(time);
+          requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+
+        initScrollReveal();
+      } catch (e) {
+        console.warn('Lenis init error:', e);
+      }
+    }
+
+    // Scroll Reveal on Intersection / Scroll
+    function initScrollReveal() {
+      const cards = document.querySelectorAll('.glass-card, .tab-pane > div');
+      if (!('IntersectionObserver' in window)) {
+        cards.forEach(c => c.classList.add('revealed'));
+        return;
+      }
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+          }
+        });
+      }, {
+        root: document.getElementById('adminMainContent'),
+        threshold: 0.08
+      });
+
+      cards.forEach(c => {
+        if (!c.classList.contains('reveal-card') && !c.closest('header') && !c.closest('aside')) {
+          c.classList.add('reveal-card');
+          observer.observe(c);
+        }
+      });
+    }
+
     // Initial load
     if (document.readyState === 'loading') {
       window.addEventListener('DOMContentLoaded', () => {
         initSidebarState();
         setDateRange('ay');
         checkAuth();
+        setTimeout(initAdminLenis, 300);
       });
     } else {
       initSidebarState();
       setDateRange('ay');
       checkAuth();
+      setTimeout(initAdminLenis, 300);
     }
   </script>
 </body>
