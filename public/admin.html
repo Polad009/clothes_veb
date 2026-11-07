@@ -234,7 +234,7 @@
               class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-2.5 text-sm text-slate-900 focus:bg-white focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition"
               placeholder="••••••••••••" />
             <button type="button" id="togglePasswordBtn" onclick="togglePasswordVisibility()"
-              class="absolute right-3 top-2.5 p-1 rounded-lg hover:bg-slate-200/70 text-slate-500 hover:text-black transition cursor-pointer"
+              class="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg hover:bg-slate-200/70 text-slate-500 hover:text-black transition cursor-pointer"
               title="Şifrəni göstər / gizlət">
               <svg id="eyeIconSvg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
@@ -257,7 +257,7 @@
           </label>
         </div>
 
-        <button type="submit"
+        <button type="submit" id="loginSubmitBtn"
           class="w-full py-3 bg-black hover:bg-neutral-800 active:scale-[0.99] text-white rounded-xl font-bold text-sm transition shadow-sm flex items-center justify-center gap-2 cursor-pointer mt-2">
           <i data-lucide="log-in" class="w-4 h-4"></i>
           <span>Daxil Ol</span>
@@ -2126,7 +2126,7 @@
       if (!token) {
         document.getElementById('loginScreen').classList.remove('hidden');
         document.getElementById('mainApp').classList.add('hidden');
-        lucide.createIcons();
+        if (window.lucide) lucide.createIcons();
         return;
       }
 
@@ -2147,7 +2147,7 @@
         document.getElementById('loginScreen').classList.remove('hidden');
         document.getElementById('mainApp').classList.add('hidden');
       }
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
     }
 
     function togglePasswordVisibility() {
@@ -2179,6 +2179,20 @@
       const remember = document.getElementById('rememberMe').checked;
       const errorDiv = document.getElementById('loginError');
       const card = document.getElementById('loginCard');
+      const submitBtn = document.getElementById('loginSubmitBtn');
+
+      if (!user || !pass) {
+        if (errorDiv) {
+          errorDiv.classList.remove('hidden');
+          document.getElementById('loginErrorText').innerText = 'İstifadəçi adı və şifrəni daxil edin.';
+        }
+        return;
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span><span>Giriş edilir...</span>';
+      }
 
       try {
         const res = await fetch('/api/admin/login', {
@@ -2189,23 +2203,34 @@
         const result = await res.json();
 
         if (res.ok && result.success && result.token) {
-          errorDiv.classList.add('hidden');
+          if (errorDiv) errorDiv.classList.add('hidden');
           if (remember) {
             localStorage.setItem(AUTH_TOKEN_KEY, result.token);
           } else {
             sessionStorage.setItem(AUTH_TOKEN_KEY, result.token);
           }
           document.getElementById('loginPassword').value = '';
-          checkAuth();
+          await checkAuth();
         } else {
-          errorDiv.classList.remove('hidden');
-          document.getElementById('loginErrorText').innerText = result.error || 'Daxil edilmiş şifrə yanlışdır.';
-          card.classList.add('shake-anim');
-          setTimeout(() => card.classList.remove('shake-anim'), 500);
+          if (errorDiv) {
+            errorDiv.classList.remove('hidden');
+            document.getElementById('loginErrorText').innerText = result.error || 'Daxil edilmiş şifrə yanlışdır.';
+          }
+          if (card) {
+            card.classList.add('shake-anim');
+            setTimeout(() => card.classList.remove('shake-anim'), 500);
+          }
         }
       } catch (err) {
-        errorDiv.classList.remove('hidden');
-        document.getElementById('loginErrorText').innerText = 'Şəbəkə xətası baş verdi.';
+        if (errorDiv) {
+          errorDiv.classList.remove('hidden');
+          document.getElementById('loginErrorText').innerText = 'Şəbəkə xətası baş verdi.';
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg><span>Daxil Ol</span>';
+        }
       }
     }
 
@@ -3125,7 +3150,7 @@
           </div>
         `;
         resContainer.classList.remove('hidden');
-        lucide.createIcons();
+        if (window.lucide) lucide.createIcons();
         return;
       }
 
@@ -3153,7 +3178,7 @@
           </div>
         `;
         resContainer.classList.remove('hidden');
-        lucide.createIcons();
+        if (window.lucide) lucide.createIcons();
         return;
       }
 
@@ -5031,10 +5056,15 @@
     }, 10000);
 
     // Initial load
-    window.addEventListener('DOMContentLoaded', () => {
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', () => {
+        setDateRange('ay');
+        checkAuth();
+      });
+    } else {
       setDateRange('ay');
       checkAuth();
-    });
+    }
   </script>
 </body>
 
