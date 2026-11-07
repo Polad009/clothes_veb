@@ -197,19 +197,20 @@ function applySecurityHeaders(response: NextResponse) {
   response.headers.set('X-XSS-Protection', '1; mode=block');
   response.headers.set(
     'Permissions-Policy',
-    'camera=(), microphone=(), geolocation=(), payment=(self)'
+    'camera=(self "https://tryanywear.ai" "https://anywear.decart.ai"), microphone=(), geolocation=(), payment=(self)'
   );
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://pay.google.com https://cdn.tailwindcss.com https://unpkg.com https://www.googletagmanager.com",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    "img-src 'self' blob: data: https: http:",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://pay.google.com https://cdn.tailwindcss.com https://unpkg.com https://www.googletagmanager.com https://tryanywear.ai https://*.tryanywear.ai https://anywear.decart.ai https://*.decart.ai",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://tryanywear.ai https://*.tryanywear.ai https://anywear.decart.ai https://*.decart.ai",
+    "img-src 'self' blob: data: https: http: https://tryanywear.ai https://*.tryanywear.ai https://anywear.decart.ai https://*.decart.ai",
     "font-src 'self' https://fonts.gstatic.com data:",
-    "connect-src 'self' https://challenges.cloudflare.com https://*.supabase.co https://api.qrserver.com https://epoint.az https://www.google-analytics.com",
-    "frame-src 'self' https://challenges.cloudflare.com https://pay.google.com https://epoint.az",
+    "media-src 'self' blob: data: https: https://tryanywear.ai https://*.tryanywear.ai https://anywear.decart.ai https://*.decart.ai",
+    "connect-src 'self' https://challenges.cloudflare.com https://*.supabase.co https://api.qrserver.com https://epoint.az https://www.google-analytics.com https://tryanywear.ai https://*.tryanywear.ai https://anywear.decart.ai https://*.decart.ai",
+    "frame-src 'self' https://challenges.cloudflare.com https://pay.google.com https://epoint.az https://tryanywear.ai https://*.tryanywear.ai https://anywear.decart.ai https://*.decart.ai",
     "object-src 'none'",
     "base-uri 'self'",
-    "form-action 'self' https://epoint.az",
+    "form-action 'self' https://epoint.az https://tryanywear.ai https://*.tryanywear.ai https://anywear.decart.ai https://*.decart.ai",
   ].join('; ');
 
   response.headers.set('Content-Security-Policy', csp);
