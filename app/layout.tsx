@@ -52,14 +52,11 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/brand/favicon-32x32.png?v=4", sizes: "32x32", type: "image/png" },
-      { url: "/brand/favicon.png?v=4", sizes: "512x512", type: "image/png" },
+      { url: "/favicon.ico", sizes: "48x48 32x32 16x16", type: "image/x-icon" },
+      { url: "/icon.png", sizes: "512x512", type: "image/png" },
     ],
-    shortcut: [{ url: "/brand/favicon.png?v=4", type: "image/png" }],
-    apple: [{ url: "/brand/favicon.png?v=4", sizes: "512x512", type: "image/png" }],
-    other: [
-      { rel: "icon", url: "/brand/favicon.png?v=4", type: "image/png" },
-    ],
+    shortcut: [{ url: "/favicon.ico", type: "image/x-icon" }],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
   },
   description: "Horwalle (Horvvalle Atelier) — Sənin ölçün, sənin üslubun. Atelyedə hər geyim ölçünə görə tikilir, istədiyin dizayn isə canlı 3D çapla köynəyə köçürülür.",
   keywords: [
