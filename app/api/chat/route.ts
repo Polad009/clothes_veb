@@ -322,6 +322,7 @@ export async function POST(req: NextRequest) {
       } else {
         thread.unreadCustomer = (thread.unreadCustomer || 0) + 1;
         thread.isTypingAdmin = false;
+        thread.typingAdminExpiresAt = 0;
         thread.adminOnline = true;
       }
     }
@@ -334,11 +335,34 @@ export async function POST(req: NextRequest) {
       sender,
       text: trimmed,
       timestamp: now,
-      // Default to delivered, will be marked 'read' when recipient fetches the conversation
       status: 'delivered',
       read: false,
     };
     messages.push(newMsg);
+
+    // AVTOMATİK CAVAB (Müştəri ilk dəfə yazdıqda ad və əlaqə nömrəsini dərhal soruşan bot/sistem mesajı)
+    if (sender === 'customer') {
+      const customerMsgs = messages.filter(m => m.sender === 'customer');
+      const alreadyAsked = messages.some(m => m.sender === 'admin' && m.text.includes('adınızı və əlaqə nömrənizi'));
+      
+      // Əgər müştərinin ilk mesajıdırsa və hələ əlaqə məlumatı qeyd edilməyibsə
+      if (customerMsgs.length === 1 && !alreadyAsked && (!thread.customerPhone || thread.customerName === 'Müştəri')) {
+        const autoReplyNow = now + 100;
+        const autoMsg: ChatMessage = {
+          id: `msg_auto_${autoReplyNow}`,
+          sender: 'admin',
+          text: 'Salam! Horwalle Atelier Canlı Dəstək xidmətinə xoş gəlmisiniz. Zəhmət olmasa, sizə operativ və fərdi xidmət göstərə bilməyimiz üçün adınızı və əlaqə nömrənizi qeyd edin.',
+          timestamp: autoReplyNow,
+          status: 'delivered',
+          read: false,
+        };
+        messages.push(autoMsg);
+        thread.lastMessage = autoMsg.text;
+        thread.lastMessageAt = autoReplyNow;
+        thread.unreadCustomer = (thread.unreadCustomer || 0) + 1;
+        await saveThreadToStorage(thread);
+      }
+    }
 
     // Keep max 200 recent messages per session
     if (messages.length > 200) {

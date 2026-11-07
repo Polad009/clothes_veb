@@ -5357,11 +5357,21 @@
 
     function handleAdminTyping() {
       if (!activeChatSessionId) return;
+      const input = document.getElementById('adminChatTextInput');
+      const val = input ? input.value.trim() : '';
+
       if (adminTypingTimeout) clearTimeout(adminTypingTimeout);
+
+      if (!val) {
+        // If input is empty, immediately clear typing status on server!
+        fetch(`/api/chat?sessionId=${encodeURIComponent(activeChatSessionId)}&role=admin&typing=false`).catch(() => {});
+        return;
+      }
+
       fetch(`/api/chat?sessionId=${encodeURIComponent(activeChatSessionId)}&role=admin&typing=true`).catch(() => {});
       adminTypingTimeout = setTimeout(() => {
         fetch(`/api/chat?sessionId=${encodeURIComponent(activeChatSessionId)}&role=admin&typing=false`).catch(() => {});
-      }, 2500);
+      }, 1800);
     }
 
     function renderConversationWindow(thread, messages, forceFullRender = false) {
@@ -5527,6 +5537,9 @@
       if (!text) return;
 
       input.value = '';
+      if (adminTypingTimeout) clearTimeout(adminTypingTimeout);
+      // Immediately tell server admin stopped typing right upon send!
+      fetch(`/api/chat?sessionId=${encodeURIComponent(activeChatSessionId)}&role=admin&typing=false`).catch(() => {});
       input.focus();
 
       // Optimistically append message to screen instantly without waiting for network!
