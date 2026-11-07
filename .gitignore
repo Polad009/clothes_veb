@@ -47,3 +47,5 @@ thumb-front-test.png
 public/models/*.onnx
 public/models/*.bin
 
+
+.vercel

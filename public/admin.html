@@ -224,91 +224,113 @@
 <body class="min-h-screen antialiased flex flex-col">
 
   <!-- ============================================================ -->
-  <!-- 1. LOGIN SCREEN (Şifrəli Giriş Sistemi) -->
+  <!-- 1. LOGIN SCREEN (Glassmorphism Split Layout — Şəkildəki Dizayn) -->
   <!-- ============================================================ -->
-  <div id="loginScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
+  <div id="loginScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 backdrop-blur-xl">
+    
+    <!-- Background Ambient Glow & Logo Silhouette -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none flex items-center justify-center">
+      <div class="w-[500px] h-[500px] bg-gradient-to-tr from-amber-500/20 via-indigo-500/20 to-purple-500/20 rounded-full blur-[120px] animate-pulse"></div>
+      <img src="/brand/icon-light.png" alt="" class="absolute w-[600px] h-[600px] object-contain opacity-[0.03] select-none" />
+    </div>
+
+    <!-- Main Glass Split Card -->
     <div id="loginCard"
-      class="w-full max-w-md glass-card p-8 sm:p-10 shadow-2xl flex flex-col items-center text-center relative overflow-hidden">
-      <!-- Glow ambient backdrop inside card -->
-      <div class="absolute -top-24 -left-24 w-48 h-48 bg-indigo-500/15 rounded-full blur-2xl pointer-events-none"></div>
-      <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-amber-500/15 rounded-full blur-2xl pointer-events-none"></div>
+      class="w-full max-w-4xl bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.45)] overflow-hidden flex flex-col md:flex-row relative z-10">
+      
+      <!-- Left Hero Column: Brand Logo & Couture Identity -->
+      <div class="w-full md:w-1/2 p-8 sm:p-12 bg-gradient-to-br from-black/60 via-stone-900/60 to-black/80 border-b md:border-b-0 md:border-r border-white/10 flex flex-col justify-between relative overflow-hidden text-white">
+        <!-- Ambient radial glow in left panel -->
+        <div class="absolute -top-20 -left-20 w-48 h-48 bg-amber-500/20 rounded-full blur-3xl pointer-events-none"></div>
 
-      <!-- Brand Logo (Image 3) -->
-      <div class="mb-5 flex flex-col items-center relative z-10">
-        <img 
-          src="/brand/horwalle_logo_black.png?v=2" 
-          alt="HORWALLE" 
-          class="h-16 w-auto object-contain mb-1 transition-transform duration-300 hover:scale-105" 
-          onerror="this.src='/brand/logo-horizontal-black.png'"
-        />
-        <p class="text-[9.5px] tracking-[0.28em] text-slate-500 font-semibold uppercase mt-1">Atelier Couture · İdarəetmə</p>
+        <div class="relative z-10">
+          <div class="flex items-center gap-2 mb-8">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="text-[10px] font-bold tracking-[0.25em] text-amber-200/80 uppercase">RƏSMİ PORTAL 2026</span>
+          </div>
+
+          <img 
+            src="/brand/horwalle_logo_transparent.png" 
+            alt="HORWALLE" 
+            class="h-16 w-auto object-contain mb-4 drop-shadow-lg" 
+            onerror="this.src='/brand/horwalle_official_logo.png'"
+          />
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-2">HORWALLE ATELIER</h1>
+          <p class="text-xs text-stone-300 leading-relaxed max-w-xs font-light">
+            Lüks geyim və fərdi dərzilik idarəetmə mərkəzi. Təhlükəsiz şifrəli giriş sistemi.
+          </p>
+        </div>
+
+        <div class="mt-8 pt-6 border-t border-white/10 flex items-center justify-between text-[11px] text-stone-400 relative z-10">
+          <span>Horvvalle V2.4 Portal</span>
+          <span class="text-emerald-400 font-semibold flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Şifrələnmiş Giriş
+          </span>
+        </div>
       </div>
 
-      <div class="w-12 h-1 bg-gradient-to-r from-indigo-500 via-amber-500 to-emerald-500 rounded-full mb-6"></div>
+      <!-- Right Form Column: Frosted Glass Form (Eynilə 1-ci şəkildəki kimi) -->
+      <div class="w-full md:w-1/2 p-8 sm:p-12 flex flex-col justify-center bg-white/[0.06] backdrop-blur-3xl text-left">
+        <div class="mb-6">
+          <span class="text-[11px] font-bold text-sky-400 uppercase tracking-widest">İNZİBATÇI GİRİŞİ</span>
+          <h2 class="text-2xl font-black text-white tracking-tight mt-1">Daxil Olun</h2>
+          <p class="text-xs text-stone-300 mt-1">İdarəetmə panelinə keçmək üçün məlumatları daxil edin</p>
+        </div>
 
-      <h2 class="text-xl font-bold text-slate-900 tracking-tight">İdarəetmə Panelinə Giriş</h2>
-      <p class="text-xs text-slate-500 mt-1 mb-6">Yalnız rəsmi mağaza inzibatçıları üçün təhlükəsiz giriş</p>
-
-      <!-- Login Form -->
-      <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="w-full space-y-4 text-left relative z-10">
-        <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">İstifadəçi Adı</label>
-          <div class="relative">
-            <i data-lucide="user" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
-            <input type="text" id="loginUsername" value="admin" required
-              class="w-full bg-white/70 border border-white/80 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 shadow-xs transition"
-              placeholder="admin" />
+        <!-- Login Form -->
+        <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-stone-200 uppercase tracking-wider mb-1.5">İstifadəçi Adı</label>
+            <div class="relative">
+              <i data-lucide="user" class="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5"></i>
+              <input type="text" id="loginUsername" value="admin" required
+                class="w-full bg-white/10 border border-white/20 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-stone-400 focus:bg-white/20 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 transition"
+                placeholder="admin" />
+            </div>
           </div>
-        </div>
 
-        <div>
-          <div class="flex items-center justify-between mb-1.5">
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">İnzibatçı Şifrəsi</label>
-            <span class="text-[10px] text-indigo-600 font-semibold bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">Təhlükəsiz Giriş</span>
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="block text-xs font-bold text-stone-200 uppercase tracking-wider">İnzibatçı Şifrəsi</label>
+              <span class="text-[10px] text-sky-300 font-semibold">Təhlükəsiz Giriş</span>
+            </div>
+            <div class="relative">
+              <i data-lucide="lock" class="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5"></i>
+              <input type="password" id="loginPassword" required
+                class="w-full bg-white/10 border border-white/20 rounded-xl pl-10 pr-10 py-2.5 text-sm text-white placeholder-stone-400 focus:bg-white/20 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 transition"
+                placeholder="••••••••••••" />
+              <button type="button" id="togglePasswordBtn" onclick="togglePasswordVisibility()"
+                class="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg hover:bg-white/10 text-stone-400 hover:text-white transition cursor-pointer"
+                title="Şifrəni göstər / gizlət">
+                <svg id="eyeIconSvg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
           </div>
-          <div class="relative">
-            <i data-lucide="lock" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
-            <input type="password" id="loginPassword" required
-              class="w-full bg-white/70 border border-white/80 rounded-xl pl-10 pr-10 py-2.5 text-sm text-slate-900 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 shadow-xs transition"
-              placeholder="••••••••••••" />
-            <button type="button" id="togglePasswordBtn" onclick="togglePasswordVisibility()"
-              class="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg hover:bg-slate-200/70 text-slate-500 hover:text-black transition cursor-pointer"
-              title="Şifrəni göstər / gizlət">
-              <svg id="eyeIconSvg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
-            </button>
+
+          <div id="loginError"
+            class="hidden text-xs text-rose-300 bg-rose-950/60 border border-rose-500/40 rounded-xl p-3 flex items-center gap-2">
+            <i data-lucide="alert-circle" class="w-4 h-4 shrink-0 text-rose-400"></i>
+            <span id="loginErrorText">Daxil edilmiş şifrə yanlışdır.</span>
           </div>
-        </div>
 
-        <div id="loginError"
-          class="hidden text-xs text-rose-600 bg-rose-50/90 border border-rose-200 rounded-xl p-3 flex items-center gap-2">
-          <i data-lucide="alert-circle" class="w-4 h-4 shrink-0 text-rose-500"></i>
-          <span id="loginErrorText">Daxil edilmiş şifrə yanlışdır.</span>
-        </div>
+          <div class="flex items-center justify-between pt-1">
+            <label class="flex items-center gap-2 text-xs text-stone-300 cursor-pointer">
+              <input type="checkbox" id="rememberMe" checked class="rounded border-white/20 bg-white/10 text-sky-500 focus:ring-sky-500">
+              <span>Məni yadda saxla</span>
+            </label>
+          </div>
 
-        <div class="flex items-center justify-between pt-1">
-          <label class="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
-            <input type="checkbox" id="rememberMe" checked class="rounded border-slate-300 text-black focus:ring-black">
-            <span>Məni yadda saxla</span>
-          </label>
-        </div>
-
-        <button type="submit" id="loginSubmitBtn"
-          class="w-full py-3 bg-gradient-to-r from-slate-900 to-slate-800 hover:from-black hover:to-neutral-900 active:scale-[0.99] text-white rounded-xl font-bold text-sm transition shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer mt-2">
-          <i data-lucide="log-in" class="w-4 h-4"></i>
-          <span>Daxil Ol</span>
-        </button>
-      </form>
-
-      <div
-        class="mt-6 pt-5 border-t border-slate-200/60 w-full flex items-center justify-between text-[11px] text-slate-500 relative z-10">
-        <span>Horvvalle V2.4 Portal</span>
-        <span class="flex items-center gap-1.5 text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sistem Aktivdir
-        </span>
+          <button type="submit" id="loginSubmitBtn"
+            class="w-full py-3 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 active:scale-[0.99] text-white rounded-xl font-bold text-sm transition shadow-[0_8px_20px_rgba(14,165,233,0.35)] flex items-center justify-center gap-2 cursor-pointer mt-3">
+            <i data-lucide="log-in" class="w-4 h-4"></i>
+            <span>Daxil Ol</span>
+          </button>
+        </form>
       </div>
+
     </div>
   </div>
 
