@@ -235,7 +235,7 @@
       "isNew": false,
       "inStock": true,
       "description": "Xüsusiyyətlər:\n\nRəng: Qara\n\nDizayn: Ön hissədə minimal loqo, arxa hissədə canlı \"Stay Focused - Never Give Up\" ayı qrafikası\n\nKəsim: Rahat / Gündəlik kəsim (Regular / Oversize)\n\nMaterial: Qalın və yumşaq pambıq qarışımlı parça, kapüşonlu və kənguru cibli",
-      "image": "https://hrgvvsyalafdscponoca.supabase.co/storage/v1/object/public/product-images/products/horvvalle_black_hoodie_front_hd.jpg",
+      "image": "/images/uploads/stay_focused_bear_hoodie_cutout.png",
       "images": [
         "https://hrgvvsyalafdscponoca.supabase.co/storage/v1/object/public/product-images/products/Bear_front_black_1793811980371_l3dk.png"
       ],
@@ -243,13 +243,16 @@
         {
           "name": "Qara (Obsidian Noir)",
           "hex": "#1A1A1A",
-          "image": "https://hrgvvsyalafdscponoca.supabase.co/storage/v1/object/public/product-images/products/horvvalle_black_hoodie_front_hd.jpg",
+          "image": "/images/uploads/stay_focused_bear_hoodie_cutout.png",
           "hoverImage": "https://hrgvvsyalafdscponoca.supabase.co/storage/v1/object/public/product-images/products/Screenshot_2026-11-04_211639_1793812619377_p597.png",
           "leftShoulderImage": "",
           "rightShoulderImage": "",
           "gallery": [
             "https://hrgvvsyalafdscponoca.supabase.co/storage/v1/object/public/product-images/products/horvvalle_black_hoodie_front_hd.jpg",
             "https://hrgvvsyalafdscponoca.supabase.co/storage/v1/object/public/product-images/products/Screenshot_2026-11-04_211639_1793812619377_p597.png"
+          ],
+          "images": [
+            "/images/uploads/stay_focused_bear_hoodie_cutout.png"
           ]
         }
       ],

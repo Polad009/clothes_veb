@@ -712,5 +712,16 @@ a:not(.no-tactile):active,
   }
 }
 
+/* Prevent Anywear Chrome Extension from injecting duplicate floating badge over our custom Try-On button */
+.vton-btn,
+div[class*="vton-btn"],
+#__decart-pill-btn {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+
 
 
