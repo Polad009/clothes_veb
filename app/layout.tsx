@@ -137,11 +137,10 @@ export default function RootLayout({
                   "name": "Horvvalle",
                   "url": "https://horvvalle.com",
                   "logo": "https://horvvalle.com/brand/icon-dark.png",
-                  "description": "Lüks Geyim & Fərdi Atelye. Dərzilik və 3D canlı çap studiyası.",
+                  "description": "Lüks Geyim & Fərdi Atelye. Dərzilik və fərdi DTG çap studiyası.",
                   "sameAs": [
-                    "https://instagram.com/horvvalle",
-                    "https://facebook.com/horvvalle",
-                    "https://tiktok.com/@horvvalle"
+                    "https://www.instagram.com/horwalle?vrfl=dGJ0anppbmYyeXRy&utm_source=qr",
+                    "https://www.tiktok.com/@horwalle"
                   ]
                 },
                 {

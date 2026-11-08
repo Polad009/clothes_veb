@@ -44,7 +44,7 @@ export default function Home() {
   const badgeMessages = [
     hero.tag || "HORVVALLE ATELIER · 2026 COUTURE · BAKI",
     language === "en" ? "100% PURE COMBED COTTON (220-380 GSM)" : language === "ru" ? "100% ЧИСТЫЙ ГРЕБЕННОЙ ХЛОПОК (220-380 GSM)" : language === "tr" ? "%100 SAF TARANMIŞ PAMUK (220-380 GSM)" : "100% XALİS DARANMIŞ PAMBIQ (220-380 GSM)",
-    language === "en" ? "LIVE 3D DTG PRINT STUDIO — BAKU" : language === "ru" ? "ЖИВАЯ 3D СТУДИЯ DTG ПЕЧАТИ — БАКУ" : language === "tr" ? "CANLI 3D DTG BASKI STÜDYOSU — BAKÜ" : "CANLI 3D DTG ÇAP STUDİYASI — BAKI",
+    language === "en" ? "LIVE ATELIER DTG PRINT STUDIO — BAKU" : language === "ru" ? "ЖИВАЯ АТЕЛЬЕ DTG СТУДИЯ ПЕЧАТИ — БАКУ" : language === "tr" ? "CANLI ATÖLYE DTG BASKI STÜDYOSU — BAKÜ" : "CANLI ATELYE DTG ÇAP STUDİYASI — BAKI",
     language === "en" ? "FREE DELIVERY TO BAKU & SUMGAYIT" : language === "ru" ? "БЕСПЛАТНАЯ ДОСТАВКА В БАКУ И СУМГАИТ" : language === "tr" ? "BAKÜ VE SUMGAYIT'A ÜCRETSİZ TESLİMAT" : "BAKI VƏ SUMQAYIT ƏRAZİSİNƏ PULSUZ ÇATDIRILMA",
   ];
 
@@ -104,7 +104,7 @@ export default function Home() {
       image: "/images/products/bmw-m-motorsport-cap/black_front.webp",
       link: "/collections?category=aksesuar",
       count: language === "en" ? "1 Model" : language === "ru" ? "1 Модель" : language === "tr" ? "1 Model" : "1 Model",
-      tag: language === "en" ? "3D PRINT STUDIO" : language === "ru" ? "3D СТУДИЯ ПЕЧАТИ" : language === "tr" ? "3D BASKI STÜDYOSU" : "3D ÇAP STUDİYASI",
+      tag: language === "en" ? "ATELIER PRINT STUDIO" : language === "ru" ? "АТЕЛЬЕ СТУДИЯ ПЕЧАТИ" : language === "tr" ? "ATÖLYE BASKI STÜDYOSU" : "ATELYE ÇAP STUDİYASI",
     },
   ];
 
@@ -309,14 +309,14 @@ export default function Home() {
       </section>
 
       {/* 4. PRINT ON DEMAND (POD) SPOTLIGHT BANNER */}
-      <section data-cms-section="podBanner" data-cms-title="3D Fərdi Çap Banneri" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+      <section data-cms-section="podBanner" data-cms-title="Fərdi Çap Banneri" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="relative rounded-3xl overflow-hidden border border-stone-200/80 bg-gradient-to-br from-white via-[#FAF7F2] to-[#F5EFE6] p-8 sm:p-12 lg:p-16 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.06)]">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             {/* Left Content */}
             <div className="lg:col-span-7 space-y-5">
               <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-stone-100 border border-stone-200 text-stone-800 text-xs font-medium uppercase tracking-wider">
                 <Palette size={14} className="text-stone-700" />
-                <span>{language === "en" ? "3D LIVE DESIGN ATELIER" : language === "ru" ? "3D СТУДИЯ ДИЗАЙНА" : language === "tr" ? "3D CANLI TASARIM ATÖLYESİ" : (podBanner.tag || "3D CANLI DİZAYN ATELYESİ")}</span>
+                <span>{language === "en" ? "BESPOKE ATELIER PRINT STUDIO" : language === "ru" ? "ИНДИВИДУАЛЬНОЕ АТЕЛЬЕ ПЕЧАТИ" : language === "tr" ? "ÖZEL ATÖLYE BASKI STÜDYOSU" : (podBanner.tag && !podBanner.tag.includes("3D") ? podBanner.tag : "FƏRDİ ATELYE ÇAP STUDİYASI")}</span>
               </div>
 
               <h2 className="text-3xl sm:text-5xl font-normal uppercase tracking-tight text-stone-900 font-serif-luxury leading-[1.05]">

@@ -70,7 +70,7 @@ export function checkRateLimit(
       remaining: 0,
       dailyRemaining: 0,
       resetSeconds,
-      error: `Günlük süni intellekt kvotanız dolmuşdur (${dailyQuota} sorğu/gün). Zəhmət olmasa sabah yenidən cəhd edin.`,
+      error: `Günlük fərdi dizayn emalı limitiniz dolmuşdur (${dailyQuota} sorğu/gün). Zəhmət olmasa sabah yenidən cəhd edin.`,
     };
   }
 

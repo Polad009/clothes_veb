@@ -119,7 +119,7 @@ export function Footer() {
             </div>
 
             {/* Direct Support & WhatsApp */}
-            <div className="pt-2">
+            <div className="pt-2 flex flex-wrap items-center gap-3">
               <a
                 href="https://wa.me/994103283152"
                 target="_blank"
@@ -131,6 +131,53 @@ export function Footer() {
                   WhatsApp VIP: <strong className="text-emerald-400 font-mono tracking-wider">+994 10 328 31 52</strong>
                 </span>
               </a>
+
+              {/* Social Media Links - Instagram & TikTok ONLY */}
+              <div className="flex items-center gap-1.5 text-stone-300">
+                <a
+                  href="https://www.instagram.com/horwalle?vrfl=dGJ0anppbmYyeXRy&utm_source=qr"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                  className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 border border-white/10 flex items-center justify-center hover:text-white transition cursor-pointer"
+                >
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+                  </svg>
+                </a>
+
+                <a
+                  href="https://www.tiktok.com/@horwalle"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="TikTok"
+                  className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 border border-white/10 flex items-center justify-center hover:text-white transition cursor-pointer"
+                >
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+                  </svg>
+                </a>
+              </div>
             </div>
           </div>
 

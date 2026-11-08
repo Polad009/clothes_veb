@@ -25,7 +25,6 @@ import { SizeChip } from "@/components/ui/SizeChip";
 import { useStoreData } from "@/context/StoreDataContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useLanguage } from "@/context/LanguageContext";
-import { HeroVideo } from "./HeroVideo";
 
 export interface HeroProductItem {
   id: string;
@@ -133,7 +132,6 @@ export function Hero() {
   const [selectedSize, setSelectedSize] = useState<string>("L");
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
   const [direction, setDirection] = useState<number>(1); // 1 = right-to-left, -1 = left-to-right
-  const [heroMode, setHeroMode] = useState<"video" | "showcase">("video");
 
   // Map live store products into rich hero items
   const heroProducts: HeroProductItem[] = useMemo(() => {
@@ -186,34 +184,7 @@ export function Hero() {
 
   // Sync active slide color to document body, root and adaptive scrollbar
   useEffect(() => {
-    if (typeof document === "undefined") return;
-
-    if (heroMode === "video") {
-      const headerBg = "#090A0E";
-      const topGradient = "linear-gradient(180deg, #090A0E 0%, #12141C 100%)";
-      const bgGradient = "radial-gradient(circle at 50% 36%, #1E2026 0%, #12141C 48%, #090A0E 100%)";
-      const colorHex = "#E6C280";
-
-      document.documentElement.style.setProperty("--hero-header-bg", headerBg);
-      document.documentElement.style.setProperty("--hero-top-gradient", topGradient);
-      document.documentElement.style.setProperty("--hero-bg", bgGradient);
-      document.documentElement.style.setProperty("--hero-ink", colorHex);
-      document.body.style.backgroundColor = headerBg;
-
-      window.dispatchEvent(
-        new CustomEvent("hv-hero-color-change", {
-          detail: {
-            headerBg,
-            topGradient,
-            bgGradient,
-            colorHex,
-          },
-        })
-      );
-      return;
-    }
-
-    if (!currentItem) return;
+    if (typeof document === "undefined" || !currentItem) return;
 
     const updateScrollbar = () => {
       const scrollY = window.scrollY || document.documentElement.scrollTop;
@@ -253,7 +224,7 @@ export function Hero() {
     return () => {
       window.removeEventListener("scroll", updateScrollbar);
     };
-  }, [heroMode, safeCurrentIndex, currentItem]);
+  }, [safeCurrentIndex, currentItem]);
 
   // Slider navigation
   const handleNext = useCallback(() => {
@@ -314,89 +285,6 @@ export function Hero() {
     }),
   };
 
-  if (heroMode === "video") {
-    return (
-      <HeroVideo
-        posterDesktop="/images/hero/hero-poster-wide.webp"
-        posterMobile="/images/hero/hero-poster-tall.webp"
-        videoDesktopSrc="/videos/hero-desktop.mp4"
-        videoMobileSrc="/videos/hero-mobile.mp4"
-        title={
-          language === "az" ? (
-            <>
-              <span>Sənin ölçün,</span>
-              <span className="block italic text-[#E6C280]">sənin üslubun.</span>
-            </>
-          ) : language === "en" ? (
-            <>
-              <span>Your fit,</span>
-              <span className="block italic text-[#E6C280]">your style.</span>
-            </>
-          ) : language === "ru" ? (
-            <>
-              <span>Твой размер,</span>
-              <span className="block italic text-[#E6C280]">твой стиль.</span>
-            </>
-          ) : (
-            <>
-              <span>Senin bedenin,</span>
-              <span className="block italic text-[#E6C280]">senin stilin.</span>
-            </>
-          )
-        }
-        subtitle={
-          language === "az"
-            ? "Atelyedə hər geyim ölçünə görə tikilir, istədiyin dizayn isə canlı 3D çapla köynəyə köçürülür."
-            : language === "en"
-            ? "Every garment is crafted to your exact fit, with live 3D print simulations brought to life."
-            : language === "ru"
-            ? "Каждая вещь шьется точно по вашей фигуре, а ваш дизайн переносится живой 3D печатью."
-            : "Her kıyafet bedeninize özel dikilir, dilediğiniz tasarım 3D baskıyla hayata geçer."
-        }
-        ctaText={
-          language === "az"
-            ? "Kolleksiyanı Kəşf Edin"
-            : language === "en"
-            ? "Explore Collection"
-            : language === "ru"
-            ? "Исследовать коллекцию"
-            : "Koleksiyonu Keşfet"
-        }
-        ctaLink="/collections"
-        secondaryCtaText={
-          language === "az"
-            ? "Fərdi Dərzilik"
-            : language === "en"
-            ? "Bespoke Atelier"
-            : language === "ru"
-            ? "Индивидуальный пошив"
-            : "Özel Terzilik"
-        }
-        secondaryCtaLink="/studio"
-      >
-        {/* Sleek Mode Switcher */}
-        <div className="flex items-center justify-center mt-6">
-          <div className="inline-flex items-center gap-1.5 p-1 rounded-full bg-black/50 backdrop-blur-md border border-white/20 shadow-xl">
-            <button
-              type="button"
-              onClick={() => setHeroMode("video")}
-              className="px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-white text-stone-950 shadow-sm cursor-pointer"
-            >
-              🎥 {language === "en" ? "Cinema" : language === "ru" ? "Кино" : language === "tr" ? "Sinema" : "Kino"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setHeroMode("showcase")}
-              className="px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider text-white/70 hover:text-white transition-colors cursor-pointer"
-            >
-              🎽 {language === "en" ? "3D Showcase" : language === "ru" ? "3D Витрина" : language === "tr" ? "3D Vitrin" : "3D Vitrin"}
-            </button>
-          </div>
-        </div>
-      </HeroVideo>
-    );
-  }
-
   return (
     <section
       id="hero-section"
@@ -406,7 +294,7 @@ export function Hero() {
         ["--hero-bg" as any]: currentItem.bgGradient,
         ["--hero-ink" as any]: currentItem.colorHex,
       }}
-      className="relative w-full min-h-[100dvh] h-auto lg:h-[100dvh] lg:max-h-[100dvh] flex flex-col justify-between overflow-x-hidden lg:overflow-hidden text-white select-none isolate"
+      className="relative w-full min-h-[100dvh] h-auto lg:h-[100dvh] lg:max-h-[100dvh] flex flex-col justify-between overflow-x-hidden text-white select-none isolate"
       aria-label="Horvvalle Atelier Hero"
     >
       {/* =========================================================================
@@ -447,18 +335,18 @@ export function Hero() {
             {/* Localized Description */}
             <p className="text-white/80 text-xs sm:text-[13.5px] leading-relaxed max-w-sm mx-auto lg:mx-0 font-sans">
               {language === "az"
-                ? "Atelyedə hər geyim ölçünə görə tikilir, istədiyin dizayn isə canlı 3D çapla köynəyə köçürülür."
+                ? "Atelyedə hər geyim ölçünə görə tikilir, istədiyin dizayn isə canlı DTG çapla köynəyə köçürülür."
                 : language === "en"
-                ? "Every garment is crafted to your exact fit, with live 3D print simulations brought to life."
+                ? "Every garment is crafted to your exact fit, with bespoke DTG prints brought to life."
                 : language === "ru"
-                ? "Каждая вещь шьется точно по вашей фигуре, а ваш дизайн переносится живой 3D печатью."
-                : "Her kıyafet bedeninize özel dikilir, dilediğiniz tasarım 3D baskıyla hayata geçer."}
+                ? "Каждая вещь шьется точно по вашей фигуре, а ваш дизайн переносится живой печатью DTG."
+                : "Her kıyafet bedeninize özel dikilir, dilediğiniz tasarım canlı DTG baskıyla hayata geçer."}
             </p>
 
             {/* Shared UI Buttons */}
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5 pt-1">
               <Button variant="primary" href="/studio">
-                <span>{t.hero.designBtn || "3D Studiyada dizayn et"}</span>
+                <span>{t.hero.designBtn || "Fərdi Studiyada dizayn et"}</span>
                 <svg
                   width="13"
                   height="13"
@@ -540,26 +428,6 @@ export function Hero() {
                 aria-label="Növbəti məhsul"
               />
             </div>
-
-            {/* Dual-Mode Selector Pill in Showcase */}
-            <div className="flex items-center justify-center mt-3 z-20">
-              <div className="inline-flex items-center gap-1.5 p-1 rounded-full bg-black/50 backdrop-blur-md border border-white/20 shadow-xl">
-                <button
-                  type="button"
-                  onClick={() => setHeroMode("video")}
-                  className="px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider text-white/70 hover:text-white transition-colors cursor-pointer"
-                >
-                  🎥 {language === "en" ? "Cinema" : language === "ru" ? "Кино" : language === "tr" ? "Sinema" : "Kino"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setHeroMode("showcase")}
-                  className="px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-white text-stone-950 shadow-sm cursor-pointer"
-                >
-                  🎽 {language === "en" ? "3D Showcase" : language === "ru" ? "3D Витрина" : language === "tr" ? "3D Vitrin" : "3D Vitrin"}
-                </button>
-              </div>
-            </div>
           </div>
 
           {/* =====================================================================
@@ -612,9 +480,10 @@ export function Hero() {
         
         {/* Left: Social Media Icons + Mobile Thumbnail Toggle */}
         <div className="flex items-center justify-between w-full sm:w-auto gap-4 order-2 sm:order-1">
-          <div className="flex items-center gap-1 sm:gap-1.5 text-white/90">
+          <div className="flex items-center gap-2 text-white/90">
+            {/* Instagram */}
             <a
-              href="https://instagram.com"
+              href="https://www.instagram.com/horwalle?vrfl=dGJ0anppbmYyeXRy&utm_source=qr"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Instagram"
@@ -636,74 +505,9 @@ export function Hero() {
               </svg>
             </a>
 
+            {/* TikTok */}
             <a
-              href="https://x.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="X"
-              className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-full hover:bg-white/10 transition-colors cursor-pointer"
-            >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M4 4l11.733 16h4.267l-11.733 -16z" />
-                <path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" />
-              </svg>
-            </a>
-
-            <a
-              href="https://facebook.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Facebook"
-              className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-full hover:bg-white/10 transition-colors cursor-pointer"
-            >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-              </svg>
-            </a>
-
-            <a
-              href="https://linkedin.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="LinkedIn"
-              className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-full hover:bg-white/10 transition-colors cursor-pointer"
-            >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-                <rect width="4" height="12" x="2" y="9" />
-                <circle cx="4" cy="4" r="2" />
-              </svg>
-            </a>
-
-            <a
-              href="https://tiktok.com"
+              href="https://www.tiktok.com/@horwalle"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="TikTok"

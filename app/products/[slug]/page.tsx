@@ -32,6 +32,18 @@ import {
 import { ApplePayLogo, PaymentLogosRow } from "@/components/PaymentLogos";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 
+function getGenderLabel(gender: string | undefined, lang: string): string {
+  if (!gender) return "";
+  const g = gender.toLowerCase().trim();
+  const map: Record<string, Record<string, string>> = {
+    men: { az: "Kişi", en: "Men", ru: "Мужское", tr: "Erkek" },
+    women: { az: "Qadın", en: "Women", ru: "Женское", tr: "Kadın" },
+    unisex: { az: "Unisex", en: "Unisex", ru: "Унисекс", tr: "Unisex" },
+  };
+  return map[g]?.[lang] || map[g]?.["az"] || gender;
+}
+
+
 export default function ProductDetailPage() {
   const params = useParams();
   const slug = params?.slug as string;
@@ -321,11 +333,18 @@ export default function ProductDetailPage() {
                 </>
               )}
 
-              {product.badge && (
-                <div className="absolute top-3 left-3 z-10">
-                  <span className="px-3 py-1 rounded-full bg-white/95 backdrop-blur-md text-stone-900 border border-stone-200/90 font-semibold text-[11px] uppercase tracking-wider shadow-2xs">
-                    {translateBadge(product.badge, language)}
-                  </span>
+              {(product.badge || product.gender) && (
+                <div className="absolute top-3 left-3 z-10 flex flex-wrap items-center gap-1.5 pointer-events-none">
+                  {product.badge && (
+                    <span className="px-3 py-1 rounded-full bg-white/95 backdrop-blur-md text-stone-900 border border-stone-200/90 font-semibold text-[11px] uppercase tracking-wider shadow-2xs">
+                      {translateBadge(product.badge, language)}
+                    </span>
+                  )}
+                  {product.gender && (
+                    <span className="px-2.5 py-1 rounded-full bg-stone-900/90 backdrop-blur-md text-white font-semibold text-[11px] uppercase tracking-wider shadow-2xs">
+                      {getGenderLabel(product.gender, language)}
+                    </span>
+                  )}
                 </div>
               )}
             </div>
@@ -342,15 +361,30 @@ export default function ProductDetailPage() {
                 <span className="uppercase tracking-widest font-mono font-semibold text-stone-700">
                   {product.refCode || "HORVVALLE-ORIGINAL"}
                 </span>
+                {product.gender && (
+                  <span className="px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-800 border border-stone-200 text-xs font-semibold uppercase tracking-wider">
+                    {getGenderLabel(product.gender, language)}
+                  </span>
+                )}
               </div>
 
               <h1 className="font-eb-garamond text-3xl sm:text-4xl lg:text-5xl font-normal text-stone-900 tracking-wide">
                 {product.name}
               </h1>
 
-              <p className="text-xs text-stone-500 font-medium uppercase tracking-wider mt-2">
-                {product.fit}
-              </p>
+              <div className="flex items-center gap-2 mt-2">
+                <p className="text-xs text-stone-500 font-medium uppercase tracking-wider">
+                  {product.fit}
+                </p>
+                {product.gender && (
+                  <>
+                    <span className="text-stone-300">•</span>
+                    <span className="text-xs font-semibold text-stone-700 uppercase tracking-wider">
+                      {getGenderLabel(product.gender, language)}
+                    </span>
+                  </>
+                )}
+              </div>
 
               {/* Price */}
               <div className="flex items-center gap-3 mt-4">

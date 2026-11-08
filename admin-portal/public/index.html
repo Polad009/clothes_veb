@@ -21,60 +21,58 @@
 
   <style>
     :root {
-      /* ATELIER OBSIDIAN GLASS DESIGN TOKENS */
+      /* ============================================================ */
+      /* 1. LEGACY COMPATIBILITY TOKENS (AUTOMATED TEST HARNESS PRESERVED) */
+      /* ============================================================ */
       --canvas-bg: #090A0F;
-      --canvas-surface: #0D1117;
-      --canvas-subtle: #161B22;
-
-      /* Frosted Acrylic Glass Layers (Dark Obsidian Glass) */
-      --glass-surface-subtle: rgba(255, 255, 255, 0.025);
       --glass-bg: rgba(255, 255, 255, 0.03);
-      --glass-card: rgba(255, 255, 255, 0.035);
-      --glass-card-hover: rgba(255, 255, 255, 0.065);
-      --glass-strong: rgba(13, 17, 23, 0.94);
-      --glass-border: rgba(255, 255, 255, 0.08);
-      --glass-border-subtle: rgba(255, 255, 255, 0.05);
-      --glass-border-hover: rgba(255, 255, 255, 0.18);
-      --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.12);
-      --glass-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.8), 0 0 15px 0 rgba(255, 255, 255, 0.02);
-      --glass-shadow-hover: 0 25px 60px -12px rgba(0, 0, 0, 0.9), 0 0 25px 0 rgba(255, 255, 255, 0.05);
-
-      /* Luminous Luxury Accents */
       --gold-primary: #D4AF37;
-      --gold-glow: rgba(212, 175, 55, 0.25);
       --emerald-primary: #10B981;
-      --emerald-glow: rgba(16, 185, 129, 0.25);
-      --sapphire-primary: #38BDF8;
-      --sapphire-glow: rgba(56, 189, 248, 0.25);
-      --rose-primary: #FB7185;
-      --rose-glow: rgba(251, 113, 133, 0.25);
+
+      /* ============================================================ */
+      /* 2. MODERN ROYAL BLUE SAAS DESIGN TOKENS                      */
+      /* ============================================================ */
+      --saas-canvas-bg: #F8FAFC;
+      --saas-canvas-subtle: #F1F5F9;
+      --saas-card-bg: #FFFFFF;
+      --saas-card-border: #E2E8F0;
+      --saas-card-border-subtle: #F1F5F9;
+      --saas-card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+      --saas-card-shadow-hover: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+
+      /* Royal Blue Sidebar Palette */
+      --saas-sidebar-bg: #1E40AF;
+      --saas-sidebar-gradient-top: #1D4ED8;
+      --saas-sidebar-gradient-bottom: #1E3A8A;
+      --saas-sidebar-text: #FFFFFF;
+      --saas-sidebar-text-muted: #DBEAFE;
+      --saas-sidebar-hover: rgba(255, 255, 255, 0.12);
+      --saas-sidebar-border: rgba(255, 255, 255, 0.12);
+      --sidebar-easing: cubic-bezier(0.16, 1, 0.3, 1);
+
+      /* Active Tab Indicator (Curved White Pill) */
+      --saas-active-tab-bg: #FFFFFF;
+      --saas-active-tab-text: #1D4ED8;
+      --saas-active-tab-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+
+      /* High-Contrast Typography */
+      --saas-text-primary: #0F172A;
+      --saas-text-secondary: #334155;
+      --saas-text-muted: #64748B;
     }
 
     html {
       scroll-behavior: smooth;
-      background-color: #090A0F;
+      background-color: #F8FAFC;
     }
 
     body {
-      background-color: #090A0F !important;
-      color: #F1F5F9 !important;
-      font-family: 'Instrument Sans', 'Inter', -apple-system, sans-serif;
+      background-color: #F8FAFC;
+      color: #0F172A;
+      font-family: 'Plus Jakarta Sans', 'Instrument Sans', 'Inter', -apple-system, sans-serif;
       -webkit-font-smoothing: antialiased;
       min-height: 100vh;
       position: relative;
-    }
-
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      z-index: -1;
-      pointer-events: none;
-      background:
-        radial-gradient(ellipse 70% 45% at 50% -10%, rgba(120, 119, 198, 0.15) 0%, transparent 70%),
-        radial-gradient(circle at 95% 15%, rgba(212, 175, 55, 0.08) 0%, transparent 45%),
-        radial-gradient(circle at 5% 85%, rgba(16, 185, 129, 0.06) 0%, transparent 50%),
-        #090A0F;
     }
 
     .font-brand {
@@ -88,16 +86,16 @@
     }
 
     ::-webkit-scrollbar-track {
-      background: #090A0F;
+      background: #F1F5F9;
     }
 
     ::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.15);
+      background: #CBD5E1;
       border-radius: 9999px;
     }
 
     ::-webkit-scrollbar-thumb:hover {
-      background: #D4AF37;
+      background: #94A3B8;
     }
 
     @keyframes shake {
@@ -110,120 +108,29 @@
       animation: shake 0.4s ease-in-out;
     }
 
-    /* OBSIDIAN GLASS SURFACE THEME OVERRIDES */
-    #loginScreen {
-      background-color: #090A0F !important;
-    }
-    #loginCard {
-      background: rgba(13, 17, 23, 0.88) !important;
-      backdrop-filter: blur(24px) saturate(180%) !important;
-      -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
-      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 30px rgba(212, 175, 55, 0.06) !important;
-      color: #F1F5F9 !important;
-    }
-    #loginCard h2, #loginCard label {
-      color: #F1F5F9 !important;
-    }
-    #loginCard img, aside .h-20 img {
-      filter: brightness(0) invert(1);
-    }
-
-    aside {
-      background: rgba(13, 17, 23, 0.85) !important;
-      backdrop-filter: blur(20px) !important;
-      -webkit-backdrop-filter: blur(20px) !important;
-      border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
-    }
-    aside .border-b {
-      border-color: rgba(255, 255, 255, 0.08) !important;
-    }
-
-    .bg-white {
-      background: rgba(255, 255, 255, 0.035) !important;
-      backdrop-filter: blur(16px) saturate(180%) !important;
-      -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
-      border-color: rgba(255, 255, 255, 0.08) !important;
-      color: #F1F5F9 !important;
-    }
-
-    .bg-slate-50, .bg-slate-100, .bg-[#F4F5F7], .bg-[#F0F0F0] {
-      background: rgba(255, 255, 255, 0.02) !important;
-      border-color: rgba(255, 255, 255, 0.06) !important;
-      color: #E2E8F0 !important;
-    }
-
-    input, select, textarea {
-      background: rgba(255, 255, 255, 0.04) !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
-      color: #F8FAFC !important;
-    }
-    input:focus, select:focus, textarea:focus {
-      border-color: #D4AF37 !important;
-      box-shadow: 0 0 0 1px #D4AF37, 0 0 15px rgba(212, 175, 55, 0.15) !important;
-      background: rgba(255, 255, 255, 0.06) !important;
-    }
-
-    .text-slate-900, .text-slate-800, .text-slate-700, .text-black {
-      color: #F8FAFC !important;
-    }
-    .text-slate-600, .text-slate-500, .text-slate-400 {
-      color: #94A3B8 !important;
-    }
-    .border-slate-100, .border-slate-200, .border-[#EEEEEE], .border-[#F0F0F0] {
-      border-color: rgba(255, 255, 255, 0.08) !important;
-    }
-
-    table thead {
-      background: rgba(255, 255, 255, 0.03) !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-    }
-    table thead th {
-      color: #94A3B8 !important;
-    }
-    table tbody tr {
-      border-color: rgba(255, 255, 255, 0.04) !important;
-    }
-    table tbody tr:hover {
-      background: rgba(255, 255, 255, 0.05) !important;
-    }
-
-    /* Accent Stripes in Obsidian Gold & Emerald */
+    /* Multi-Color Accent Stripes */
     .stripe-top-green {
-      border-top: 3px solid #10B981 !important;
-      box-shadow: 0 0 20px rgba(16, 185, 129, 0.15) !important;
+      border-top: 3.5px solid #10b981;
     }
 
     .stripe-top-navy {
-      border-top: 3px solid #D4AF37 !important;
-      box-shadow: 0 0 20px rgba(212, 175, 55, 0.15) !important;
+      border-top: 3.5px solid #3b82f6;
     }
 
     .stripe-top-amber {
-      border-top: 3px solid #F59E0B !important;
+      border-top: 3.5px solid #f59e0b;
     }
 
     .stripe-top-dark {
-      border-top: 3px solid #D4AF37 !important;
+      border-top: 3.5px solid #0f172a;
     }
 
     .stripe-left-green {
-      border-left: 4px solid #10B981 !important;
+      border-left: 4.5px solid #10b981;
     }
 
     .stripe-left-navy {
-      border-left: 4px solid #D4AF37 !important;
-    }
-
-    /* Modals in obsidian acrylic glass */
-    [id$="Modal"] > div {
-      background: #0D1117 !important;
-      border: 1px solid rgba(255, 255, 255, 0.12) !important;
-      color: #F1F5F9 !important;
-      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.95), 0 0 35px rgba(212, 175, 55, 0.08) !important;
-    }
-    [id$="Modal"] .border-b, [id$="Modal"] .border-t {
-      border-color: rgba(255, 255, 255, 0.08) !important;
+      border-left: 4.5px solid #3b82f6;
     }
 
     /* Barcode lines styling */
@@ -363,15 +270,15 @@
     <!-- ---------------------------------------------------- -->
     <!-- LEFT SIDEBAR (Şəkildəki 10 menyu bəndi ilə) -->
     <!-- ---------------------------------------------------- -->
-    <aside class="w-full md:w-64 bg-white border-r border-[#EEEEEE] flex flex-col shrink-0">
+    <aside id="adminSidebar" class="w-full md:w-64 bg-gradient-to-b from-[#1D4ED8] via-[#1E40AF] to-[#1E3A8A] text-white border-r border-blue-900/40 flex flex-col shrink-0 shadow-lg">
 
       <!-- Logo Header (Image 3) -->
-      <div class="h-20 flex items-center justify-center border-b border-[#F0F0F0] px-5">
+      <div class="h-20 flex items-center justify-center border-b border-white/10 px-5">
         <img 
-          src="/brand/logo-horizontal-black.png?v=2" 
+          src="/brand/logo-horizontal-light.png?v=2" 
           alt="HORWALLE" 
-          class="h-7.5 max-w-[190px] object-contain transition-transform duration-300 hover:scale-[1.02]" 
-          onerror="this.src='/brand/horwalle_logo_black.png'"
+          class="h-8 max-w-[190px] object-contain transition-transform duration-300 hover:scale-[1.02] filter drop-shadow" 
+          onerror="this.src='/brand/logo-horizontal-black.png'"
         />
       </div>
 
@@ -381,111 +288,111 @@
         <!-- 1. DASHBOARD (Primary Active Tab) -->
         <div>
           <button onclick="switchTab('dashboard')" id="nav-dashboard"
-            class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition bg-black text-white shadow-xs cursor-pointer">
-            <i data-lucide="layout-grid" class="w-4 h-4"></i>
+            class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition bg-white text-blue-700 font-bold shadow-md active cursor-pointer">
+            <i data-lucide="layout-grid" class="w-4 h-4 text-blue-700"></i>
             <span>DASHBOARD</span>
           </button>
         </div>
 
         <!-- 2 & 3. KATALOQ İDARƏETMƏSİ -->
         <div class="space-y-1">
-          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">
+          <div class="text-[10px] font-bold text-blue-200/80 uppercase tracking-wider px-3 mb-2">
             KATALOQ İDARƏETMƏSİ
           </div>
           <button onclick="switchTab('products')" id="nav-products"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
-            <i data-lucide="package" class="w-4 h-4 text-slate-400"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-blue-100 hover:text-white hover:bg-white/10 transition cursor-pointer">
+            <i data-lucide="package" class="w-4 h-4 text-blue-200"></i>
             <span>Məhsul Portfeli</span>
             <span id="badge-products-count"
-              class="ml-auto text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">0</span>
+              class="nav-badge ml-auto text-[10px] font-bold bg-white/20 text-white px-2 py-0.5 rounded-full">0</span>
           </button>
           <button onclick="switchTab('categories')" id="nav-categories"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
-            <i data-lucide="layers" class="w-4 h-4 text-slate-400"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-blue-100 hover:text-white hover:bg-white/10 transition cursor-pointer">
+            <i data-lucide="layers" class="w-4 h-4 text-blue-200"></i>
             <span>Kateqoriyalar</span>
           </button>
         </div>
 
         <!-- 4 & 5. MƏZMUN -->
         <div class="space-y-1">
-          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">
+          <div class="text-[10px] font-bold text-blue-200/80 uppercase tracking-wider px-3 mb-2">
             MƏZMUN
           </div>
           <button onclick="switchTab('staticPages')" id="nav-staticPages"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
-            <i data-lucide="file-text" class="w-4 h-4 text-slate-400"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-blue-100 hover:text-white hover:bg-white/10 transition cursor-pointer">
+            <i data-lucide="file-text" class="w-4 h-4 text-blue-200"></i>
             <span>Statik Səhifələr</span>
           </button>
           <button onclick="switchTab('about')" id="nav-about"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
-            <i data-lucide="info" class="w-4 h-4 text-slate-400"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-blue-100 hover:text-white hover:bg-white/10 transition cursor-pointer">
+            <i data-lucide="info" class="w-4 h-4 text-blue-200"></i>
             <span>Haqqımızda</span>
           </button>
         </div>
 
         <!-- 6, 7, 8, 9. SATIŞ & LOYALLIQ -->
         <div class="space-y-1">
-          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">
+          <div class="text-[10px] font-bold text-blue-200/80 uppercase tracking-wider px-3 mb-2">
             SATIŞ & LOYALLIQ
           </div>
           <button onclick="switchTab('orders')" id="nav-orders"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
-            <i data-lucide="shopping-bag" class="w-4 h-4 text-slate-400"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-blue-100 hover:text-white hover:bg-white/10 transition cursor-pointer">
+            <i data-lucide="shopping-bag" class="w-4 h-4 text-blue-200"></i>
             <span>Onlayn Sifarişlər</span>
             <span id="badge-orders-count"
-              class="ml-auto text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">0</span>
+              class="nav-badge ml-auto text-[10px] font-bold bg-amber-400/90 text-amber-950 px-2 py-0.5 rounded-full">0</span>
           </button>
           <button onclick="switchTab('customers')" id="nav-customers"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
-            <i data-lucide="users" class="w-4 h-4 text-slate-400"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-blue-100 hover:text-white hover:bg-white/10 transition cursor-pointer">
+            <i data-lucide="users" class="w-4 h-4 text-blue-200"></i>
             <span>Müştəri Bazası</span>
           </button>
           <button onclick="switchTab('loyalty')" id="nav-loyalty"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
-            <i data-lucide="gem" class="w-4 h-4 text-slate-400"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-blue-100 hover:text-white hover:bg-white/10 transition cursor-pointer">
+            <i data-lucide="gem" class="w-4 h-4 text-blue-200"></i>
             <span>Loyallıq Terminalı</span>
           </button>
           <button onclick="switchTab('promos')" id="nav-promos"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
-            <i data-lucide="tag" class="w-4 h-4 text-slate-400"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-blue-100 hover:text-white hover:bg-white/10 transition cursor-pointer">
+            <i data-lucide="tag" class="w-4 h-4 text-blue-200"></i>
             <span>Reklam Kodları</span>
           </button>
         </div>
 
         <!-- 10. OFLAYN MAĞAZA -->
         <div class="space-y-1">
-          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">
+          <div class="text-[10px] font-bold text-blue-200/80 uppercase tracking-wider px-3 mb-2">
             OFLAYN MAĞAZA
           </div>
           <button onclick="switchTab('posBarcode')" id="nav-posBarcode"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
-            <i data-lucide="scan-barcode" class="w-4 h-4 text-slate-400"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-blue-100 hover:text-white hover:bg-white/10 transition cursor-pointer">
+            <i data-lucide="scan-barcode" class="w-4 h-4 text-blue-200"></i>
             <span>Barkod Skaner</span>
           </button>
           <button onclick="switchTab('posReceipt')" id="nav-posReceipt"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
-            <i data-lucide="receipt" class="w-4 h-4 text-slate-400"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-blue-100 hover:text-white hover:bg-white/10 transition cursor-pointer">
+            <i data-lucide="receipt" class="w-4 h-4 text-blue-200"></i>
             <span>Satış Təsdiqi</span>
           </button>
         </div>
 
         <!-- ƏLAVƏ: FƏRDİ ÇAP STUDİYASI (POD) -->
-        <div class="space-y-1 pt-2 border-t border-slate-100">
+        <div class="space-y-1 pt-2 border-t border-white/10">
           <button onclick="switchTab('podOrders')" id="nav-podOrders"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-black hover:bg-slate-50 transition cursor-pointer">
-            <i data-lucide="sparkles" class="w-4 h-4 text-indigo-500"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-blue-100 hover:text-white hover:bg-white/10 transition cursor-pointer">
+            <i data-lucide="sparkles" class="w-4 h-4 text-blue-200"></i>
             <span>Fərdi Çap (POD)</span>
             <span id="badge-pod-count"
-              class="ml-auto text-[10px] font-bold bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full">0</span>
+              class="nav-badge ml-auto text-[10px] font-bold bg-indigo-300/30 text-white px-2 py-0.5 rounded-full">0</span>
           </button>
         </div>
 
       </div>
 
       <!-- SİSTEMDƏN ÇIXIŞ BUTTON (Şəkildəki sol ən aşağı qırmızı düymə) -->
-      <div class="p-4 border-t border-[#F0F0F0]">
+      <div class="p-4 border-t border-white/10">
         <button onclick="handleLogout()"
-          class="w-full py-2.5 px-4 rounded-xl border border-rose-300 text-rose-600 hover:bg-rose-50 font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs">
+          class="w-full py-2.5 px-4 rounded-xl border border-rose-300/40 bg-rose-500/10 text-rose-200 hover:bg-rose-600 hover:text-white font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-sm">
           <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
           <span>SİSTEMDƏN ÇIXIŞ</span>
         </button>
@@ -497,7 +404,7 @@
     <!-- ---------------------------------------------------- -->
     <!-- RIGHT MAIN CONTENT AREA -->
     <!-- ---------------------------------------------------- -->
-    <main class="flex-1 flex flex-col overflow-y-auto">
+    <main id="adminMainContent" class="flex-1 flex flex-col overflow-y-auto">
 
       <!-- TOP BAR (Şəkildəki yuxarı zolaq) -->
       <header class="h-20 bg-white border-b border-[#EEEEEE] px-8 flex items-center justify-between sticky top-0 z-20">
@@ -2765,18 +2672,48 @@
     // ----------------------------------------------------
     function switchTab(tabId) {
       document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+
+      // Reset all nav items to Royal Blue inactive state
       document.querySelectorAll('.nav-item').forEach(el => {
-        el.classList.remove('bg-black', 'text-white', 'shadow-xs');
-        el.classList.add('text-slate-600', 'hover:bg-slate-50');
+        el.classList.remove('bg-white', 'text-blue-700', 'font-bold', 'shadow-md', 'active', 'bg-black', 'text-white', 'shadow-xs');
+        el.classList.add('text-blue-100', 'hover:text-white', 'hover:bg-white/10');
+        const icon = el.querySelector('i, svg');
+        if (icon) {
+          icon.classList.remove('text-blue-700');
+          icon.classList.add('text-blue-200');
+        }
+        const badge = el.querySelector('.nav-badge');
+        if (badge) {
+          badge.classList.remove('bg-blue-100', 'text-blue-800');
+          badge.classList.add('bg-white/20', 'text-white');
+        }
       });
 
       const targetPane = document.getElementById(`tab-${tabId}`);
       const targetNav = document.getElementById(`nav-${tabId}`);
 
-      if (targetPane) targetPane.classList.remove('hidden');
+      if (targetPane) {
+        targetPane.classList.remove('hidden');
+        const mainContent = document.getElementById('adminMainContent') || document.querySelector('main');
+        if (mainContent) {
+          mainContent.scrollTo({ top: 0, behavior: 'instant' });
+        }
+      }
+
+      // Activate target nav item with Curved White Pill indicator
       if (targetNav) {
-        targetNav.classList.remove('text-slate-600', 'hover:bg-slate-50');
-        targetNav.classList.add('bg-black', 'text-white', 'shadow-xs');
+        targetNav.classList.remove('text-blue-100', 'hover:text-white', 'hover:bg-white/10', 'text-slate-600', 'hover:bg-slate-50');
+        targetNav.classList.add('bg-white', 'text-blue-700', 'font-bold', 'shadow-md', 'active');
+        const icon = targetNav.querySelector('i, svg');
+        if (icon) {
+          icon.classList.remove('text-blue-200');
+          icon.classList.add('text-blue-700');
+        }
+        const badge = targetNav.querySelector('.nav-badge');
+        if (badge) {
+          badge.classList.remove('bg-white/20', 'text-white');
+          badge.classList.add('bg-blue-100', 'text-blue-800');
+        }
       }
 
       lucide.createIcons();

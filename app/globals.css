@@ -58,7 +58,7 @@
   }
 
   html {
-    scroll-behavior: smooth;
+    scroll-behavior: auto;
     -webkit-tap-highlight-color: transparent;
     overflow-x: hidden !important;
     max-width: 100vw;

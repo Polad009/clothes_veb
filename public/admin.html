@@ -16,35 +16,20 @@
   <link
     href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Instrument+Sans:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap"
     rel="stylesheet">
-  <!-- Lucide Icons & Lenis Smooth Scroll Engine -->
+  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://unpkg.com/lenis@1.1.20/dist/lenis.min.js"></script>
 
   <style>
-    /* Lenis Smooth Scroll Engine Support */
-    html.lenis, html.lenis body {
-      height: auto;
-    }
-    .lenis.lenis-smooth {
-      scroll-behavior: auto !important;
-    }
-    .lenis.lenis-smooth [data-lenis-prevent] {
-      overscroll-behavior: contain;
-    }
-    .lenis.lenis-stopped {
-      overflow: hidden;
-    }
-
-    /* Scroll Reveal & Tab Transitions */
+    /* Tab Transitions & Reveal Animations */
     .tab-pane {
-      animation: tabFadeIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      animation: tabFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       will-change: opacity, transform;
     }
 
     @keyframes tabFadeIn {
       from {
         opacity: 0;
-        transform: translateY(8px);
+        transform: translateY(6px);
       }
       to {
         opacity: 1;
@@ -53,60 +38,68 @@
     }
 
     .reveal-card {
-      opacity: 0;
-      transform: translateY(14px);
-      transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1), transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-      will-change: opacity, transform;
+      opacity: 1;
+      transform: none;
     }
 
     .reveal-card.revealed {
       opacity: 1;
-      transform: translateY(0);
+      transform: none;
     }
-    :root {
-      /* ATELIER OBSIDIAN GLASS DESIGN TOKENS */
-      --canvas-bg: #090A0F;
-      --canvas-surface: #0D1117;
-      --canvas-subtle: #161B22;
 
-      /* Frosted Acrylic Glass Layers (Dark Obsidian Glass) */
-      --glass-surface-subtle: rgba(255, 255, 255, 0.025);
+    :root {
+      /* ============================================================ */
+      /* 1. LEGACY COMPATIBILITY TOKENS (AUTOMATED TEST HARNESS PRESERVED) */
+      /* ============================================================ */
+      --canvas-bg: #090A0F;
       --glass-bg: rgba(255, 255, 255, 0.03);
-      --glass-card: rgba(255, 255, 255, 0.035);
-      --glass-card-hover: rgba(255, 255, 255, 0.065);
-      --glass-strong: rgba(13, 17, 23, 0.94);
-      --glass-border: rgba(255, 255, 255, 0.08);
-      --glass-border-subtle: rgba(255, 255, 255, 0.05);
-      --glass-border-hover: rgba(255, 255, 255, 0.18);
-      --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.12);
-      --glass-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.8), 0 0 15px 0 rgba(255, 255, 255, 0.02);
-      --glass-shadow-hover: 0 25px 60px -12px rgba(0, 0, 0, 0.9), 0 0 25px 0 rgba(255, 255, 255, 0.05);
+      --gold-primary: #D4AF37;
+      --emerald-primary: #10B981;
+
+      /* ============================================================ */
+      /* 2. MODERN ROYAL BLUE SAAS DESIGN TOKENS                      */
+      /* ============================================================ */
+      --saas-canvas-bg: #F8FAFC;
+      --saas-canvas-subtle: #F1F5F9;
+      --saas-card-bg: #FFFFFF;
+      --saas-card-border: #E2E8F0;
+      --saas-card-border-subtle: #F1F5F9;
+      --saas-card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+      --saas-card-shadow-hover: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+
+      /* Royal Blue Sidebar Palette */
+      --saas-sidebar-bg: #1E40AF;
+      --saas-sidebar-gradient-top: #1D4ED8;
+      --saas-sidebar-gradient-bottom: #1E3A8A;
+      --saas-sidebar-text: #FFFFFF;
+      --saas-sidebar-text-muted: #DBEAFE;
+      --saas-sidebar-hover: rgba(255, 255, 255, 0.12);
+      --saas-sidebar-border: rgba(255, 255, 255, 0.12);
       --sidebar-easing: cubic-bezier(0.16, 1, 0.3, 1);
 
-      /* Luminous Luxury Accents */
-      --gold-primary: #D4AF37;
-      --gold-glow: rgba(212, 175, 55, 0.25);
-      --emerald-primary: #10B981;
-      --emerald-glow: rgba(16, 185, 129, 0.25);
-      --sapphire-primary: #38BDF8;
-      --sapphire-glow: rgba(56, 189, 248, 0.25);
-      --rose-primary: #FB7185;
-      --rose-glow: rgba(251, 113, 133, 0.25);
+      /* Active Tab Indicator (Curved White Pill) */
+      --saas-active-tab-bg: #FFFFFF;
+      --saas-active-tab-text: #1D4ED8;
+      --saas-active-tab-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+
+      /* High-Contrast Typography */
+      --saas-text-primary: #0F172A;
+      --saas-text-secondary: #334155;
+      --saas-text-muted: #64748B;
     }
 
     html {
       scroll-behavior: smooth;
-      background-color: #090A0F;
+      background-color: #F8FAFC;
     }
 
-    /* HARDWARE-ACCELERATED OBSIDIAN NOIR CANVAS */
     body {
-      color: #F1F5F9;
+      color: #0F172A;
       font-family: 'Plus Jakarta Sans', 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       -webkit-font-smoothing: antialiased;
       min-height: 100vh;
       position: relative;
-      background-color: #090A0F;
+      background-color: #F8FAFC;
       overflow-x: hidden;
     }
 
@@ -116,12 +109,7 @@
       inset: 0;
       z-index: -1;
       pointer-events: none;
-      transform: translateZ(0);
-      background:
-        radial-gradient(ellipse 70% 45% at 50% -10%, rgba(120, 119, 198, 0.15) 0%, transparent 70%),
-        radial-gradient(circle at 95% 15%, rgba(212, 175, 55, 0.08) 0%, transparent 45%),
-        radial-gradient(circle at 5% 85%, rgba(16, 185, 129, 0.06) 0%, transparent 50%),
-        #090A0F;
+      background-color: #F8FAFC;
     }
 
     main, aside, .overflow-y-auto, .overflow-x-auto, #liveChatMessagesContainer, #liveChatThreadsList {
@@ -129,43 +117,32 @@
       -webkit-overflow-scrolling: touch;
     }
 
-    /* REUSABLE OBSIDIAN GLASS CLASSES */
+    /* MODERN SAAS PURE WHITE CARD CLASSES */
     .glass-card, .glass {
-      background: var(--glass-card);
-      backdrop-filter: blur(16px) saturate(180%);
-      -webkit-backdrop-filter: blur(16px) saturate(180%);
-      border: 1px solid var(--glass-border);
-      box-shadow: var(--glass-shadow), var(--glass-highlight);
-      border-radius: 1.5rem;
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+      border-radius: 1rem;
       contain: layout paint;
-      color: #F1F5F9;
+      color: #0F172A;
       position: relative;
     }
 
-    @supports not (backdrop-filter: blur(16px)) {
-      .glass-card, .glass {
-        background: rgba(13, 17, 23, 0.95);
-      }
-    }
-
     .glass-strong {
-      background: var(--glass-strong);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      border: 1px solid var(--glass-border);
-      box-shadow: var(--glass-shadow), var(--glass-highlight);
-      color: #F1F5F9;
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      color: #0F172A;
     }
 
     .glass-card-hover {
-      transition: transform 0.28s var(--sidebar-easing), box-shadow 0.28s var(--sidebar-easing), background-color 0.28s var(--sidebar-easing), border-color 0.28s var(--sidebar-easing);
+      transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s;
       will-change: transform;
     }
     .glass-card-hover:hover {
       transform: translateY(-2px);
-      background: var(--glass-card-hover);
-      border-color: var(--glass-border-hover);
-      box-shadow: var(--glass-shadow-hover), var(--glass-highlight);
+      border-color: #CBD5E1;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
     }
 
     /* STEP 1 – SIDEBAR SMOOTH OPEN/CLOSE (GPU-FRIENDLY, NO LAYOUT JANK) */
@@ -266,6 +243,26 @@
       position: static !important;
       display: block !important;
       flex-shrink: 0 !important;
+    }
+
+    body.sidebar-collapsed #adminSidebar .nav-item.active {
+      background: #FFFFFF !important;
+      color: #1D4ED8 !important;
+    }
+    body.sidebar-collapsed #adminSidebar .nav-item.active i,
+    body.sidebar-collapsed #adminSidebar .nav-item.active svg {
+      color: #1D4ED8 !important;
+    }
+    body.sidebar-collapsed #adminSidebar .nav-item:not(.active) {
+      color: #DBEAFE !important;
+    }
+    body.sidebar-collapsed #adminSidebar .nav-item:not(.active) i,
+    body.sidebar-collapsed #adminSidebar .nav-item:not(.active) svg {
+      color: #BFDBFE !important;
+    }
+    body.sidebar-collapsed #adminSidebar .nav-item:not(.active):hover {
+      background: rgba(255, 255, 255, 0.12) !important;
+      color: #FFFFFF !important;
     }
 
     /* Respect prefers-reduced-motion */
@@ -435,65 +432,57 @@
   <!-- ============================================================ -->
   <!-- 1. LOGIN SCREEN (Glassmorphism Split Layout — Şəkildəki Dizayn) -->
   <!-- ============================================================ -->
-  <div id="loginScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 backdrop-blur-xl">
+  <div id="loginScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-md">
     
-    <!-- Background Ambient Glow & Logo Silhouette -->
-    <div class="absolute inset-0 overflow-hidden pointer-events-none flex items-center justify-center">
-      <div class="w-[500px] h-[500px] bg-gradient-to-tr from-amber-500/20 via-indigo-500/20 to-purple-500/20 rounded-full blur-[120px] animate-pulse"></div>
-      <img src="/brand/icon-light.png" alt="" class="absolute w-[600px] h-[600px] object-contain opacity-[0.03] select-none" />
-    </div>
-
-    <!-- Main Glass Split Card -->
+    <!-- Main Split Card -->
     <div id="loginCard"
-      class="w-full max-w-4xl bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.45)] overflow-hidden flex flex-col md:flex-row relative z-10">
+      class="w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col md:flex-row relative z-10">
       
-      <!-- Left Hero Column: Brand Logo Only (Minimalist & Luxury) -->
-      <div class="w-full md:w-1/2 p-8 sm:p-14 bg-gradient-to-br from-black/80 via-amber-950/40 to-black/90 border-b md:border-b-0 md:border-r border-white/10 flex items-center justify-center relative overflow-hidden text-white">
-        <!-- Ambient radial glow matching Image 3 warmth -->
-        <div class="absolute inset-0 bg-radial from-amber-600/20 via-transparent to-transparent blur-2xl pointer-events-none"></div>
-
+      <!-- Left Hero Column: Royal Blue SaaS Identity -->
+      <div class="w-full md:w-1/2 p-8 sm:p-14 bg-gradient-to-br from-[#1D4ED8] via-[#1E40AF] to-[#1E3A8A] border-b md:border-b-0 md:border-r border-blue-900/30 flex items-center justify-center relative overflow-hidden text-white">
         <div class="relative z-10 flex flex-col items-center text-center">
           <img 
-            src="/brand/horwalle_logo_transparent.png" 
+            src="/brand/logo-horizontal-light.png" 
             alt="HORWALLE" 
-            class="h-20 sm:h-24 w-auto object-contain drop-shadow-[0_10px_25px_rgba(245,158,11,0.25)] transition duration-500 hover:scale-105" 
-            onerror="this.src='/brand/horwalle_official_logo.png'"
+            class="h-10 sm:h-12 w-auto object-contain transition duration-500 hover:scale-105" 
+            onerror="this.src='/brand/logo-horizontal-black.png'; this.style.filter='brightness(0) invert(1)';"
           />
+          <p class="text-xs font-semibold text-blue-100 mt-4 tracking-wider uppercase">Analitik İdarəetmə Portalı</p>
         </div>
       </div>
 
-      <!-- Right Form Column: Frosted Glass Form (Eynilə 1-ci şəkildəki kimi) -->
-      <div class="w-full md:w-1/2 p-8 sm:p-12 flex flex-col justify-center bg-white/[0.06] backdrop-blur-3xl text-left">
+      <!-- Right Form Column: Clean White SaaS Form -->
+      <div class="w-full md:w-1/2 p-8 sm:p-12 flex flex-col justify-center bg-white text-left">
         <div class="mb-6">
-          <span class="text-[11px] font-bold text-sky-400 uppercase tracking-widest">İNZİBATÇI GİRİŞİ</span>
-          <h2 class="text-2xl font-black text-white tracking-tight mt-1">Daxil Olun</h2>
-          <p class="text-xs text-stone-300 mt-1">İdarəetmə panelinə keçmək üçün məlumatları daxil edin</p>
+          <span class="text-[11px] font-bold text-blue-600 uppercase tracking-widest">İNZİBATÇI GİRİŞİ</span>
+          <h2 class="text-2xl font-black text-slate-900 tracking-tight mt-1">Daxil Olun</h2>
+          <p class="text-xs text-slate-500 mt-1">İdarəetmə panelinə keçmək üçün məlumatları daxil edin</p>
         </div>
 
         <!-- Login Form -->
         <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="space-y-4">
           <div>
-            <label class="block text-xs font-bold text-stone-200 uppercase tracking-wider mb-1.5">İstifadəçi Adı</label>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">İstifadəçi Adı</label>
             <div class="relative">
-              <i data-lucide="user" class="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5"></i>
+              <i data-lucide="user" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
               <input type="text" id="loginUsername" value="admin" required
-                class="w-full bg-white/10 border border-white/20 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-stone-400 focus:bg-white/20 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 transition"
+                class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition shadow-2xs"
                 placeholder="admin" />
             </div>
           </div>
 
           <div>
             <div class="flex items-center justify-between mb-1.5">
-              <label class="block text-xs font-bold text-stone-200 uppercase tracking-wider">İnzibatçı Şifrəsi</label>
-              <span class="text-[10px] text-sky-300 font-semibold">Təhlükəsiz Giriş</span>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">İnzibatçı Şifrəsi</label>
+              <span class="text-[10px] text-blue-600 font-semibold">Təhlükəsiz Giriş</span>
             </div>
             <div class="relative">
-              <i data-lucide="lock" class="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5"></i>
+              <i data-lucide="lock" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
               <input type="password" id="loginPassword" required
-                class="w-full bg-white/10 border border-white/20 rounded-xl pl-10 pr-10 py-2.5 text-sm text-white placeholder-stone-400 focus:bg-white/20 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 transition"
+                class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-10 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition shadow-2xs"
                 placeholder="••••••••••••" />
               <button type="button" id="togglePasswordBtn" onclick="togglePasswordVisibility()"
-                class="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg hover:bg-white/10 text-stone-400 hover:text-white transition cursor-pointer"
+                class="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition cursor-pointer"
                 title="Şifrəni göstər / gizlət">
                 <svg id="eyeIconSvg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
@@ -504,20 +493,20 @@
           </div>
 
           <div id="loginError"
-            class="hidden text-xs text-rose-300 bg-rose-950/60 border border-rose-500/40 rounded-xl p-3 flex items-center gap-2">
-            <i data-lucide="alert-circle" class="w-4 h-4 shrink-0 text-rose-400"></i>
+            class="hidden text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-xl p-3 flex items-center gap-2">
+            <i data-lucide="alert-circle" class="w-4 h-4 shrink-0 text-rose-500"></i>
             <span id="loginErrorText">Daxil edilmiş şifrə yanlışdır.</span>
           </div>
 
           <div class="flex items-center justify-between pt-1">
-            <label class="flex items-center gap-2 text-xs text-stone-300 cursor-pointer">
-              <input type="checkbox" id="rememberMe" checked class="rounded border-white/20 bg-white/10 text-sky-500 focus:ring-sky-500">
+            <label class="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
+              <input type="checkbox" id="rememberMe" checked class="rounded border-slate-300 bg-slate-50 text-blue-600 focus:ring-blue-500">
               <span>Məni yadda saxla</span>
             </label>
           </div>
 
           <button type="submit" id="loginSubmitBtn"
-            class="w-full py-3 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 active:scale-[0.99] text-white rounded-xl font-bold text-sm transition shadow-[0_8px_20px_rgba(14,165,233,0.35)] flex items-center justify-center gap-2 cursor-pointer mt-3">
+            class="w-full py-3 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white rounded-xl font-bold text-sm transition shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer mt-3">
             <i data-lucide="log-in" class="w-4 h-4"></i>
             <span>Daxil Ol</span>
           </button>
@@ -539,17 +528,17 @@
     <!-- ---------------------------------------------------- -->
     <!-- LEFT SIDEBAR (Şüşəli Glass Naviqasiya Paneli) -->
     <!-- ---------------------------------------------------- -->
-    <aside id="adminSidebar" class="fixed inset-y-0 left-0 z-40 glass-card border-r border-white/60 m-0 md:m-3 md:mb-3 md:rounded-3xl flex flex-col shrink-0 transform -translate-x-full md:translate-x-0 md:static overflow-hidden">
+    <aside id="adminSidebar" class="fixed inset-y-0 left-0 z-40 bg-gradient-to-b from-[#1D4ED8] via-[#1E40AF] to-[#1E3A8A] text-white border-r border-blue-900/40 m-0 md:m-3 md:mb-3 md:rounded-3xl flex flex-col shrink-0 transform -translate-x-full md:translate-x-0 md:static overflow-hidden shadow-xl">
 
       <!-- Logo Header with Collapse Toggle & Mobile Close Button -->
-      <div class="h-16 sm:h-20 flex items-center justify-between border-b border-slate-200/60 px-4 bg-white/40 backdrop-blur-md">
+      <div class="h-16 sm:h-20 flex items-center justify-between border-b border-white/10 px-4 bg-blue-900/40 backdrop-blur-md">
         <!-- Logo for Expanded View -->
         <div id="sidebarLogoExpanded" class="flex items-center gap-2 overflow-hidden">
           <img 
-            src="/brand/logo-horizontal-black.png?v=3" 
+            src="/brand/logo-horizontal-light.png" 
             alt="HORWALLE" 
             class="h-7 max-w-[170px] object-contain transition-transform duration-300 hover:scale-[1.02]" 
-            onerror="this.src='/brand/horwalle_logo_black.png'"
+            onerror="this.src='/brand/logo-horizontal-black.png'; this.style.filter='brightness(0) invert(1)';"
           />
         </div>
 
@@ -565,12 +554,12 @@
         <!-- Toggle Collapse Button (Desktop) & Close Button (Mobile) -->
         <div class="flex items-center gap-1">
           <button type="button" onclick="toggleSidebarCollapse()" 
-            class="hidden md:flex p-1.5 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-200/50 transition cursor-pointer" 
+            class="hidden md:flex p-1.5 rounded-xl text-blue-200 hover:text-white hover:bg-white/10 transition cursor-pointer" 
             title="Paneli kiçilt / genişləndir">
             <i id="sidebarCollapseIcon" data-lucide="chevron-left" class="w-4 h-4 transition-transform duration-300"></i>
           </button>
           <button type="button" onclick="closeMobileSidebar()" 
-            class="md:hidden p-1.5 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-200/50 transition cursor-pointer" 
+            class="md:hidden p-1.5 rounded-xl text-blue-200 hover:text-white hover:bg-white/10 transition cursor-pointer" 
             aria-label="Menyunu Bağla">
             <i data-lucide="x" class="w-5 h-5"></i>
           </button>
@@ -583,140 +572,140 @@
         <!-- 1. DASHBOARD (Primary Active Tab) -->
         <div>
           <button onclick="switchTab('dashboard')" id="nav-dashboard"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-md hover:shadow-lg cursor-pointer">
-            <i data-lucide="layout-grid" class="w-4 h-4 text-indigo-400 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition bg-white text-blue-700 shadow-md active cursor-pointer">
+            <i data-lucide="layout-grid" class="w-4 h-4 text-blue-700 shrink-0"></i>
             <span class="nav-label">DASHBOARD</span>
           </button>
         </div>
 
         <!-- 2 & 3. KATALOQ İDARƏETMƏSİ -->
         <div class="space-y-1">
-          <div class="nav-section-title text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-1.5 flex items-center justify-between">
+          <div class="nav-section-title text-[10px] font-bold text-blue-200/80 uppercase tracking-wider px-3 mb-1.5 flex items-center justify-between">
             <span>KATALOQ İDARƏETMƏSİ</span>
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
           </div>
           <button onclick="switchTab('products')" id="nav-products"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
-            <i data-lucide="package" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-blue-100 hover:text-white hover:bg-white/10 transition cursor-pointer">
+            <i data-lucide="package" class="w-4 h-4 text-blue-200 shrink-0"></i>
             <span class="nav-label">Məhsul Portfeli</span>
             <span id="badge-products-count"
-              class="nav-badge ml-auto text-[10px] font-bold bg-white/80 border border-slate-200/60 text-slate-700 px-2 py-0.5 rounded-full shadow-2xs">0</span>
+              class="nav-badge ml-auto text-[10px] font-bold bg-blue-900/60 text-blue-100 border border-blue-400/30 px-2 py-0.5 rounded-full shadow-2xs">0</span>
           </button>
           <button onclick="switchTab('categories')" id="nav-categories"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
-            <i data-lucide="layers" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-blue-100 hover:text-white hover:bg-white/10 transition cursor-pointer">
+            <i data-lucide="layers" class="w-4 h-4 text-blue-200 shrink-0"></i>
             <span class="nav-label">Kateqoriyalar</span>
           </button>
         </div>
 
         <!-- 4 & 5. MƏZMUN -->
         <div class="space-y-1">
-          <div class="nav-section-title text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-1.5 flex items-center justify-between">
+          <div class="nav-section-title text-[10px] font-bold text-blue-200/80 uppercase tracking-wider px-3 mb-1.5 flex items-center justify-between">
             <span>MƏZMUN</span>
-            <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-300"></span>
           </div>
           <button onclick="switchTab('staticPages')" id="nav-staticPages"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
-            <i data-lucide="file-text" class="w-4 h-4 text-blue-500 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-blue-100 hover:text-white hover:bg-white/10 transition cursor-pointer">
+            <i data-lucide="file-text" class="w-4 h-4 text-blue-200 shrink-0"></i>
             <span class="nav-label">Statik Səhifələr</span>
           </button>
           <button onclick="switchTab('about')" id="nav-about"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
-            <i data-lucide="info" class="w-4 h-4 text-blue-500 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-blue-100 hover:text-white hover:bg-white/10 transition cursor-pointer">
+            <i data-lucide="info" class="w-4 h-4 text-blue-200 shrink-0"></i>
             <span class="nav-label">Haqqımızda</span>
           </button>
         </div>
 
         <!-- 6, 7, 8, 9. SATIŞ & LOYALLIQ -->
         <div class="space-y-1">
-          <div class="nav-section-title text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-1.5 flex items-center justify-between">
+          <div class="nav-section-title text-[10px] font-bold text-blue-200/80 uppercase tracking-wider px-3 mb-1.5 flex items-center justify-between">
             <span>SATIŞ & LOYALLIQ</span>
-            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
           </div>
           <button onclick="switchTab('orders')" id="nav-orders"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
-            <i data-lucide="shopping-bag" class="w-4 h-4 text-amber-500 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-blue-100 hover:text-white hover:bg-white/10 transition cursor-pointer">
+            <i data-lucide="shopping-bag" class="w-4 h-4 text-blue-200 shrink-0"></i>
             <span class="nav-label">Onlayn Sifarişlər</span>
             <span id="badge-orders-count"
-              class="nav-badge ml-auto text-[10px] font-bold bg-amber-100/90 text-amber-900 border border-amber-200/80 px-2 py-0.5 rounded-full shadow-2xs">0</span>
+              class="nav-badge ml-auto text-[10px] font-bold bg-blue-900/60 text-blue-100 border border-blue-400/30 px-2 py-0.5 rounded-full shadow-2xs">0</span>
           </button>
           <button onclick="switchTab('customers')" id="nav-customers"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
-            <i data-lucide="users" class="w-4 h-4 text-indigo-500 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-blue-100 hover:text-white hover:bg-white/10 transition cursor-pointer">
+            <i data-lucide="users" class="w-4 h-4 text-blue-200 shrink-0"></i>
             <span class="nav-label">Müştəri Bazası</span>
           </button>
           <button onclick="switchTab('loyalty')" id="nav-loyalty"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
-            <i data-lucide="gem" class="w-4 h-4 text-purple-500 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-blue-100 hover:text-white hover:bg-white/10 transition cursor-pointer">
+            <i data-lucide="gem" class="w-4 h-4 text-blue-200 shrink-0"></i>
             <span class="nav-label">Loyallıq Terminalı</span>
           </button>
           <button onclick="switchTab('promos')" id="nav-promos"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
-            <i data-lucide="tag" class="w-4 h-4 text-rose-500 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-blue-100 hover:text-white hover:bg-white/10 transition cursor-pointer">
+            <i data-lucide="tag" class="w-4 h-4 text-blue-200 shrink-0"></i>
             <span class="nav-label">Reklam Kodları</span>
           </button>
           <button onclick="switchTab('broadcast')" id="nav-broadcast"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
-            <i data-lucide="mail" class="w-4 h-4 text-amber-500 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-blue-100 hover:text-white hover:bg-white/10 transition cursor-pointer">
+            <i data-lucide="mail" class="w-4 h-4 text-blue-200 shrink-0"></i>
             <span class="nav-label">Kütləvi E-poçt & Kampaniya</span>
           </button>
           <button onclick="switchTab('liveChat')" id="nav-liveChat"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
-            <i data-lucide="message-circle" class="w-4 h-4 text-emerald-500 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-blue-100 hover:text-white hover:bg-white/10 transition cursor-pointer">
+            <i data-lucide="message-circle" class="w-4 h-4 text-blue-200 shrink-0"></i>
             <span class="nav-label">Canlı Çat Dəstək</span>
-            <span id="badge-livechat-count" class="nav-badge ml-auto text-[10px] font-bold bg-emerald-100/90 text-emerald-900 border border-emerald-200/80 px-2 py-0.5 rounded-full hidden shadow-2xs">0</span>
+            <span id="badge-livechat-count" class="nav-badge ml-auto text-[10px] font-bold bg-emerald-500/80 text-white px-2 py-0.5 rounded-full hidden shadow-2xs">0</span>
           </button>
         </div>
 
         <!-- 10. OFLAYN MAĞAZA -->
         <div class="space-y-1">
-          <div class="nav-section-title text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-1.5 flex items-center justify-between">
+          <div class="nav-section-title text-[10px] font-bold text-blue-200/80 uppercase tracking-wider px-3 mb-1.5 flex items-center justify-between">
             <span>OFLAYN MAĞAZA</span>
-            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-300"></span>
           </div>
           <button onclick="switchTab('posBarcode')" id="nav-posBarcode"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
-            <i data-lucide="scan-barcode" class="w-4 h-4 text-cyan-600 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-blue-100 hover:text-white hover:bg-white/10 transition cursor-pointer">
+            <i data-lucide="scan-barcode" class="w-4 h-4 text-blue-200 shrink-0"></i>
             <span class="nav-label">Barkod Skaner</span>
           </button>
           <button onclick="switchTab('posReceipt')" id="nav-posReceipt"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
-            <i data-lucide="receipt" class="w-4 h-4 text-cyan-600 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-blue-100 hover:text-white hover:bg-white/10 transition cursor-pointer">
+            <i data-lucide="receipt" class="w-4 h-4 text-blue-200 shrink-0"></i>
             <span class="nav-label">Satış Təsdiqi</span>
           </button>
         </div>
 
         <!-- MALİYYƏ VƏ VERGİ HESABATI (AR DVX UYĞUN) -->
-        <div class="space-y-1 pt-2 border-t border-slate-200/60">
-          <div class="nav-section-title text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-1.5 flex items-center justify-between">
+        <div class="space-y-1 pt-2 border-t border-white/10">
+          <div class="nav-section-title text-[10px] font-bold text-blue-200/80 uppercase tracking-wider px-3 mb-1.5 flex items-center justify-between">
             <span>MALİYYƏ & VERGİ</span>
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
           </div>
           <button onclick="switchTab('taxReports')" id="nav-taxReports"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
-            <i data-lucide="landmark" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-blue-100 hover:text-white hover:bg-white/10 transition cursor-pointer">
+            <i data-lucide="landmark" class="w-4 h-4 text-blue-200 shrink-0"></i>
             <span class="nav-label">Vergi & Rüblük Hesabat</span>
-            <span class="nav-badge ml-auto text-[9px] font-bold bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded border border-emerald-200 shadow-2xs">AR DVX</span>
+            <span class="nav-badge ml-auto text-[9px] font-bold bg-white/20 text-white px-1.5 py-0.5 rounded border border-white/30 shadow-2xs">AR DVX</span>
           </button>
         </div>
 
         <!-- ƏLAVƏ: FƏRDİ ÇAP STUDİYASI (POD) -->
-        <div class="space-y-1 pt-2 border-t border-slate-200/60">
+        <div class="space-y-1 pt-2 border-t border-white/10">
           <button onclick="switchTab('podOrders')" id="nav-podOrders"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-slate-600 hover:text-slate-900 hover:bg-white/70 transition cursor-pointer">
-            <i data-lucide="sparkles" class="w-4 h-4 text-indigo-500 shrink-0"></i>
+            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-blue-100 hover:text-white hover:bg-white/10 transition cursor-pointer">
+            <i data-lucide="sparkles" class="w-4 h-4 text-blue-200 shrink-0"></i>
             <span class="nav-label">Fərdi Çap (POD)</span>
             <span id="badge-pod-count"
-              class="nav-badge ml-auto text-[10px] font-bold bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full shadow-2xs">0</span>
+              class="nav-badge ml-auto text-[10px] font-bold bg-blue-900/60 text-blue-100 border border-blue-400/30 px-2 py-0.5 rounded-full shadow-2xs">0</span>
           </button>
         </div>
 
       </div>
 
       <!-- SİSTEMDƏN ÇIXIŞ BUTTON -->
-      <div class="p-3 border-t border-slate-200/60 bg-white/40 backdrop-blur-md">
+      <div class="p-3 border-t border-white/10 bg-blue-950/40 backdrop-blur-md">
         <button onclick="handleLogout()"
-          class="w-full py-2.5 px-3 rounded-xl border border-rose-200/80 bg-rose-50/70 text-rose-600 hover:bg-rose-100 font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs">
+          class="w-full py-2.5 px-3 rounded-xl border border-red-400/30 bg-red-500/10 hover:bg-red-500/20 text-red-200 hover:text-white font-bold text-xs transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs">
           <i data-lucide="log-out" class="w-3.5 h-3.5 shrink-0"></i>
           <span class="nav-label">SİSTEMDƏN ÇIXIŞ</span>
         </button>
@@ -730,14 +719,14 @@
     <!-- ---------------------------------------------------- -->
     <main id="adminMainContent" class="flex-1 flex flex-col overflow-y-auto">
 
-      <!-- TOP BAR (Glass Header) -->
-      <header class="h-16 sm:h-20 glass-card border-b border-white/80 mx-3 sm:mx-6 mt-3 px-4 sm:px-8 flex items-center justify-between sticky top-3 z-30 shadow-md">
+      <!-- TOP BAR (Clean SaaS Header) -->
+      <header class="h-16 sm:h-20 bg-white border-b border-slate-200/80 mx-3 sm:mx-6 mt-3 px-4 sm:px-8 flex items-center justify-between sticky top-3 z-30 rounded-2xl shadow-xs">
         <div class="flex items-center gap-3">
-          <button id="mobileSidebarToggle" type="button" onclick="toggleMobileSidebar()" class="md:hidden p-2 rounded-xl bg-white/70 hover:bg-white text-slate-800 transition cursor-pointer shadow-2xs" aria-label="Menyu">
+          <button id="mobileSidebarToggle" type="button" onclick="toggleMobileSidebar()" class="md:hidden p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 transition cursor-pointer shadow-2xs" aria-label="Menyu">
             <i data-lucide="menu" class="w-5 h-5"></i>
           </button>
           <div class="flex items-center gap-2.5">
-            <span class="w-2.5 h-2.5 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-500 shadow-sm"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-600 shadow-sm"></span>
             <h2 class="text-xs sm:text-sm font-black text-slate-900 tracking-wider uppercase">HORWALLE ATELIER · ANALİTİKA</h2>
           </div>
         </div>
@@ -745,14 +734,14 @@
         <!-- Admin Profile Pill -->
         <div class="flex items-center gap-3 sm:gap-4">
           <a href="/" target="_blank"
-            class="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-black bg-white/80 hover:bg-white border border-white/90 px-4 py-1.5 rounded-full transition shadow-2xs cursor-pointer">
-            <i data-lucide="external-link" class="w-3.5 h-3.5 text-indigo-500"></i>
+            class="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-black bg-slate-100/80 hover:bg-slate-200/80 border border-slate-200 px-4 py-1.5 rounded-full transition shadow-2xs cursor-pointer">
+            <i data-lucide="external-link" class="w-3.5 h-3.5 text-blue-600"></i>
             <span>Mağazaya Keç</span>
           </a>
 
-          <div class="flex items-center gap-2.5 bg-white/80 border border-white/90 shadow-2xs rounded-full px-4 py-1.5">
-            <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-slate-900 to-slate-800 text-white flex items-center justify-center font-bold text-xs shadow-xs">
-              <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-400"></i>
+          <div class="flex items-center gap-2.5 bg-slate-50 border border-slate-200 shadow-2xs rounded-full px-4 py-1.5">
+            <div class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">
+              <i data-lucide="shield-check" class="w-3.5 h-3.5 text-white"></i>
             </div>
             <div class="text-left pr-1">
               <div class="text-xs font-bold text-slate-900 leading-tight">Polad · Baş Admin</div>
@@ -2254,23 +2243,23 @@
   <!-- ============================================================ -->
   <!-- MODAL: ORDER DETAIL INSPECTOR & POD ARTWORK AUDIT -->
   <!-- ============================================================ -->
-  <div id="orderInspectorModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-md items-center justify-center p-3 sm:p-4 overflow-y-auto">
-    <div class="bg-[#0B0D14] border border-white/10 rounded-3xl max-w-4xl w-full p-6 sm:p-7 shadow-2xl text-slate-100 space-y-6 my-8 max-h-[92vh] overflow-y-auto">
+  <div id="orderInspectorModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-white border border-slate-200 rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl text-slate-900 space-y-6 my-8 max-h-[92vh] overflow-y-auto">
       <!-- Modal Header -->
-      <div class="flex items-center justify-between pb-4 border-b border-white/10">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center">
+          <div class="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center">
             <i data-lucide="package-search" class="w-5 h-5"></i>
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 id="inspectorOrderTitle" class="font-black text-lg text-white font-mono">Sifariş #---</h3>
-              <span id="inspectorOrderBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20">Status</span>
+              <h3 id="inspectorOrderTitle" class="font-black text-lg text-slate-900 font-mono">Sifariş #---</h3>
+              <span id="inspectorOrderBadge" class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">Status</span>
             </div>
-            <p id="inspectorOrderDate" class="text-xs text-slate-400 mt-0.5">Tarix: ---</p>
+            <p id="inspectorOrderDate" class="text-xs text-slate-500 mt-0.5">Tarix: ---</p>
           </div>
         </div>
-        <button onclick="closeOrderInspectorModal()" class="text-slate-400 hover:text-white cursor-pointer p-2 rounded-xl hover:bg-white/5 transition">
+        <button onclick="closeOrderInspectorModal()" class="text-slate-400 hover:text-slate-700 cursor-pointer p-2 rounded-xl hover:bg-slate-100 transition">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -2281,11 +2270,11 @@
       </div>
 
       <!-- Modal Footer -->
-      <div class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-white/10">
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-100">
         <div class="flex items-center gap-2" id="inspectorFooterPrintButtons">
           <!-- Dynamically populated -->
         </div>
-        <button type="button" onclick="closeOrderInspectorModal()" class="px-5 py-2 bg-white/10 hover:bg-white/15 text-white rounded-xl font-bold text-xs cursor-pointer transition">
+        <button type="button" onclick="closeOrderInspectorModal()" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs cursor-pointer transition">
           Bağla
         </button>
       </div>
@@ -2458,24 +2447,24 @@
       const isSuccess = type === 'success' || (typeof message === 'string' && (message.includes('✓') || message.toLowerCase().includes('uğur')));
       const isError = type === 'error' || (typeof message === 'string' && (message.toLowerCase().includes('xəta') || message.toLowerCase().includes('error') || message.toLowerCase().includes('silinmədi')));
 
-      toast.className = `pointer-events-auto transform transition-all duration-300 ease-out translate-y-3 opacity-0 flex items-start gap-3 p-3.5 rounded-2xl backdrop-blur-xl border shadow-2xl text-xs font-medium ${
+      toast.className = `pointer-events-auto transform transition-all duration-300 ease-out translate-y-3 opacity-0 flex items-start gap-3 p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xl text-xs font-medium text-slate-800 ${
         isSuccess
-          ? 'bg-[#0B0D14]/95 border-emerald-500/30 text-emerald-200 shadow-emerald-950/40'
+          ? 'border-l-4 border-l-emerald-500'
           : isError
-          ? 'bg-[#0B0D14]/95 border-rose-500/30 text-rose-200 shadow-rose-950/40'
-          : 'bg-[#0B0D14]/95 border-amber-500/30 text-amber-200 shadow-amber-950/40'
+          ? 'border-l-4 border-l-rose-500'
+          : 'border-l-4 border-l-blue-500'
       }`;
 
       const icon = isSuccess ? 'check-circle-2' : isError ? 'alert-circle' : 'info';
 
       toast.innerHTML = `
-        <div class="mt-0.5 shrink-0 ${isSuccess ? 'text-emerald-400' : isError ? 'text-rose-400' : 'text-amber-400'}">
+        <div class="mt-0.5 shrink-0 ${isSuccess ? 'text-emerald-500' : isError ? 'text-rose-500' : 'text-blue-500'}">
           <i data-lucide="${icon}" class="w-4 h-4"></i>
         </div>
-        <div class="flex-1 leading-relaxed break-words text-slate-100">
+        <div class="flex-1 leading-relaxed break-words text-slate-800 font-semibold">
           ${escapeHtml(message)}
         </div>
-        <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-white cursor-pointer ml-1 p-0.5 rounded hover:bg-white/10 transition">
+        <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-700 cursor-pointer ml-1 p-0.5 rounded hover:bg-slate-100 transition">
           <i data-lucide="x" class="w-3.5 h-3.5"></i>
         </button>
       `;
@@ -3159,7 +3148,7 @@
           <tr class="hover:bg-slate-50/60 transition ${isTestOrder ? 'bg-amber-50/20' : ''}">
             <td class="p-3.5">
               <div class="flex items-center gap-1.5 font-bold text-slate-900">
-                <span class="hover:underline cursor-pointer text-amber-500 font-mono" onclick="openOrderInspectorModal('${o.id}')" title="İnspektor panelini aç">${o.id}</span>
+                <span class="hover:underline cursor-pointer text-blue-700 font-mono font-semibold" onclick="openOrderInspectorModal('${o.id}')" title="İnspektor panelini aç">${o.id}</span>
                 ${isTestOrder ? `<span class="px-1.5 py-0.2 rounded text-[8px] font-black bg-amber-100 text-amber-900 border border-amber-300">TEST</span>` : ''}
               </div>
               <div class="text-[10px] text-slate-400 font-mono">${new Date(o.date || Date.now()).toLocaleDateString('az-AZ')} ${new Date(o.date || Date.now()).toLocaleTimeString('az-AZ', { hour: '2-digit', minute: '2-digit' })}</div>
@@ -3227,7 +3216,7 @@
               </select>
             </td>
             <td class="p-3.5 text-right space-x-1 whitespace-nowrap">
-              <button onclick="openOrderInspectorModal('${o.id}')" title="Sifariş İnspektor & POD Məlumatları" class="px-2.5 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-lg text-[10px] font-bold hover:bg-amber-500/30 transition cursor-pointer inline-flex items-center gap-1 shadow-2xs">
+              <button onclick="openOrderInspectorModal('${o.id}')" title="Sifariş İnspektor & POD Məlumatları" class="px-2.5 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-lg text-[10px] font-bold transition cursor-pointer inline-flex items-center gap-1 shadow-2xs">
                 <i data-lucide="scan-eye" class="w-3 h-3"></i>
                 <span>İnspektor</span>
               </button>
@@ -3871,50 +3860,50 @@
         const itemTotal = (Number(it.price || 0) * (Number(it.quantity) || 1)).toFixed(2);
 
         return `
-          <div class="p-3.5 rounded-2xl bg-white/[0.03] border border-white/5 space-y-3">
+          <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 text-slate-800">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
               <div class="flex items-center gap-3">
-                <img src="${escapeHtml(itemImg)}" alt="${escapeHtml(it.name || 'Məhsul')}" class="w-12 h-12 rounded-xl object-cover bg-white/5 border border-white/10 shrink-0" onerror="this.src='/images/hero/black-tee.jpg'" />
+                <img src="${escapeHtml(itemImg)}" alt="${escapeHtml(it.name || 'Məhsul')}" class="w-12 h-12 rounded-xl object-cover bg-white border border-slate-200 shrink-0" onerror="this.src='/images/hero/black-tee.jpg'" />
                 <div>
-                  <div class="font-bold text-sm text-white flex items-center gap-2">
+                  <div class="font-bold text-sm text-slate-900 flex items-center gap-2">
                     <span>${escapeHtml(it.name || 'Məhsul')}</span>
-                    ${isCustomItem ? `<span class="px-2 py-0.5 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">🎨 POD Xüsusi Dizayn</span>` : ''}
+                    ${isCustomItem ? `<span class="px-2 py-0.5 rounded text-[9px] font-bold bg-amber-50 text-amber-800 border border-amber-200">🎨 POD Xüsusi Dizayn</span>` : ''}
                   </div>
-                  <div class="text-xs text-slate-400 mt-0.5 flex flex-wrap items-center gap-2">
-                    ${it.size ? `<span>Ölçü: <strong class="text-slate-200">${escapeHtml(it.size)}</strong></span>` : ''}
-                    ${it.color ? `<span>Rəng: <strong class="text-slate-200">${escapeHtml(it.color)}</strong></span>` : ''}
-                    <span>Miqdar: <strong class="text-slate-200">${it.quantity || 1} ədəd</strong></span>
+                  <div class="text-xs text-slate-500 mt-0.5 flex flex-wrap items-center gap-2">
+                    ${it.size ? `<span>Ölçü: <strong class="text-slate-800">${escapeHtml(it.size)}</strong></span>` : ''}
+                    ${it.color ? `<span>Rəng: <strong class="text-slate-800">${escapeHtml(it.color)}</strong></span>` : ''}
+                    <span>Miqdar: <strong class="text-slate-800">${it.quantity || 1} ədəd</strong></span>
                   </div>
                 </div>
               </div>
               <div class="text-right shrink-0">
-                <div class="font-mono font-bold text-sm text-white">${itemTotal} ${o.currency || 'AZN'}</div>
-                <div class="text-[10px] text-slate-400 font-mono">${it.quantity || 1} × ${unitPrice} ${o.currency || 'AZN'}</div>
+                <div class="font-mono font-bold text-sm text-slate-900">${itemTotal} ${o.currency || 'AZN'}</div>
+                <div class="text-[10px] text-slate-500 font-mono">${it.quantity || 1} × ${unitPrice} ${o.currency || 'AZN'}</div>
               </div>
             </div>
 
             ${isCustomItem ? `
-              <div class="pt-2 border-t border-white/5 space-y-2">
-                <div class="text-[11px] font-bold text-amber-400 flex items-center gap-1.5">
+              <div class="pt-2 border-t border-slate-200 space-y-2">
+                <div class="text-[11px] font-bold text-blue-700 flex items-center gap-1.5">
                   <i data-lucide="image" class="w-3.5 h-3.5"></i>
                   <span>Müştərinin Yüklədiyi Çap Qatları (Artwork Previews)</span>
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   ${frontImg ? `
-                    <div class="p-2 rounded-xl bg-white/[0.02] border border-white/10 text-center">
-                      <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Ön Tərəf (Front)</span>
-                      <a href="${escapeHtml(frontImg)}" target="_blank" class="block group relative overflow-hidden rounded-lg aspect-square bg-black/40">
+                    <div class="p-2 rounded-xl bg-white border border-slate-200 text-center shadow-2xs">
+                      <span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Ön Tərəf (Front)</span>
+                      <a href="${escapeHtml(frontImg)}" target="_blank" class="block group relative overflow-hidden rounded-lg aspect-square bg-slate-100">
                         <img src="${escapeHtml(frontImg)}" class="w-full h-full object-contain group-hover:scale-105 transition" />
-                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition">Aç</div>
+                        <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition">Aç</div>
                       </a>
                     </div>
                   ` : ''}
                   ${backImg ? `
-                    <div class="p-2 rounded-xl bg-white/[0.02] border border-white/10 text-center">
-                      <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Arxa Tərəf (Back)</span>
-                      <a href="${escapeHtml(backImg)}" target="_blank" class="block group relative overflow-hidden rounded-lg aspect-square bg-black/40">
+                    <div class="p-2 rounded-xl bg-white border border-slate-200 text-center shadow-2xs">
+                      <span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Arxa Tərəf (Back)</span>
+                      <a href="${escapeHtml(backImg)}" target="_blank" class="block group relative overflow-hidden rounded-lg aspect-square bg-slate-100">
                         <img src="${escapeHtml(backImg)}" class="w-full h-full object-contain group-hover:scale-105 transition" />
-                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition">Aç</div>
+                        <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition">Aç</div>
                       </a>
                     </div>
                   ` : ''}
@@ -3928,82 +3917,82 @@
       contentEl.innerHTML = `
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <!-- Card 1: International Destination & Contact -->
-          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
-            <div class="flex items-center justify-between border-b border-white/5 pb-2">
-              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-amber-400"></i>
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 text-slate-800">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-blue-600"></i>
                 <span>Çatdırılma Ünvanı & Alıcı</span>
               </span>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isDomestic ? 'bg-sky-500/10 text-sky-400 border border-sky-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isDomestic ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}">
                 ${isDomestic ? '🇦🇿 Yerli (Domestic)' : '🌐 Beynəlxalq (' + escapeHtml(countryCode) + ')'}
               </span>
             </div>
             <div class="space-y-1.5 text-xs">
-              <div class="font-bold text-white text-sm">${escapeHtml(cust.fullName || 'Adsız Alıcı')}</div>
-              <div class="text-slate-300 flex items-center gap-2">
+              <div class="font-bold text-slate-900 text-sm">${escapeHtml(cust.fullName || 'Adsız Alıcı')}</div>
+              <div class="text-slate-600 flex items-center gap-2">
                 <i data-lucide="phone" class="w-3 h-3 text-slate-400"></i>
                 <span>${escapeHtml(rawPhone || '-')}</span>
                 ${cleanPhone.length >= 7 ? `
-                  <a href="https://wa.me/${cleanPhone}" target="_blank" class="text-emerald-400 hover:underline font-bold text-[10px] inline-flex items-center gap-0.5">
+                  <a href="https://wa.me/${cleanPhone}" target="_blank" class="text-emerald-700 hover:underline font-bold text-[10px] inline-flex items-center gap-0.5">
                     <i data-lucide="message-circle" class="w-3 h-3"></i> WhatsApp
                   </a>
                 ` : ''}
               </div>
               ${cust.email ? `
-                <div class="text-slate-400 flex items-center gap-2 font-mono text-[11px]">
+                <div class="text-slate-500 flex items-center gap-2 font-mono text-[11px]">
                   <i data-lucide="mail" class="w-3 h-3 text-slate-400"></i>
                   <span>${escapeHtml(cust.email)}</span>
                 </div>
               ` : ''}
-              <div class="pt-2 border-t border-white/5 text-slate-300">
-                <div class="font-medium text-white">${escapeHtml(cust.address || '-')} ${cust.addressLine2 ? escapeHtml(cust.addressLine2) : ''}</div>
-                <div class="text-slate-400 text-[11px] mt-0.5">
+              <div class="pt-2 border-t border-slate-200 text-slate-700">
+                <div class="font-medium text-slate-900">${escapeHtml(cust.address || '-')} ${cust.addressLine2 ? escapeHtml(cust.addressLine2) : ''}</div>
+                <div class="text-slate-500 text-[11px] mt-0.5">
                   ${escapeHtml(cust.city || '')}${cust.stateOrRegion ? ', ' + escapeHtml(cust.stateOrRegion) : ''}${cust.postalCode ? ' - İndeks: ' + escapeHtml(cust.postalCode) : ''}
                 </div>
-                <div class="text-slate-400 text-[11px] font-semibold mt-0.5">${escapeHtml(countryName)} (${escapeHtml(countryCode)})</div>
+                <div class="text-slate-600 text-[11px] font-semibold mt-0.5">${escapeHtml(countryName)} (${escapeHtml(countryCode)})</div>
               </div>
             </div>
           </div>
 
           <!-- Card 2: Carrier, Tracking & Payment Method -->
-          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
-            <div class="flex items-center justify-between border-b border-white/5 pb-2">
-              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <i data-lucide="truck" class="w-3.5 h-3.5 text-amber-400"></i>
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 text-slate-800">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                <i data-lucide="truck" class="w-3.5 h-3.5 text-blue-600"></i>
                 <span>Kargo Metodu & Ödəniş</span>
               </span>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${o.paymentStatus === 'paid' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${o.paymentStatus === 'paid' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-800 border border-amber-200'}">
                 ${escapeHtml(o.paymentStatus || 'Gözləmədə')}
               </span>
             </div>
             <div class="space-y-2 text-xs">
               <div class="flex items-center justify-between">
-                <span class="text-slate-400">Kargo Seçimi:</span>
-                <span class="font-bold text-white text-right">${escapeHtml(o.shippingMethodLabel || (o.shippingMethod === 'intl_express' ? 'DHL Express Worldwide' : isDomestic ? 'Kuryer Çatdırılması' : 'Standard International Post'))}</span>
+                <span class="text-slate-500">Kargo Seçimi:</span>
+                <span class="font-bold text-slate-900 text-right">${escapeHtml(o.shippingMethodLabel || (o.shippingMethod === 'intl_express' ? 'DHL Express Worldwide' : isDomestic ? 'Kuryer Çatdırılması' : 'Standard International Post'))}</span>
               </div>
               <div class="flex items-center justify-between">
-                <span class="text-slate-400">İzləmə Kodu (Tracking):</span>
-                <span class="font-mono font-bold text-amber-300">${escapeHtml(o.trackingCode || o.id)}</span>
+                <span class="text-slate-500">İzləmə Kodu (Tracking):</span>
+                <span class="font-mono font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-200">${escapeHtml(o.trackingCode || o.id)}</span>
               </div>
               <div class="flex items-center justify-between">
-                <span class="text-slate-400">Təxmini Çatdırılma:</span>
-                <span class="text-slate-200">${escapeHtml(o.estimatedDelivery || (isDomestic ? '1-2 iş günü' : '5-10 iş günü'))}</span>
+                <span class="text-slate-500">Təxmini Çatdırılma:</span>
+                <span class="text-slate-700 font-medium">${escapeHtml(o.estimatedDelivery || (isDomestic ? '1-2 iş günü' : '5-10 iş günü'))}</span>
               </div>
-              <div class="pt-2 border-t border-white/5 flex items-center justify-between">
-                <span class="text-slate-400">Ödəniş Üsulu:</span>
-                <span class="font-bold text-white">${escapeHtml(o.paymentMethod || 'Online Kart')}</span>
-              </div>
-              <div class="flex items-center justify-between">
-                <span class="text-slate-400">Səbət Məbləği:</span>
-                <span class="font-mono text-slate-200">${Number(o.subtotal || o.total || 0).toFixed(2)} ${o.currency || 'AZN'}</span>
+              <div class="pt-2 border-t border-slate-200 flex items-center justify-between">
+                <span class="text-slate-500">Ödəniş Üsulu:</span>
+                <span class="font-bold text-slate-900">${escapeHtml(o.paymentMethod || 'Online Kart')}</span>
               </div>
               <div class="flex items-center justify-between">
-                <span class="text-slate-400">Çatdırılma Haqqı:</span>
-                <span class="font-mono ${Number(o.shipping || 0) === 0 ? 'text-emerald-400 font-bold' : 'text-slate-200'}">${Number(o.shipping || 0) === 0 ? 'PULSUZ (0.00)' : `${Number(o.shipping || 0).toFixed(2)} ${o.currency || 'AZN'}`}</span>
+                <span class="text-slate-500">Səbət Məbləği:</span>
+                <span class="font-mono text-slate-700 font-semibold">${Number(o.subtotal || o.total || 0).toFixed(2)} ${o.currency || 'AZN'}</span>
               </div>
-              <div class="pt-2 border-t border-white/10 flex items-center justify-between text-sm">
-                <span class="font-bold text-white">Yekun Məbləğ:</span>
-                <span class="font-mono font-black text-amber-400 text-base">${Number(o.total || 0).toFixed(2)} ${o.currency || 'AZN'}</span>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-500">Çatdırılma Haqqı:</span>
+                <span class="font-mono ${Number(o.shipping || 0) === 0 ? 'text-emerald-700 font-bold' : 'text-slate-700 font-semibold'}">${Number(o.shipping || 0) === 0 ? 'PULSUZ (0.00)' : `${Number(o.shipping || 0).toFixed(2)} ${o.currency || 'AZN'}`}</span>
+              </div>
+              <div class="pt-2 border-t border-slate-200 flex items-center justify-between text-sm">
+                <span class="font-bold text-slate-900">Yekun Məbləğ:</span>
+                <span class="font-mono font-black text-slate-900 text-base">${Number(o.total || 0).toFixed(2)} ${o.currency || 'AZN'}</span>
               </div>
             </div>
           </div>
@@ -4012,8 +4001,8 @@
         <!-- Items Section -->
         <div class="space-y-3">
           <div class="flex items-center justify-between">
-            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-              <i data-lucide="shopping-bag" class="w-3.5 h-3.5 text-amber-400"></i>
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+              <i data-lucide="shopping-bag" class="w-3.5 h-3.5 text-blue-600"></i>
               <span>Sifariş Edilən Məhsullar (${items.length} ədəd)</span>
             </h4>
           </div>
@@ -4023,31 +4012,31 @@
         </div>
 
         <!-- Audit & Status Timeline -->
-        <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
-          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-            <i data-lucide="history" class="w-3.5 h-3.5 text-amber-400"></i>
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 text-slate-800">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+            <i data-lucide="history" class="w-3.5 h-3.5 text-blue-600"></i>
             <span>Status və Əməliyyat Tarixçəsi (Audit Log)</span>
           </h4>
           <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-xs">
-            <div class="p-2.5 rounded-xl ${o.orderStatus ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-white/[0.02] border border-white/5 text-slate-500'}">
+            <div class="p-2.5 rounded-xl ${o.orderStatus ? 'bg-emerald-50 border border-emerald-200 text-emerald-800 font-semibold' : 'bg-white border border-slate-200 text-slate-400'}">
               <div class="font-bold text-[11px]">1. Qəbul Edildi</div>
-              <div class="text-[9px] mt-0.5 text-slate-400">Yeni Sifariş</div>
+              <div class="text-[9px] mt-0.5 text-slate-500">Yeni Sifariş</div>
             </div>
-            <div class="p-2.5 rounded-xl ${['Təsdiqləndi', 'Təsdiqləndi (COD)', 'Çapda / Dərzidə', 'Kuryerdədir', 'Çatdırıldı'].includes(o.orderStatus) ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-white/[0.02] border border-white/5 text-slate-500'}">
+            <div class="p-2.5 rounded-xl ${['Təsdiqləndi', 'Təsdiqləndi (COD)', 'Çapda / Dərzidə', 'Kuryerdədir', 'Çatdırıldı'].includes(o.orderStatus) ? 'bg-emerald-50 border border-emerald-200 text-emerald-800 font-semibold' : 'bg-white border border-slate-200 text-slate-400'}">
               <div class="font-bold text-[11px]">2. Təsdiqləndi</div>
-              <div class="text-[9px] mt-0.5 text-slate-400">İnzibatçı təsdiqi</div>
+              <div class="text-[9px] mt-0.5 text-slate-500">İnzibatçı təsdiqi</div>
             </div>
-            <div class="p-2.5 rounded-xl ${['Çapda / Dərzidə', 'Kuryerdədir', 'Çatdırıldı'].includes(o.orderStatus) ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-white/[0.02] border border-white/5 text-slate-500'}">
+            <div class="p-2.5 rounded-xl ${['Çapda / Dərzidə', 'Kuryerdədir', 'Çatdırıldı'].includes(o.orderStatus) ? 'bg-emerald-50 border border-emerald-200 text-emerald-800 font-semibold' : 'bg-white border border-slate-200 text-slate-400'}">
               <div class="font-bold text-[11px]">3. İstehsalat</div>
-              <div class="text-[9px] mt-0.5 text-slate-400">Çap / Dərzi</div>
+              <div class="text-[9px] mt-0.5 text-slate-500">Çap / Dərzi</div>
             </div>
-            <div class="p-2.5 rounded-xl ${['Kuryerdədir', 'Çatdırıldı'].includes(o.orderStatus) ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-white/[0.02] border border-white/5 text-slate-500'}">
+            <div class="p-2.5 rounded-xl ${['Kuryerdədir', 'Çatdırıldı'].includes(o.orderStatus) ? 'bg-emerald-50 border border-emerald-200 text-emerald-800 font-semibold' : 'bg-white border border-slate-200 text-slate-400'}">
               <div class="font-bold text-[11px]">4. Çatdırılmada</div>
-              <div class="text-[9px] mt-0.5 text-slate-400">Kuryer / Kargo</div>
+              <div class="text-[9px] mt-0.5 text-slate-500">Kuryer / Kargo</div>
             </div>
-            <div class="p-2.5 rounded-xl ${o.orderStatus === 'Çatdırıldı' ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-white/[0.02] border border-white/5 text-slate-500'}">
+            <div class="p-2.5 rounded-xl ${o.orderStatus === 'Çatdırıldı' ? 'bg-emerald-50 border border-emerald-200 text-emerald-800 font-semibold' : 'bg-white border border-slate-200 text-slate-400'}">
               <div class="font-bold text-[11px]">5. Tamamlandı</div>
-              <div class="text-[9px] mt-0.5 text-slate-400">Təhvil verildi</div>
+              <div class="text-[9px] mt-0.5 text-slate-500">Təhvil verildi</div>
             </div>
           </div>
         </div>
@@ -5154,9 +5143,21 @@
     function switchTab(tabId) {
       closeMobileSidebar();
       document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+
+      // Reset all nav items to Royal Blue inactive state
       document.querySelectorAll('.nav-item').forEach(el => {
-        el.classList.remove('bg-black', 'text-white', 'shadow-xs');
-        el.classList.add('text-slate-600', 'hover:bg-slate-50');
+        el.classList.remove('bg-white', 'text-blue-700', 'font-bold', 'shadow-md', 'active');
+        el.classList.add('text-blue-100', 'hover:text-white', 'hover:bg-white/10');
+        const icon = el.querySelector('i, svg');
+        if (icon) {
+          icon.classList.remove('text-blue-700');
+          icon.classList.add('text-blue-200');
+        }
+        const badge = el.querySelector('.nav-badge');
+        if (badge) {
+          badge.classList.remove('bg-blue-100', 'text-blue-800');
+          badge.classList.add('bg-blue-900/60', 'text-blue-100');
+        }
       });
 
       const targetPane = document.getElementById(`tab-${tabId}`);
@@ -5164,21 +5165,28 @@
 
       if (targetPane) {
         targetPane.classList.remove('hidden');
-        if (adminLenis) {
-          try {
-            adminLenis.scrollTo(0, { immediate: true });
-            setTimeout(() => {
-              adminLenis.resize();
-              initScrollReveal();
-            }, 100);
-          } catch(e) {}
+        const mainContent = document.getElementById('adminMainContent');
+        if (mainContent) {
+          mainContent.scrollTo({ top: 0, behavior: 'instant' });
         }
       } else {
         console.warn('Tab pane not found for tabId:', tabId);
       }
+
+      // Activate target nav item with Curved White Pill indicator
       if (targetNav) {
-        targetNav.classList.remove('text-slate-600', 'hover:bg-slate-50');
-        targetNav.classList.add('bg-black', 'text-white', 'shadow-xs');
+        targetNav.classList.remove('text-blue-100', 'hover:text-white', 'hover:bg-white/10');
+        targetNav.classList.add('bg-white', 'text-blue-700', 'font-bold', 'shadow-md', 'active');
+        const icon = targetNav.querySelector('i, svg');
+        if (icon) {
+          icon.classList.remove('text-blue-200');
+          icon.classList.add('text-blue-700');
+        }
+        const badge = targetNav.querySelector('.nav-badge');
+        if (badge) {
+          badge.classList.remove('bg-blue-900/60', 'text-blue-100');
+          badge.classList.add('bg-blue-100', 'text-blue-800');
+        }
       }
 
       // Re-trigger table renders on tab switch to guarantee fresh data display
@@ -6140,69 +6148,10 @@
       }
     }, 8000);
 
-    // ----------------------------------------------------
-    // LENIS BUTTER-SMOOTH INERTIA SCROLL ENGINE (SAYT İLƏ EYNİ)
-    // ----------------------------------------------------
-    let adminLenis = null;
-
-    function initAdminLenis() {
-      if (typeof Lenis === 'undefined') return;
-      const isMobile = window.innerWidth < 768 || 'ontouchstart' in window;
-      if (isMobile) return;
-
-      const mainContent = document.getElementById('adminMainContent');
-      if (!mainContent) return;
-
-      try {
-        adminLenis = new Lenis({
-          wrapper: mainContent,
-          content: mainContent.firstElementChild || mainContent,
-          duration: 1.15,
-          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-          orientation: 'vertical',
-          gestureOrientation: 'vertical',
-          smoothWheel: true,
-          wheelMultiplier: 0.95,
-          syncTouch: false,
-        });
-
-        function raf(time) {
-          if (adminLenis) adminLenis.raf(time);
-          requestAnimationFrame(raf);
-        }
-        requestAnimationFrame(raf);
-
-        initScrollReveal();
-      } catch (e) {
-        console.warn('Lenis init error:', e);
-      }
-    }
-
-    // Scroll Reveal on Intersection / Scroll
+    // Native Smooth Presentation
     function initScrollReveal() {
       const cards = document.querySelectorAll('.glass-card, .tab-pane > div');
-      if (!('IntersectionObserver' in window)) {
-        cards.forEach(c => c.classList.add('revealed'));
-        return;
-      }
-
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('revealed');
-          }
-        });
-      }, {
-        root: document.getElementById('adminMainContent'),
-        threshold: 0.08
-      });
-
-      cards.forEach(c => {
-        if (!c.classList.contains('reveal-card') && !c.closest('header') && !c.closest('aside')) {
-          c.classList.add('reveal-card');
-          observer.observe(c);
-        }
-      });
+      cards.forEach(c => c.classList.add('revealed'));
     }
 
     // Initial load
@@ -6211,13 +6160,13 @@
         initSidebarState();
         setDateRange('ay');
         checkAuth();
-        setTimeout(initAdminLenis, 300);
+        initScrollReveal();
       });
     } else {
       initSidebarState();
       setDateRange('ay');
       checkAuth();
-      setTimeout(initAdminLenis, 300);
+      initScrollReveal();
     }
   </script>
 </body>

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { Play, Pause, Sparkles, ArrowRight } from "lucide-react";
+import { Play, Pause, ArrowRight } from "lucide-react";
 
 export interface HeroVideoProps {
   posterDesktop: string;
@@ -213,7 +213,7 @@ export function HeroVideo({
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 sm:pt-36 lg:pt-40 pb-16 sm:pb-20 flex-1 flex flex-col justify-center items-center text-center">
         {/* Editorial Kicker */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[#E6C280] text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.25em] mb-4 sm:mb-6 shadow-sm">
-          <Sparkles size={12} className="text-[#E6C280]" />
+          <span className="w-1.5 h-1.5 rounded-full bg-[#E6C280]" />
           <span>{kicker || "HORWALLE ATELIER · 2026 COUTURE"}</span>
         </div>
 

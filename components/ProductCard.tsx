@@ -17,6 +17,17 @@ interface ProductCardProps {
   priority?: boolean;
 }
 
+function getGenderLabel(gender: string | undefined, lang: string): string {
+  if (!gender) return "";
+  const g = gender.toLowerCase().trim();
+  const map: Record<string, Record<string, string>> = {
+    men: { az: "Kişi", en: "Men", ru: "Мужское", tr: "Erkek" },
+    women: { az: "Qadın", en: "Women", ru: "Женское", tr: "Kadın" },
+    unisex: { az: "Unisex", en: "Unisex", ru: "Унисекс", tr: "Unisex" },
+  };
+  return map[g]?.[lang] || map[g]?.["az"] || gender;
+}
+
 export const ProductCard = React.memo(function ProductCard({
   product,
   variant = "light",
@@ -136,18 +147,31 @@ export const ProductCard = React.memo(function ProductCard({
           )}
         </Link>
 
-        {/* Top-Left: Badge */}
-        {product.badge && (
-          <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 pointer-events-none">
-            <span
-              className={
-                isDark
-                  ? "px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-black/60 backdrop-blur-md text-[#E6C280] border border-[#E6C280]/30 rounded-full shadow-sm"
-                  : "px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider bg-white/90 backdrop-blur-md text-stone-700 border border-stone-200/90 rounded-full shadow-2xs"
-              }
-            >
-              {translateBadge(product.badge, language)}
-            </span>
+        {/* Top-Left: Badges (Product & Gender) */}
+        {(product.badge || product.gender) && (
+          <div className="absolute top-3 left-3 z-10 flex flex-wrap items-center gap-1.5 pointer-events-none">
+            {product.badge && (
+              <span
+                className={
+                  isDark
+                    ? "px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-black/60 backdrop-blur-md text-[#E6C280] border border-[#E6C280]/30 rounded-full shadow-sm"
+                    : "px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider bg-white/90 backdrop-blur-md text-stone-700 border border-stone-200/90 rounded-full shadow-2xs"
+                }
+              >
+                {translateBadge(product.badge, language)}
+              </span>
+            )}
+            {product.gender && (
+              <span
+                className={
+                  isDark
+                    ? "px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider bg-black/60 backdrop-blur-md text-white/90 border border-white/20 rounded-full shadow-sm"
+                    : "px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider bg-stone-900/90 backdrop-blur-md text-white rounded-full shadow-2xs"
+                }
+              >
+                {getGenderLabel(product.gender, language)}
+              </span>
+            )}
           </div>
         )}
 
@@ -314,16 +338,32 @@ export const ProductCard = React.memo(function ProductCard({
             {product.name}
           </Link>
 
-          {/* Fit description */}
-          <p
-            className={
-              isDark
-                ? "text-[11px] sm:text-xs text-white/60 mt-0.5"
-                : "text-xs text-stone-500 mt-0.5"
-            }
-          >
-            {product.fit}
-          </p>
+          {/* Fit description & Gender */}
+          <div className="flex items-center gap-1.5 mt-0.5">
+            {product.gender && (
+              <>
+                <span
+                  className={
+                    isDark
+                      ? "text-[10px] font-semibold uppercase tracking-wider text-[#E6C280]"
+                      : "text-[10px] font-semibold uppercase tracking-wider text-stone-700"
+                  }
+                >
+                  {getGenderLabel(product.gender, language)}
+                </span>
+                <span className={isDark ? "text-white/30 text-xs" : "text-stone-300 text-xs"}>•</span>
+              </>
+            )}
+            <p
+              className={
+                isDark
+                  ? "text-[11px] sm:text-xs text-white/60"
+                  : "text-xs text-stone-500"
+              }
+            >
+              {product.fit}
+            </p>
+          </div>
         </div>
 
         {/* Pricing & Rating */}

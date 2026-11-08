@@ -63,7 +63,7 @@ export async function removeImageBackground(
 
   // 2. High-Performance Server-Side Neural Background Removal (U2-Net / Rembg)
   try {
-    onProgress?.(20, "Süni intellekt modeli hazırlanır...");
+    onProgress?.(20, "Dizayn emal olunur...");
     
     // Convert blob or URL to base64 if needed
     let base64Payload = imageSrc;
@@ -99,7 +99,7 @@ export async function removeImageBackground(
 
   // 3. Fallback: Browser-Side ONNX Neural Segmentation (@imgly/background-removal)
   try {
-    onProgress?.(65, "Alternativ AI modeli işə salınır...");
+    onProgress?.(65, "Şəkil filtrləri tətbiq olunur...");
     const dynamicImport = new Function("url", "return import(url)");
     const imglyModule = await dynamicImport(
       "https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.5.8/+esm"

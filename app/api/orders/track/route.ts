@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readStoreDb } from "@/lib/storeDb";
 import { supabaseServer } from "@/lib/supabaseServer";
+import { getCountryByCode } from "@/lib/countries";
 
 export const dynamic = "force-dynamic";
 
@@ -18,10 +19,45 @@ function maskName(name: string): string {
 
 function maskPhone(phone: string): string {
   if (!phone || phone === "-") return "-";
-  const digits = phone.replace(/\D/g, "");
-  if (digits.length >= 7) {
-    return "+994 " + digits.slice(-9, -7) + " *** ** " + digits.slice(-2);
+  const trimmed = phone.trim();
+
+  // If number starts with international prefix '+' or '00'
+  const isPlus = trimmed.startsWith("+");
+  const isDoubleZero = trimmed.startsWith("00");
+
+  if (isPlus || isDoubleZero) {
+    const normalized = isDoubleZero ? "+" + trimmed.slice(2).trim() : trimmed;
+    // Extract country dial code (e.g. +1, +90, +44, +49, +994, etc.)
+    const dialMatch = normalized.match(/^(\+\d{1,4})[\s.-]?(.*)$/);
+    if (dialMatch) {
+      const dialCode = dialMatch[1];
+      const restDigits = (dialMatch[2] || "").replace(/\D/g, "");
+      if (restDigits.length >= 4) {
+        const lead = restDigits.slice(0, Math.min(2, restDigits.length - 2));
+        const tail = restDigits.slice(-2);
+        return `${dialCode} ${lead} *** ** ${tail}`;
+      } else if (restDigits.length > 0) {
+        return `${dialCode} ***`;
+      }
+      return `${dialCode} ***`;
+    }
   }
+
+  // Domestic or digits-only format
+  const digits = trimmed.replace(/\D/g, "");
+  if (digits.startsWith("994") && digits.length >= 10) {
+    const national = digits.slice(3);
+    return "+994 " + national.slice(0, 2) + " *** ** " + national.slice(-2);
+  }
+
+  if (digits.length >= 7) {
+    // If entered as local number without country code (e.g. 050..., 50...)
+    const sliceStart = digits.length >= 9 ? -9 : -7;
+    const lead = digits.slice(sliceStart, sliceStart + 2);
+    const tail = digits.slice(-2);
+    return "+994 " + lead + " *** ** " + tail;
+  }
+
   return "***";
 }
 
@@ -151,8 +187,11 @@ export async function GET(req: NextRequest) {
               phone: so.customer_phone || "-",
               email: so.customer_email || "-",
               address: so.delivery_address || "-",
-              city: so.delivery_city || "Bakı",
-              country: "Azərbaycan",
+              addressLine2: so.delivery_address_line2 || undefined,
+              city: so.delivery_city || (so.delivery_country && so.delivery_country !== "Azərbaycan" && so.delivery_country !== "Azerbaijan" ? "-" : "Bakı"),
+              stateOrRegion: so.delivery_state || undefined,
+              postalCode: so.delivery_postal_code || undefined,
+              country: so.delivery_country || "Azərbaycan",
             },
             items: (so.order_items || []).map((it: any) => ({
               name: it.item_name,
@@ -237,7 +276,11 @@ export async function GET(req: NextRequest) {
             fullName: maskName(matchedOrder.customer?.fullName || (matchedOrder.customer as any)?.name || "Müştəri"),
             phone: maskPhone(matchedOrder.customer?.phone || "-"),
             email: maskEmail(matchedOrder.customer?.email || "-"),
-            city: matchedOrder.customer?.city || "Bakı",
+            city: matchedOrder.customer?.city || (matchedOrder.customer?.country && matchedOrder.customer.country !== "Azərbaycan" && matchedOrder.customer.country !== "Azerbaijan" ? "-" : "Bakı"),
+            stateOrRegion: matchedOrder.customer?.stateOrRegion || (matchedOrder.customer as any)?.delivery_state || undefined,
+            postalCode: matchedOrder.customer?.postalCode || (matchedOrder.customer as any)?.delivery_postal_code || undefined,
+            country: matchedOrder.customer?.country || (matchedOrder.customer as any)?.delivery_country || (matchedOrder.customer?.countryCode ? getCountryByCode(matchedOrder.customer.countryCode)?.localName || matchedOrder.customer.countryCode : "Azərbaycan"),
+            countryCode: matchedOrder.customer?.countryCode || undefined,
             address: maskAddress(matchedOrder.customer?.address || "-"),
           },
           items: matchedOrder.items || [],
@@ -276,7 +319,8 @@ export async function GET(req: NextRequest) {
             fullName: maskName(matchedPod.customerName || (matchedPod as any).customer?.name || "Müştəri"),
             phone: maskPhone(matchedPod.customerPhone || (matchedPod as any).customer?.phone || "-"),
             email: maskEmail((matchedPod as any).customerEmail || "-"),
-            city: "Bakı",
+            city: (matchedPod as any).city || "Bakı",
+            country: (matchedPod as any).country || "Azərbaycan",
             address: "Atelyedən təhvil / Çatdırılma",
           },
           items: [

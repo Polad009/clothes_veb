@@ -10,6 +10,7 @@ import {
   CreditCard,
   Truck,
   Lock,
+  User,
   AlertCircle,
   X,
   Globe,
@@ -484,11 +485,6 @@ export default function CheckoutPage() {
   const validateShipping = () => {
     const errors: Record<string, string> = {};
 
-    if (!user) {
-      openAuthModal();
-      errors.auth = cT.authRequiredOrder;
-    }
-
     if (!fullName.trim()) {
       errors.fullName = cT.enterFullName;
     } else if (fullName.trim().length < 3) {
@@ -544,12 +540,6 @@ export default function CheckoutPage() {
   };
 
   const validateAll = () => {
-    if (!user) {
-      openAuthModal();
-      setErrorMsg(cT.loginToBuy);
-      return false;
-    }
-
     const errors = validateShipping();
 
     if (paymentMethod === "card") {
@@ -673,11 +663,6 @@ export default function CheckoutPage() {
   const processOrder = async (chosenMethod: string) => {
     setErrorMsg(null);
 
-    if (!user) {
-      openAuthModal();
-      return;
-    }
-
     if (items.length === 0) {
       setErrorMsg("Səbətiniz boşdur.");
       return;
@@ -691,14 +676,14 @@ export default function CheckoutPage() {
 
     try {
       const clientOrderId = `VTX-ORD-${Math.floor(1000 + Math.random() * 9000)}`;
-      const customerEmail = user.email || email;
+      const customerEmail = user?.email || email;
 
       const res = await fetch("/api/store/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id: clientOrderId,
-          userId: user.id,
+          userId: user?.id || null,
           customer: {
             fullName,
             phone,
@@ -771,7 +756,12 @@ export default function CheckoutPage() {
               phone: phone || "",
               email: customerEmail,
               address: address || "",
-              city: city || "Bakı",
+              addressLine2: addressLine2.trim() || undefined,
+              city: city.trim() || (isDomestic ? "Bakı" : ""),
+              stateOrRegion: stateOrRegion.trim() || undefined,
+              postalCode: postalCode.trim() || undefined,
+              country: currentCountry.name || (isDomestic ? "Azərbaycan" : selectedCountryCode),
+              countryCode: selectedCountryCode,
             },
             items: items.map((i) => ({
               productId: i.productId,
@@ -803,16 +793,6 @@ export default function CheckoutPage() {
 
   const handleNativePayment = async (method: "apple_pay" | "google_pay") => {
     setWalletDebugMsg(null);
-    if (!user) {
-      openAuthModal();
-      setErrorMsg(
-        language === "az"
-          ? "Məhsul almaq və izləmə kodunuzu əldə etmək üçün zəhmət olmasa daxil olun."
-          : "Please sign in to complete your purchase and secure your tracking code."
-      );
-      return;
-    }
-
     setPaymentMethod(method);
     const errors = validateShipping();
     setFieldErrors(errors);
@@ -1067,12 +1047,6 @@ export default function CheckoutPage() {
   const handleCardSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!user) {
-      openAuthModal();
-      setErrorMsg(cT.loginToBuy);
-      return;
-    }
-
     if (paymentMethod === "apple_pay") {
       handleNativePayment("apple_pay");
       return;
@@ -1227,29 +1201,40 @@ export default function CheckoutPage() {
               )}
             </AnimatePresence>
 
-            {/* Customer Authentication Gate */}
+            {/* Customer Authentication Gate / Guest Checkout */}
             {!user ? (
-              <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/90 rounded-3xl p-6 sm:p-7 space-y-4 shadow-xs text-stone-900">
-                <div className="flex items-start gap-3.5">
-                  <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center shrink-0">
-                    <Lock size={20} />
+              <div className="bg-stone-50/90 border border-stone-200/90 rounded-3xl p-5 sm:p-6 space-y-3 shadow-2xs text-stone-900">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-stone-200/80 text-stone-700 flex items-center justify-center shrink-0">
+                      <User size={20} />
+                    </div>
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-eb-garamond text-lg font-normal text-stone-900">
+                          {language === "az" ? "Qonaq kimi sifariş" : language === "tr" ? "Misafir Siparişi" : language === "ru" ? "Заказ как гость" : "Guest Checkout"}
+                        </h3>
+                        <span className="text-[10px] font-bold bg-stone-200/80 text-stone-700 px-2 py-0.5 rounded-full">
+                          {language === "az" ? "Qeydiyyatsız" : language === "tr" ? "Kayıtsız" : language === "ru" ? "Без регистрации" : "Seamless"}
+                        </span>
+                      </div>
+                      <p className="text-xs text-stone-500 leading-relaxed">
+                        {language === "az"
+                          ? "Qeydiyyatdan keçmədən birbaşa sifariş verə və ya VIP üstünlüklər üçün daxil ola bilərsiniz."
+                          : language === "tr"
+                          ? "Kayıt olmadan doğrudan sipariş verebilir veya VIP avantajlar için giriş yapabilirsiniz."
+                          : language === "ru"
+                          ? "Вы можете оформить заказ без регистрации или войти для получения VIP-привилегий."
+                          : "You can place your order directly as a guest or sign in for VIP atelier perks."}
+                      </p>
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <h3 className="font-eb-garamond text-xl font-normal text-stone-900">
-                      {t.checkout.loginRequired}
-                    </h3>
-                    <p className="text-xs text-stone-600 leading-relaxed">
-                      {t.checkout.loginPrompt}
-                    </p>
-                  </div>
-                </div>
-                <div className="pt-2">
                   <button
                     type="button"
                     onClick={openAuthModal}
-                    className="w-full sm:w-auto py-3 px-6 rounded-full bg-stone-900 hover:bg-black text-white text-xs font-bold uppercase tracking-wider transition shadow-sm cursor-pointer"
+                    className="self-start sm:self-center shrink-0 py-2 px-4 rounded-full bg-stone-900 hover:bg-black text-white text-xs font-semibold uppercase tracking-wider transition shadow-2xs cursor-pointer"
                   >
-                    {t.auth.signIn} / {t.auth.signUp}
+                    {t.auth.signIn}
                   </button>
                 </div>
               </div>

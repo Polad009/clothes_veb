@@ -56,10 +56,10 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   const iframeSrc = `/admin.html?access=${encodeURIComponent(expectedKey)}&${cacheBuster}`;
 
   return (
-    <div className="fixed inset-0 z-[999999] w-screen h-screen bg-[#090A0F] overflow-hidden m-0 p-0">
+    <div className="fixed inset-0 z-[999999] w-screen h-screen bg-[#F8FAFC] overflow-hidden m-0 p-0">
       <iframe
         src={iframeSrc}
-        className="w-full h-full border-none m-0 p-0 block bg-[#090A0F]"
+        className="w-full h-full border-none m-0 p-0 block bg-[#F8FAFC]"
         title="HORWALLE İdarəetmə Portalı"
       />
     </div>
