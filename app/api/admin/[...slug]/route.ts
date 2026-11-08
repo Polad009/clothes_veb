@@ -197,7 +197,11 @@ export async function GET(
     // 1. Full store data (protected & enriched with Supabase live profiles & cloud orders)
     if (route === 'data') {
       const data = await getEnrichedStoreData();
-      return NextResponse.json(data);
+      const res = NextResponse.json(data);
+      res.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+      res.headers.set('Pragma', 'no-cache');
+      res.headers.set('Expires', '0');
+      return res;
     }
 
     // 2. Gallery images list (protected)

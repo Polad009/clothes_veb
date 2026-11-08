@@ -64,35 +64,52 @@
       transform: translateY(0);
     }
     :root {
-      /* STEP 3 – PROPER GLASSMORPHISM TOKENS */
-      --glass-bg: rgba(255, 255, 255, 0.45);
-      --glass-card: rgba(255, 255, 255, 0.52);
-      --glass-card-hover: rgba(255, 255, 255, 0.72);
-      --glass-strong: rgba(255, 255, 255, 0.85);
-      --glass-border: rgba(255, 255, 255, 0.65);
-      --glass-border-subtle: rgba(255, 255, 255, 0.35);
-      --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.75);
-      --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08), 0 1px 2px 0 rgba(0, 0, 0, 0.04);
-      --glass-shadow-hover: 0 14px 40px -4px rgba(31, 38, 135, 0.14), 0 2px 6px 0 rgba(0, 0, 0, 0.04);
-      --sidebar-easing: cubic-bezier(0.22, 1, 0.36, 1);
+      /* ATELIER OBSIDIAN GLASS DESIGN TOKENS */
+      --canvas-bg: #090A0F;
+      --canvas-surface: #0D1117;
+      --canvas-subtle: #161B22;
+
+      /* Frosted Acrylic Glass Layers (Dark Obsidian Glass) */
+      --glass-surface-subtle: rgba(255, 255, 255, 0.025);
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-card: rgba(255, 255, 255, 0.035);
+      --glass-card-hover: rgba(255, 255, 255, 0.065);
+      --glass-strong: rgba(13, 17, 23, 0.94);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-border-subtle: rgba(255, 255, 255, 0.05);
+      --glass-border-hover: rgba(255, 255, 255, 0.18);
+      --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      --glass-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.8), 0 0 15px 0 rgba(255, 255, 255, 0.02);
+      --glass-shadow-hover: 0 25px 60px -12px rgba(0, 0, 0, 0.9), 0 0 25px 0 rgba(255, 255, 255, 0.05);
+      --sidebar-easing: cubic-bezier(0.16, 1, 0.3, 1);
+
+      /* Luminous Luxury Accents */
+      --gold-primary: #D4AF37;
+      --gold-glow: rgba(212, 175, 55, 0.25);
+      --emerald-primary: #10B981;
+      --emerald-glow: rgba(16, 185, 129, 0.25);
+      --sapphire-primary: #38BDF8;
+      --sapphire-glow: rgba(56, 189, 248, 0.25);
+      --rose-primary: #FB7185;
+      --rose-glow: rgba(251, 113, 133, 0.25);
     }
 
     html {
       scroll-behavior: smooth;
+      background-color: #090A0F;
     }
 
-    /* STEP 2 – SINGLE STATIC FIXED BACKGROUND LAYER (NO filter: blur, hardware-accelerated) */
+    /* HARDWARE-ACCELERATED OBSIDIAN NOIR CANVAS */
     body {
-      color: #0f172a;
+      color: #F1F5F9;
       font-family: 'Plus Jakarta Sans', 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       -webkit-font-smoothing: antialiased;
       min-height: 100vh;
       position: relative;
-      background-color: #f8fafc;
+      background-color: #090A0F;
       overflow-x: hidden;
     }
 
-    /* Hardware-accelerated background without complex stacked radial gradients */
     body::before {
       content: "";
       position: fixed;
@@ -101,10 +118,10 @@
       pointer-events: none;
       transform: translateZ(0);
       background:
-        radial-gradient(circle at 10% 10%, rgba(199, 210, 254, 0.45) 0%, transparent 45%),
-        radial-gradient(circle at 90% 12%, rgba(254, 215, 170, 0.35) 0%, transparent 45%),
-        radial-gradient(circle at 85% 85%, rgba(204, 251, 241, 0.4) 0%, transparent 50%),
-        #f8fafc;
+        radial-gradient(ellipse 70% 45% at 50% -10%, rgba(120, 119, 198, 0.15) 0%, transparent 70%),
+        radial-gradient(circle at 95% 15%, rgba(212, 175, 55, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 5% 85%, rgba(16, 185, 129, 0.06) 0%, transparent 50%),
+        #090A0F;
     }
 
     main, aside, .overflow-y-auto, .overflow-x-auto, #liveChatMessagesContainer, #liveChatThreadsList {
@@ -112,41 +129,42 @@
       -webkit-overflow-scrolling: touch;
     }
 
-    /* STEP 3 – REUSABLE GLASS CLASSES (Optimized ≤ 12px blur, contain: layout paint) */
+    /* REUSABLE OBSIDIAN GLASS CLASSES */
     .glass-card, .glass {
       background: var(--glass-card);
-      backdrop-filter: blur(12px) saturate(140%);
-      -webkit-backdrop-filter: blur(12px) saturate(140%);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
       border: 1px solid var(--glass-border);
       box-shadow: var(--glass-shadow), var(--glass-highlight);
       border-radius: 1.5rem;
       contain: layout paint;
-      color: #0f172a;
+      color: #F1F5F9;
       position: relative;
     }
 
-    /* Fallback for browsers without backdrop-filter support */
-    @supports not (backdrop-filter: blur(12px)) {
+    @supports not (backdrop-filter: blur(16px)) {
       .glass-card, .glass {
-        background: rgba(255, 255, 255, 0.92);
+        background: rgba(13, 17, 23, 0.95);
       }
     }
 
     .glass-strong {
       background: var(--glass-strong);
-      backdrop-filter: blur(14px) saturate(160%);
-      -webkit-backdrop-filter: blur(14px) saturate(160%);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
       border: 1px solid var(--glass-border);
       box-shadow: var(--glass-shadow), var(--glass-highlight);
+      color: #F1F5F9;
     }
 
     .glass-card-hover {
-      transition: transform 0.28s var(--sidebar-easing), box-shadow 0.28s var(--sidebar-easing), background-color 0.28s var(--sidebar-easing);
+      transition: transform 0.28s var(--sidebar-easing), box-shadow 0.28s var(--sidebar-easing), background-color 0.28s var(--sidebar-easing), border-color 0.28s var(--sidebar-easing);
       will-change: transform;
     }
     .glass-card-hover:hover {
       transform: translateY(-2px);
       background: var(--glass-card-hover);
+      border-color: var(--glass-border-hover);
       box-shadow: var(--glass-shadow-hover), var(--glass-highlight);
     }
 
@@ -2233,6 +2251,49 @@
     </div>
   </div>
 
+  <!-- ============================================================ -->
+  <!-- MODAL: ORDER DETAIL INSPECTOR & POD ARTWORK AUDIT -->
+  <!-- ============================================================ -->
+  <div id="orderInspectorModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-md items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-[#0B0D14] border border-white/10 rounded-3xl max-w-4xl w-full p-6 sm:p-7 shadow-2xl text-slate-100 space-y-6 my-8 max-h-[92vh] overflow-y-auto">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-4 border-b border-white/10">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center">
+            <i data-lucide="package-search" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 id="inspectorOrderTitle" class="font-black text-lg text-white font-mono">Sifariş #---</h3>
+              <span id="inspectorOrderBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20">Status</span>
+            </div>
+            <p id="inspectorOrderDate" class="text-xs text-slate-400 mt-0.5">Tarix: ---</p>
+          </div>
+        </div>
+        <button onclick="closeOrderInspectorModal()" class="text-slate-400 hover:text-white cursor-pointer p-2 rounded-xl hover:bg-white/5 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body (Dynamic content) -->
+      <div id="inspectorModalContent" class="space-y-6">
+        <!-- Rendered dynamically by openOrderInspectorModal() -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-white/10">
+        <div class="flex items-center gap-2" id="inspectorFooterPrintButtons">
+          <!-- Dynamically populated -->
+        </div>
+        <button type="button" onclick="closeOrderInspectorModal()" class="px-5 py-2 bg-white/10 hover:bg-white/15 text-white rounded-xl font-bold text-xs cursor-pointer transition">
+          Bağla
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LUXURY GLASS TOAST CONTAINER -->
+  <div id="adminToastContainer" class="fixed bottom-6 right-6 z-[999999] flex flex-col gap-2.5 pointer-events-none max-w-sm w-full"></div>
 
   <!-- CATEGORY ADD/EDIT MODAL -->
   <div id="categoryModal"
@@ -2383,6 +2444,68 @@
         .replace(/'/g, '&#039;');
     }
 
+    // ----------------------------------------------------
+    // LUXURY OBSIDIAN GLASS TOAST NOTIFICATION SYSTEM
+    // ----------------------------------------------------
+    function showToast(message, type = 'info', duration = 3800) {
+      const container = document.getElementById('adminToastContainer');
+      if (!container) {
+        console.log('[Toast]', type, message);
+        return;
+      }
+
+      const toast = document.createElement('div');
+      const isSuccess = type === 'success' || (typeof message === 'string' && (message.includes('✓') || message.toLowerCase().includes('uğur')));
+      const isError = type === 'error' || (typeof message === 'string' && (message.toLowerCase().includes('xəta') || message.toLowerCase().includes('error') || message.toLowerCase().includes('silinmədi')));
+
+      toast.className = `pointer-events-auto transform transition-all duration-300 ease-out translate-y-3 opacity-0 flex items-start gap-3 p-3.5 rounded-2xl backdrop-blur-xl border shadow-2xl text-xs font-medium ${
+        isSuccess
+          ? 'bg-[#0B0D14]/95 border-emerald-500/30 text-emerald-200 shadow-emerald-950/40'
+          : isError
+          ? 'bg-[#0B0D14]/95 border-rose-500/30 text-rose-200 shadow-rose-950/40'
+          : 'bg-[#0B0D14]/95 border-amber-500/30 text-amber-200 shadow-amber-950/40'
+      }`;
+
+      const icon = isSuccess ? 'check-circle-2' : isError ? 'alert-circle' : 'info';
+
+      toast.innerHTML = `
+        <div class="mt-0.5 shrink-0 ${isSuccess ? 'text-emerald-400' : isError ? 'text-rose-400' : 'text-amber-400'}">
+          <i data-lucide="${icon}" class="w-4 h-4"></i>
+        </div>
+        <div class="flex-1 leading-relaxed break-words text-slate-100">
+          ${escapeHtml(message)}
+        </div>
+        <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-white cursor-pointer ml-1 p-0.5 rounded hover:bg-white/10 transition">
+          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+        </button>
+      `;
+
+      container.appendChild(toast);
+      if (window.lucide) lucide.createIcons();
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-3', 'opacity-0');
+        toast.classList.add('translate-y-0', 'opacity-100');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 320);
+      }, duration);
+    }
+
+    // Forward native alert calls into non-blocking glass toasts with fallback preservation
+    const _nativeAlert = window.alert;
+    window.alert = function(msg) {
+      try {
+        const isSuccess = typeof msg === 'string' && (msg.includes('✓') || msg.toLowerCase().includes('uğur'));
+        const isError = typeof msg === 'string' && (msg.toLowerCase().includes('xəta') || msg.toLowerCase().includes('error') || msg.toLowerCase().includes('silinmədi'));
+        showToast(msg, isSuccess ? 'success' : isError ? 'error' : 'info');
+      } catch (e) {
+        if (_nativeAlert) _nativeAlert(msg);
+      }
+    };
+
     function getAdminToken() {
       return localStorage.getItem(AUTH_TOKEN_KEY) || sessionStorage.getItem(AUTH_TOKEN_KEY) || '';
     }
@@ -2411,6 +2534,37 @@
       }
       return res;
     };
+
+    // ----------------------------------------------------
+    // REAL-TIME TRI-CHANNEL DATA SYNCHRONIZATION BROADCASTER
+    // ----------------------------------------------------
+    function notifyStoreSync(type = 'DATA_UPDATED') {
+      const payload = { type, timestamp: Date.now(), source: 'admin' };
+      try {
+        if (typeof BroadcastChannel !== 'undefined') {
+          const bc = new BroadcastChannel('horwalle_store_sync');
+          bc.postMessage(payload);
+          bc.close();
+        }
+      } catch (e) {}
+      try {
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({ type: 'hv-store-refresh', payload }, '*');
+        }
+      } catch (e) {}
+      try {
+        localStorage.removeItem('hv_live_products_cache');
+        localStorage.setItem('hv_last_sync', Date.now().toString());
+        localStorage.setItem('hv_store_updated', Date.now().toString());
+      } catch (e) {}
+      window.dispatchEvent(new CustomEvent('hv-store-refresh', { detail: payload }));
+    }
+
+    async function saveProduct(e) {
+      if (typeof handleProductFormSubmit === 'function') {
+        return handleProductFormSubmit(e);
+      }
+    }
 
     // ----------------------------------------------------
     // AUTHENTICATION LOGIC (Server-side Verified Token)
@@ -2542,9 +2696,11 @@
 
 
     // ----------------------------------------------------
-    // DATA FETCHING & SYNCHRONIZATION (PARALLEL NON-BLOCKING)
+    // DATA FETCHING & SYNCHRONIZATION (PARALLEL NON-BLOCKING & DOM DIFFING)
     // ----------------------------------------------------
-    async function loadData() {
+    let lastStoreDataHash = '';
+
+    async function loadData(forceRender = false) {
       try {
         const [adminRes, chatRes] = await Promise.allSettled([
           fetch('/api/admin/data'),
@@ -2554,8 +2710,24 @@
         if (adminRes.status === 'fulfilled' && adminRes.value.ok) {
           const data = await adminRes.value.json();
           if (data) {
+            let dataChanged = true;
+            try {
+              const newHash = JSON.stringify(data);
+              dataChanged = (newHash !== lastStoreDataHash);
+              if (dataChanged) {
+                lastStoreDataHash = newHash;
+              }
+            } catch (e) {
+              dataChanged = true;
+            }
+
             STORE_DATA = data;
-            renderAll();
+
+            // DOM DIFFING: Only recreate DOM tables if payload has changed or forceRender is requested.
+            // This preserves user input focus (e.g. in #productSearchInput, #customerSearchInput).
+            if (dataChanged || forceRender) {
+              renderAll();
+            }
           }
         }
 
@@ -2873,6 +3045,7 @@
         const result = await res.json();
         if (result.success) {
           closeCategoryModal();
+          notifyStoreSync('DATA_UPDATED');
           await loadData();
           alert('✓ Kateqoriya əlavə edildi!');
         }
@@ -2886,7 +3059,10 @@
       try {
         const res = await fetch(`/api/admin/categories/${id}`, { method: 'DELETE' });
         const result = await res.json();
-        if (result.success) await loadData();
+        if (result.success) {
+          notifyStoreSync('DATA_UPDATED');
+          await loadData();
+        }
       } catch (err) {
         alert('Xəta: ' + err.message);
       }
@@ -2983,7 +3159,7 @@
           <tr class="hover:bg-slate-50/60 transition ${isTestOrder ? 'bg-amber-50/20' : ''}">
             <td class="p-3.5">
               <div class="flex items-center gap-1.5 font-bold text-slate-900">
-                <span>${o.id}</span>
+                <span class="hover:underline cursor-pointer text-amber-500 font-mono" onclick="openOrderInspectorModal('${o.id}')" title="İnspektor panelini aç">${o.id}</span>
                 ${isTestOrder ? `<span class="px-1.5 py-0.2 rounded text-[8px] font-black bg-amber-100 text-amber-900 border border-amber-300">TEST</span>` : ''}
               </div>
               <div class="text-[10px] text-slate-400 font-mono">${new Date(o.date || Date.now()).toLocaleDateString('az-AZ')} ${new Date(o.date || Date.now()).toLocaleTimeString('az-AZ', { hour: '2-digit', minute: '2-digit' })}</div>
@@ -3051,6 +3227,10 @@
               </select>
             </td>
             <td class="p-3.5 text-right space-x-1 whitespace-nowrap">
+              <button onclick="openOrderInspectorModal('${o.id}')" title="Sifariş İnspektor & POD Məlumatları" class="px-2.5 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-lg text-[10px] font-bold hover:bg-amber-500/30 transition cursor-pointer inline-flex items-center gap-1 shadow-2xs">
+                <i data-lucide="scan-eye" class="w-3 h-3"></i>
+                <span>İnspektor</span>
+              </button>
               <button onclick="openShippingLabelModal('${o.id}')" title="100x150mm Termal Kargo Etiketi Çap Et" class="px-2.5 py-1 bg-emerald-600 text-white rounded-lg text-[10px] font-bold hover:bg-emerald-700 transition cursor-pointer inline-flex items-center gap-1 shadow-2xs">
                 <i data-lucide="tag" class="w-3 h-3"></i>
                 <span>Etiket</span>
@@ -3075,6 +3255,7 @@
         const result = await res.json();
         if (result.success) {
           alert('✓ ' + (result.message || 'Bütün test sifarişləri silindi.'));
+          notifyStoreSync('DATA_UPDATED');
           await loadData();
         } else {
           alert('Xəta: ' + (result.error || 'Silinmədi'));
@@ -3094,6 +3275,7 @@
         });
         const result = await res.json();
         if (result.success) {
+          notifyStoreSync('DATA_UPDATED');
           await loadData();
         } else {
           alert('Xəta: ' + (result.error || 'Status dəyişmədi'));
@@ -3125,6 +3307,7 @@
         });
         const result = await res.json();
         if (result.success) {
+          notifyStoreSync('DATA_UPDATED');
           await loadData();
         } else {
           alert('Status yenilənmədi: ' + (result.error || 'Xəta baş verdi'));
@@ -3140,7 +3323,10 @@
       try {
         const res = await fetch(`/api/admin/orders/${id}`, { method: 'DELETE' });
         const result = await res.json();
-        if (result.success) await loadData();
+        if (result.success) {
+          notifyStoreSync('DATA_UPDATED');
+          await loadData();
+        }
       } catch (err) {
         alert('Silinmə xətası: ' + err.message);
       }
@@ -3152,6 +3338,7 @@
         const res = await fetch('/api/admin/orders/clear-all', { method: 'POST' });
         const result = await res.json();
         if (result.success) {
+          notifyStoreSync('DATA_UPDATED');
           await loadData();
           alert('✓ Bütün sınaq sifarişləri uğurla sıfırlandı.');
         }
@@ -3635,6 +3822,261 @@
       document.getElementById('shippingLabelModal').classList.add('hidden');
       document.getElementById('shippingLabelModal').classList.remove('flex');
       document.body.classList.remove('printing-label');
+    }
+
+    // ----------------------------------------------------
+    // ORDER DETAIL INSPECTOR & POD ARTWORK MODAL
+    // ----------------------------------------------------
+    function openOrderInspectorModal(orderId) {
+      if (!STORE_DATA || !Array.isArray(STORE_DATA.orders)) return;
+      const o = STORE_DATA.orders.find(ord => String(ord.id) === String(orderId));
+      if (!o) {
+        showToast('Sifariş tapılmadı: ' + orderId, 'error');
+        return;
+      }
+
+      const modal = document.getElementById('orderInspectorModal');
+      const titleEl = document.getElementById('inspectorOrderTitle');
+      const dateEl = document.getElementById('inspectorOrderDate');
+      const badgeEl = document.getElementById('inspectorOrderBadge');
+      const contentEl = document.getElementById('inspectorModalContent');
+      const footerButtons = document.getElementById('inspectorFooterPrintButtons');
+
+      if (titleEl) titleEl.innerText = `Sifariş #${o.id}`;
+      if (dateEl) {
+        const d = new Date(o.date || Date.now());
+        dateEl.innerText = `Tarix: ${d.toLocaleDateString('az-AZ')} ${d.toLocaleTimeString('az-AZ', { hour: '2-digit', minute: '2-digit' })}`;
+      }
+      const theme = getStatusTheme(o.orderStatus);
+      if (badgeEl) {
+        badgeEl.innerText = o.orderStatus || 'Yeni Sifariş';
+        badgeEl.className = `text-[10px] font-bold px-2.5 py-0.5 rounded-full ${theme.badgeClass}`;
+      }
+
+      const cust = o.customer || {};
+      const isDomestic = !cust.countryCode || cust.countryCode === 'AZ' || (cust.country && cust.country.toLowerCase().includes('azər'));
+      const countryCode = (cust.countryCode || (isDomestic ? 'AZ' : 'INTL')).toUpperCase();
+      const countryName = cust.country || (isDomestic ? 'Azərbaycan' : countryCode);
+      const rawPhone = cust.phone || '';
+      const cleanPhone = rawPhone.replace(/\D/g, '');
+
+      const items = Array.isArray(o.items) ? o.items : [];
+
+      let itemsHtml = items.map((it) => {
+        const isCustomItem = Boolean(it.isCustom || it.customDesignId || it.frontArtwork || it.backArtwork || (it.printLayers && it.printLayers.length > 0));
+        const frontImg = it.frontArtwork || it.artworkUrl || (it.customDesign && it.customDesign.frontArtwork) || (it.printLayers && it.printLayers[0]?.url) || '';
+        const backImg = it.backArtwork || (it.customDesign && it.customDesign.backArtwork) || (it.printLayers && it.printLayers[1]?.url) || '';
+        const itemImg = it.image || frontImg || '/images/hero/black-tee.jpg';
+        const unitPrice = Number(it.price || 0).toFixed(2);
+        const itemTotal = (Number(it.price || 0) * (Number(it.quantity) || 1)).toFixed(2);
+
+        return `
+          <div class="p-3.5 rounded-2xl bg-white/[0.03] border border-white/5 space-y-3">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <img src="${escapeHtml(itemImg)}" alt="${escapeHtml(it.name || 'Məhsul')}" class="w-12 h-12 rounded-xl object-cover bg-white/5 border border-white/10 shrink-0" onerror="this.src='/images/hero/black-tee.jpg'" />
+                <div>
+                  <div class="font-bold text-sm text-white flex items-center gap-2">
+                    <span>${escapeHtml(it.name || 'Məhsul')}</span>
+                    ${isCustomItem ? `<span class="px-2 py-0.5 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">🎨 POD Xüsusi Dizayn</span>` : ''}
+                  </div>
+                  <div class="text-xs text-slate-400 mt-0.5 flex flex-wrap items-center gap-2">
+                    ${it.size ? `<span>Ölçü: <strong class="text-slate-200">${escapeHtml(it.size)}</strong></span>` : ''}
+                    ${it.color ? `<span>Rəng: <strong class="text-slate-200">${escapeHtml(it.color)}</strong></span>` : ''}
+                    <span>Miqdar: <strong class="text-slate-200">${it.quantity || 1} ədəd</strong></span>
+                  </div>
+                </div>
+              </div>
+              <div class="text-right shrink-0">
+                <div class="font-mono font-bold text-sm text-white">${itemTotal} ${o.currency || 'AZN'}</div>
+                <div class="text-[10px] text-slate-400 font-mono">${it.quantity || 1} × ${unitPrice} ${o.currency || 'AZN'}</div>
+              </div>
+            </div>
+
+            ${isCustomItem ? `
+              <div class="pt-2 border-t border-white/5 space-y-2">
+                <div class="text-[11px] font-bold text-amber-400 flex items-center gap-1.5">
+                  <i data-lucide="image" class="w-3.5 h-3.5"></i>
+                  <span>Müştərinin Yüklədiyi Çap Qatları (Artwork Previews)</span>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  ${frontImg ? `
+                    <div class="p-2 rounded-xl bg-white/[0.02] border border-white/10 text-center">
+                      <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Ön Tərəf (Front)</span>
+                      <a href="${escapeHtml(frontImg)}" target="_blank" class="block group relative overflow-hidden rounded-lg aspect-square bg-black/40">
+                        <img src="${escapeHtml(frontImg)}" class="w-full h-full object-contain group-hover:scale-105 transition" />
+                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition">Aç</div>
+                      </a>
+                    </div>
+                  ` : ''}
+                  ${backImg ? `
+                    <div class="p-2 rounded-xl bg-white/[0.02] border border-white/10 text-center">
+                      <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Arxa Tərəf (Back)</span>
+                      <a href="${escapeHtml(backImg)}" target="_blank" class="block group relative overflow-hidden rounded-lg aspect-square bg-black/40">
+                        <img src="${escapeHtml(backImg)}" class="w-full h-full object-contain group-hover:scale-105 transition" />
+                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition">Aç</div>
+                      </a>
+                    </div>
+                  ` : ''}
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+
+      contentEl.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Card 1: International Destination & Contact -->
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
+            <div class="flex items-center justify-between border-b border-white/5 pb-2">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-amber-400"></i>
+                <span>Çatdırılma Ünvanı & Alıcı</span>
+              </span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isDomestic ? 'bg-sky-500/10 text-sky-400 border border-sky-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}">
+                ${isDomestic ? '🇦🇿 Yerli (Domestic)' : '🌐 Beynəlxalq (' + escapeHtml(countryCode) + ')'}
+              </span>
+            </div>
+            <div class="space-y-1.5 text-xs">
+              <div class="font-bold text-white text-sm">${escapeHtml(cust.fullName || 'Adsız Alıcı')}</div>
+              <div class="text-slate-300 flex items-center gap-2">
+                <i data-lucide="phone" class="w-3 h-3 text-slate-400"></i>
+                <span>${escapeHtml(rawPhone || '-')}</span>
+                ${cleanPhone.length >= 7 ? `
+                  <a href="https://wa.me/${cleanPhone}" target="_blank" class="text-emerald-400 hover:underline font-bold text-[10px] inline-flex items-center gap-0.5">
+                    <i data-lucide="message-circle" class="w-3 h-3"></i> WhatsApp
+                  </a>
+                ` : ''}
+              </div>
+              ${cust.email ? `
+                <div class="text-slate-400 flex items-center gap-2 font-mono text-[11px]">
+                  <i data-lucide="mail" class="w-3 h-3 text-slate-400"></i>
+                  <span>${escapeHtml(cust.email)}</span>
+                </div>
+              ` : ''}
+              <div class="pt-2 border-t border-white/5 text-slate-300">
+                <div class="font-medium text-white">${escapeHtml(cust.address || '-')} ${cust.addressLine2 ? escapeHtml(cust.addressLine2) : ''}</div>
+                <div class="text-slate-400 text-[11px] mt-0.5">
+                  ${escapeHtml(cust.city || '')}${cust.stateOrRegion ? ', ' + escapeHtml(cust.stateOrRegion) : ''}${cust.postalCode ? ' - İndeks: ' + escapeHtml(cust.postalCode) : ''}
+                </div>
+                <div class="text-slate-400 text-[11px] font-semibold mt-0.5">${escapeHtml(countryName)} (${escapeHtml(countryCode)})</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Carrier, Tracking & Payment Method -->
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
+            <div class="flex items-center justify-between border-b border-white/5 pb-2">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <i data-lucide="truck" class="w-3.5 h-3.5 text-amber-400"></i>
+                <span>Kargo Metodu & Ödəniş</span>
+              </span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${o.paymentStatus === 'paid' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}">
+                ${escapeHtml(o.paymentStatus || 'Gözləmədə')}
+              </span>
+            </div>
+            <div class="space-y-2 text-xs">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">Kargo Seçimi:</span>
+                <span class="font-bold text-white text-right">${escapeHtml(o.shippingMethodLabel || (o.shippingMethod === 'intl_express' ? 'DHL Express Worldwide' : isDomestic ? 'Kuryer Çatdırılması' : 'Standard International Post'))}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">İzləmə Kodu (Tracking):</span>
+                <span class="font-mono font-bold text-amber-300">${escapeHtml(o.trackingCode || o.id)}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">Təxmini Çatdırılma:</span>
+                <span class="text-slate-200">${escapeHtml(o.estimatedDelivery || (isDomestic ? '1-2 iş günü' : '5-10 iş günü'))}</span>
+              </div>
+              <div class="pt-2 border-t border-white/5 flex items-center justify-between">
+                <span class="text-slate-400">Ödəniş Üsulu:</span>
+                <span class="font-bold text-white">${escapeHtml(o.paymentMethod || 'Online Kart')}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">Səbət Məbləği:</span>
+                <span class="font-mono text-slate-200">${Number(o.subtotal || o.total || 0).toFixed(2)} ${o.currency || 'AZN'}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">Çatdırılma Haqqı:</span>
+                <span class="font-mono ${Number(o.shipping || 0) === 0 ? 'text-emerald-400 font-bold' : 'text-slate-200'}">${Number(o.shipping || 0) === 0 ? 'PULSUZ (0.00)' : `${Number(o.shipping || 0).toFixed(2)} ${o.currency || 'AZN'}`}</span>
+              </div>
+              <div class="pt-2 border-t border-white/10 flex items-center justify-between text-sm">
+                <span class="font-bold text-white">Yekun Məbləğ:</span>
+                <span class="font-mono font-black text-amber-400 text-base">${Number(o.total || 0).toFixed(2)} ${o.currency || 'AZN'}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Items Section -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <i data-lucide="shopping-bag" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>Sifariş Edilən Məhsullar (${items.length} ədəd)</span>
+            </h4>
+          </div>
+          <div class="space-y-2">
+            ${itemsHtml}
+          </div>
+        </div>
+
+        <!-- Audit & Status Timeline -->
+        <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+            <i data-lucide="history" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span>Status və Əməliyyat Tarixçəsi (Audit Log)</span>
+          </h4>
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-xs">
+            <div class="p-2.5 rounded-xl ${o.orderStatus ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-white/[0.02] border border-white/5 text-slate-500'}">
+              <div class="font-bold text-[11px]">1. Qəbul Edildi</div>
+              <div class="text-[9px] mt-0.5 text-slate-400">Yeni Sifariş</div>
+            </div>
+            <div class="p-2.5 rounded-xl ${['Təsdiqləndi', 'Təsdiqləndi (COD)', 'Çapda / Dərzidə', 'Kuryerdədir', 'Çatdırıldı'].includes(o.orderStatus) ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-white/[0.02] border border-white/5 text-slate-500'}">
+              <div class="font-bold text-[11px]">2. Təsdiqləndi</div>
+              <div class="text-[9px] mt-0.5 text-slate-400">İnzibatçı təsdiqi</div>
+            </div>
+            <div class="p-2.5 rounded-xl ${['Çapda / Dərzidə', 'Kuryerdədir', 'Çatdırıldı'].includes(o.orderStatus) ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-white/[0.02] border border-white/5 text-slate-500'}">
+              <div class="font-bold text-[11px]">3. İstehsalat</div>
+              <div class="text-[9px] mt-0.5 text-slate-400">Çap / Dərzi</div>
+            </div>
+            <div class="p-2.5 rounded-xl ${['Kuryerdədir', 'Çatdırıldı'].includes(o.orderStatus) ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-white/[0.02] border border-white/5 text-slate-500'}">
+              <div class="font-bold text-[11px]">4. Çatdırılmada</div>
+              <div class="text-[9px] mt-0.5 text-slate-400">Kuryer / Kargo</div>
+            </div>
+            <div class="p-2.5 rounded-xl ${o.orderStatus === 'Çatdırıldı' ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-white/[0.02] border border-white/5 text-slate-500'}">
+              <div class="font-bold text-[11px]">5. Tamamlandı</div>
+              <div class="text-[9px] mt-0.5 text-slate-400">Təhvil verildi</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      if (footerButtons) {
+        footerButtons.innerHTML = `
+          <button onclick="openShippingLabelModal('${o.id}')" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
+            <i data-lucide="tag" class="w-3.5 h-3.5"></i>
+            <span>Termal Etiket (100x150mm)</span>
+          </button>
+          <button onclick="displayOrderInReceipt('${o.id}')" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
+            <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+            <span>Faktura Çap Et</span>
+          </button>
+        `;
+      }
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeOrderInspectorModal() {
+      const modal = document.getElementById('orderInspectorModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
     }
 
     function renderShippingLabel(o) {
@@ -4653,11 +5095,7 @@
         const result = await res.json();
         if (result.success) {
           closeProductModal();
-          try {
-            localStorage.removeItem('hv_live_products_cache');
-            localStorage.setItem('hv_store_updated', Date.now().toString());
-          } catch(e) {}
-          window.dispatchEvent(new Event('hv-store-refresh'));
+          notifyStoreSync('PRODUCT_MUTATED');
           await loadData();
           alert('✓ Məhsul, rənglər və qiymət uğurla yadda saxlanıldı!');
         } else {
@@ -4674,11 +5112,7 @@
         const res = await fetch(`/api/admin/products/${id}`, { method: 'DELETE' });
         const result = await res.json();
         if (result.success) {
-          try {
-            localStorage.removeItem('hv_live_products_cache');
-            localStorage.setItem('hv_store_updated', Date.now().toString());
-          } catch(e) {}
-          window.dispatchEvent(new Event('hv-store-refresh'));
+          notifyStoreSync('PRODUCT_MUTATED');
           await loadData();
         } else {
           alert('Silinmə xətası: ' + (result.error || 'Naməlum xəta'));

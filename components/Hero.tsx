@@ -25,6 +25,7 @@ import { SizeChip } from "@/components/ui/SizeChip";
 import { useStoreData } from "@/context/StoreDataContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { HeroVideo } from "./HeroVideo";
 
 export interface HeroProductItem {
   id: string;
@@ -132,6 +133,7 @@ export function Hero() {
   const [selectedSize, setSelectedSize] = useState<string>("L");
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
   const [direction, setDirection] = useState<number>(1); // 1 = right-to-left, -1 = left-to-right
+  const [heroMode, setHeroMode] = useState<"video" | "showcase">("video");
 
   // Map live store products into rich hero items
   const heroProducts: HeroProductItem[] = useMemo(() => {
@@ -184,7 +186,34 @@ export function Hero() {
 
   // Sync active slide color to document body, root and adaptive scrollbar
   useEffect(() => {
-    if (typeof document === "undefined" || !currentItem) return;
+    if (typeof document === "undefined") return;
+
+    if (heroMode === "video") {
+      const headerBg = "#090A0E";
+      const topGradient = "linear-gradient(180deg, #090A0E 0%, #12141C 100%)";
+      const bgGradient = "radial-gradient(circle at 50% 36%, #1E2026 0%, #12141C 48%, #090A0E 100%)";
+      const colorHex = "#E6C280";
+
+      document.documentElement.style.setProperty("--hero-header-bg", headerBg);
+      document.documentElement.style.setProperty("--hero-top-gradient", topGradient);
+      document.documentElement.style.setProperty("--hero-bg", bgGradient);
+      document.documentElement.style.setProperty("--hero-ink", colorHex);
+      document.body.style.backgroundColor = headerBg;
+
+      window.dispatchEvent(
+        new CustomEvent("hv-hero-color-change", {
+          detail: {
+            headerBg,
+            topGradient,
+            bgGradient,
+            colorHex,
+          },
+        })
+      );
+      return;
+    }
+
+    if (!currentItem) return;
 
     const updateScrollbar = () => {
       const scrollY = window.scrollY || document.documentElement.scrollTop;
@@ -224,7 +253,7 @@ export function Hero() {
     return () => {
       window.removeEventListener("scroll", updateScrollbar);
     };
-  }, [safeCurrentIndex, currentItem]);
+  }, [heroMode, safeCurrentIndex, currentItem]);
 
   // Slider navigation
   const handleNext = useCallback(() => {
@@ -285,6 +314,89 @@ export function Hero() {
     }),
   };
 
+  if (heroMode === "video") {
+    return (
+      <HeroVideo
+        posterDesktop="/images/hero/hero-poster-wide.webp"
+        posterMobile="/images/hero/hero-poster-tall.webp"
+        videoDesktopSrc="/videos/hero-desktop.mp4"
+        videoMobileSrc="/videos/hero-mobile.mp4"
+        title={
+          language === "az" ? (
+            <>
+              <span>Sənin ölçün,</span>
+              <span className="block italic text-[#E6C280]">sənin üslubun.</span>
+            </>
+          ) : language === "en" ? (
+            <>
+              <span>Your fit,</span>
+              <span className="block italic text-[#E6C280]">your style.</span>
+            </>
+          ) : language === "ru" ? (
+            <>
+              <span>Твой размер,</span>
+              <span className="block italic text-[#E6C280]">твой стиль.</span>
+            </>
+          ) : (
+            <>
+              <span>Senin bedenin,</span>
+              <span className="block italic text-[#E6C280]">senin stilin.</span>
+            </>
+          )
+        }
+        subtitle={
+          language === "az"
+            ? "Atelyedə hər geyim ölçünə görə tikilir, istədiyin dizayn isə canlı 3D çapla köynəyə köçürülür."
+            : language === "en"
+            ? "Every garment is crafted to your exact fit, with live 3D print simulations brought to life."
+            : language === "ru"
+            ? "Каждая вещь шьется точно по вашей фигуре, а ваш дизайн переносится живой 3D печатью."
+            : "Her kıyafet bedeninize özel dikilir, dilediğiniz tasarım 3D baskıyla hayata geçer."
+        }
+        ctaText={
+          language === "az"
+            ? "Kolleksiyanı Kəşf Edin"
+            : language === "en"
+            ? "Explore Collection"
+            : language === "ru"
+            ? "Исследовать коллекцию"
+            : "Koleksiyonu Keşfet"
+        }
+        ctaLink="/collections"
+        secondaryCtaText={
+          language === "az"
+            ? "Fərdi Dərzilik"
+            : language === "en"
+            ? "Bespoke Atelier"
+            : language === "ru"
+            ? "Индивидуальный пошив"
+            : "Özel Terzilik"
+        }
+        secondaryCtaLink="/studio"
+      >
+        {/* Sleek Mode Switcher */}
+        <div className="flex items-center justify-center mt-6">
+          <div className="inline-flex items-center gap-1.5 p-1 rounded-full bg-black/50 backdrop-blur-md border border-white/20 shadow-xl">
+            <button
+              type="button"
+              onClick={() => setHeroMode("video")}
+              className="px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-white text-stone-950 shadow-sm cursor-pointer"
+            >
+              🎥 {language === "en" ? "Cinema" : language === "ru" ? "Кино" : language === "tr" ? "Sinema" : "Kino"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setHeroMode("showcase")}
+              className="px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider text-white/70 hover:text-white transition-colors cursor-pointer"
+            >
+              🎽 {language === "en" ? "3D Showcase" : language === "ru" ? "3D Витрина" : language === "tr" ? "3D Vitrin" : "3D Vitrin"}
+            </button>
+          </div>
+        </div>
+      </HeroVideo>
+    );
+  }
+
   return (
     <section
       id="hero-section"
@@ -294,7 +406,7 @@ export function Hero() {
         ["--hero-bg" as any]: currentItem.bgGradient,
         ["--hero-ink" as any]: currentItem.colorHex,
       }}
-      className="relative w-full min-h-[100dvh] h-auto lg:h-[100dvh] lg:max-h-[100dvh] -mt-[88px] sm:-mt-[96px] flex flex-col justify-between overflow-x-hidden lg:overflow-hidden text-white select-none isolate"
+      className="relative w-full min-h-[100dvh] h-auto lg:h-[100dvh] lg:max-h-[100dvh] flex flex-col justify-between overflow-x-hidden lg:overflow-hidden text-white select-none isolate"
       aria-label="Horvvalle Atelier Hero"
     >
       {/* =========================================================================
@@ -427,6 +539,26 @@ export function Hero() {
                 onClick={handleNext}
                 aria-label="Növbəti məhsul"
               />
+            </div>
+
+            {/* Dual-Mode Selector Pill in Showcase */}
+            <div className="flex items-center justify-center mt-3 z-20">
+              <div className="inline-flex items-center gap-1.5 p-1 rounded-full bg-black/50 backdrop-blur-md border border-white/20 shadow-xl">
+                <button
+                  type="button"
+                  onClick={() => setHeroMode("video")}
+                  className="px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider text-white/70 hover:text-white transition-colors cursor-pointer"
+                >
+                  🎥 {language === "en" ? "Cinema" : language === "ru" ? "Кино" : language === "tr" ? "Sinema" : "Kino"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setHeroMode("showcase")}
+                  className="px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-white text-stone-950 shadow-sm cursor-pointer"
+                >
+                  🎽 {language === "en" ? "3D Showcase" : language === "ru" ? "3D Витрина" : language === "tr" ? "3D Vitrin" : "3D Vitrin"}
+                </button>
+              </div>
             </div>
           </div>
 

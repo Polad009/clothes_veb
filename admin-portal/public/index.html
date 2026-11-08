@@ -20,11 +20,61 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
+    :root {
+      /* ATELIER OBSIDIAN GLASS DESIGN TOKENS */
+      --canvas-bg: #090A0F;
+      --canvas-surface: #0D1117;
+      --canvas-subtle: #161B22;
+
+      /* Frosted Acrylic Glass Layers (Dark Obsidian Glass) */
+      --glass-surface-subtle: rgba(255, 255, 255, 0.025);
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-card: rgba(255, 255, 255, 0.035);
+      --glass-card-hover: rgba(255, 255, 255, 0.065);
+      --glass-strong: rgba(13, 17, 23, 0.94);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-border-subtle: rgba(255, 255, 255, 0.05);
+      --glass-border-hover: rgba(255, 255, 255, 0.18);
+      --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      --glass-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.8), 0 0 15px 0 rgba(255, 255, 255, 0.02);
+      --glass-shadow-hover: 0 25px 60px -12px rgba(0, 0, 0, 0.9), 0 0 25px 0 rgba(255, 255, 255, 0.05);
+
+      /* Luminous Luxury Accents */
+      --gold-primary: #D4AF37;
+      --gold-glow: rgba(212, 175, 55, 0.25);
+      --emerald-primary: #10B981;
+      --emerald-glow: rgba(16, 185, 129, 0.25);
+      --sapphire-primary: #38BDF8;
+      --sapphire-glow: rgba(56, 189, 248, 0.25);
+      --rose-primary: #FB7185;
+      --rose-glow: rgba(251, 113, 133, 0.25);
+    }
+
+    html {
+      scroll-behavior: smooth;
+      background-color: #090A0F;
+    }
+
     body {
-      background-color: #F8F9FA;
-      color: #111827;
+      background-color: #090A0F !important;
+      color: #F1F5F9 !important;
       font-family: 'Instrument Sans', 'Inter', -apple-system, sans-serif;
       -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 70% 45% at 50% -10%, rgba(120, 119, 198, 0.15) 0%, transparent 70%),
+        radial-gradient(circle at 95% 15%, rgba(212, 175, 55, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 5% 85%, rgba(16, 185, 129, 0.06) 0%, transparent 50%),
+        #090A0F;
     }
 
     .font-brand {
@@ -38,63 +88,142 @@
     }
 
     ::-webkit-scrollbar-track {
-      background: #f1f5f9;
+      background: #090A0F;
     }
 
     ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
+      background: rgba(255, 255, 255, 0.15);
       border-radius: 9999px;
     }
 
     ::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
+      background: #D4AF37;
     }
 
     @keyframes shake {
-
-      0%,
-      100% {
-        transform: translateX(0);
-      }
-
-      20%,
-      60% {
-        transform: translateX(-6px);
-      }
-
-      40%,
-      80% {
-        transform: translateX(6px);
-      }
+      0%, 100% { transform: translateX(0); }
+      20%, 61% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
     }
 
     .shake-anim {
       animation: shake 0.4s ease-in-out;
     }
 
-    /* Exact Accent Stripes matching JANAB / Yusif Babazada Design */
+    /* OBSIDIAN GLASS SURFACE THEME OVERRIDES */
+    #loginScreen {
+      background-color: #090A0F !important;
+    }
+    #loginCard {
+      background: rgba(13, 17, 23, 0.88) !important;
+      backdrop-filter: blur(24px) saturate(180%) !important;
+      -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 30px rgba(212, 175, 55, 0.06) !important;
+      color: #F1F5F9 !important;
+    }
+    #loginCard h2, #loginCard label {
+      color: #F1F5F9 !important;
+    }
+    #loginCard img, aside .h-20 img {
+      filter: brightness(0) invert(1);
+    }
+
+    aside {
+      background: rgba(13, 17, 23, 0.85) !important;
+      backdrop-filter: blur(20px) !important;
+      -webkit-backdrop-filter: blur(20px) !important;
+      border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    aside .border-b {
+      border-color: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    .bg-white {
+      background: rgba(255, 255, 255, 0.035) !important;
+      backdrop-filter: blur(16px) saturate(180%) !important;
+      -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+      border-color: rgba(255, 255, 255, 0.08) !important;
+      color: #F1F5F9 !important;
+    }
+
+    .bg-slate-50, .bg-slate-100, .bg-[#F4F5F7], .bg-[#F0F0F0] {
+      background: rgba(255, 255, 255, 0.02) !important;
+      border-color: rgba(255, 255, 255, 0.06) !important;
+      color: #E2E8F0 !important;
+    }
+
+    input, select, textarea {
+      background: rgba(255, 255, 255, 0.04) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      color: #F8FAFC !important;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #D4AF37 !important;
+      box-shadow: 0 0 0 1px #D4AF37, 0 0 15px rgba(212, 175, 55, 0.15) !important;
+      background: rgba(255, 255, 255, 0.06) !important;
+    }
+
+    .text-slate-900, .text-slate-800, .text-slate-700, .text-black {
+      color: #F8FAFC !important;
+    }
+    .text-slate-600, .text-slate-500, .text-slate-400 {
+      color: #94A3B8 !important;
+    }
+    .border-slate-100, .border-slate-200, .border-[#EEEEEE], .border-[#F0F0F0] {
+      border-color: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    table thead {
+      background: rgba(255, 255, 255, 0.03) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    table thead th {
+      color: #94A3B8 !important;
+    }
+    table tbody tr {
+      border-color: rgba(255, 255, 255, 0.04) !important;
+    }
+    table tbody tr:hover {
+      background: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    /* Accent Stripes in Obsidian Gold & Emerald */
     .stripe-top-green {
-      border-top: 4px solid #10b981;
+      border-top: 3px solid #10B981 !important;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.15) !important;
     }
 
     .stripe-top-navy {
-      border-top: 4px solid #1e3a8a;
+      border-top: 3px solid #D4AF37 !important;
+      box-shadow: 0 0 20px rgba(212, 175, 55, 0.15) !important;
     }
 
     .stripe-top-amber {
-      border-top: 4px solid #f59e0b;
+      border-top: 3px solid #F59E0B !important;
     }
 
     .stripe-top-dark {
-      border-top: 4px solid #111827;
+      border-top: 3px solid #D4AF37 !important;
     }
 
     .stripe-left-green {
-      border-left: 5px solid #10b981;
+      border-left: 4px solid #10B981 !important;
     }
 
     .stripe-left-navy {
-      border-left: 5px solid #1e3a8a;
+      border-left: 4px solid #D4AF37 !important;
+    }
+
+    /* Modals in obsidian acrylic glass */
+    [id$="Modal"] > div {
+      background: #0D1117 !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      color: #F1F5F9 !important;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.95), 0 0 35px rgba(212, 175, 55, 0.08) !important;
+    }
+    [id$="Modal"] .border-b, [id$="Modal"] .border-t {
+      border-color: rgba(255, 255, 255, 0.08) !important;
     }
 
     /* Barcode lines styling */
@@ -130,7 +259,8 @@
         left: 0;
         top: 0;
         width: 100%;
-        background: white;
+        background: white !important;
+        color: black !important;
         padding: 20px;
       }
 
@@ -1589,6 +1719,38 @@
 
 
     // ----------------------------------------------------
+    // REAL-TIME TRI-CHANNEL DATA SYNCHRONIZATION BROADCASTER
+    // ----------------------------------------------------
+    function notifyStoreSync(type = 'DATA_UPDATED') {
+      const payload = { type, timestamp: Date.now(), source: 'admin' };
+      try {
+        if (typeof BroadcastChannel !== 'undefined') {
+          const bc = new BroadcastChannel('horwalle_store_sync');
+          bc.postMessage(payload);
+          bc.close();
+        }
+      } catch (e) {}
+      try {
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({ type: 'hv-store-refresh', payload }, '*');
+        }
+      } catch (e) {}
+      try {
+        localStorage.removeItem('hv_live_products_cache');
+        localStorage.setItem('hv_last_sync', Date.now().toString());
+        localStorage.setItem('hv_store_updated', Date.now().toString());
+      } catch (e) {}
+      window.dispatchEvent(new CustomEvent('hv-store-refresh', { detail: payload }));
+    }
+
+    async function saveProduct(e) {
+      if (typeof handleProductFormSubmit === 'function') {
+        return handleProductFormSubmit(e);
+      }
+    }
+
+
+    // ----------------------------------------------------
     // DATA FETCHING & SYNCHRONIZATION
     // ----------------------------------------------------
     async function loadData() {
@@ -1879,6 +2041,7 @@
         const result = await res.json();
         if (result.success) {
           closeCategoryModal();
+          notifyStoreSync('DATA_UPDATED');
           await loadData();
           alert('✓ Kateqoriya əlavə edildi!');
         }
@@ -1893,11 +2056,7 @@
         const res = await fetch(`/api/admin/categories/${id}`, { method: 'DELETE' });
         const result = await res.json();
         if (result.success) {
-          try {
-            localStorage.removeItem('hv_live_products_cache');
-            localStorage.setItem('hv_store_updated', Date.now().toString());
-          } catch(e) {}
-          window.dispatchEvent(new Event('hv-store-refresh'));
+          notifyStoreSync('DATA_UPDATED');
           await loadData();
         } else {
           alert('Silinmə xətası: ' + (result.error || 'Naməlum xəta'));
@@ -1996,6 +2155,7 @@
         });
         const result = await res.json();
         if (result.success) {
+          notifyStoreSync('DATA_UPDATED');
           await loadData();
         }
       } catch (err) {
@@ -2009,11 +2169,7 @@
         const res = await fetch(`/api/admin/orders/${id}`, { method: 'DELETE' });
         const result = await res.json();
         if (result.success) {
-          try {
-            localStorage.removeItem('hv_live_products_cache');
-            localStorage.setItem('hv_store_updated', Date.now().toString());
-          } catch(e) {}
-          window.dispatchEvent(new Event('hv-store-refresh'));
+          notifyStoreSync('DATA_UPDATED');
           await loadData();
         } else {
           alert('Silinmə xətası: ' + (result.error || 'Naməlum xəta'));
@@ -2029,6 +2185,7 @@
         const res = await fetch('/api/admin/orders/clear-all', { method: 'POST' });
         const result = await res.json();
         if (result.success) {
+          notifyStoreSync('DATA_UPDATED');
           await loadData();
           alert('✓ Bütün sınaq sifarişləri uğurla sıfırlandı.');
         }
@@ -2577,6 +2734,7 @@
         const result = await res.json();
         if (result.success) {
           closeProductModal();
+          notifyStoreSync('PRODUCT_MUTATED');
           await loadData();
           alert('✓ Məhsul uğurla yadda saxlanıldı!');
         }
@@ -2591,11 +2749,7 @@
         const res = await fetch(`/api/admin/products/${id}`, { method: 'DELETE' });
         const result = await res.json();
         if (result.success) {
-          try {
-            localStorage.removeItem('hv_live_products_cache');
-            localStorage.setItem('hv_store_updated', Date.now().toString());
-          } catch(e) {}
-          window.dispatchEvent(new Event('hv-store-refresh'));
+          notifyStoreSync('PRODUCT_MUTATED');
           await loadData();
         } else {
           alert('Silinmə xətası: ' + (result.error || 'Naməlum xəta'));

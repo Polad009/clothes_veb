@@ -49,3 +49,5 @@ public/models/*.bin
 
 
 .vercel
+
+.agents/

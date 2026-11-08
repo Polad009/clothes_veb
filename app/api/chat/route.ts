@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabaseServer';
+import { isAdminAuthenticated } from '@/lib/adminAuth';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,6 +46,8 @@ async function getThreadFromStorage(sessionId: string, bypassCache = false): Pro
     return memoryThreads[sessionId];
   }
 
+  if (!supabaseServer) return memoryThreads[sessionId] || null;
+
   try {
     const { data, error } = await supabaseServer.storage
       .from(BUCKET)
@@ -63,6 +66,7 @@ async function getThreadFromStorage(sessionId: string, bypassCache = false): Pro
 async function saveThreadToStorage(thread: ChatThread) {
   memoryThreads[thread.sessionId] = thread;
   cacheTimestamps[`t_${thread.sessionId}`] = Date.now();
+  if (!supabaseServer) return;
   try {
     await supabaseServer.storage
       .from(BUCKET)
@@ -78,6 +82,8 @@ async function getMessagesFromStorage(sessionId: string, bypassCache = false): P
   if (!bypassCache && memoryMessages[sessionId] && cacheTimestamps[`m_${sessionId}`] && (now - cacheTimestamps[`m_${sessionId}`] < 800)) {
     return memoryMessages[sessionId];
   }
+
+  if (!supabaseServer) return memoryMessages[sessionId] || [];
 
   try {
     const { data, error } = await supabaseServer.storage
@@ -98,6 +104,7 @@ async function getMessagesFromStorage(sessionId: string, bypassCache = false): P
 async function saveMessagesToStorage(sessionId: string, messages: ChatMessage[]) {
   memoryMessages[sessionId] = messages;
   cacheTimestamps[`m_${sessionId}`] = Date.now();
+  if (!supabaseServer) return;
   try {
     await supabaseServer.storage
       .from(BUCKET)
@@ -176,7 +183,7 @@ export async function GET(req: NextRequest) {
             messagesUpdated = true;
           }
         }
-      } else if (role === 'admin') {
+      } else if (role === 'admin' && isAdminAuthenticated(req)) {
         if (!thread.adminOnline) { thread.adminOnline = true; changed = true; }
         if (isTypingParam !== null) {
           const isTyping = isTypingParam === 'true';
@@ -275,6 +282,10 @@ export async function POST(req: NextRequest) {
 
     if (!sender || !text || typeof text !== 'string') {
       return NextResponse.json({ error: 'Invalid message payload' }, { status: 400 });
+    }
+
+    if (sender === 'admin' && !isAdminAuthenticated(req)) {
+      return NextResponse.json({ error: 'Unauthorized: Admin authentication required to send admin messages' }, { status: 401 });
     }
 
     const trimmed = text.trim();

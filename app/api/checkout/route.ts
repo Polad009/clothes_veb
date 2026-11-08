@@ -5,6 +5,7 @@ import { verifyTurnstileToken } from "@/lib/turnstile";
 import { checkRateLimit } from "@/lib/rateLimiter";
 import { validateShippingRate, isDomesticDestination } from "@/lib/shipping";
 import { getCountryByCode } from "@/lib/countries";
+import { readStoreDb } from "@/lib/storeDb";
 
 export async function POST(req: NextRequest) {
   try {
@@ -101,8 +102,32 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Compute items subtotal & server-side shipping rate
-    const subtotal = items.reduce((sum, item) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 1), 0);
+    // 3. Server-side Recalculation: Verify prices & subtotal against database (anti-tampering)
+    const db = readStoreDb();
+    let serverSubtotal = 0;
+    const validatedItems: OrderItem[] = [];
+
+    for (const clientItem of (items || [])) {
+      const clientItemId = (clientItem as any).productId || clientItem.id || (clientItem as any).slug;
+      const matchingProduct = (db.products || []).find(
+        (p) => p.id === (clientItem as any).productId || p.id === clientItem.id || p.slug === (clientItem as any).slug || p.slug === clientItemId
+      );
+      const isCustom = Boolean((clientItem as any).isCustom || clientItem.type === 'custom');
+      const unitPrice = isCustom
+        ? (Number(clientItem.price) || 0)
+        : (matchingProduct ? Number(matchingProduct.price) : (Number(clientItem.price) || 0));
+
+      const qty = Math.max(1, Math.floor(Number(clientItem.quantity) || 1));
+      serverSubtotal += unitPrice * qty;
+
+      validatedItems.push({
+        ...clientItem,
+        price: unitPrice,
+        quantity: qty,
+      });
+    }
+
+    const subtotal = Math.round(serverSubtotal * 100) / 100;
     const orderCurrency: "AZN" | "USD" = currency === "USD" ? "USD" : "AZN";
 
     const defaultOptionId = isDomestic
@@ -152,7 +177,7 @@ export async function POST(req: NextRequest) {
       amount: totalAmount,
       currency: orderCurrency,
       method,
-      items,
+      items: validatedItems,
       customer: {
         fullName: sanitizedCustomer.fullName,
         phone: sanitizedCustomer.phone,

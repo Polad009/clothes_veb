@@ -17,7 +17,11 @@ interface ProductCardProps {
   priority?: boolean;
 }
 
-export function ProductCard({ product, variant = "light", priority = false }: ProductCardProps) {
+export const ProductCard = React.memo(function ProductCard({
+  product,
+  variant = "light",
+  priority = false,
+}: ProductCardProps) {
   const { addItem } = useCart();
   const { openTryOn } = useTryOn();
   const { formatPrice, formatProductPrice } = useCurrency();
@@ -376,4 +380,4 @@ export function ProductCard({ product, variant = "light", priority = false }: Pr
       </div>
     </div>
   );
-}
+});

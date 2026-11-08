@@ -49,6 +49,10 @@ export function Header({ className = "" }: HeaderProps) {
   const [heroHeaderBg, setHeroHeaderBg] = useState<string>("#542E13");
   const [heroTopGradient, setHeroTopGradient] = useState<string>("linear-gradient(180deg, #3A1B07 0%, #542E13 100%)");
 
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const lastScrollYRef = React.useRef(0);
+
   // Listen to active hero slide color changes
   useEffect(() => {
     const handleColorChange = (e: any) => {
@@ -59,59 +63,77 @@ export function Header({ className = "" }: HeaderProps) {
     return () => window.removeEventListener("hv-hero-color-change", handleColorChange);
   }, []);
 
-  // Detect whether user is currently over the #hero-section (with back-navigation & scroll resilience)
+  // Detect whether user is currently over the #hero-section (with hysteresis & float transition)
   useEffect(() => {
     if (pathname !== "/") {
       setIsOverHero(false);
-      return;
     }
 
-    const checkHeroIntersect = () => {
-      if (pathname !== "/") return;
+    const handleScroll = () => {
       const scrollY = typeof window !== "undefined" ? window.scrollY || document.documentElement.scrollTop || 0 : 0;
-      
-      // If at or near top of the page on home, we are ALWAYS over hero!
-      if (scrollY < 120) {
-        setIsOverHero(true);
-        return;
+      const prevScrollY = lastScrollYRef.current;
+      const deltaY = scrollY - prevScrollY;
+
+      setIsScrolled(scrollY > 20);
+
+      // Stable hysteresis check for isOverHero on homepage
+      if (pathname === "/") {
+        if (scrollY < 80) {
+          setIsOverHero(true);
+        } else {
+          const heroEl = document.getElementById("hero-section");
+          if (heroEl) {
+            const rect = heroEl.getBoundingClientRect();
+            // Hysteresis band: rect.bottom > 140 enters hero, rect.bottom <= 50 leaves hero
+            if (rect.bottom > 140) {
+              setIsOverHero(true);
+            } else if (rect.bottom <= 50) {
+              setIsOverHero(false);
+            }
+          } else {
+            setIsOverHero(scrollY < 500);
+          }
+        }
+      } else {
+        setIsOverHero(false);
       }
 
-      const heroEl = document.getElementById("hero-section");
-      if (heroEl) {
-        const rect = heroEl.getBoundingClientRect();
-        if (rect.height > 0) {
-          setIsOverHero(rect.bottom > 70);
-          return;
-        }
+      // Smooth float-on-upward-scroll logic
+      if (scrollY <= 80) {
+        setIsHeaderVisible(true);
+      } else if (deltaY > 8 && scrollY > 140) {
+        // Scrolling down past threshold: smoothly glide up and hide
+        setIsHeaderVisible(false);
+      } else if (deltaY < -6) {
+        // Scrolling up: smoothly glide down and reveal
+        setIsHeaderVisible(true);
       }
-      setIsOverHero(scrollY < 500);
+
+      lastScrollYRef.current = scrollY;
     };
 
-    // Immediate check
-    checkHeroIntersect();
+    handleScroll();
 
     let ticking = false;
     const onScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          checkHeroIntersect();
+          handleScroll();
           ticking = false;
         });
         ticking = true;
       }
     };
 
-    // Attach scroll listener with passive flag and RAF throttle
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("hv-intro-reveal", checkHeroIntersect);
+    window.addEventListener("hv-intro-reveal", handleScroll);
 
-    // Staggered retries to catch element after DOM mounts / animates
-    const t1 = setTimeout(checkHeroIntersect, 50);
-    const t2 = setTimeout(checkHeroIntersect, 200);
+    const t1 = setTimeout(handleScroll, 50);
+    const t2 = setTimeout(handleScroll, 200);
 
     return () => {
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("hv-intro-reveal", checkHeroIntersect);
+      window.removeEventListener("hv-intro-reveal", handleScroll);
       clearTimeout(t1);
       clearTimeout(t2);
     };

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readStoreDb, writeStoreDb, StoreProduct } from '@/lib/storeDb';
 import { supabaseServer } from '@/lib/supabaseServer';
+import { isAdminAuthenticated } from '@/lib/adminAuth';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -125,6 +126,10 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  if (!isAdminAuthenticated(req)) {
+    return NextResponse.json({ success: false, error: 'Unauthorized: Admin icazəsi tələb olunur' }, { status: 401 });
+  }
+
   try {
     const product: StoreProduct = await req.json();
     if (!product.name || !product.price) {
@@ -249,6 +254,10 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  if (!isAdminAuthenticated(req)) {
+    return NextResponse.json({ success: false, error: 'Unauthorized: Admin icazəsi tələb olunur' }, { status: 401 });
+  }
+
   try {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');

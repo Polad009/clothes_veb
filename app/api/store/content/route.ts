@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readStoreDb, writeStoreDb } from '@/lib/storeDb';
+import { isAdminAuthenticated } from '@/lib/adminAuth';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
+  if (!isAdminAuthenticated(req)) {
+    return NextResponse.json({ success: false, error: 'Unauthorized: Admin icazəsi tələb olunur' }, { status: 401 });
+  }
+
   try {
     const body = await req.json();
     const db = readStoreDb();

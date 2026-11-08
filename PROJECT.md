@@ -1,11 +1,21 @@
-# Project: clothes_veb Gender Categorization & International Shipping
+# Project: Horwalle Atelier Storefront Luxury Overhaul, Glassmorphism Admin & Security Hardening
 
 ## Architecture
 - **Framework**: Next.js 14.2 (App Router) with React 18, TypeScript 5.4, Tailwind CSS.
-- **Admin System**: Dual entrypoints (`public/admin.html` embedded via iframe in `/admin` and `admin-portal/public/index.html`).
-- **Data Layers**: Local persistent JSON store (`lib/storeDb.ts` accessing `data/storeData.json` / `/tmp/storeData.json`) synced with Supabase PostgreSQL (`lib/supabase/schema.sql`).
-- **Storefront**: Next.js App Router (`components/Header.tsx`, `app/collections/page.tsx`, `app/checkout/page.tsx`, `context/CurrencyContext.tsx`).
-- **Shipping & Rates Engine**: Isolated module (`lib/shipping.ts` / `lib/countries.ts`) responsible for tiered rate calculation, destination rules, and currency conversion.
+- **Storefront Layer**:
+  - High-performance ambient video hero (`components/HeroVideo.tsx` / `components/Hero.tsx`) with dual 16:9 & 9:16 responsive streams, poster fallback, `IntersectionObserver` pause/resume, and frosted glass CTAs.
+  - Floating dynamic header (`components/Header.tsx`) with smooth backdrop blur and contrast stabilization.
+  - Consistent Atelier Obsidian color tokens and typography hierarchy across `app/globals.css`, `app/page.tsx`, and `components/ProductCard.tsx`.
+- **Admin System Layer**:
+  - Dedicated luxury Glassmorphism UI in `public/admin.html` and `admin-portal/public/index.html` (`#090A0F` obsidian canvas, frosted glass acrylic panels, luminous borders, gold/emerald accents).
+  - Tri-channel synchronization engine (`BroadcastChannel('horwalle_store_sync')`, `window.parent.postMessage`, `localStorage` storage events) connecting Admin to `context/StoreDataContext.tsx` with zero latency.
+  - Non-destructive DOM fingerprint diffing eliminating 8s polling input loss, plus non-blocking glass toasts replacing native alerts.
+  - International Order Detail Inspector modal dialog displaying full destination coordinates, carrier methods, custom POD artwork, and audit logs.
+- **Defensive Security & Resilience Layer**:
+  - Centralized authorization enforcement via `isAdminAuthenticated` across all mutation/deletion endpoints (`/api/store/products`, `/api/store/content`, `/api/store/pod-orders`, `/api/chat/threads`).
+  - Secrets rotation and privacy enforcement: eliminated fallback service role keys, sanitized customer PII, stopped open ntfy broadcasting.
+  - Comprehensive injection defense: sanitized HTML interpolation for Stored XSS defense, server-side database price validation on checkout.
+  - Security headers (CSP, HSTS, X-Content-Type-Options, X-Frame-Options) in `next.config.mjs` and middleware rate limiting.
 
 ---
 
@@ -14,20 +24,24 @@ Every feature identified from the survey and requirements is cataloged and assig
 
 | # | Feature | Description | Milestone | Source |
 |---|---------|-------------|-----------|--------|
-| 1 | Admin Gender Selector | Explicit Gender selector (🔘 Kişi / 🔘 Qadın / 🔘 Unisex) in `#productForm`, reset in `openProductModal`, populate in `editProduct`, dynamic submit payload, and badge in `renderProductsTable` across both `public/admin.html` and `admin-portal/public/index.html`. | M1 | Survey (explorer 1) |
-| 2 | Header Navigation Gender Links | "Kişi" (`/collections?gender=men`) and "Qadın" (`/collections?gender=women`) navigation links in desktop glass navbar and mobile drawer menu with active route indicator and multilingual translations. | M1 | Survey (explorer 1) |
-| 3 | Collections Page Gender Filtering | Read `gender` query param, display interactive Gender filter tabs (Hamısı / Kişi / Qadın / Unisex), apply inclusive filtering (`men` includes `men`+`unisex`, `women` includes `women`+`unisex`, `unisex` is strict), and update heading/filters. | M1 | Survey (explorer 1) |
-| 4 | Storefront Product API Gender Support | Ensure `app/api/store/products/route.ts` and `app/api/store/data/route.ts` correctly serve and filter gender consistently. | M1 | Survey (explorer 1) |
-| 5 | Global Destination & Country Registry | `lib/countries.ts` with comprehensive country catalog (ISO-2 code, name, dial code, flag, postal code validation pattern) and auto-detection integration from `CurrencyContext` / `/api/geo`. | M2 | Survey (explorer 2) |
-| 6 | International Shipping Rate Engine | `lib/shipping.ts` providing transparent tiered rates (Standard International vs. DHL Express Worldwide), delivery day estimates, currency-aware calculation (USD/AZN), and free shipping thresholds ($150+ standard free, $200+ express discount). | M2 | Survey (explorer 2) |
-| 7 | Payment Method Gating (COD restriction) | Enforce Cash on Delivery availability only for domestic Azerbaijan orders; disable/hide COD for international destinations while enabling Card, Apple Pay, and Google Pay. | M2 | Survey (explorer 2) |
-| 8 | Order Schema & Database Expansion | Update `StoreOrder` and `StoreCustomerAddress` in `lib/storeDb.ts`, and Supabase schema in `lib/supabase/schema.sql` with `delivery_country`, `delivery_postal_code`, `delivery_state`, `delivery_address_line2`, `shipping_method`, `currency`. | M2 | Survey (explorer 2) |
-| 9 | Checkout International Address Form | Dynamic domestic vs. international form in `app/checkout/page.tsx` with Country dropdown, international phone dial code, Address Line 1 & 2, City, State/Province, and Postal/ZIP code. | M3 | Survey (explorer 2) |
-| 10 | Dynamic Shipping Method Selector in Checkout | Live shipping selection UI in `app/checkout/page.tsx` displaying available carriers, rates in active currency, delivery estimates, and instant order summary price recalculation. | M3 | Survey (explorer 2) |
-| 11 | Server-Side Order Submission & Validation | Server-side recalculation and validation in `app/api/store/orders/route.ts` & `app/api/checkout/route.ts`, sanitizing international address fields, verifying shipping rates, and persisting complete records. | M3 | Survey (explorer 2) |
-| 12 | Thermal Labels & Admin Order Viewer | Update `renderShippingLabelString` in `public/admin.html` and admin order detail modal to display international destination, postal code, and carrier badge (DHL vs Post vs Courier). | M3 | Survey (explorer 2) |
-| 13 | E2E Testing Suite (Tiers 1-4) | Comprehensive opaque-box test runner covering all inventoried features across Category-Partition (Tier 1), Boundary Value Analysis (Tier 2), Pairwise Combinations (Tier 3), and Real-World Scenarios (Tier 4). | TestTrack | Project Pattern |
-| 14 | Final Verification & Adversarial Hardening | Pass 100% of E2E test suite followed by Tier 5 adversarial stress testing and forensic audit clean verification. | M4 | Project Pattern |
+| 1 | Ambient Video Hero Component | Responsive video hero with 16:9 desktop & 9:16 mobile cuts, WebP poster fallback, zero-flash opacity transition on play, IntersectionObserver auto-pause, frosted glass CTAs. | M1 | Survey (explorer 1) |
+| 2 | Header Contrast & Float Transition | Float-on-scroll navigation header in `Header.tsx` eliminating contrast flicker and scroll threshold jumps, optimized nav link layout for 1024px-1280px viewports. | M1 | Survey (explorer 1) |
+| 3 | Storefront Color Tokens & Smooth Atmosphere | Unified Atelier tokens in `globals.css` (`--atelier-noir`, `--atelier-carbon`, `--atelier-gold`, `--atelier-cream`) and seamless dark-to-light transition in `app/page.tsx`. | M1 | Survey (explorer 1) |
+| 4 | Product Card Visual Refinement | Remove awkward double-border in light mode card in `ProductCard.tsx`, standardize hover lift physics and aspect ratio consistency. | M1 | Survey (explorer 1) |
+| 5 | Admin Atelier Obsidian Glass Design System | Dark obsidian theme (`#090A0F`), frosted acrylic glass panels (`backdrop-blur-xl`, `bg-white/[0.03]`, `border-white/[0.08]`), champagne gold & emerald rim lighting in `public/admin.html` & `admin-portal/public/index.html`. | M2 | Survey (explorer 2) |
+| 6 | Real-Time Tri-Channel Data Synchronization | Connect admin actions to storefront via `BroadcastChannel`, `postMessage`, and `storage` events, backed by HTTP `Cache-Control: no-store` on `/api/admin/data` and client cache busters. | M2 | Survey (explorer 2) |
+| 7 | Non-Destructive DOM Diffing & Glass Toasts | Payload hash diffing preventing 8s table recreation, preserving search input focus in `#productSearchInput`, and luxury glass toasts replacing native `alert()` calls. | M2 | Survey (explorer 2) |
+| 8 | International Order Detail Inspector Modal | Dedicated admin modal displaying full international address details, carrier badge (DHL/Post/Courier), tracking number, custom POD artwork, and audit logs. | M2 | Survey (explorer 2) |
+| 9 | Admin Page Wrapper Polish | Eliminate light-gray flash in `app/admin/page.tsx` by styling iframe container with obsidian glass aesthetic. | M2 | Survey (explorer 2) |
+| 10 | Strict Automated Test Parity Preservation | Retain all 150 automated test selectors (`prodGender`, `productGenderFilter`, `<th class="p-3.5">Cins</th>`, `data-gender`) in both admin HTML files. | M2 | Survey (explorer 2) |
+| 11 | API Route Authentication Gating | Enforce `isAdminAuthenticated` across `POST`/`DELETE` in `/api/store/products`, `POST` in `/api/store/content`, `GET`/`PATCH` in `/api/store/pod-orders`, and `GET`/`DELETE` in `/api/chat/threads`. | M3 | Survey (explorer 3) |
+| 12 | Secrets Sanitization & PII Privacy Protection | Remove hardcoded Supabase Service Role Key fallback in `lib/supabaseServer.ts`; mask or eliminate public unauthenticated `ntfy.sh` customer PII broadcasts. | M3 | Survey (explorer 3) |
+| 13 | Stored XSS & Injection Sanitization | Escape all user-controlled values interpolated into `innerHTML` (`customerName`, `customerNote`, `promoCode`, `o.id`) in `public/admin.html`. | M3 | Survey (explorer 3) |
+| 14 | Server-Side Checkout Price Recalculation | Verify item prices against authoritative database in `app/api/checkout/route.ts` to prevent client price tampering. | M3 | Survey (explorer 3) |
+| 15 | Security Headers & Rate Limiting | Add CSP, HSTS, X-Content-Type-Options, X-Frame-Options to `next.config.mjs`, and implement rate limiting on authentication and checkout endpoints. | M3 | Survey (explorer 3) |
+| 16 | Dead Code & Performance Optimization | Purge unimported legacy components (`EditorialHero.tsx`, unused studio components), wrap `ProductCard` in `React.memo`. | M3 | Survey (explorer 3) |
+| 17 | Comprehensive Automated E2E Test Suite | Tiers 1-4 automated test runner verifying all storefront, admin, synchronization, and security hardening features, publishing `TEST_READY.md`. | TestTrack | Project Pattern |
+| 18 | Final Adversarial Hardening & Forensic Audit | 100% pass of E2E test suite + Tier 5 adversarial stress testing + clean Forensic Integrity Audit. | M4 | Project Pattern |
 
 ---
 
@@ -35,89 +49,65 @@ Every feature identified from the survey and requirements is cataloged and assig
 
 | # | Name | Scope | Dependencies | Status |
 |---|------|-------|-------------|--------|
-| TestTrack | E2E Testing Track | Build test runner & Tiers 1-4 automated tests, publish `TEST_READY.md` | Survey | DONE |
-| M1 | Gender Categorization & Filtering | Admin forms, Header navigation links, Collections tabs and product filtering, API consistency | Survey | DONE |
-| M2 | International Shipping Engine & Data Models | `lib/countries.ts`, `lib/shipping.ts`, COD gating rules, `StoreOrder` interface & SQL schema | Survey | DONE |
-| M3 | Storefront Checkout & Order Processing | `app/checkout/page.tsx` address form & carrier selector, `app/api/store/orders/route.ts` server validation | M2 | DONE |
-| M4 | Final E2E Test Pass & Adversarial Hardening | 100% pass of E2E test suite + Tier 5 adversarial coverage hardening + clean Forensic Audit | M1, M3, TestTrack | DONE |
+| TestTrack | E2E Testing Track | Build test runner & Tiers 1-4 automated test suite covering all features, publish `TEST_READY.md` | Survey | PLANNED |
+| M1 | Storefront Design & Luxury Video Hero | Video hero component, header contrast float, atelier color tokens, ProductCard polish | Survey | PLANNED |
+| M2 | Admin Glassmorphism & Real-Time Sync | Atelier Obsidian Glass UI, tri-channel sync, order inspector, DOM diffing, test selector parity | Survey | PLANNED |
+| M3 | Defensive Security & Code Optimization | Route auth gating, secrets cleanup, PII masking, XSS escaping, checkout price validation, dead code purge | Survey | PLANNED |
+| M4 | Final E2E Test Pass & Adversarial Hardening | 100% pass of E2E suite + Tier 5 adversarial testing + clean Forensic Integrity Audit | M1, M2, M3, TestTrack | PLANNED |
 
 ---
 
 ## Interface Contracts
 
-### 1. Gender Schema & Product Contract
+### 1. Hero Video Component Interface
 ```typescript
-export type ProductGender = 'men' | 'women' | 'unisex';
-
-export interface ProductGenderFilter {
-  gender: 'all' | ProductGender;
+export interface HeroVideoProps {
+  posterDesktop: string;
+  posterMobile: string;
+  videoDesktopSrc: string;
+  videoMobileSrc: string;
+  title: string;
+  subtitle: string;
+  ctaText: string;
+  ctaLink: string;
+  secondaryCtaText?: string;
+  secondaryCtaLink?: string;
 }
 ```
-- In DB: `gender TEXT NOT NULL DEFAULT 'unisex' CHECK (gender IN ('men', 'women', 'unisex'))`.
-- In Admin UI: `#prodGender` radio buttons with values `'men'`, `'women'`, `'unisex'`.
-- In URL query: `/collections?gender=men`, `/collections?gender=women`, `/collections?gender=unisex`.
-- In Filtering logic:
-  - `gender === 'men'`: includes items where `product.gender === 'men' || product.gender === 'unisex'`.
-  - `gender === 'women'`: includes items where `product.gender === 'women' || product.gender === 'unisex'`.
-  - `gender === 'unisex'`: includes items where `product.gender === 'unisex'`.
+- Autoplay muted loop with `playsInline`.
+- Responsive sources: `<source media="(max-width: 767px)" src={videoMobileSrc} type="video/mp4" />` & `<source src={videoDesktopSrc} type="video/mp4" />`.
+- Visibility tracking: `IntersectionObserver` auto-pauses when `< 20%` visible.
 
-### 2. Country & International Shipping Contract
-```typescript
-export interface CountryInfo {
-  code: string; // ISO 2-letter, e.g. "AZ", "US", "TR", "GB", "DE", "AE"
-  name: string; // English
-  localName: string;
-  dialCode: string; // e.g. "+994", "+1", "+90", "+44"
-  flag: string; // emoji
-  requiresPostalCode: boolean;
-  requiresState: boolean;
-}
+### 2. Tri-Channel State Synchronization Contract
+- Admin Channel Name: `'horwalle_store_sync'`
+- Payload: `{ type: 'DATA_UPDATED' | 'PRODUCT_MUTATED' | 'ORDER_PLACED', timestamp: number, source: 'admin' | 'storefront' }`
+- Channels:
+  1. `BroadcastChannel`: `new BroadcastChannel('horwalle_store_sync').postMessage(payload)`
+  2. `window.parent.postMessage`: `if (window.parent !== window) window.parent.postMessage({ type: 'hv-store-refresh', payload }, '*')`
+  3. `localStorage`: `localStorage.setItem('hv_last_sync', Date.now().toString())`
+- Client Listening in `context/StoreDataContext.tsx`:
+  - Listens on `BroadcastChannel`, `window.addEventListener('message')`, and `window.addEventListener('storage')`.
+  - Triggers non-destructive background fetch with `Cache-Control: no-store` and `?_t=${Date.now()}`.
 
-export interface ShippingOption {
-  id: string; // 'domestic_baku_sumgayit' | 'domestic_region' | 'intl_standard' | 'intl_express'
-  name: string;
-  carrier: string;
-  estimatedDays: string;
-  price: number;
-  isFree: boolean;
-  currency: 'AZN' | 'USD';
-}
-
-export interface InternationalAddress {
-  fullName: string;
-  email: string;
-  phone: string;
-  address: string;
-  addressLine2?: string;
-  city: string;
-  stateOrRegion?: string;
-  postalCode?: string;
-  country: string;
-  countryCode: string;
-}
-```
-
-### 3. Order Processing API Contract
-Endpoint: `POST /api/store/orders`
-- Request Payload `customer`:
-  - `fullName`: string (min 3)
-  - `phone`: string (numeric digits validated per dial code)
-  - `email`: string (valid email regex)
-  - `address`: string (min 4)
-  - `addressLine2`: optional string
-  - `city`: string
-  - `stateOrRegion`: optional string (required for US/CA/AU)
-  - `postalCode`: optional string (required for international)
-  - `country`: string
-  - `countryCode`: string (ISO-2)
-- Request Payload `shippingMethod`: string (`'domestic_free'` | `'domestic_region'` | `'intl_standard'` | `'intl_express'`)
-- Rate verification: Server computes shipping according to destination `countryCode`, `subtotal`, and `currency`. Rejects if COD is requested for `countryCode !== 'AZ'`.
+### 3. API Authorization Contract
+- Function: `isAdminAuthenticated(req: NextRequest): Promise<boolean>` in `lib/adminAuth.ts`.
+- Gating Rule:
+  ```typescript
+  if (!(await isAdminAuthenticated(req))) {
+    return NextResponse.json({ success: false, error: 'Unauthorized: Admin authentication required' }, { status: 401 });
+  }
+  ```
+- Applied to:
+  - `POST`, `DELETE` in `/api/store/products`
+  - `POST` in `/api/store/content`
+  - `GET`, `PATCH` in `/api/store/pod-orders`
+  - `GET`, `DELETE` in `/api/chat/threads`
 
 ---
 
 ## Code Layout & Ownership Boundaries
 - **Testing Track**: Exclusive owner of `tests/` and test runner scripts (`scripts/run-e2e-tests.mjs`, `TEST_INFRA.md`, `TEST_READY.md`).
-- **Milestone 1 Worker**: Exclusive owner of `components/Header.tsx`, `app/collections/page.tsx`, `public/admin.html`, `admin-portal/public/index.html`, `lib/translations.ts`.
-- **Milestone 2 Worker**: Exclusive owner of `lib/countries.ts`, `lib/shipping.ts`, `lib/storeDb.ts`, `lib/supabase/schema.sql`, `lib/payments/provider.ts`.
-- **Milestone 3 Worker**: Exclusive owner of `app/checkout/page.tsx`, `app/api/store/orders/route.ts`, `app/api/checkout/route.ts`, `lib/notifications/orderNotifier.ts`.
+- **Milestone 1 Worker**: Exclusive owner of `components/Hero.tsx`, `components/HeroVideo.tsx`, `components/Header.tsx`, `components/ProductCard.tsx`, `app/page.tsx`, `app/globals.css`.
+- **Milestone 2 Worker**: Exclusive owner of `public/admin.html`, `admin-portal/public/index.html`, `app/admin/page.tsx`, `context/StoreDataContext.tsx`, `app/api/admin/[...slug]/route.ts`.
+- **Milestone 3 Worker**: Exclusive owner of `app/api/store/products/route.ts`, `app/api/store/content/route.ts`, `app/api/store/pod-orders/route.ts`, `app/api/chat/threads/route.ts`, `app/api/chat/route.ts`, `app/api/checkout/route.ts`, `lib/supabaseServer.ts`, `lib/notifications/orderNotifier.ts`, `next.config.mjs`, `middleware.ts`.
 - Concurrent workers MUST NOT write to each other's owned files.

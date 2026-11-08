@@ -134,11 +134,41 @@ export function StoreDataProvider({ children }: { children: React.ReactNode }) {
       if (document.visibilityState === "visible") fetchLiveStoreData();
     };
     const onStorage = (e: StorageEvent) => {
-      if (e.key === "hv_store_updated") fetchLiveStoreData();
+      if (e.key === "hv_store_updated" || e.key === "hv_last_sync" || e.key === "hv_live_products_cache") {
+        fetchLiveStoreData();
+      }
     };
+    const onWindowMessage = (event: MessageEvent) => {
+      if (
+        event.data === "hv-store-refresh" ||
+        event.data?.type === "hv-store-refresh" ||
+        event.data?.type === "DATA_UPDATED"
+      ) {
+        fetchLiveStoreData();
+      }
+    };
+
+    let bc: BroadcastChannel | null = null;
+    if (typeof window !== "undefined" && typeof BroadcastChannel !== "undefined") {
+      try {
+        bc = new BroadcastChannel("horwalle_store_sync");
+        bc.onmessage = (event) => {
+          if (
+            event.data &&
+            (event.data.type === "DATA_UPDATED" ||
+              event.data.type === "PRODUCT_MUTATED" ||
+              event.data.type === "ORDER_PLACED" ||
+              event.data.type === "REFRESH")
+          ) {
+            fetchLiveStoreData();
+          }
+        };
+      } catch (e) {}
+    }
 
     window.addEventListener("focus", onRefresh);
     window.addEventListener("hv-store-refresh", onRefresh);
+    window.addEventListener("message", onWindowMessage);
     window.addEventListener("storage", onStorage);
     document.addEventListener("visibilitychange", onVisibilityChange);
 
@@ -148,8 +178,14 @@ export function StoreDataProvider({ children }: { children: React.ReactNode }) {
     return () => {
       window.removeEventListener("focus", onRefresh);
       window.removeEventListener("hv-store-refresh", onRefresh);
+      window.removeEventListener("message", onWindowMessage);
       window.removeEventListener("storage", onStorage);
       document.removeEventListener("visibilitychange", onVisibilityChange);
+      if (bc) {
+        try {
+          bc.close();
+        } catch (e) {}
+      }
       clearInterval(interval);
     };
   }, [fetchLiveStoreData]);
