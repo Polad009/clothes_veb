@@ -326,38 +326,7 @@ export function LiveModelPreviewModal({
                 </div>
               </div>
 
-              {/* Model Gender (Male / Female) - Front view only */}
-              {modelSide === "front" && (
-                <div className="bg-black/40 border border-white/12 rounded-2xl p-4 space-y-2 backdrop-blur-md">
-                  <span className="text-xs font-bold uppercase tracking-wider text-white/70 block">
-                    {t.studio.maleModel} / {t.studio.femaleModel}:
-                  </span>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setModelGender("male")}
-                      className={`py-2 px-3 rounded-xl text-xs font-bold transition-all ${
-                        modelGender === "male"
-                          ? "bg-white text-black shadow-lg"
-                          : "bg-black/50 text-white/70 border border-white/15 hover:border-white/30"
-                      }`}
-                    >
-                      {t.studio.maleModel}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setModelGender("female")}
-                      className={`py-2 px-3 rounded-xl text-xs font-bold transition-all ${
-                        modelGender === "female"
-                          ? "bg-white text-black shadow-lg"
-                          : "bg-black/50 text-white/70 border border-white/15 hover:border-white/30"
-                      }`}
-                    >
-                      {t.studio.femaleModel}
-                    </button>
-                  </div>
-                </div>
-              )}
+
 
               {/* AI Auto-Alignment & Correction Switch Panel */}
               {hasDesign ? (

@@ -109,7 +109,7 @@ export function StoreDataProvider({ children }: { children: React.ReactNode }) {
       });
       if (!res.ok) return;
       const data = await res.json();
-      if (data && data.products && Array.isArray(data.products) && data.products.length > 0) {
+      if (data && Array.isArray(data.products)) {
         const normalized = data.products.map(normalizeProduct);
         setProducts(normalized);
         try {

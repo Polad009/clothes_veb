@@ -18,7 +18,7 @@ export async function GET() {
           .select('*')
           .order('created_at', { ascending: true });
 
-        if (!error && supaProducts && supaProducts.length > 0) {
+        if (!error && Array.isArray(supaProducts)) {
           const liveMapped = supaProducts.map((sp: any) => {
             let meta: any = {};
             try {
@@ -60,15 +60,8 @@ export async function GET() {
             };
           });
 
-          // Live Supabase products always take 100% precedence for live prices & data
-          const mergedProducts = [...liveMapped];
-          // Keep any local-only products if not in Supabase yet
-          (data.products || []).forEach((lp: any) => {
-            if (!mergedProducts.some(mp => mp.slug === lp.slug || mp.id === lp.id)) {
-              mergedProducts.push(lp);
-            }
-          });
-          data.products = mergedProducts;
+          // Live Supabase products always take 100% precedence for live products & deletions
+          data.products = liveMapped;
         }
       } catch (err) {
         console.warn('[StoreData] Supabase products fetch error:', err);

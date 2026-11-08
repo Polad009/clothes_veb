@@ -12,6 +12,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { translateColor, translateBadge } from "@/lib/translations";
 import { ProductCard } from "@/components/ProductCard";
 import { useCart } from "@/context/CartContext";
+import { useTryOn } from "@/context/TryOnContext";
 import {
   ShoppingBag,
   ShieldCheck,
@@ -26,6 +27,7 @@ import {
   MessageCircle,
   Share2,
   Copy,
+  Sparkles,
 } from "lucide-react";
 import { ApplePayLogo, PaymentLogosRow } from "@/components/PaymentLogos";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
@@ -100,6 +102,7 @@ export default function ProductDetailPage() {
   }
 
   const { addItem, openCart } = useCart();
+  const { openTryOn } = useTryOn();
 
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -451,6 +454,17 @@ export default function ProductDetailPage() {
               transition={{ duration: 0.45, delay: 0.32, ease: [0.16, 1, 0.3, 1] }}
               className="space-y-3 pt-3"
             >
+              {/* Virtual Try-On · Anywear AI Button */}
+              <button
+                type="button"
+                onClick={() => openTryOn(product, selectedColorIndex, selectedSize)}
+                className="w-full py-3.5 rounded-full bg-gradient-to-r from-stone-900 via-stone-950 to-stone-900 hover:from-black hover:to-black text-[#E6C280] border border-[#E6C280]/40 font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 active:scale-98 shadow-md hover:shadow-lg cursor-pointer group mb-1.5"
+              >
+                <Sparkles size={16} className="text-[#E6C280] group-hover:rotate-12 transition-transform" />
+                <span>Virtual Try-On · Əynində Yoxla</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#E6C280]/20 text-[#E6C280] font-mono border border-[#E6C280]/30">Anywear AI</span>
+              </button>
+
               <button
                 onClick={handleAddToCart}
                 className={`w-full py-4 rounded-full font-semibold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-98 cursor-pointer ${

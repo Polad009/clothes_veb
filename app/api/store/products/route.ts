@@ -248,28 +248,51 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'Məhsul ID-si tələb olunur.' }, { status: 400 });
     }
 
-    const db = readStoreDb();
-    const prevCount = db.products.length;
-    db.products = db.products.filter(p => p.id !== id);
-
-    if (db.products.length === prevCount) {
-      return NextResponse.json({ error: 'Məhsul tapılmadı.' }, { status: 404 });
-    }
-
-    writeStoreDb(db);
+    let targetSlug = id;
+    let targetMetaId = id;
+    let targetName = '';
 
     if (supabaseServer) {
       try {
         const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+        const { data: sp } = isUuid
+          ? await supabaseServer.from('products').select('*').eq('id', id).maybeSingle()
+          : await supabaseServer.from('products').select('*').or(`id.eq.${id},slug.eq.${id}`).maybeSingle();
+
+        if (sp) {
+          targetSlug = sp.slug || targetSlug;
+          targetName = sp.name || '';
+          try {
+            if (typeof sp.description === 'string' && sp.description.startsWith('{')) {
+              const meta = JSON.parse(sp.description);
+              if (meta.id) targetMetaId = meta.id;
+            }
+          } catch (e) {}
+        }
+
         if (isUuid) {
           await supabaseServer.from('products').delete().eq('id', id);
         } else {
           await supabaseServer.from('products').delete().eq('slug', id);
         }
+        if (targetSlug && targetSlug !== id) {
+          await supabaseServer.from('products').delete().eq('slug', targetSlug);
+        }
       } catch (e) {
         console.warn('[Products API] Supabase delete error:', e);
       }
     }
+
+    const db = readStoreDb();
+    db.products = (db.products || []).filter(
+      (p: any) =>
+        p.id !== id &&
+        p.slug !== id &&
+        p.id !== targetMetaId &&
+        p.slug !== targetSlug &&
+        (!targetName || p.name !== targetName)
+    );
+    writeStoreDb(db);
 
     return NextResponse.json({ success: true, message: 'Məhsul silindi.' });
   } catch (error: any) {

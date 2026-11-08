@@ -71,7 +71,7 @@ const CHAT_I18N = {
     welcomeFormTitle: "Canlı Dəstəyə Xoş Gəlmisiniz",
     welcomeFormDesc: "Sizə daha operativ və fərdi xidmət göstərməyimiz üçün zəhmət olmasa məlumatlarınızı qeyd edin:",
     nameLabel: "Ad və Soyadınız",
-    namePlaceholder: "Məs: Elşən Məmmədov",
+    namePlaceholder: "Məs: Alex Smith",
     phoneLabel: "Əlaqə Nömrəniz",
     phonePlaceholder: "+994 50 123 45 67",
     startChatSubmit: "Söhbətə Başla",

@@ -35,12 +35,11 @@
           HORVVALLE
         </a>
 
-        <!-- Desktop Mərkəz Menyu (Kişi, Qadın, Kolleksiyalar, Studio) -->
+        <!-- Desktop Mərkəz Menyu (Kolleksiyalar, Studio) -->
         <nav class="main-nav">
-          <a href="http://localhost:3000/collections?gender=men" class="nav-link">Kişi</a>
-          <a href="http://localhost:3000/collections?gender=women" class="nav-link">Qadın</a>
-          <a href="http://localhost:3000/collections" class="nav-link">Kolleksiyalar</a>
-          <a href="http://localhost:3000/studio" class="nav-link">Studio</a>
+          <a href="/collections" class="nav-link">Kolleksiyalar</a>
+          <a href="/studio" class="nav-link">Studio</a>
+          <a href="/track" class="nav-link">Sifariş İzləmə</a>
         </nav>
 
         <!-- Sağ Tərəf: Səbət (0) -->
@@ -53,11 +52,9 @@
 
   <!-- Mobil Açılan Menyu Drawer -->
   <div id="mobileNavDrawer" style="position: fixed; top: 56px; left: 0; right: 0; background: #fff; border-bottom: 1px solid var(--border-color); padding: 20px 32px; display: none; flex-direction: column; gap: 16px; z-index: 99; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
-    <a href="http://localhost:3000/collections?gender=men" class="nav-link">Kişi</a>
-    <a href="http://localhost:3000/collections?gender=women" class="nav-link">Qadın</a>
-    <a href="http://localhost:3000/collections" class="nav-link">Kolleksiyalar</a>
-    <a href="http://localhost:3000/studio" class="nav-link">Studio</a>
-    <a href="http://localhost:3000/track" class="nav-link">Sifariş İzləmə</a>
+    <a href="/collections" class="nav-link">Kolleksiyalar</a>
+    <a href="/studio" class="nav-link">Studio</a>
+    <a href="/track" class="nav-link">Sifariş İzləmə</a>
   </div>
 
   <!-- =========================================================
@@ -146,8 +143,6 @@
         <h2 class="featured-heading" style="margin-bottom: 0;">Bütün Kolleksiya</h2>
         <div style="display: flex; gap: 16px;">
           <button class="nav-link" onclick="Store.setCategory('all')">Hamısı</button>
-          <button class="nav-link" onclick="Store.setCategory('kişi')">Kişi</button>
-          <button class="nav-link" onclick="Store.setCategory('qadın')">Qadın</button>
         </div>
       </div>
       <div class="products-grid-4" id="catalogProductsGrid">
@@ -286,7 +281,7 @@
                   <div class="two-col-inputs">
                     <div class="input-field-group">
                       <label>Ad və Soyad *</label>
-                      <input type="text" id="orderFullName" required value="Elşən Məmmədov">
+                      <input type="text" id="orderFullName" required value="Alex Smith">
                     </div>
                     <div class="input-field-group">
                       <label>Telefon *</label>
@@ -296,7 +291,7 @@
                   <div class="two-col-inputs">
                     <div class="input-field-group">
                       <label>E-poçt</label>
-                      <input type="email" id="orderEmail" value="elsan@example.com">
+                      <input type="email" id="orderEmail" value="alex@example.com">
                     </div>
                     <div class="input-field-group">
                       <label>Şəhər</label>

@@ -3,11 +3,12 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Heart, Plus, Check } from "lucide-react";
+import { Heart, Plus, Check, Sparkles } from "lucide-react";
 import { Product } from "@/data/products";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useCart } from "@/context/CartContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { useTryOn } from "@/context/TryOnContext";
 import { translateColor, translateBadge } from "@/lib/translations";
 
 interface ProductCardProps {
@@ -18,6 +19,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product, variant = "light", priority = false }: ProductCardProps) {
   const { addItem } = useCart();
+  const { openTryOn } = useTryOn();
   const { formatPrice, formatProductPrice } = useCurrency();
   const { language, t } = useLanguage();
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
@@ -130,20 +132,38 @@ export function ProductCard({ product, variant = "light", priority = false }: Pr
           )}
         </Link>
 
-        {/* Badge */}
-        {product.badge && (
-          <div className="absolute top-3 left-3 z-10 pointer-events-none">
+        {/* Top-Left: ✨ Try-On Button (Anywear Virtual Fitting) & Badge */}
+        <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              openTryOn(product, selectedColorIndex);
+            }}
+            className={
+              isDark
+                ? "inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold rounded-full bg-black/80 hover:bg-black text-[#E6C280] border border-[#E6C280]/40 backdrop-blur-md shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer group/tryon"
+                : "inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold rounded-full bg-white/95 hover:bg-white text-stone-900 border border-stone-200 shadow-md backdrop-blur-md hover:scale-105 active:scale-95 transition-all cursor-pointer group/tryon"
+            }
+            title="Virtual Try-On · Əynində Yoxla"
+          >
+            <Sparkles className="w-3 h-3 text-[#E6C280] transition-transform group-hover/tryon:rotate-12" />
+            <span className="font-['Plus_Jakarta_Sans',sans-serif] tracking-tight">Try-On</span>
+          </button>
+
+          {product.badge && (
             <span
               className={
                 isDark
-                  ? "px-3 py-1 text-[10px] font-bold uppercase tracking-wider bg-black/60 backdrop-blur-md text-[#E6C280] border border-[#E6C280]/40 rounded-full shadow-sm"
-                  : "px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-white/95 backdrop-blur-md text-stone-800 border border-stone-200/90 rounded-full shadow-2xs"
+                  ? "px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-black/60 backdrop-blur-md text-[#E6C280] border border-[#E6C280]/30 rounded-full shadow-sm pointer-events-none"
+                  : "px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider bg-white/90 backdrop-blur-md text-stone-700 border border-stone-200/90 rounded-full shadow-2xs pointer-events-none"
               }
             >
               {translateBadge(product.badge, language)}
             </span>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Wishlist action */}
         <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5">

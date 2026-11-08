@@ -814,21 +814,50 @@ export async function DELETE(
 
     // 1. Delete Product
     if (route === 'products' && id) {
-      db.products = db.products.filter((p: any) => p.id !== id && p.slug !== id);
-      writeStoreDb(db);
+      let targetSlug = id;
+      let targetMetaId = id;
+      let targetName = '';
 
       if (supabaseServer) {
         try {
           const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+          const { data: sp } = isUuid
+            ? await supabaseServer.from('products').select('*').eq('id', id).maybeSingle()
+            : await supabaseServer.from('products').select('*').or(`id.eq.${id},slug.eq.${id}`).maybeSingle();
+
+          if (sp) {
+            targetSlug = sp.slug || targetSlug;
+            targetName = sp.name || '';
+            try {
+              if (typeof sp.description === 'string' && sp.description.startsWith('{')) {
+                const meta = JSON.parse(sp.description);
+                if (meta.id) targetMetaId = meta.id;
+              }
+            } catch (e) {}
+          }
+
           if (isUuid) {
             await supabaseServer.from('products').delete().eq('id', id);
           } else {
             await supabaseServer.from('products').delete().eq('slug', id);
           }
+          if (targetSlug && targetSlug !== id) {
+            await supabaseServer.from('products').delete().eq('slug', targetSlug);
+          }
         } catch (e) {
           console.warn('[AdminAPI] Supabase product delete error:', e);
         }
       }
+
+      // Filter out from local store database by all possible identifier matches
+      db.products = (db.products || []).filter((p: any) =>
+        p.id !== id &&
+        p.slug !== id &&
+        p.id !== targetMetaId &&
+        p.slug !== targetSlug &&
+        (!targetName || p.name !== targetName)
+      );
+      writeStoreDb(db);
 
       return NextResponse.json({ success: true });
     }

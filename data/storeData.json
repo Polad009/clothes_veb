@@ -91,82 +91,43 @@
   },
   "products": [
     {
-      "id": "vtx-bmw-m-hoodie",
-      "slug": "horwalle-bmw-m-motorsport-heavyweight-fleece-hoodie",
-      "name": "HORWALLE \"BMW M Motorsport\" Heavyweight Fleece Hoodie",
-      "refCode": "HUDI-BMW-M-2026",
-      "gender": "unisex",
-      "category": "hudi",
-      "fit": "Hody qalın (3iplik)",
-      "price": 21,
-      "badge": "LIMITED MOTORSPORT EDITION",
-      "composition": "100% Xalis Daranmış Pambıq (380 GSM), İsti Şardonlu 3-İplik Fleece toxuma",
-      "inStock": true,
-      "description": "HORWALLE — \"BMW M Motorsport\" Heavyweight Fleece Hoodie\n\nBavariya avtomobil mühəndisliyinin ikonik gücü və yarış ruhu HORWALLE lüks küçə dəbi (streetwear) estetikası ilə görüşür. 380 GSM yüksək sıxlıqlı pambıq parçadan, daxili isti və yumşaq şardonlu astarla hazırlanmış premium hudi.\n\nXüsusiyyətlər:\n\n• Kəsim: Düşük çiyinli (dropped shoulder), xüsusi rahat oversized boxy streetwear kəsim\n• Ön Detal: Sağ sinədə orijinal BMW roundel emblemi, sol sinədə ikonik BMW ///M Motorsport zolaqları və naxışlı loqo\n• Arxa Detal: Təmiz, minimalist və zərif monoxrom toxuma\n• Yaxa & Kapüşon: İkiqat qalın pambıq astarla forması pozulmayan kapüşon, metal ucluqlu və metal halqalı sıxıcı kordonlar\n• Ciblər: Geniş və rahat ön kenquru cibi, elastik rib manjetlər və ətək\n• Parça: 100% Xalis Daranmış Pambıq (380 GSM Heavyweight Fleece)\n• Qulluq: 30°C dərəcədə tərsinə çevirərək yuyulması və tərsdən ütülənməsi tövsiyə olunur.",
-      "sizes": [
-        "S",
-        "M",
-        "L",
-        "XL",
-        "XXL"
-      ],
-      "image": "/images/uploads/bmw_hoodie_black_front_v3.png",
-      "hoverImage": "/images/uploads/bmw_hoodie_black_back_v3.png",
-      "gallery": [
-        "/images/uploads/bmw_hoodie_black_front_v3.png",
-        "/images/uploads/bmw_hoodie_black_back_v3.png",
-        "/images/uploads/bmw_hoodie_grey_front_v3.png",
-        "/images/uploads/bmw_hoodie_grey_back_v3.png",
-        "/images/uploads/bmw_hoodie_white_front_v3.png",
-        "/images/uploads/bmw_hoodie_white_back_v3.png"
-      ],
-      "colors": [
-        {
-          "name": "Washed Black",
-          "hex": "#1A1A1A",
-          "image": "/images/uploads/bmw_hoodie_black_front_v3.png",
-          "hoverImage": "/images/uploads/bmw_hoodie_black_back_v3.png",
-          "gallery": [
-            "/images/uploads/bmw_hoodie_black_front_v3.png",
-            "/images/uploads/bmw_hoodie_black_back_v3.png"
-          ]
-        },
-        {
-          "name": "Heather Grey",
-          "hex": "#8C8C8C",
-          "image": "/images/uploads/bmw_hoodie_grey_front_v3.png",
-          "hoverImage": "/images/uploads/bmw_hoodie_grey_back_v3.png",
-          "gallery": [
-            "/images/uploads/bmw_hoodie_grey_front_v3.png",
-            "/images/uploads/bmw_hoodie_grey_back_v3.png"
-          ]
-        },
-        {
-          "name": "Clean White",
-          "hex": "#F5F5F7",
-          "image": "/images/uploads/bmw_hoodie_white_front_v3.png",
-          "hoverImage": "/images/uploads/bmw_hoodie_white_back_v3.png",
-          "gallery": [
-            "/images/uploads/bmw_hoodie_white_front_v3.png",
-            "/images/uploads/bmw_hoodie_white_back_v3.png"
-          ]
-        }
-      ],
-      "internationalPrice": 14
-    },
-    {
-      "id": "vtx-fec6739b",
-      "slug": "horwalle-mclaren-750s-heavyweight-oversized-tee",
-      "name": "HORWALLE \"McLaren 750S\" Heavyweight Oversized Tee",
-      "refCode": "TEE-MCLAREN-750S-2026",
-      "gender": "men",
-      "category": "koynek",
-      "fit": "Oversize T-shirt (Süprəm / 2iplik)",
+      "id": "b8e699da-6036-49a2-9825-c5be5f16605e",
+      "slug": "horwalle-angel-dust-vintage-hoodie",
+      "name": "HORWALLE Angel Dust Vintage Hoodie",
+      "refCode": "HV-HUD-2026-142",
       "price": 29.99,
-      "badge": "LIMITED MOTORSPORT EDITION",
-      "composition": "100% Xalis Daranmış Ağır Pambıq (280 GSM), Heavyweight Jersey toxuma",
+      "compareAtPrice": 45.99,
+      "category": "hudi",
+      "gender": "unisex",
+      "badge": "",
+      "rating": 5,
+      "reviewCount": 12,
+      "fit": "Hody qalın (3iplik)",
+      "fabric": "",
+      "composition": "100% Premium Qalın Pambıq (450 GSM), Vintage Garment-Washed toxuma",
+      "care": "",
+      "isNew": false,
       "inStock": true,
-      "description": "HORWALLE — \"McLaren 750S\" Heavyweight Oversized Tee\n\nSuperkar mühəndisliyinin dəqiqliyi və dinamikası lüks küçə dəbi (streetwear) estetikası ilə görüşür. 280 GSM yüksək sıxlıqlı xalis pambıq parçadan hazırlanmış, nəfəs alan və forması itməyən premium oversize köynək.\n\nXüsusiyyətlər:\n\n• Kəsim: Düşük çiyinli (dropped shoulder), xüsusi rahat boxy oversized streetwear kəsim\n• Ön Detal: Sol sinədə relyefli HORWALLE 3D lent monoqram loqosu\n• Arxa Detal: Yüksək dəqiqlikli McLaren 750S triptik aerodinamik qrafik sənət çapı və texniki göstəricilər paneli (740 PS, 1,277 KG, 2.8 SEC, Track Engineered)\n• Yaxa & Qol: Geniş rib yaxalıq və möhkəmləndirilmiş ikiqat tikişlər\n• Parça: 100% Xalis Pambıq (280 GSM)\n• Qulluq: 30°C dərəcədə tərsinə çevirərək yuyulması və tərsdən ütülənməsi tövsiyə olunur.",
+      "description": "HORWALLE — Angel Dust / 002 Heavyweight Hoodie\n\nKlassik heykəltəraşlıq sənətinin yeraltı küçə dəbi (streetwear) estetikası ilə sintezi. Premium 450 GSM pambıq parçadan hazırlanmış xüsusi garment-washed toxuması ilə maksimum rahatlıq və unikal vintage xarakter bəxş edir.\n\nXüsusiyyətlər:\n\nKəsim: Çiyindən aşağı (dropped shoulders), rahat oversize / boxy fit\n\nQabaq detal: Sol sinədə orijinal relyefli HORWALLE imzası\n\nArxa detal: Klassik mərmər mələk heykəli, bulud toxumaları və \"Angel Dust — Beauty in Imperfection\" tipoqrafik sənət çapı\n\nToxuma: Qalın başlıq (double-layered hood), geniş qollar, elastik qalın manjetlər və kənquru cib\n\nParça: 450 GSM 100% Pambıq\n\nQulluq: 30°C-də tərsinə çevrilərək yuyulması və tərsdən ütülənməsi tövsiyə olunur.",
+      "image": "/images/uploads/angel_dust_hoodie_cutout.png",
+      "images": [
+        "/images/uploads/angel_dust_hoodie_cutout.png"
+      ],
+      "colors": [
+        {
+          "name": "Washed Black",
+          "hex": "#1A1A1A",
+          "image": "/images/uploads/angel_dust_hoodie_cutout.png",
+          "hoverImage": "/images/uploads/Code_Generated_Image__3__png_1792855968247.png",
+          "leftShoulderImage": "",
+          "rightShoulderImage": "",
+          "gallery": [
+            "/images/uploads/angel_dust_hoodie_cutout.png",
+            "/images/uploads/Code_Generated_Image__3__png_1792855968247.png",
+            "/images/uploads/Code_Generated_Image__2__png_1792855952562.png"
+          ]
+        }
+      ],
       "sizes": [
         "S",
         "M",
@@ -174,89 +135,31 @@
         "XL",
         "XXL"
       ],
-      "image": "/images/uploads/mclaren_tee_white_studio_front.png",
-      "hoverImage": "/images/uploads/mclaren_tee_white_studio_back.png",
-      "gallery": [
-        "/images/uploads/mclaren_tee_white_studio_front.png",
-        "/images/uploads/mclaren_tee_white_studio_back.png",
-        "/images/uploads/mclaren_tee_white_studio_left.png",
-        "/images/uploads/mclaren_tee_black_front_v2.png",
-        "/images/uploads/mclaren_tee_sand_front_v3.png"
-      ],
-      "colors": [
-        {
-          "name": "Clean White",
-          "hex": "#F5F5F7",
-          "image": "/images/uploads/mclaren_tee_white_studio_front.png",
-          "hoverImage": "/images/uploads/mclaren_tee_white_studio_back.png",
-          "leftShoulderImage": "/images/uploads/mclaren_tee_white_side_v1.png",
-          "rightShoulderImage": "/images/uploads/mclaren_tee_white_right_v2.png",
-          "gallery": [
-            "/images/uploads/mclaren_tee_white_studio_front.png",
-            "/images/uploads/mclaren_tee_white_studio_back.png"
-          ]
-        },
-        {
-          "name": "Washed Black",
-          "hex": "#1A1A1A",
-          "image": "/images/uploads/mclaren_tee_black_front_v2.png",
-          "hoverImage": "/images/uploads/mclaren_tee_black_back_v2.png",
-          "leftShoulderImage": "/images/uploads/mclaren_tee_black_left_v2.png",
-          "rightShoulderImage": "/images/uploads/mclaren_tee_black_right_v2.png",
-          "gallery": [
-            "/images/uploads/mclaren_tee_black_front_v2.png",
-            "/images/uploads/mclaren_tee_black_back_v2.png",
-            "/images/uploads/mclaren_tee_black_left_v2.png",
-            "/images/uploads/mclaren_tee_black_right_v2.png",
-            "/images/uploads/mclaren_tee_white_side_v1.png",
-            "/images/uploads/mclaren_tee_white_right_v2.png"
-          ]
-        },
-        {
-          "name": "Sand Beige",
-          "hex": "#E2D9C8",
-          "image": "/images/uploads/mclaren_tee_sand_front_v3.png",
-          "hoverImage": "/images/uploads/mclaren_tee_sand_back_v2.png",
-          "leftShoulderImage": "/images/uploads/mclaren_tee_sand_left_v2.png",
-          "rightShoulderImage": "/images/uploads/mclaren_tee_sand_right_v2.png",
-          "gallery": [
-            "/images/uploads/mclaren_tee_sand_front_v3.png",
-            "/images/uploads/mclaren_tee_sand_back_v2.png",
-            "/images/uploads/mclaren_tee_sand_left_v2.png",
-            "/images/uploads/mclaren_tee_sand_right_v2.png",
-            "/images/uploads/mclaren_tee_white_side_v1.png",
-            "/images/uploads/mclaren_tee_white_right_v2.png"
-          ]
-        }
-      ],
-      "internationalPrice": 20
+      "features": [],
+      "printLayers": []
     },
     {
+      "id": "55a198c1-d7a7-4651-a377-499332d04e5e",
+      "slug": "horwalle-angelus-heavyweight-vintage-polo",
       "name": "HORVVALLE Angelus Heavyweight Vintage Polo",
       "refCode": "POLO-ANGELUS-2026",
-      "gender": "men",
+      "price": 26.59,
+      "compareAtPrice": 37.99,
       "category": "koynek",
-      "fit": "Polo - qısaqol",
-      "price": 34,
-      "compareAtPrice": 109,
+      "gender": "unisex",
       "badge": "YENİ SEZON · 2026",
+      "rating": 5,
+      "reviewCount": 12,
+      "fit": "Polo - qısaqol",
+      "fabric": "",
       "composition": "100% Xalis Daranmış Ağır Pambıq (280 GSM), Garment-Washed toxuma",
+      "care": "",
+      "isNew": false,
       "inStock": true,
       "description": "HORWALLE — Angelus Heavyweight Polo Köynək\n\nİntibah dövrü qravüra sənətinin müasir lüks küçə dəbi (streetwear) ilə unikal harmoniyası. 280 GSM sıx toxunuşlu, nəfəs alan ağır pambıq parçadan hazırlanmış xüsusi vintage polo.\n\nXüsusiyyətlər:\n\n• Kəsim: Düşük çiyinli (dropped shoulder), rahat oversized boxy fit\n• Ön Detal: Sol sinədə orijinal relyefli HORWALLE 3D lent monoqram naxışı\n• Arxa Detal: İntibah dövrü mələk qravürası və ulduz halesi litroqrafiya sənət çapı\n• Qol & Yaxa: Klassik polo yaxalıq, düyməli ön kəsim və möhkəm manjetlər\n• Parça: 100% Xalis Pambıq (280 GSM)\n• Qulluq: 30°C dərəcədə tərsinə çevirərək yuyulması və tərsdən ütülənməsi tövsiyə olunur.",
-      "sizes": [
-        "S",
-        "M",
-        "L",
-        "XL",
-        "XXL"
-      ],
       "image": "/images/uploads/polo_angel_black_front_cutout.png",
-      "hoverImage": "/images/uploads/polo_angel_black_back.png",
-      "gallery": [
-        "/images/uploads/polo_angel_black_front_v3.png",
-        "/images/uploads/polo_angel_black_back.png",
-        "/images/uploads/polo_angel_black_left_v3.png",
-        "/images/uploads/polo_angel_black_right.png"
+      "images": [
+        "/images/uploads/polo_angel_black_front_cutout.png"
       ],
       "colors": [
         {
@@ -265,11 +168,12 @@
           "image": "/images/uploads/polo_angel_black_front_cutout.png",
           "hoverImage": "/images/uploads/polo_angel_black_back.png",
           "leftShoulderImage": "/images/uploads/polo_angel_black_left_v3.png",
-          "rightShoulderImage": "/images/uploads/polo_angel_black_right.png",
+          "rightShoulderImage": "/images/uploads/polo_angel_black_left_v3.png",
           "gallery": [
-            "/images/uploads/polo_angel_black_front_v3.png",
+            "/images/uploads/polo_angel_black_front_cutout.png",
             "/images/uploads/polo_angel_black_back.png",
             "/images/uploads/polo_angel_black_left_v3.png",
+            "/images/uploads/polo_angel_black_front_v3.png",
             "/images/uploads/polo_angel_black_right.png"
           ]
         },
@@ -279,7 +183,7 @@
           "image": "/images/uploads/polo_angel_grey_front_v3.png",
           "hoverImage": "/images/uploads/polo_angel_grey_back_v7.png",
           "leftShoulderImage": "/images/uploads/polo_angel_grey_left_v3.png",
-          "rightShoulderImage": "/images/uploads/polo_angel_grey_right.png",
+          "rightShoulderImage": "/images/uploads/polo_angel_grey_left_v3.png",
           "gallery": [
             "/images/uploads/polo_angel_grey_front_v3.png",
             "/images/uploads/polo_angel_grey_back_v7.png",
@@ -293,7 +197,7 @@
           "image": "/images/uploads/polo_angel_white_front_v8.png",
           "hoverImage": "/images/uploads/polo_angel_white_back_v8.png",
           "leftShoulderImage": "/images/uploads/polo_angel_white_left_v8.png",
-          "rightShoulderImage": "/images/uploads/polo_angel_white_right_v8.png",
+          "rightShoulderImage": "/images/uploads/polo_angel_white_left_v8.png",
           "gallery": [
             "/images/uploads/polo_angel_white_front_v8.png",
             "/images/uploads/polo_angel_white_back_v8.png",
@@ -302,20 +206,6 @@
           ]
         }
       ],
-      "id": "vtx-mvmliyrt",
-      "slug": "horwalle-angelus-heavyweight-vintage-polo",
-      "internationalPrice": 23
-    },
-    {
-      "name": "HORWALLE Angel Dust Vintage Hoodie",
-      "refCode": "HV-HUD-2026-142",
-      "gender": "men",
-      "category": "hudi",
-      "fit": "Hody qalın (3iplik)",
-      "price": 49,
-      "composition": "100% Premium Qalın Pambıq (450 GSM), Vintage Garment-Washed toxuma",
-      "inStock": true,
-      "description": "HORWALLE — Angel Dust / 002 Heavyweight Hoodie\n\nKlassik heykəltəraşlıq sənətinin yeraltı küçə dəbi (streetwear) estetikası ilə sintezi. Premium 450 GSM pambıq parçadan hazırlanmış xüsusi garment-washed toxuması ilə maksimum rahatlıq və unikal vintage xarakter bəxş edir.\n\nXüsusiyyətlər:\n\nKəsim: Çiyindən aşağı (dropped shoulders), rahat oversize / boxy fit\n\nQabaq detal: Sol sinədə orijinal relyefli HORWALLE imzası\n\nArxa detal: Klassik mərmər mələk heykəli, bulud toxumaları və \"Angel Dust — Beauty in Imperfection\" tipoqrafik sənət çapı\n\nToxuma: Qalın başlıq (double-layered hood), geniş qollar, elastik qalın manjetlər və kənquru cib\n\nParça: 450 GSM 100% Pambıq\n\nQulluq: 30°C-də tərsinə çevrilərək yuyulması və tərsdən ütülənməsi tövsiyə olunur.",
       "sizes": [
         "S",
         "M",
@@ -323,29 +213,65 @@
         "XL",
         "XXL"
       ],
-      "image": "/images/uploads/angel_dust_hoodie_cutout.png",
-      "hoverImage": "/images/uploads/angel_dust_hoodie_back_official.png",
-      "gallery": [
-        "/images/uploads/angel_dust_hoodie_cutout.png",
-        "/images/uploads/angel_dust_hoodie_back_official.png",
-        "/images/uploads/angel_dust_print_art.png"
+      "features": [],
+      "printLayers": []
+    },
+    {
+      "id": "26c9738a-c9aa-419b-a26f-ef9aa9e0d50b",
+      "slug": "-stay-focused-bear-qara-hudi",
+      "name": "\"Stay Focused\" Bear Qara Hudi",
+      "refCode": "-stay-focused-bear-qara-hudi",
+      "price": 39.99,
+      "compareAtPrice": 55,
+      "category": "koynek",
+      "gender": "unisex",
+      "badge": "",
+      "rating": 5,
+      "reviewCount": 12,
+      "fit": "Regular Fit",
+      "fabric": "",
+      "composition": "",
+      "care": "",
+      "isNew": false,
+      "inStock": true,
+      "description": "Xüsusiyyətlər:\n\nRəng: Qara\n\nDizayn: Ön hissədə minimal loqo, arxa hissədə canlı \"Stay Focused - Never Give Up\" ayı qrafikası\n\nKəsim: Rahat / Gündəlik kəsim (Regular / Oversize)\n\nMaterial: Qalın və yumşaq pambıq qarışımlı parça, kapüşonlu və kənguru cibli",
+      "image": "https://hrgvvsyalafdscponoca.supabase.co/storage/v1/object/public/product-images/products/horvvalle_black_hoodie_front_hd.jpg",
+      "images": [
+        "https://hrgvvsyalafdscponoca.supabase.co/storage/v1/object/public/product-images/products/Bear_front_black_1793811980371_l3dk.png"
       ],
       "colors": [
         {
-          "name": "Washed Black",
+          "name": "Qara (Obsidian Noir)",
           "hex": "#1A1A1A",
-          "image": "/images/uploads/angel_dust_hoodie_cutout.png",
-          "hoverImage": "/images/uploads/angel_dust_hoodie_back_official.png",
+          "image": "https://hrgvvsyalafdscponoca.supabase.co/storage/v1/object/public/product-images/products/horvvalle_black_hoodie_front_hd.jpg",
+          "hoverImage": "https://hrgvvsyalafdscponoca.supabase.co/storage/v1/object/public/product-images/products/Screenshot_2026-11-04_211639_1793812619377_p597.png",
+          "leftShoulderImage": "",
+          "rightShoulderImage": "",
           "gallery": [
-            "/images/uploads/angel_dust_hoodie_cutout.png",
-            "/images/uploads/angel_dust_hoodie_back_official.png",
-            "/images/uploads/angel_dust_print_art.png"
+            "https://hrgvvsyalafdscponoca.supabase.co/storage/v1/object/public/product-images/products/horvvalle_black_hoodie_front_hd.jpg",
+            "https://hrgvvsyalafdscponoca.supabase.co/storage/v1/object/public/product-images/products/Screenshot_2026-11-04_211639_1793812619377_p597.png"
           ]
         }
       ],
-      "id": "vtx-mvmi2ckz",
-      "slug": "horwalle-angel-dust-vintage-hoodie",
-      "internationalPrice": 33
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "features": [],
+      "printLayers": [
+        {
+          "name": "On teref",
+          "url": "https://hrgvvsyalafdscponoca.supabase.co/storage/v1/object/public/product-images/products/D6D57C81-3DFE-4C26-8A49-B0A653_1793815021395_4jb5.png",
+          "desc": "Kompyuterdən yüklənmiş DTF/DTG şəffaf çap faylı"
+        },
+        {
+          "name": "Arxa teref",
+          "url": "https://hrgvvsyalafdscponoca.supabase.co/storage/v1/object/public/product-images/products/3E5F76D1-FE24-4D1A-A5C7-D784E0_1793815038661_lt8c.png",
+          "desc": "Kompyuterdən yüklənmiş DTF/DTG şəffaf çap faylı"
+        }
+      ]
     }
   ],
   "orders": [],
