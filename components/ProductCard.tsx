@@ -132,38 +132,20 @@ export function ProductCard({ product, variant = "light", priority = false }: Pr
           )}
         </Link>
 
-        {/* Top-Left: ✨ Try-On Button (Anywear Virtual Fitting) & Badge */}
-        <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              openTryOn(product, selectedColorIndex);
-            }}
-            className={
-              isDark
-                ? "inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold rounded-full bg-black/80 hover:bg-black text-[#E6C280] border border-[#E6C280]/40 backdrop-blur-md shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer group/tryon"
-                : "inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold rounded-full bg-white/95 hover:bg-white text-stone-900 border border-stone-200 shadow-md backdrop-blur-md hover:scale-105 active:scale-95 transition-all cursor-pointer group/tryon"
-            }
-            title="Virtual Try-On · Əynində Yoxla"
-          >
-            <Sparkles className="w-3 h-3 text-[#E6C280] transition-transform group-hover/tryon:rotate-12" />
-            <span className="font-['Plus_Jakarta_Sans',sans-serif] tracking-tight">Try-On</span>
-          </button>
-
-          {product.badge && (
+        {/* Top-Left: Badge */}
+        {product.badge && (
+          <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 pointer-events-none">
             <span
               className={
                 isDark
-                  ? "px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-black/60 backdrop-blur-md text-[#E6C280] border border-[#E6C280]/30 rounded-full shadow-sm pointer-events-none"
-                  : "px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider bg-white/90 backdrop-blur-md text-stone-700 border border-stone-200/90 rounded-full shadow-2xs pointer-events-none"
+                  ? "px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-black/60 backdrop-blur-md text-[#E6C280] border border-[#E6C280]/30 rounded-full shadow-sm"
+                  : "px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider bg-white/90 backdrop-blur-md text-stone-700 border border-stone-200/90 rounded-full shadow-2xs"
               }
             >
               {translateBadge(product.badge, language)}
             </span>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Wishlist action */}
         <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5">

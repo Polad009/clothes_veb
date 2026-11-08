@@ -174,11 +174,6 @@ export default function RootLayout({
             })
           }}
         />
-        {/* Decart AI · Anywear Real-Time Virtual Try-On Widget */}
-        <script
-          src="https://anywear.decart.ai/widget/latest/anywear.js?domain=www.horwalle.com"
-          async
-        />
       </head>
       <body className="min-h-screen flex flex-col bg-[#FAF7F2] text-[#1A1517] font-sans antialiased selection:bg-[#E6C280] selection:text-black">
         <Analytics />
