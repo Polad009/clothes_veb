@@ -83,8 +83,15 @@ CREATE TABLE IF NOT EXISTS orders (
     customer_phone TEXT NOT NULL,
     customer_email TEXT,
     delivery_address TEXT NOT NULL,
+    delivery_address_line2 TEXT,
     delivery_city TEXT NOT NULL DEFAULT 'Bakı',
+    delivery_state TEXT,
+    delivery_postal_code TEXT,
+    delivery_country TEXT NOT NULL DEFAULT 'Azərbaycan',
     total_amount NUMERIC(10, 2) NOT NULL,
+    shipping_method TEXT DEFAULT 'standard',
+    shipping_amount NUMERIC(10, 2) DEFAULT 0.00,
+    currency TEXT DEFAULT 'AZN',
     payment_method TEXT NOT NULL CHECK (payment_method IN ('card', 'apple_pay', 'google_pay', 'cash_on_delivery')),
     payment_status TEXT DEFAULT 'pending' CHECK (payment_status IN ('pending', 'paid', 'failed', 'refunded')),
     order_status TEXT DEFAULT 'yeni' CHECK (order_status IN ('yeni', 'təsdiqləndi', 'çapdadır', 'kuryerdə', 'tamamlandı', 'ləğv_edildi')),
@@ -93,6 +100,15 @@ CREATE TABLE IF NOT EXISTS orders (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+-- Idempotent migrations for existing deployments
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_country TEXT DEFAULT 'Azərbaycan';
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_postal_code TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_state TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_address_line2 TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_method TEXT DEFAULT 'standard';
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_amount NUMERIC(10, 2) DEFAULT 0.00;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS currency TEXT DEFAULT 'AZN';
 
 -- 7. ORDER ITEMS (READY vs CUSTOM)
 CREATE TABLE IF NOT EXISTS order_items (

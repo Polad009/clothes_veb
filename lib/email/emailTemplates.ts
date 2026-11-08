@@ -45,6 +45,25 @@ export function generateOrderConfirmationHtml(order: any): string {
   const items = order.items || [];
   const trackingUrl = `https://horvvalle.com/track?orderId=${encodeURIComponent(order.id)}`;
 
+  const destinationParts = [
+    cust.address,
+    cust.addressLine2,
+    cust.city,
+    cust.stateOrRegion,
+    cust.postalCode,
+    cust.country || "Azərbaycan",
+  ].filter(Boolean);
+  const destinationStr = destinationParts.join(", ") || "-";
+  const carrierLabel = order.shippingMethodLabel || order.shippingMethod || "Kuryer";
+  const shippingInfo = order.estimatedDelivery ? `${carrierLabel} (${order.estimatedDelivery})` : carrierLabel;
+  const formatEmailPrice = (val: number) => {
+    const num = Number(val || 0).toFixed(2);
+    if (order.currency === "USD") return `$${num}`;
+    if (order.currency === "EUR") return `€${num}`;
+    return `${num} ₼`;
+  };
+  const shippingCostStr = Number(order.shipping || 0) === 0 ? "Pulsuz" : formatEmailPrice(order.shipping);
+
   const itemsRows = items
     .map(
       (item: any) => `
@@ -54,7 +73,7 @@ export function generateOrderConfirmationHtml(order: any): string {
         <span style="font-size: 11px; color: #7A7269;">Ölçü: ${item.size || "L"} · Rəng: ${item.color || "Standart"}</span>
       </td>
       <td style="text-align: center;">${item.quantity || 1}</td>
-      <td style="text-align: right; font-weight: bold;">${Number(item.price || 0).toFixed(2)} ₼</td>
+      <td style="text-align: right; font-weight: bold;">${formatEmailPrice(item.price)}</td>
     </tr>
   `
     )
@@ -78,7 +97,11 @@ export function generateOrderConfirmationHtml(order: any): string {
         </tr>
         <tr>
           <td style="color: #7A7269; padding-bottom: 6px;">Çatdırılma Ünvanı:</td>
-          <td style="text-align: right;">${cust.city || "Bakı"}, ${cust.address || "-"}</td>
+          <td style="text-align: right;">${destinationStr}</td>
+        </tr>
+        <tr>
+          <td style="color: #7A7269; padding-bottom: 6px;">Çatdırılma Xidməti:</td>
+          <td style="text-align: right;">${shippingInfo} (${shippingCostStr})</td>
         </tr>
         <tr>
           <td style="color: #7A7269;">Status:</td>
@@ -100,9 +123,28 @@ export function generateOrderConfirmationHtml(order: any): string {
       </tbody>
       <tfoot>
         <tr>
-          <td colspan="2" style="text-align: right; padding-top: 14px; font-weight: bold;">Cəmi:</td>
-          <td style="text-align: right; padding-top: 14px; font-weight: bold; font-size: 16px; color: #111011;">
-            ${Number(order.total || 0).toFixed(2)} ₼
+          <td colspan="2" style="text-align: right; padding-top: 10px; color: #7A7269; font-size: 12px;">Məhsullar:</td>
+          <td style="text-align: right; padding-top: 10px; font-size: 12px; color: #111011;">
+            ${formatEmailPrice(order.subtotal)}
+          </td>
+        </tr>
+        ${Number(order.discount || 0) > 0 ? `
+        <tr>
+          <td colspan="2" style="text-align: right; padding-top: 4px; color: #16A34A; font-size: 12px;">Endirim:</td>
+          <td style="text-align: right; padding-top: 4px; font-size: 12px; color: #16A34A; font-weight: bold;">
+            -${formatEmailPrice(order.discount)}
+          </td>
+        </tr>` : ''}
+        <tr>
+          <td colspan="2" style="text-align: right; padding-top: 4px; color: #7A7269; font-size: 12px;">Çatdırılma:</td>
+          <td style="text-align: right; padding-top: 4px; font-size: 12px; color: #111011;">
+            ${shippingCostStr}
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2" style="text-align: right; padding-top: 14px; font-weight: bold; border-top: 2px solid #EBE4DA;">Yekun Cəmi:</td>
+          <td style="text-align: right; padding-top: 14px; font-weight: bold; font-size: 16px; color: #111011; border-top: 2px solid #EBE4DA;">
+            ${formatEmailPrice(order.total)}
           </td>
         </tr>
       </tfoot>
@@ -145,10 +187,11 @@ export function generateStatusUpdateHtml(order: any, newStatus: string): string 
       <p style="font-size: 13px; color: #5C5247; margin: 12px 0 0 0; line-height: 1.5;">
         ${statusDescription}
       </p>
+      ${order.shippingMethodLabel ? `<p style="font-size: 11px; color: #7A7269; margin: 10px 0 0 0;">Çatdırılma: <strong>${order.shippingMethodLabel}</strong>${order.estimatedDelivery ? ` (${order.estimatedDelivery})` : ""}</p>` : ""}
     </div>
 
     <div style="text-align: center; margin-top: 30px;">
-      <a href="${trackingUrl}" class="btn">Kuryerin Yerini İzlə</a>
+      <a href="${trackingUrl}" class="btn">Sifarişi İzlə</a>
     </div>
   `;
 

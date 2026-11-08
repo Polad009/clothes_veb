@@ -24,15 +24,31 @@ export async function notifyNewOrder(order: any) {
       })
       .join("\n");
 
+    const destinationParts = [
+      order.customer?.address,
+      order.customer?.addressLine2,
+      order.customer?.city,
+      order.customer?.stateOrRegion,
+      order.customer?.postalCode,
+      order.customer?.country || "Azərbaycan",
+    ].filter(Boolean);
+    const destinationStr = destinationParts.join(", ") || "-";
+    const carrierStr = order.shippingMethodLabel
+      ? `${order.shippingMethodLabel}${order.estimatedDelivery ? ` (${order.estimatedDelivery})` : ""}`
+      : (order.shippingMethod || "Kuryer");
+    const currencyStr = order.currency || "AZN";
+    const shippingStr = Number(order.shipping || 0) === 0 ? "PULSUZ" : `${Number(order.shipping || 0).toFixed(2)} ${currencyStr}`;
+
     const messageText =
       `🛍 *YENİ SİFARİŞ GƏLDİ! (HORVVALLE)*\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `📦 *Sifariş №:* \`${order.id}\`\n` +
       `👤 *Müştəri:* ${order.customer?.fullName || "Müştəri"}\n` +
       `📞 *Əlaqə:* ${order.customer?.phone || "-"}\n` +
-      `📍 *Ünvan:* ${order.customer?.city || "Bakı"}, ${order.customer?.address || "-"}\n` +
+      `📍 *Ünvan:* ${destinationStr}\n` +
+      `🚚 *Çatdırılma:* ${carrierStr} — ${shippingStr}\n` +
       `💳 *Ödəniş:* ${order.paymentMethod || "Kart"}\n` +
-      `💰 *Yekun Məbləğ:* *${Number(order.total || 0).toFixed(2)} ₼*\n\n` +
+      `💰 *Yekun Məbləğ:* *${Number(order.total || 0).toFixed(2)} ${currencyStr}*\n\n` +
       `🛒 *Məhsullar:*\n${itemsSummary}\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `⏰ ${new Date().toLocaleString("az-AZ")}`;
@@ -60,11 +76,11 @@ export async function notifyNewOrder(order: any) {
         fetch(`https://ntfy.sh/${encodeURIComponent(ntfyTopic)}`, {
           method: "POST",
           headers: {
-            Title: `🛍 Yeni Sifaris: ${order.id} (${Number(order.total || 0).toFixed(2)} AZN)`,
+            Title: `🛍 Yeni Sifaris: ${order.id} (${Number(order.total || 0).toFixed(2)} ${currencyStr})`,
             Priority: "urgent",
             Tags: "shopping_bags,moneybag,bell",
           },
-          body: `Müştəri: ${order.customer?.fullName || "Müştəri"} (${order.customer?.phone || ""})\nÜnvan: ${order.customer?.city || "Bakı"}, ${order.customer?.address || ""}\nMəbləğ: ${Number(order.total || 0).toFixed(2)} AZN\n${(order.items || []).map((i: any) => `${i.quantity}x ${i.name}`).join(", ")}`,
+          body: `Müştəri: ${order.customer?.fullName || "Müştəri"} (${order.customer?.phone || ""})\nÜnvan: ${destinationStr}\nÇatdırılma: ${carrierStr} (${shippingStr})\nMəbləğ: ${Number(order.total || 0).toFixed(2)} ${currencyStr}\n${(order.items || []).map((i: any) => `${i.quantity}x ${i.name}`).join(", ")}`,
         }).catch((e) => console.warn("NTFY push notification error:", e.message))
       );
     }

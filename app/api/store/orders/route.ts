@@ -7,6 +7,8 @@ import { sendOrderConfirmation, sendOrderStatusUpdate } from '@/lib/email/emailS
 import { getActivePaymentProvider, PaymentMethod, PaymentRequest } from '@/lib/payments';
 import { verifyTurnstileToken } from '@/lib/turnstile';
 import { checkRateLimit } from '@/lib/rateLimiter';
+import { validateShippingRate, isDomesticDestination, calculateShippingOptions, getShippingOptionById } from '@/lib/shipping';
+import { getCountryByCode } from '@/lib/countries';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,14 +16,20 @@ async function syncOrderToSupabase(order: StoreOrder, customer: any, items: any[
   const client = supabaseServer;
   if (!client) return;
   try {
-    // Attempt insert with modern payment schema columns
+    // Attempt insert with modern payment schema columns including international address and shipping
     const fullPayload: any = {
       user_id: userId || null,
       customer_name: customer.fullName,
       customer_phone: customer.phone,
       customer_email: customer.email,
       delivery_address: customer.address,
+      delivery_address_line2: customer.addressLine2 || null,
       delivery_city: customer.city,
+      delivery_state: customer.stateOrRegion || null,
+      delivery_postal_code: customer.postalCode || null,
+      delivery_country: customer.country || 'Azərbaycan',
+      shipping_method: order.shippingMethod || 'domestic_baku_sumgayit',
+      shipping_amount: Number(order.shipping) || 0,
       total_amount: Number(order.total) || 0,
       payment_method: order.paymentMethod || 'Card',
       payment_status: order.paymentStatus || 'pending_payment',
@@ -152,10 +160,66 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 2. Server-side Shipping Calculation
-    const city = String(customer.city || 'Bakı').trim();
-    const isFreeZone = /^(bak[ıi]|sumqay[ıi]t)/i.test(city);
-    const serverShipping = isFreeZone ? 0 : (serverSubtotal >= 60 ? 0 : 5);
+    // Customer destination & address extraction
+    const rawCountry = String(customer.country || '').trim();
+    const rawCountryCode = String(customer.countryCode || '').trim().toUpperCase();
+
+    let countryCode = 'AZ';
+    if (rawCountryCode) {
+      countryCode = rawCountryCode;
+    } else if (rawCountry) {
+      const match = getCountryByCode(rawCountry);
+      countryCode = match ? match.code : (isDomesticDestination(rawCountry) ? 'AZ' : 'AZ');
+    }
+
+    const matchedCountry = getCountryByCode(countryCode);
+    const countryName = matchedCountry ? matchedCountry.name : (countryCode === 'AZ' ? 'Azərbaycan' : countryCode);
+    const isDomestic = isDomesticDestination(countryCode);
+
+    const addressLine2 = customer.addressLine2
+      ? String(customer.addressLine2).replace(/[<>]/g, '').trim().slice(0, 150)
+      : undefined;
+    const stateOrRegion = customer.stateOrRegion
+      ? String(customer.stateOrRegion).replace(/[<>]/g, '').trim().slice(0, 100)
+      : undefined;
+    const postalCode = customer.postalCode
+      ? String(customer.postalCode).replace(/[<>]/g, '').trim().slice(0, 30)
+      : undefined;
+
+    // 2. Server-side Shipping Calculation & Rate Verification
+    const shippingCurrency: 'AZN' | 'USD' = requestedCurrency === 'USD' ? 'USD' : 'AZN';
+    const clientShippingMethod = String(body.shippingMethod || '').trim();
+    const city = String(customer.city || (isDomestic ? 'Bakı' : '')).trim();
+
+    const defaultOptionId = isDomestic
+      ? (/^(bak[ıi]|sumqay[ıi]t)/i.test(city) ? 'domestic_baku_sumgayit' : 'domestic_region')
+      : 'intl_standard';
+    const targetOptionId = clientShippingMethod || defaultOptionId;
+
+    const claimedShippingRate = typeof body.shipping === 'number'
+      ? Number(body.shipping)
+      : (typeof body.shippingCost === 'number' ? Number(body.shippingCost) : undefined);
+
+    const shippingValidation = validateShippingRate(
+      countryCode,
+      serverSubtotal,
+      shippingCurrency,
+      targetOptionId,
+      claimedShippingRate !== undefined ? claimedShippingRate : -1
+    );
+
+    // Reject tampered shipping rates
+    if (claimedShippingRate !== undefined && !shippingValidation.valid) {
+      return NextResponse.json(
+        {
+          error: `Çatdırılma haqqı uyğunsuzluğu. Gözlənilən: ${shippingValidation.expectedRate} ${shippingCurrency}, təqdim edilən: ${claimedShippingRate} ${shippingCurrency}`,
+        },
+        { status: 400 }
+      );
+    }
+
+    const serverShipping = shippingValidation.expectedRate;
+    const validatedShippingOption = shippingValidation.option;
 
     // 3. Server-side Promo Code Validation
     let serverDiscount = 0;
@@ -181,7 +245,7 @@ export async function POST(req: NextRequest) {
 
     const serverTotal = Math.max(0, Math.round((serverSubtotal - serverDiscount + serverShipping) * 100) / 100);
 
-    // 4. Normalize Payment Method
+    // 4. Normalize Payment Method & Enforce COD Gating
     let method: PaymentMethod = 'card';
     const methodStr = String(rawMethod || '').toLowerCase();
     if (methodStr.includes('apple')) {
@@ -192,13 +256,25 @@ export async function POST(req: NextRequest) {
       method = 'cash_on_delivery';
     }
 
-    // Check COD eligibility (Custom POD items require upfront digital payment)
-    const hasCustomItems = validatedItems.some((i) => i.isCustom);
-    if (method === 'cash_on_delivery' && hasCustomItems) {
-      return NextResponse.json(
-        { error: 'Fərdi dizaynlı məhsullar üçün çatdırılmada ödəniş keçərli deyil. Zəhmət olmasa kart və ya Apple/Google Pay seçin.' },
-        { status: 400 }
-      );
+    // COD Gating Rules
+    if (method === 'cash_on_delivery') {
+      if (!isDomestic || countryCode !== 'AZ') {
+        return NextResponse.json(
+          {
+            error: 'Nağd ödəniş (COD) yalnız Azərbaycan daxili sifarişlər üçün keçərlidir. Beynəlxalq sifarişlər üçün kart və ya Apple/Google Pay seçin.',
+          },
+          { status: 400 }
+        );
+      }
+
+      // Check COD eligibility for custom POD items
+      const hasCustomItems = validatedItems.some((i) => i.isCustom);
+      if (hasCustomItems) {
+        return NextResponse.json(
+          { error: 'Fərdi dizaynlı məhsullar üçün çatdırılmada ödəniş keçərli deyil. Zəhmət olmasa kart və ya Apple/Google Pay seçin.' },
+          { status: 400 }
+        );
+      }
     }
 
     const orderId = body.id || ('VTX-ORD-' + Math.floor(1000 + Math.random() * 9000));
@@ -220,6 +296,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, order: recentDuplicate, duplicatePrevented: true });
     }
 
+    const sanitizedCustomer = {
+      fullName: String(customer.fullName || '').replace(/[<>]/g, '').trim().slice(0, 100),
+      phone: String(customer.phone || '').replace(/[<>]/g, '').trim().slice(0, 30),
+      email: String(customer.email || '').replace(/[<>]/g, '').trim().slice(0, 120),
+      address: String(customer.address || '').replace(/[<>]/g, '').trim().slice(0, 250),
+      addressLine2: addressLine2 || undefined,
+      city: String(customer.city || (isDomestic ? 'Bakı' : '')).replace(/[<>]/g, '').trim().slice(0, 60),
+      stateOrRegion: stateOrRegion || undefined,
+      postalCode: postalCode || undefined,
+      country: countryName,
+      countryCode: countryCode,
+    };
+
     // 6. Execute Pluggable Payment Provider
     const provider = getActivePaymentProvider();
     const paymentRequest: PaymentRequest = {
@@ -237,12 +326,12 @@ export async function POST(req: NextRequest) {
         color: i.color,
       })),
       customer: {
-        fullName: customer.fullName,
-        phone: customer.phone,
-        email: customer.email,
-        address: customer.address,
-        city: customer.city,
-        country: 'Azərbaycan',
+        fullName: sanitizedCustomer.fullName,
+        phone: sanitizedCustomer.phone,
+        email: sanitizedCustomer.email,
+        address: [sanitizedCustomer.address, sanitizedCustomer.addressLine2].filter(Boolean).join(", "),
+        city: [sanitizedCustomer.city, sanitizedCustomer.stateOrRegion, sanitizedCustomer.postalCode].filter(Boolean).join(", "),
+        country: sanitizedCustomer.country,
       },
       isTest: isTestMode,
       promoCode: validatedPromoCode,
@@ -265,7 +354,6 @@ export async function POST(req: NextRequest) {
         if (!item.isCustom && item.productId) {
           const prodIndex = (db.products || []).findIndex((p) => p.id === item.productId);
           if (prodIndex !== -1) {
-            // If product has explicit quantity or inventory flag
             if (typeof (db.products[prodIndex] as any).stockCount === 'number') {
               (db.products[prodIndex] as any).stockCount = Math.max(0, (db.products[prodIndex] as any).stockCount - item.quantity);
             }
@@ -273,15 +361,6 @@ export async function POST(req: NextRequest) {
         }
       }
     }
-
-    const sanitizedCustomer = {
-      fullName: String(customer.fullName || '').replace(/[<>]/g, '').trim().slice(0, 100),
-      phone: String(customer.phone || '').replace(/[<>]/g, '').trim().slice(0, 30),
-      email: String(customer.email || '').replace(/[<>]/g, '').trim().slice(0, 120),
-      address: String(customer.address || '').replace(/[<>]/g, '').trim().slice(0, 250),
-      city: String(customer.city || 'Bakı').replace(/[<>]/g, '').trim().slice(0, 60),
-      country: 'Azərbaycan',
-    };
 
     const newOrder: StoreOrder = {
       id: orderId,
@@ -302,6 +381,9 @@ export async function POST(req: NextRequest) {
       orderStatus: method === 'cash_on_delivery' ? 'Təsdiqləndi (COD)' : 'Yeni Sifariş',
       subtotal: serverSubtotal,
       shipping: serverShipping,
+      shippingMethod: validatedShippingOption.id,
+      shippingMethodLabel: validatedShippingOption.name,
+      estimatedDelivery: validatedShippingOption.estimatedDays,
       discount: serverDiscount,
       total: serverTotal,
       isTest: isTestMode,

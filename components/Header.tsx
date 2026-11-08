@@ -34,6 +34,8 @@ export function Header({ className = "" }: HeaderProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentCategory = searchParams?.get("category") || null;
+  const rawGender = searchParams?.get("gender");
+  const currentGender = rawGender ? rawGender.toLowerCase().trim() : null;
 
   const { totalCount, openCart } = useCart();
   const { formatPrice, formatProductPrice } = useCurrency();
@@ -121,11 +123,13 @@ export function Header({ className = "" }: HeaderProps) {
   // Close mobile sidebar on route change
   useEffect(() => {
     setMobileMenuOpen(false);
-  }, [pathname, currentCategory]);
+  }, [pathname, currentCategory, currentGender]);
 
   useBodyScrollLock(mobileMenuOpen);
 
   const navLinks = [
+    { label: t.nav.men, href: "/collections?gender=men", genderId: "men" },
+    { label: t.nav.women, href: "/collections?gender=women", genderId: "women" },
     { label: t.nav.shirts, href: "/collections?category=koynek", categoryId: "koynek" },
     { label: t.nav.hoodies, href: "/collections?category=hudi", categoryId: "hudi" },
     { label: t.nav.pants, href: "/collections?category=salvar", categoryId: "salvar" },
@@ -134,18 +138,24 @@ export function Header({ className = "" }: HeaderProps) {
     { label: t.nav.track, href: "/track", categoryId: "track" },
   ];
 
-  const isLinkActive = (categoryId: string, href: string) => {
-    if (categoryId !== "all") {
-      if (pathname === "/collections" && currentCategory === categoryId) {
+  const isLinkActive = (item: { categoryId?: string; genderId?: string; href: string }) => {
+    if (item.genderId) {
+      return pathname === "/collections" && currentGender === item.genderId;
+    }
+    if (item.categoryId && item.categoryId !== "all") {
+      if (pathname === "/collections" && currentCategory === item.categoryId && !currentGender) {
         return true;
       }
-      if (pathname === "/" && categoryId === "koynek") {
+      if (pathname === "/" && item.categoryId === "koynek" && !currentCategory && !currentGender) {
         return true;
       }
       return false;
     }
-    if (categoryId === "all") {
-      return pathname === "/collections" && (!currentCategory || currentCategory === "all");
+    if (item.categoryId === "all") {
+      return pathname === "/collections" && (!currentCategory || currentCategory === "all") && !currentGender;
+    }
+    if (item.categoryId === "track" || item.href === "/track") {
+      return pathname === "/track";
     }
     return false;
   };
@@ -196,7 +206,7 @@ export function Header({ className = "" }: HeaderProps) {
             }`}
           >
             {navLinks.map((link) => {
-              const active = isLinkActive(link.categoryId, link.href);
+              const active = isLinkActive(link);
               return (
                 <Link
                   key={link.label}
@@ -500,7 +510,7 @@ export function Header({ className = "" }: HeaderProps) {
                     animate="visible"
                   >
                     {navLinks.map((link) => {
-                      const active = isLinkActive(link.categoryId, link.href);
+                      const active = isLinkActive(link);
                       return (
                         <motion.div
                           key={link.label}

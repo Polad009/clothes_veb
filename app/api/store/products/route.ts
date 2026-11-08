@@ -10,7 +10,8 @@ export async function GET(req: NextRequest) {
   const startTime = Date.now();
   try {
     const { searchParams } = new URL(req.url);
-    const gender = searchParams.get('gender');
+    const rawGender = searchParams.get('gender');
+    const gender = rawGender ? rawGender.toLowerCase().trim() : null;
     const category = searchParams.get('category');
     const search = searchParams.get('q')?.toLowerCase();
     const limitParam = searchParams.get('limit');
@@ -72,7 +73,15 @@ export async function GET(req: NextRequest) {
     }
 
     if (gender && gender !== 'all') {
-      products = products.filter(p => p.gender === gender || p.gender === 'accessories');
+      if (gender === 'men') {
+        products = products.filter(p => p.gender === 'men' || p.gender === 'unisex');
+      } else if (gender === 'women') {
+        products = products.filter(p => p.gender === 'women' || p.gender === 'unisex');
+      } else if (gender === 'unisex') {
+        products = products.filter(p => p.gender === 'unisex');
+      } else {
+        products = products.filter(p => p.gender === gender);
+      }
     }
 
     if (category && category !== 'all') {

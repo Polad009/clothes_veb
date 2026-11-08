@@ -12,7 +12,23 @@ import {
   Lock,
   AlertCircle,
   X,
+  Globe,
+  Plane,
+  ChevronDown,
 } from "lucide-react";
+import {
+  getAllCountries,
+  getCountryByCode,
+  formatPhoneWithDialCode,
+  isValidCountry,
+  CountryInfo,
+} from "@/lib/countries";
+import {
+  calculateShippingOptions,
+  getShippingOptionById,
+  isDomesticDestination,
+  ShippingOption,
+} from "@/lib/shipping";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ApplePayLogo,
@@ -81,6 +97,17 @@ const CHECKOUT_I18N = {
     helpDesc: "Ölçü seçimi, çatdırılma və ya suallarınız üçün birbaşa WhatsApp dəstək xəttimizə yaza bilərsiniz:",
     itemsLabel: "Məhsullar",
     shippingLabel: "Çatdırılma",
+    countryLabel: "Ölkə",
+    selectCountry: "Çatdırılma ölkəsini seçin",
+    addressLine1: "Ünvan (Küçə, bina, ev)",
+    addressLine2: "Mənzil, blok, mərtəbə (istəyə bağlı)",
+    stateOrRegion: "Bölgə / Vilayət / Ştat",
+    enterState: "Ştat və ya vilayəti daxil edin",
+    postalCode: "Poçt indeksi / ZIP",
+    enterPostalCode: "Poçt indeksini daxil edin",
+    shippingMethodsTitle: "Çatdırılma Xidməti",
+    codAzOnly: "Nağd ödəniş yalnız Azərbaycan daxili sifarişlər üçün keçərlidir",
+    dduNotice: "Beynəlxalq sifarişlər DDU (Delivered Duty Unpaid) şərtilə göndərilir. Yerli gömrük rüsumları müştəri tərəfindən ödənilir.",
   },
   en: {
     testBanner: "No real payment is charged. You can safely complete a test order in test mode.",
@@ -136,6 +163,17 @@ const CHECKOUT_I18N = {
     helpDesc: "For sizing assistance, delivery, or general questions, message our direct WhatsApp support:",
     itemsLabel: "Items",
     shippingLabel: "Delivery",
+    countryLabel: "Country",
+    selectCountry: "Select destination country",
+    addressLine1: "Street address, building, apt",
+    addressLine2: "Apartment, suite, unit (optional)",
+    stateOrRegion: "State / Province / Region",
+    enterState: "Please enter state or province",
+    postalCode: "Postal / ZIP Code",
+    enterPostalCode: "Please enter postal/ZIP code",
+    shippingMethodsTitle: "Shipping Method",
+    codAzOnly: "Cash on delivery is only available within Azerbaijan",
+    dduNotice: "International shipments are delivered DDU (Delivered Duty Unpaid). Applicable local customs fees are handled by customer.",
   },
   ru: {
     testBanner: "Списание средств не производится. В тестовом режиме вы можете безопасно оформить заказ.",
@@ -191,6 +229,17 @@ const CHECKOUT_I18N = {
     helpDesc: "По вопросам подбора размера, доставки или оформления пишите напрямую в нашу поддержку WhatsApp:",
     itemsLabel: "Товары",
     shippingLabel: "Доставка",
+    countryLabel: "Страна",
+    selectCountry: "Выберите страну доставки",
+    addressLine1: "Адрес (улица, дом, кв.)",
+    addressLine2: "Квартира, подъезд, этаж (необязательно)",
+    stateOrRegion: "Регион / Область / Штат",
+    enterState: "Введите регион или штат",
+    postalCode: "Почтовый индекс / ZIP",
+    enterPostalCode: "Введите почтовый индекс",
+    shippingMethodsTitle: "Способ доставки",
+    codAzOnly: "Оплата при получении доступна только для заказов по Азербайджану",
+    dduNotice: "Международная доставка осуществляется на условиях DDU.",
   },
   tr: {
     testBanner: "Gerçek ödeme alınmaz. Test modunda güvenle deneme siparişi verebilirsiniz.",
@@ -246,17 +295,37 @@ const CHECKOUT_I18N = {
     helpDesc: "Beden seçimi, teslimat veya sorularınız için doğrudan WhatsApp destek hattımıza yazabilirsiniz:",
     itemsLabel: "Ürünler",
     shippingLabel: "Teslimat",
+    countryLabel: "Ülke",
+    selectCountry: "Teslimat ülkesini seçin",
+    addressLine1: "Adres (Sokak, bina, daire)",
+    addressLine2: "Daire, kat, blok (isteğe bağlı)",
+    stateOrRegion: "Eyalet / İl / Bölge",
+    enterState: "Eyalet veya ili girin",
+    postalCode: "Posta Kodu / ZIP",
+    enterPostalCode: "Posta kodunu girin",
+    shippingMethodsTitle: "Teslimat Yöntemi",
+    codAzOnly: "Kapıda ödeme yalnızca Azerbaycan içi siparişlerde geçerlidir",
+    dduNotice: "Uluslararası siparişler DDU (gümrük vergileri alıcıya ait) olarak gönderilir.",
   },
 };
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, totalPrice, clearCart } = useCart();
-  const { formatPrice, getProductPrice, currency, isAzerbaijan } = useCurrency();
+  const { formatPrice, getProductPrice, currency, isAzerbaijan, detectedCountry } = useCurrency();
   const { t, language } = useLanguage();
   const langKey = (language as "az" | "en" | "ru" | "tr") || "az";
   const cT = CHECKOUT_I18N[langKey] || CHECKOUT_I18N.az;
   const { user, profile, isLoading: isAuthLoading, openAuthModal } = useAuth();
+
+  // Country & Destination State
+  const initialCountryCode = detectedCountry && isValidCountry(detectedCountry) ? detectedCountry.toUpperCase() : "AZ";
+  const [selectedCountryCode, setSelectedCountryCode] = useState<string>(initialCountryCode);
+  const [userSelectedCountry, setUserSelectedCountry] = useState(false);
+  const [selectedShippingMethodId, setSelectedShippingMethodId] = useState<string>("domestic_baku_sumgayit");
+
+  const currentCountry: CountryInfo = getCountryByCode(selectedCountryCode) || getCountryByCode("AZ")!;
+  const isDomestic = isDomesticDestination(selectedCountryCode);
 
   // Form State
   const [fullName, setFullName] = useState("");
@@ -264,6 +333,23 @@ export default function CheckoutPage() {
   const [email, setEmail] = useState("");
   const [city, setCity] = useState("Bakı");
   const [address, setAddress] = useState("");
+  const [addressLine2, setAddressLine2] = useState("");
+  const [stateOrRegion, setStateOrRegion] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+
+  // Sync detectedCountry from CurrencyContext when geo-detection arrives (if user hasn't manually chosen)
+  useEffect(() => {
+    if (!userSelectedCountry && detectedCountry && isValidCountry(detectedCountry)) {
+      const code = detectedCountry.toUpperCase();
+      setSelectedCountryCode(code);
+      const c = getCountryByCode(code);
+      if (c && code !== "AZ") {
+        setPhone(`${c.dialCode} `);
+        setCity("");
+        setSelectedShippingMethodId("intl_standard");
+      }
+    }
+  }, [detectedCountry, userSelectedCountry]);
 
   // Auto-fill from authenticated Supabase profile
   useEffect(() => {
@@ -277,8 +363,46 @@ export default function CheckoutPage() {
     }
   }, [user, profile]);
 
+  const handleCountryChange = (newCode: string) => {
+    setUserSelectedCountry(true);
+    setSelectedCountryCode(newCode);
+    const c = getCountryByCode(newCode);
+    if (c) {
+      if (newCode === "AZ") {
+        const cleanDigits = phone.replace(/\D/g, "");
+        if (cleanDigits.length <= 4) {
+          setPhone("+994 ");
+        } else {
+          setPhone(formatPhoneWithDialCode(phone, "AZ"));
+        }
+        if (!city || city === "Bakı" || city === "Sumqayıt") {
+          setCity("Bakı");
+        }
+        setSelectedShippingMethodId("domestic_baku_sumgayit");
+      } else {
+        const cleanDigits = phone.replace(/\D/g, "");
+        if (cleanDigits.length <= 4) {
+          setPhone(`${c.dialCode} `);
+        } else {
+          setPhone(formatPhoneWithDialCode(phone, newCode));
+        }
+        if (city === "Bakı" || city === "Sumqayıt") {
+          setCity("");
+        }
+        setSelectedShippingMethodId("intl_standard");
+      }
+    }
+    if (newCode !== "AZ" && paymentMethod === "cod") {
+      setPaymentMethod("card");
+    }
+    clearFieldError("country");
+    clearFieldError("city");
+    clearFieldError("postalCode");
+    clearFieldError("stateOrRegion");
+  };
+
   // Payment Selection - default to card so bank fields are ready and strictly validated
-  const [paymentMethod, setPaymentMethod] = useState<"apple_pay" | "google_pay" | "card">("card");
+  const [paymentMethod, setPaymentMethod] = useState<"apple_pay" | "google_pay" | "card" | "cod">("card");
   const [turnstileToken, setTurnstileToken] = useState<string>("");
   const isTestMode = process.env.NEXT_PUBLIC_PAYMENT_MODE === "test";
   const enableCod = process.env.NEXT_PUBLIC_ENABLE_COD !== "false";
@@ -326,9 +450,18 @@ export default function CheckoutPage() {
     0
   );
 
-  // Free delivery for Baku & Sumqayit regardless of cart amount
-  const isFreeZone = /^(bak[ıi]|sumqay[ıi]t)/i.test(city.trim());
-  const shippingCost = isFreeZone ? 0 : (effectiveSubtotal >= 60 ? 0 : 5);
+  // Dynamic Shipping Options Engine
+  const shippingOptions: ShippingOption[] = calculateShippingOptions(
+    selectedCountryCode,
+    effectiveSubtotal,
+    currency || "AZN"
+  );
+
+  const activeShippingOption: ShippingOption =
+    shippingOptions.find((o) => o.id === selectedShippingMethodId) || shippingOptions[0];
+  const shippingCost = activeShippingOption ? activeShippingOption.price : 0;
+  const isFreeZone = isDomestic && /^(bak[ıi]|sumqay[ıi]t)/i.test(city.trim());
+
   const discountAmount = promoDiscountAmount > 0 ? promoDiscountAmount : (effectiveSubtotal * discountPercent) / 100;
   const finalTotal = Math.max(0, effectiveSubtotal - discountAmount + shippingCost);
   const hasCustomItems = items.some((i) => i.type === "custom");
@@ -365,7 +498,9 @@ export default function CheckoutPage() {
     const digits = phone.replace(/\D/g, "");
     if (!phone.trim()) {
       errors.phone = cT.enterPhone;
-    } else if (digits.length < 9) {
+    } else if (isDomestic && digits.length < 9) {
+      errors.phone = cT.validPhone;
+    } else if (!isDomestic && digits.length < 7) {
       errors.phone = cT.validPhone;
     }
 
@@ -383,6 +518,26 @@ export default function CheckoutPage() {
       errors.address = cT.enterAddress;
     } else if (address.trim().length < 4) {
       errors.address = cT.addressMin;
+    }
+
+    if (isDomestic) {
+      if (!city.trim()) {
+        errors.city = "Zəhmət olmasa şəhər və ya rayonu qeyd edin";
+      }
+    } else {
+      if (!city.trim()) {
+        errors.city = "Zəhmət olmasa şəhəri qeyd edin";
+      } else if (city.trim().length < 2) {
+        errors.city = "Düzgün şəhər adı daxil edin";
+      }
+
+      if (currentCountry?.requiresState && !stateOrRegion.trim()) {
+        errors.stateOrRegion = cT.enterState || "Zəhmət olmasa ştat və ya vilayəti daxil edin";
+      }
+
+      if ((currentCountry?.requiresPostalCode || !isDomestic) && !postalCode.trim()) {
+        errors.postalCode = cT.enterPostalCode || "Zəhmət olmasa poçt indeksini daxil edin";
+      }
     }
 
     return errors;
@@ -549,8 +704,12 @@ export default function CheckoutPage() {
             phone,
             email: customerEmail,
             address,
-            city,
-            country: "Azərbaycan",
+            addressLine2: addressLine2.trim() || undefined,
+            city: city.trim(),
+            stateOrRegion: stateOrRegion.trim() || undefined,
+            postalCode: postalCode.trim() || undefined,
+            country: currentCountry.name || "Azərbaycan",
+            countryCode: selectedCountryCode,
           },
           items: items.map((i) => ({
             productId: i.productId,
@@ -570,8 +729,11 @@ export default function CheckoutPage() {
               : chosenMethod === "cod"
               ? "Çatdırılmada Ödəniş (COD)"
               : "Bank Kartı (Visa/Mastercard)",
-          subtotal: effectiveSubtotal,
+          shippingMethod: activeShippingOption.id,
+          shippingMethodLabel: activeShippingOption.name,
           shipping: shippingCost,
+          estimatedDelivery: activeShippingOption.estimatedDays,
+          subtotal: effectiveSubtotal,
           discount: discountAmount,
           promoCode: appliedPromoCode || null,
           currency: currency || "AZN",
@@ -698,7 +860,7 @@ export default function CheckoutPage() {
         }
 
         const paymentRequest = {
-          countryCode: "AZ",
+          countryCode: selectedCountryCode || "AZ",
           currencyCode: currency || "AZN",
           supportedNetworks: ["visa", "masterCard"],
           merchantCapabilities: ["supports3DS"],
@@ -798,7 +960,7 @@ export default function CheckoutPage() {
               totalPriceLabel: "Total",
               totalPrice: finalTotal.toFixed(2),
               currencyCode: currency || "AZN",
-              countryCode: "AZ",
+              countryCode: selectedCountryCode || "AZ",
             },
           };
 
@@ -918,6 +1080,25 @@ export default function CheckoutPage() {
 
     if (paymentMethod === "google_pay") {
       handleNativePayment("google_pay");
+      return;
+    }
+
+    if (paymentMethod === "cod") {
+      const shippingErrors = validateShipping();
+      setFieldErrors(shippingErrors);
+      if (Object.keys(shippingErrors).length > 0) {
+        const firstField = Object.keys(shippingErrors)[0];
+        setShakingField(firstField);
+        setTimeout(() => setShakingField(null), 600);
+        const el = document.getElementById(`field-${firstField}`);
+        if (el) {
+          el.focus();
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        setErrorMsg(cT.checkErrorsBelow);
+        return;
+      }
+      processOrder("cod");
       return;
     }
 
@@ -1093,11 +1274,47 @@ export default function CheckoutPage() {
 
             {/* Customer Information Form - noValidate to avoid ugly browser tooltips */}
             <form noValidate onSubmit={handleCardSubmit} className="space-y-6">
-              <div className="bg-white border border-stone-200/90 rounded-3xl p-6 space-y-4 shadow-xs">
-                <h3 className="font-eb-garamond text-xl font-normal text-stone-900 flex items-center gap-2">
-                  <Truck size={18} className="text-stone-700" />
-                  <span>1. {t.checkout.contactInfo}</span>
-                </h3>
+              <div className="bg-white border border-stone-200/90 rounded-3xl p-6 space-y-5 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-eb-garamond text-xl font-normal text-stone-900 flex items-center gap-2">
+                    <Truck size={18} className="text-stone-700" />
+                    <span>1. {t.checkout.contactInfo}</span>
+                  </h3>
+                  <span className="text-[11px] font-semibold text-stone-600 bg-stone-100 px-2.5 py-1 rounded-full border border-stone-200 flex items-center gap-1.5">
+                    <span>{currentCountry.flag}</span>
+                    <span>{currentCountry.name}</span>
+                  </span>
+                </div>
+
+                {/* Country Selector Dropdown */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-stone-700 uppercase flex items-center gap-1.5">
+                      <Globe size={13} className="text-stone-500" />
+                      <span>{cT.countryLabel || "Ölkə"} *</span>
+                    </label>
+                    <span className="text-[10px] font-semibold text-stone-500">
+                      {isDomestic ? "Azərbaycan daxili" : "Beynəlxalq çatdırılma"}
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <select
+                      id="field-country"
+                      value={selectedCountryCode}
+                      onChange={(e) => handleCountryChange(e.target.value)}
+                      className="w-full appearance-none bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 text-xs text-stone-900 focus:outline-none focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900 transition font-medium pr-10 cursor-pointer"
+                    >
+                      {getAllCountries().map((c) => (
+                        <option key={c.code} value={c.code}>
+                          {c.flag} {c.name} ({c.dialCode}) — {c.localName}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-stone-500">
+                      <ChevronDown size={14} />
+                    </div>
+                  </div>
+                </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <motion.div
@@ -1154,7 +1371,7 @@ export default function CheckoutPage() {
                     <input
                       id="field-phone"
                       type="tel"
-                      placeholder="+994 50 123 45 67"
+                      placeholder={`${currentCountry.dialCode} 50 123 45 67`}
                       value={phone}
                       onChange={(e) => handleFieldChange("phone", e.target.value, setPhone)}
                       className={`w-full rounded-xl px-3.5 py-2.5 text-xs text-stone-900 placeholder-stone-400 transition-all duration-200 focus:outline-none ${
@@ -1181,7 +1398,7 @@ export default function CheckoutPage() {
                   </motion.div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   <motion.div
                     animate={shakingField === "email" ? { x: [-8, 8, -6, 6, -3, 3, 0] } : { x: 0 }}
                     transition={{ duration: 0.45, ease: "easeInOut" }}
@@ -1224,112 +1441,400 @@ export default function CheckoutPage() {
                       )}
                     </AnimatePresence>
                   </motion.div>
-
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-semibold text-stone-700 uppercase">{t.checkout.city} *</label>
-                      <span className="text-[10px] font-semibold text-emerald-700">
-                        {isFreeZone ? `✓ ${t.checkout.free}` : cT.regions5}
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-3 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setCity("Bakı");
-                          clearFieldError("city");
-                        }}
-                        className={`py-2 px-2.5 rounded-xl border text-xs font-semibold transition cursor-pointer text-center ${
-                          city === "Bakı"
-                            ? "bg-stone-900 text-white border-stone-900 shadow-xs"
-                            : "bg-stone-50 text-stone-700 border-stone-200 hover:border-stone-400"
-                        }`}
-                      >
-                        Bakı <span className="block text-[9.5px] opacity-80 font-normal">{t.checkout.free}</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setCity("Sumqayıt");
-                          clearFieldError("city");
-                        }}
-                        className={`py-2 px-2.5 rounded-xl border text-xs font-semibold transition cursor-pointer text-center ${
-                          city === "Sumqayıt"
-                            ? "bg-stone-900 text-white border-stone-900 shadow-xs"
-                            : "bg-stone-50 text-stone-700 border-stone-200 hover:border-stone-400"
-                        }`}
-                      >
-                        Sumqayıt <span className="block text-[9.5px] opacity-80 font-normal">{t.checkout.free}</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (city === "Bakı" || city === "Sumqayıt") setCity("");
-                        }}
-                        className={`py-2 px-2.5 rounded-xl border text-xs font-semibold transition cursor-pointer text-center ${
-                          city !== "Bakı" && city !== "Sumqayıt"
-                            ? "bg-stone-900 text-white border-stone-900 shadow-xs"
-                            : "bg-stone-50 text-stone-700 border-stone-200 hover:border-stone-400"
-                        }`}
-                      >
-                        {t.collections.all} <span className="block text-[9.5px] opacity-80 font-normal">{cT.regionsLabel}</span>
-                      </button>
-                    </div>
-
-                    {city !== "Bakı" && city !== "Sumqayıt" && (
-                      <input
-                        id="field-city"
-                        type="text"
-                        placeholder={cT.regionsPlaceholder}
-                        value={city}
-                        onChange={(e) => setCity(e.target.value)}
-                        className="w-full mt-2 bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2 text-xs text-stone-900 placeholder-stone-400 focus:outline-none focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900 transition"
-                      />
-                    )}
-                  </div>
                 </div>
 
-                <motion.div
-                  animate={shakingField === "address" ? { x: [-8, 8, -6, 6, -3, 3, 0] } : { x: 0 }}
-                  transition={{ duration: 0.45, ease: "easeInOut" }}
-                  className="space-y-1.5"
-                >
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-stone-700 uppercase">{t.checkout.address} *</label>
-                    {fieldErrors.address && (
-                      <span className="text-[10px] text-rose-500 font-medium">{cT.reqField}</span>
-                    )}
+                {/* Domestic Azerbaijan Fields */}
+                {isDomestic ? (
+                  <div className="space-y-4">
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-stone-700 uppercase">{t.checkout.city} *</label>
+                        <span className="text-[10px] font-semibold text-emerald-700">
+                          {isFreeZone ? `✓ ${t.checkout.free}` : cT.regions5}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCity("Bakı");
+                            setSelectedShippingMethodId("domestic_baku_sumgayit");
+                            clearFieldError("city");
+                          }}
+                          className={`py-2 px-2.5 rounded-xl border text-xs font-semibold transition cursor-pointer text-center ${
+                            city === "Bakı"
+                              ? "bg-stone-900 text-white border-stone-900 shadow-xs"
+                              : "bg-stone-50 text-stone-700 border-stone-200 hover:border-stone-400"
+                          }`}
+                        >
+                          Bakı <span className="block text-[9.5px] opacity-80 font-normal">{t.checkout.free}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCity("Sumqayıt");
+                            setSelectedShippingMethodId("domestic_baku_sumgayit");
+                            clearFieldError("city");
+                          }}
+                          className={`py-2 px-2.5 rounded-xl border text-xs font-semibold transition cursor-pointer text-center ${
+                            city === "Sumqayıt"
+                              ? "bg-stone-900 text-white border-stone-900 shadow-xs"
+                              : "bg-stone-50 text-stone-700 border-stone-200 hover:border-stone-400"
+                          }`}
+                        >
+                          Sumqayıt <span className="block text-[9.5px] opacity-80 font-normal">{t.checkout.free}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (city === "Bakı" || city === "Sumqayıt") setCity("");
+                            setSelectedShippingMethodId("domestic_region");
+                          }}
+                          className={`py-2 px-2.5 rounded-xl border text-xs font-semibold transition cursor-pointer text-center ${
+                            city !== "Bakı" && city !== "Sumqayıt"
+                              ? "bg-stone-900 text-white border-stone-900 shadow-xs"
+                              : "bg-stone-50 text-stone-700 border-stone-200 hover:border-stone-400"
+                          }`}
+                        >
+                          {t.collections.all} <span className="block text-[9.5px] opacity-80 font-normal">{cT.regionsLabel}</span>
+                        </button>
+                      </div>
+
+                      {city !== "Bakı" && city !== "Sumqayıt" && (
+                        <input
+                          id="field-city"
+                          type="text"
+                          placeholder={cT.regionsPlaceholder}
+                          value={city}
+                          onChange={(e) => handleFieldChange("city", e.target.value, setCity)}
+                          className="w-full mt-2 bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2 text-xs text-stone-900 placeholder-stone-400 focus:outline-none focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900 transition"
+                        />
+                      )}
+                    </div>
+
+                    <motion.div
+                      animate={shakingField === "address" ? { x: [-8, 8, -6, 6, -3, 3, 0] } : { x: 0 }}
+                      transition={{ duration: 0.45, ease: "easeInOut" }}
+                      className="space-y-1.5"
+                    >
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-stone-700 uppercase">{t.checkout.address} *</label>
+                        {fieldErrors.address && (
+                          <span className="text-[10px] text-rose-500 font-medium">{cT.reqField}</span>
+                        )}
+                      </div>
+                      <input
+                        id="field-address"
+                        type="text"
+                        placeholder={cT.addressPlaceholder}
+                        value={address}
+                        onChange={(e) => handleFieldChange("address", e.target.value, setAddress)}
+                        className={`w-full rounded-xl px-3.5 py-2.5 text-xs text-stone-900 placeholder-stone-400 transition-all duration-200 focus:outline-none ${
+                          fieldErrors.address
+                            ? "bg-rose-50/40 border border-rose-400 ring-2 ring-rose-200/60 focus:border-rose-500 focus:ring-rose-300"
+                            : "bg-stone-50 border border-stone-200 focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900"
+                        }`}
+                      />
+                      <AnimatePresence>
+                        {fieldErrors.address && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -4, scale: 0.96 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -4, scale: 0.96 }}
+                            transition={{ duration: 0.2 }}
+                            className="flex items-center gap-1.5 text-[11px] font-medium text-rose-600 bg-rose-50/90 border border-rose-200 rounded-lg px-2.5 py-1.5 shadow-xs"
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping shrink-0" />
+                            <AlertCircle size={13} className="shrink-0 text-rose-600" />
+                            <span>{fieldErrors.address}</span>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
                   </div>
-                  <input
-                    id="field-address"
-                    type="text"
-                    placeholder={cT.addressPlaceholder}
-                    value={address}
-                    onChange={(e) => handleFieldChange("address", e.target.value, setAddress)}
-                    className={`w-full rounded-xl px-3.5 py-2.5 text-xs text-stone-900 placeholder-stone-400 transition-all duration-200 focus:outline-none ${
-                      fieldErrors.address
-                        ? "bg-rose-50/40 border border-rose-400 ring-2 ring-rose-200/60 focus:border-rose-500 focus:ring-rose-300"
-                        : "bg-stone-50 border border-stone-200 focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900"
-                    }`}
-                  />
-                  <AnimatePresence>
-                    {fieldErrors.address && (
+                ) : (
+                  /* International Address Fields */
+                  <div className="space-y-4">
+                    {/* Address Line 1 */}
+                    <motion.div
+                      animate={shakingField === "address" ? { x: [-8, 8, -6, 6, -3, 3, 0] } : { x: 0 }}
+                      transition={{ duration: 0.45, ease: "easeInOut" }}
+                      className="space-y-1.5"
+                    >
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-stone-700 uppercase">
+                          {cT.addressLine1 || "Ünvan (Küçə, bina, ev)"} *
+                        </label>
+                        {fieldErrors.address && (
+                          <span className="text-[10px] text-rose-500 font-medium">{cT.reqField}</span>
+                        )}
+                      </div>
+                      <input
+                        id="field-address"
+                        type="text"
+                        placeholder="e.g. 742 Evergreen Terrace"
+                        value={address}
+                        onChange={(e) => handleFieldChange("address", e.target.value, setAddress)}
+                        className={`w-full rounded-xl px-3.5 py-2.5 text-xs text-stone-900 placeholder-stone-400 transition-all duration-200 focus:outline-none ${
+                          fieldErrors.address
+                            ? "bg-rose-50/40 border border-rose-400 ring-2 ring-rose-200/60 focus:border-rose-500 focus:ring-rose-300"
+                            : "bg-stone-50 border border-stone-200 focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900"
+                        }`}
+                      />
+                      <AnimatePresence>
+                        {fieldErrors.address && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -4, scale: 0.96 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -4, scale: 0.96 }}
+                            transition={{ duration: 0.2 }}
+                            className="flex items-center gap-1.5 text-[11px] font-medium text-rose-600 bg-rose-50/90 border border-rose-200 rounded-lg px-2.5 py-1.5 shadow-xs"
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping shrink-0" />
+                            <AlertCircle size={13} className="shrink-0 text-rose-600" />
+                            <span>{fieldErrors.address}</span>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
+
+                    {/* Address Line 2 (Optional) */}
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-stone-700 uppercase">
+                        {cT.addressLine2 || "Mənzil, blok, mərtəbə (istəyə bağlı)"}
+                      </label>
+                      <input
+                        id="field-addressLine2"
+                        type="text"
+                        placeholder="Apt 4B, Suite 200, Floor 3"
+                        value={addressLine2}
+                        onChange={(e) => setAddressLine2(e.target.value)}
+                        className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 text-xs text-stone-900 placeholder-stone-400 focus:outline-none focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900 transition"
+                      />
+                    </div>
+
+                    {/* City & State/Province Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* City */}
                       <motion.div
-                        initial={{ opacity: 0, y: -4, scale: 0.96 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -4, scale: 0.96 }}
-                        transition={{ duration: 0.2 }}
-                        className="flex items-center gap-1.5 text-[11px] font-medium text-rose-600 bg-rose-50/90 border border-rose-200 rounded-lg px-2.5 py-1.5 shadow-xs"
+                        animate={shakingField === "city" ? { x: [-8, 8, -6, 6, -3, 3, 0] } : { x: 0 }}
+                        transition={{ duration: 0.45, ease: "easeInOut" }}
+                        className="space-y-1.5"
                       >
-                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping shrink-0" />
-                        <AlertCircle size={13} className="shrink-0 text-rose-600" />
-                        <span>{fieldErrors.address}</span>
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-semibold text-stone-700 uppercase">
+                            {t.checkout.city} *
+                          </label>
+                          {fieldErrors.city && (
+                            <span className="text-[10px] text-rose-500 font-medium">{cT.reqField}</span>
+                          )}
+                        </div>
+                        <input
+                          id="field-city"
+                          type="text"
+                          placeholder="e.g. New York, London, Istanbul"
+                          value={city}
+                          onChange={(e) => handleFieldChange("city", e.target.value, setCity)}
+                          className={`w-full rounded-xl px-3.5 py-2.5 text-xs text-stone-900 placeholder-stone-400 transition-all duration-200 focus:outline-none ${
+                            fieldErrors.city
+                              ? "bg-rose-50/40 border border-rose-400 ring-2 ring-rose-200/60 focus:border-rose-500 focus:ring-rose-300"
+                              : "bg-stone-50 border border-stone-200 focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900"
+                          }`}
+                        />
+                        <AnimatePresence>
+                          {fieldErrors.city && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -4, scale: 0.96 }}
+                              animate={{ opacity: 1, y: 0, scale: 1 }}
+                              exit={{ opacity: 0, y: -4, scale: 0.96 }}
+                              transition={{ duration: 0.2 }}
+                              className="flex items-center gap-1.5 text-[11px] font-medium text-rose-600 bg-rose-50/90 border border-rose-200 rounded-lg px-2.5 py-1.5 shadow-xs"
+                            >
+                              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping shrink-0" />
+                              <AlertCircle size={13} className="shrink-0 text-rose-600" />
+                              <span>{fieldErrors.city}</span>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
+
+                      {/* State / Province / Region */}
+                      <motion.div
+                        animate={shakingField === "stateOrRegion" ? { x: [-8, 8, -6, 6, -3, 3, 0] } : { x: 0 }}
+                        transition={{ duration: 0.45, ease: "easeInOut" }}
+                        className="space-y-1.5"
+                      >
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-semibold text-stone-700 uppercase">
+                            {cT.stateOrRegion || "Ştat / Vilayət / Region"} {currentCountry.requiresState ? "*" : ""}
+                          </label>
+                          {fieldErrors.stateOrRegion && (
+                            <span className="text-[10px] text-rose-500 font-medium">{cT.reqField}</span>
+                          )}
+                        </div>
+                        <input
+                          id="field-stateOrRegion"
+                          type="text"
+                          placeholder={currentCountry.statePlaceholder || "e.g. California, Ontario, Bavaria"}
+                          value={stateOrRegion}
+                          onChange={(e) => handleFieldChange("stateOrRegion", e.target.value, setStateOrRegion)}
+                          className={`w-full rounded-xl px-3.5 py-2.5 text-xs text-stone-900 placeholder-stone-400 transition-all duration-200 focus:outline-none ${
+                            fieldErrors.stateOrRegion
+                              ? "bg-rose-50/40 border border-rose-400 ring-2 ring-rose-200/60 focus:border-rose-500 focus:ring-rose-300"
+                              : "bg-stone-50 border border-stone-200 focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900"
+                          }`}
+                        />
+                        <AnimatePresence>
+                          {fieldErrors.stateOrRegion && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -4, scale: 0.96 }}
+                              animate={{ opacity: 1, y: 0, scale: 1 }}
+                              exit={{ opacity: 0, y: -4, scale: 0.96 }}
+                              transition={{ duration: 0.2 }}
+                              className="flex items-center gap-1.5 text-[11px] font-medium text-rose-600 bg-rose-50/90 border border-rose-200 rounded-lg px-2.5 py-1.5 shadow-xs"
+                            >
+                              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping shrink-0" />
+                              <AlertCircle size={13} className="shrink-0 text-rose-600" />
+                              <span>{fieldErrors.stateOrRegion}</span>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </motion.div>
+                    </div>
+
+                    {/* Postal / ZIP Code */}
+                    <motion.div
+                      animate={shakingField === "postalCode" ? { x: [-8, 8, -6, 6, -3, 3, 0] } : { x: 0 }}
+                      transition={{ duration: 0.45, ease: "easeInOut" }}
+                      className="space-y-1.5"
+                    >
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-stone-700 uppercase">
+                          {cT.postalCode || "Poçt indeksi / ZIP"} *
+                        </label>
+                        {fieldErrors.postalCode && (
+                          <span className="text-[10px] text-rose-500 font-medium">{cT.reqField}</span>
+                        )}
+                      </div>
+                      <input
+                        id="field-postalCode"
+                        type="text"
+                        placeholder={currentCountry.postalCodePlaceholder || "e.g. 10001, SW1A 1AA, 34000"}
+                        value={postalCode}
+                        onChange={(e) => handleFieldChange("postalCode", e.target.value, setPostalCode)}
+                        className={`w-full rounded-xl px-3.5 py-2.5 text-xs text-stone-900 placeholder-stone-400 transition-all duration-200 focus:outline-none ${
+                          fieldErrors.postalCode
+                            ? "bg-rose-50/40 border border-rose-400 ring-2 ring-rose-200/60 focus:border-rose-500 focus:ring-rose-300"
+                            : "bg-stone-50 border border-stone-200 focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900"
+                        }`}
+                      />
+                      <AnimatePresence>
+                        {fieldErrors.postalCode && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -4, scale: 0.96 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -4, scale: 0.96 }}
+                            transition={{ duration: 0.2 }}
+                            className="flex items-center gap-1.5 text-[11px] font-medium text-rose-600 bg-rose-50/90 border border-rose-200 rounded-lg px-2.5 py-1.5 shadow-xs"
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping shrink-0" />
+                            <AlertCircle size={13} className="shrink-0 text-rose-600" />
+                            <span>{fieldErrors.postalCode}</span>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
+
+                    {/* DDU Notice */}
+                    <div className="p-3 bg-stone-100/70 border border-stone-200/80 rounded-xl text-[11px] text-stone-600 flex items-start gap-2.5">
+                      <Plane size={15} className="text-stone-500 shrink-0 mt-0.5" />
+                      <span>{cT.dduNotice}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Dynamic Shipping Method Selector */}
+              <div className="bg-white border border-stone-200/90 rounded-3xl p-6 space-y-4 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-eb-garamond text-xl font-normal text-stone-900 flex items-center gap-2">
+                    <Truck size={18} className="text-stone-700" />
+                    <span>{cT.shippingMethodsTitle || "Çatdırılma Xidməti"}</span>
+                  </h3>
+                  <span className="text-[11px] text-stone-500 font-medium">
+                    {currentCountry.flag} {currentCountry.name}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {shippingOptions.map((opt) => {
+                    const isSelected = activeShippingOption?.id === opt.id;
+                    const isFree = opt.price === 0;
+
+                    return (
+                      <div
+                        key={opt.id}
+                        onClick={() => {
+                          setSelectedShippingMethodId(opt.id);
+                          if (isDomestic) {
+                            if (opt.id === "domestic_baku_sumgayit" && city !== "Bakı" && city !== "Sumqayıt") {
+                              setCity("Bakı");
+                            } else if (opt.id === "domestic_region" && (city === "Bakı" || city === "Sumqayıt")) {
+                              setCity("");
+                            }
+                          }
+                        }}
+                        className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-3 ${
+                          isSelected
+                            ? "border-stone-900 bg-stone-50 ring-1 ring-stone-900/10 shadow-xs"
+                            : "border-stone-200 bg-white hover:border-stone-300"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <div className="text-[10px] font-bold uppercase tracking-wider text-stone-500 flex items-center gap-1.5">
+                              {opt.id.includes("express") ? (
+                                <span className="text-amber-600 font-extrabold flex items-center gap-1">
+                                  ⚡ {opt.carrier}
+                                </span>
+                              ) : (
+                                <span>{opt.carrier}</span>
+                              )}
+                            </div>
+                            <div className="text-xs font-bold text-stone-900 mt-0.5">
+                              {opt.name}
+                            </div>
+                            <div className="text-[11px] text-stone-500 flex items-center gap-1 mt-1">
+                              <Truck size={12} className="shrink-0 text-stone-400" />
+                              <span>{opt.estimatedDays}</span>
+                            </div>
+                          </div>
+                          <span className="w-4 h-4 rounded-full border-2 border-stone-300 flex items-center justify-center shrink-0 mt-0.5">
+                            {isSelected && <span className="w-2 h-2 rounded-full bg-stone-900" />}
+                          </span>
+                        </div>
+
+                        <div className="pt-2 border-t border-stone-100 flex items-baseline justify-between">
+                          <span className="text-[10.5px] text-stone-500 line-clamp-1">
+                            {opt.description ? opt.description : "Sürətli çatdırılma"}
+                          </span>
+                          <div className="text-right shrink-0 ml-2">
+                            {opt.originalPrice && opt.originalPrice > opt.price && (
+                              <span className="text-[10.5px] text-stone-400 line-through mr-1.5">
+                                {currency === "USD" ? `$${opt.originalPrice.toFixed(2)}` : `${opt.originalPrice.toFixed(2)} ₼`}
+                              </span>
+                            )}
+                            <span className={`text-xs font-bold ${isFree ? "text-emerald-700 uppercase" : "text-stone-900"}`}>
+                              {isFree ? "PULSUZ" : (currency === "USD" ? `$${opt.price.toFixed(2)}` : `${opt.price.toFixed(2)} ₼`)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Payment Method Selector */}
@@ -1410,6 +1915,53 @@ export default function CheckoutPage() {
                       {paymentMethod === "google_pay" && <span className="w-2 h-2 rounded-full bg-stone-900" />}
                     </span>
                   </label>
+
+                  {/* Option 4: Cash on Delivery (COD) */}
+                  {isDomestic ? (
+                    <label
+                      onClick={() => {
+                        if (!hasCustomItems) {
+                          setPaymentMethod("cod");
+                        }
+                      }}
+                      className={`p-4 rounded-2xl border flex items-center justify-between transition-all ${
+                        hasCustomItems
+                          ? "border-stone-200 bg-stone-100/60 opacity-60 cursor-not-allowed"
+                          : paymentMethod === "cod"
+                          ? "border-stone-900 bg-stone-50 text-stone-900 ring-1 ring-stone-900/10 shadow-xs cursor-pointer"
+                          : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:text-stone-900 cursor-pointer"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Truck size={20} className={paymentMethod === "cod" ? "text-stone-900" : "text-stone-400"} />
+                        <div>
+                          <div className="text-xs font-bold text-stone-900 flex items-center gap-2">
+                            <span>{cT.codTitle}</span>
+                            {hasCustomItems && (
+                              <span className="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded font-semibold">
+                                {cT.codNoCustom}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[11px] text-stone-500">
+                            {hasCustomItems
+                              ? "Fərdi studiya məhsulları üçün yalnız onlayn ödəniş keçərlidir"
+                              : cT.codSubtitle}
+                          </div>
+                        </div>
+                      </div>
+                      <span className="w-4 h-4 rounded-full border-2 border-stone-300 flex items-center justify-center">
+                        {paymentMethod === "cod" && <span className="w-2 h-2 rounded-full bg-stone-900" />}
+                      </span>
+                    </label>
+                  ) : (
+                    <div className="p-3.5 rounded-2xl bg-amber-500/5 border border-amber-500/20 text-xs text-amber-900 flex items-center gap-2.5">
+                      <AlertCircle size={15} className="text-amber-700 shrink-0" />
+                      <span className="text-[11px]">
+                        {cT.codAzOnly}
+                      </span>
+                    </div>
+                  )}
 
                   {/* Card Form when selected */}
                   {paymentMethod === "card" && (
@@ -1583,6 +2135,11 @@ export default function CheckoutPage() {
                     <GooglePayLogo className="h-5 w-auto" />
                     <span className="font-semibold tracking-normal lowercase first-letter:uppercase">ilə ödə — {currency === "USD" ? `$${finalTotal.toFixed(2)}` : `${finalTotal.toFixed(2)} ₼`}</span>
                   </>
+                ) : paymentMethod === "cod" ? (
+                  <>
+                    <Truck size={15} />
+                    <span>{t.checkout.confirmOrder} (Qapıda Ödəniş) — {currency === "USD" ? `$${finalTotal.toFixed(2)}` : `${finalTotal.toFixed(2)} ₼`}</span>
+                  </>
                 ) : (
                   <>
                     <Lock size={15} />
@@ -1702,12 +2259,17 @@ export default function CheckoutPage() {
                     </span>
                   </div>
                 )}
-                <div className="flex justify-between">
-                  <span>{t.checkout.delivery}:</span>
-                  <span className="font-bold text-stone-900">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span className="block">{t.checkout.delivery}:</span>
+                    <span className="text-[10px] text-stone-500 font-medium block">
+                      {activeShippingOption?.name}
+                    </span>
+                  </div>
+                  <span className="font-bold text-stone-900 text-right">
                     {shippingCost === 0 ? (
                       <span className="text-emerald-700">
-                        {t.checkout.free} {isFreeZone ? "(Bakı & Sumqayıt)" : ""}
+                        {t.checkout.free}
                       </span>
                     ) : (
                       currency === "USD" ? `$${shippingCost.toFixed(2)}` : `${shippingCost.toFixed(2)} ₼`

@@ -47,6 +47,8 @@ function CollectionsContent() {
   const searchParams = useSearchParams();
   const { products } = useStoreData();
   const { t, language } = useLanguage();
+  const rawGender = searchParams.get("gender") || "all";
+  const selectedGender = rawGender.toLowerCase().trim() || "all";
   const selectedCategory = searchParams.get("category") || "all";
 
   const [selectedFit, setSelectedFit] = useState<string>("all");
@@ -55,8 +57,47 @@ function CollectionsContent() {
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
   const handleCategoryChange = (catId: string) => {
-    const url = catId === "all" ? "/collections" : `/collections?category=${catId}`;
-    router.replace(url, { scroll: false });
+    const params = new URLSearchParams(searchParams.toString());
+    if (catId === "all") {
+      params.delete("category");
+    } else {
+      params.set("category", catId);
+    }
+    const qs = params.toString();
+    router.replace(`/collections${qs ? `?${qs}` : ""}`, { scroll: false });
+  };
+
+  const handleGenderChange = (genId: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (genId === "all") {
+      params.delete("gender");
+    } else {
+      params.set("gender", genId);
+    }
+    const qs = params.toString();
+    router.replace(`/collections${qs ? `?${qs}` : ""}`, { scroll: false });
+  };
+
+  const getCategoryHref = (catId: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (catId === "all") {
+      params.delete("category");
+    } else {
+      params.set("category", catId);
+    }
+    const qs = params.toString();
+    return `/collections${qs ? `?${qs}` : ""}`;
+  };
+
+  const getGenderHref = (genId: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (genId === "all") {
+      params.delete("gender");
+    } else {
+      params.set("gender", genId);
+    }
+    const qs = params.toString();
+    return `/collections${qs ? `?${qs}` : ""}`;
   };
 
   // Lock body scroll when mobile filter sidebar is open
@@ -70,6 +111,13 @@ function CollectionsContent() {
       document.body.style.overflow = "";
     };
   }, [mobileFilterOpen]);
+
+  const genderTabs = [
+    { id: "all", label: t.collections?.all || (language === "az" ? "Hamısı" : language === "ru" ? "Все" : language === "tr" ? "Tümü" : "All") },
+    { id: "men", label: t.collections?.men || (language === "az" ? "Kişi" : language === "ru" ? "Мужское" : language === "tr" ? "Erkek" : "Men") },
+    { id: "women", label: t.collections?.women || (language === "az" ? "Qadın" : language === "ru" ? "Женское" : language === "tr" ? "Kadın" : "Women") },
+    { id: "unisex", label: t.collections?.unisex || (language === "az" ? "Unisex" : language === "ru" ? "Унисекс" : language === "tr" ? "Uniseks" : "Unisex") },
+  ];
 
   const categories = [
     { id: "all", label: t.collections?.allModels || "Bütün modellər" },
@@ -110,13 +158,26 @@ function CollectionsContent() {
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
+      // Gender filtering
+      if (selectedGender !== "all") {
+        if (selectedGender === "men") {
+          if (product.gender !== "men" && product.gender !== "unisex") return false;
+        } else if (selectedGender === "women") {
+          if (product.gender !== "women" && product.gender !== "unisex") return false;
+        } else if (selectedGender === "unisex") {
+          if (product.gender !== "unisex") return false;
+        } else if (product.gender !== selectedGender) {
+          return false;
+        }
+      }
+
       if (selectedCategory !== "all" && product.category !== selectedCategory) {
         return false;
       }
       if (selectedFit !== "all") {
-        const pFit = (product.fit || "").toLowerCase();
-        const sFit = selectedFit.toLowerCase();
-        if (pFit !== sFit && !pFit.includes(sFit) && !sFit.includes(pFit)) {
+        const pFit = (product.fit || "").toLowerCase().trim();
+        const sFit = selectedFit.toLowerCase().trim();
+        if (!pFit || (pFit !== sFit && !pFit.includes(sFit) && !sFit.includes(pFit))) {
           return false;
         }
       }
@@ -130,13 +191,13 @@ function CollectionsContent() {
       if (sortBy === "rating") return b.rating - a.rating;
       return b.reviewCount - a.reviewCount;
     });
-  }, [products, selectedCategory, selectedFit, selectedSize, sortBy]);
+  }, [products, selectedGender, selectedCategory, selectedFit, selectedSize, sortBy]);
 
   const clearFilters = () => {
-    handleCategoryChange("all");
     setSelectedFit("all");
     setSelectedSize("all");
     setSortBy("bestselling");
+    router.replace("/collections", { scroll: false });
   };
 
   // Staggered animation variants for smooth cascading entrance
@@ -173,7 +234,7 @@ function CollectionsContent() {
             ========================================================================= */}
         <div className="py-6 sm:py-8 border-b border-stone-200/80 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <motion.div
-            key={selectedCategory}
+            key={`${selectedCategory}_${selectedGender}`}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
@@ -185,7 +246,39 @@ function CollectionsContent() {
 
             {/* Serif Title */}
             <h1 className="font-eb-garamond text-3xl sm:text-5xl lg:text-[3.2rem] font-normal leading-[1.1] tracking-tight text-stone-900 mt-1">
-              {selectedCategory === "hudi" ? (
+              {selectedGender !== "all" && selectedCategory === "all" ? (
+                selectedGender === "men" ? (
+                  language === "az" ? (
+                    <>Kişi <span className="italic text-stone-800">kolleksiyası</span></>
+                  ) : language === "ru" ? (
+                    <>Мужская <span className="italic text-stone-800">коллекция</span></>
+                  ) : language === "tr" ? (
+                    <>Erkek <span className="italic text-stone-800">koleksiyonu</span></>
+                  ) : (
+                    <>Men's <span className="italic text-stone-800">Collection</span></>
+                  )
+                ) : selectedGender === "women" ? (
+                  language === "az" ? (
+                    <>Qadın <span className="italic text-stone-800">kolleksiyası</span></>
+                  ) : language === "ru" ? (
+                    <>Женская <span className="italic text-stone-800">коллекция</span></>
+                  ) : language === "tr" ? (
+                    <>Kadın <span className="italic text-stone-800">koleksiyonu</span></>
+                  ) : (
+                    <>Women's <span className="italic text-stone-800">Collection</span></>
+                  )
+                ) : (
+                  language === "az" ? (
+                    <>Unisex <span className="italic text-stone-800">kolleksiyası</span></>
+                  ) : language === "ru" ? (
+                    <>Унисекс <span className="italic text-stone-800">коллекция</span></>
+                  ) : language === "tr" ? (
+                    <>Uniseks <span className="italic text-stone-800">koleksiyonu</span></>
+                  ) : (
+                    <>Unisex <span className="italic text-stone-800">Collection</span></>
+                  )
+                )
+              ) : selectedCategory === "hudi" ? (
                 language === "az" ? (
                   <>Hudi və <span className="italic text-stone-800">sviterlər</span></>
                 ) : language === "ru" ? (
@@ -240,7 +333,13 @@ function CollectionsContent() {
 
             {/* Editorial Subtitle */}
             <p className="text-stone-600 text-sm sm:text-[14.5px] leading-relaxed max-w-xl font-sans mt-2">
-              {selectedCategory === "hudi"
+              {selectedGender === "men" && selectedCategory === "all"
+                ? (language === "az" ? "Kişilər üçün hazırlanmış premium kəsimli köynəklər, hudilər və şalvarlar." : language === "ru" ? "Мужская коллекция: футболки, плотные худи и брюки из гребенного хлопка." : language === "tr" ? "Erkekler için özenle tasarlanmış premium t-shirtler, polar hudiler ve pantolonlar." : "Curated men's collection featuring bespoke tees, fleece hoodies, and tailored trousers.")
+                : selectedGender === "women" && selectedCategory === "all"
+                ? (language === "az" ? "Qadınlar üçün zərif və rahat atelye kəsimli modellər." : language === "ru" ? "Женская коллекция базовых и утонченных моделей с безупречной посадкой." : language === "tr" ? "Kadınlar için zarif ve konforlu atölye kesimli modeller." : "Refined women's wardrobe essentials with atelier tailoring.")
+                : selectedGender === "unisex" && selectedCategory === "all"
+                ? (language === "az" ? "Həm kişi, həm də qadınlar üçün universal oversize və rahat siluetlər." : language === "ru" ? "Универсальные оверсайз силуэты, подходящие каждому." : language === "tr" ? "Hem kadın hem erkek için konforlu uniseks silüetler." : "Universal oversize silhouettes designed for all genders.")
+                : selectedCategory === "hudi"
                 ? (language === "az" ? "3iplik qalın və isti hudilər, daranmış xalis pambıq və fərdi atelye kəsimi." : language === "ru" ? "Теплые и плотные худи 3-х нитка, гребенной хлопок и индивидуальный крой." : language === "tr" ? "Kalın ve sıcak tutan 3iplik polarlar, penye pamuk ve özel terzi kesimi." : "Heavyweight 3-thread fleece, combed pure cotton and bespoke atelier tailoring.")
                 : selectedCategory === "koynek"
                 ? (language === "az" ? "Oversize və regular t-shirt-lər, klassik Oxford köynəklər, 100% daranmış premium pambıq." : language === "ru" ? "Оверсайз и классические футболки, рубашки Оксфорд из 100% гребенного хлопка." : language === "tr" ? "Oversize ve regular t-shirtler, klasik Oxford gömlekler, %100 penye pamuk." : "Oversize and regular t-shirts, classic Oxford shirts in 100% premium combed cotton.")
@@ -277,36 +376,73 @@ function CollectionsContent() {
         </div>
 
         {/* =========================================================================
-            CATEGORY TABS (Pills: Active Dark Charcoal Pill with Sliding Indicator)
+            GENDER & CATEGORY FILTER TABS (Interactive Pills)
             ========================================================================= */}
-        <div className="hidden md:flex items-center gap-2 py-5 border-b border-stone-200/80 overflow-x-auto select-none">
-          <div className="flex items-center gap-1.5 p-1 rounded-full bg-stone-100/90 border border-stone-200/80 shadow-2xs">
-            {categories.map((c) => {
-              const isActive = selectedCategory === c.id;
-              const catHref = c.id === "all" ? "/collections" : `/collections?category=${c.id}`;
-              return (
-                <Link
-                  key={c.id}
-                  href={catHref}
-                  scroll={false}
-                  prefetch={true}
-                  className={`relative px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-medium transition-colors shrink-0 cursor-pointer select-none active:scale-95 ${
-                    isActive
-                      ? "text-white font-semibold"
-                      : "text-stone-600 hover:text-stone-900"
-                  }`}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeCollectionsCategoryPill"
-                      className="absolute inset-0 bg-stone-900 rounded-full shadow-sm z-0"
-                      transition={{ type: "spring", stiffness: 450, damping: 32 }}
-                    />
-                  )}
-                  <span className="relative z-10">{c.label}</span>
-                </Link>
-              );
-            })}
+        <div className="py-4 border-b border-stone-200/80 space-y-3">
+          {/* Gender Filter Tabs (Hamısı / Kişi / Qadın / Unisex) */}
+          <div className="flex items-center gap-2 overflow-x-auto select-none">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mr-1 shrink-0">
+              {t.collections?.gender || "Cins"}:
+            </span>
+            <div className="flex items-center gap-1.5 p-1 rounded-full bg-stone-100/90 border border-stone-200/80 shadow-2xs shrink-0">
+              {genderTabs.map((g) => {
+                const isActive = selectedGender === g.id;
+                return (
+                  <Link
+                    key={g.id}
+                    href={getGenderHref(g.id)}
+                    scroll={false}
+                    prefetch={true}
+                    className={`relative px-4 sm:px-5 py-1.5 rounded-full text-xs font-semibold transition-colors shrink-0 cursor-pointer select-none active:scale-95 ${
+                      isActive ? "text-white font-bold" : "text-stone-600 hover:text-stone-900"
+                    }`}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeCollectionsGenderPill"
+                        className="absolute inset-0 bg-stone-900 rounded-full shadow-sm z-0"
+                        transition={{ type: "spring", stiffness: 450, damping: 32 }}
+                      />
+                    )}
+                    <span className="relative z-10">{g.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Category Tabs (Desktop & Tablet) */}
+          <div className="hidden md:flex items-center gap-2 overflow-x-auto select-none pt-0.5">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400 mr-1 shrink-0">
+              {t.nav.categories || "Bölmə"}:
+            </span>
+            <div className="flex items-center gap-1.5 p-1 rounded-full bg-stone-100/90 border border-stone-200/80 shadow-2xs">
+              {categories.map((c) => {
+                const isActive = selectedCategory === c.id;
+                return (
+                  <Link
+                    key={c.id}
+                    href={getCategoryHref(c.id)}
+                    scroll={false}
+                    prefetch={true}
+                    className={`relative px-4 sm:px-5 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors shrink-0 cursor-pointer select-none active:scale-95 ${
+                      isActive
+                        ? "text-white font-semibold"
+                        : "text-stone-600 hover:text-stone-900"
+                    }`}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeCollectionsCategoryPill"
+                        className="absolute inset-0 bg-stone-800 rounded-full shadow-sm z-0"
+                        transition={{ type: "spring", stiffness: 450, damping: 32 }}
+                      />
+                    )}
+                    <span className="relative z-10">{c.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
           </div>
         </div>
 
@@ -333,10 +469,36 @@ function CollectionsContent() {
                 </button>
               </div>
 
+              {/* Gender Filter inside Sidebar */}
+              <div className="space-y-2.5">
+                <label className="text-xs font-bold text-stone-600 uppercase tracking-wider block">
+                  {t.collections?.gender || "Cins"}
+                </label>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {genderTabs.map((g) => {
+                    const isActive = selectedGender === g.id;
+                    return (
+                      <button
+                        key={g.id}
+                        type="button"
+                        onClick={() => handleGenderChange(g.id)}
+                        className={`py-2 px-3 rounded-full text-xs font-medium transition text-center cursor-pointer ${
+                          isActive
+                            ? "bg-stone-900 text-white font-medium shadow-sm"
+                            : "bg-stone-50 text-stone-700 hover:bg-stone-100 hover:text-stone-900 border border-stone-200/60"
+                        }`}
+                      >
+                        {g.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               {/* Category Pills inside Sidebar */}
               <div className="space-y-2.5">
                 <label className="text-xs font-bold text-stone-600 uppercase tracking-wider block">
-                  Kateqoriya
+                  {t.nav.categories || "Kateqoriya"}
                 </label>
                 <div className="grid grid-cols-1 gap-1.5">
                   {categories.map((cat) => {
@@ -451,7 +613,7 @@ function CollectionsContent() {
               </div>
             ) : (
               <motion.div
-                key={`${selectedCategory}_${selectedFit}_${selectedSize}_${sortBy}`}
+                key={`${selectedCategory}_${selectedGender}_${selectedFit}_${selectedSize}_${sortBy}`}
                 variants={staggerContainerVariants}
                 initial="hidden"
                 animate="show"
@@ -516,15 +678,41 @@ function CollectionsContent() {
 
               {/* Drawer Body Filters */}
               <div className="p-5 space-y-6 flex-1 overflow-y-auto">
+                {/* Gender Selection */}
+                <div className="space-y-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-stone-600 block">
+                    {t.collections?.gender || "Cins"}
+                  </span>
+                  <div className="grid grid-cols-2 gap-2">
+                    {genderTabs.map((g) => {
+                      const isActive = selectedGender === g.id;
+                      return (
+                        <button
+                          key={g.id}
+                          type="button"
+                          onClick={() => handleGenderChange(g.id)}
+                          className={`py-2 px-3 rounded-full text-xs font-medium transition text-center cursor-pointer ${
+                            isActive
+                              ? "bg-stone-900 text-white font-semibold shadow-sm"
+                              : "bg-stone-50 text-stone-700 hover:bg-stone-100 border border-stone-200"
+                          }`}
+                        >
+                          {g.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 {/* Category Selection */}
                 <div className="space-y-2">
                   <span className="text-xs font-bold uppercase tracking-wider text-stone-600 block">
-                    Kateqoriya
+                    {t.nav.categories || "Kateqoriya"}
                   </span>
                   <div className="grid grid-cols-2 gap-2">
                     {categories.map((c) => {
                       const isActive = selectedCategory === c.id;
-                      const catHref = c.id === "all" ? "/collections" : `/collections?category=${c.id}`;
+                      const catHref = getCategoryHref(c.id);
                       return (
                         <Link
                           key={c.id}

@@ -80,20 +80,26 @@ export interface StoreSettings {
   contactPhone: string;
 }
 
+export interface StoreCustomerAddress {
+  fullName: string;
+  email: string;
+  phone: string;
+  address: string;
+  addressLine2?: string;
+  city: string;
+  stateOrRegion?: string;
+  postalCode?: string;
+  country: string;
+  countryCode?: string;
+}
+
 export interface StoreOrder {
   id: string;
   trackingCode?: string;
   userId?: string;
   source?: string;
   date: string;
-  customer: {
-    fullName: string;
-    email: string;
-    phone: string;
-    address: string;
-    city: string;
-    country: string;
-  };
+  customer: StoreCustomerAddress;
   items: Array<{
     productId: string;
     name: string;
@@ -109,6 +115,9 @@ export interface StoreOrder {
   orderStatus: string;
   subtotal: number;
   shipping: number;
+  shippingMethod?: string;
+  shippingMethodLabel?: string;
+  estimatedDelivery?: string;
   discount: number;
   total: number;
   isTest?: boolean;

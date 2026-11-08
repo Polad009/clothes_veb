@@ -5,6 +5,9 @@ export interface Translations {
   nav: {
     home: string;
     collections: string;
+    men: string;
+    women: string;
+    unisex: string;
     shirts: string;
     hoodies: string;
     pants: string;
@@ -116,6 +119,14 @@ export interface Translations {
     size: string;
     filterByFit: string;
     filterBySize: string;
+    men: string;
+    women: string;
+    unisex: string;
+    gender: string;
+    filterByGender: string;
+    menCollection: string;
+    womenCollection: string;
+    unisexCollection: string;
   };
   // Checkout
   checkout: {
@@ -240,6 +251,9 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
     nav: {
       home: "Ana Səhifə",
       collections: "Kolleksiya",
+      men: "Kişi",
+      women: "Qadın",
+      unisex: "Unisex",
       shirts: "Köynək",
       hoodies: "Hudi",
       pants: "Şalvar",
@@ -346,7 +360,15 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
         "fit": "Kəsim / Model",
         "size": "Ölçü",
         "filterByFit": "Kəsimə görə filtr",
-        "filterBySize": "Ölçüyə görə filtr"
+        "filterBySize": "Ölçüyə görə filtr",
+        "men": "Kişi",
+        "women": "Qadın",
+        "unisex": "Unisex",
+        "gender": "Cins",
+        "filterByGender": "Cinsə görə filtr",
+        "menCollection": "Kişi Kolleksiyası",
+        "womenCollection": "Qadın Kolleksiyası",
+        "unisexCollection": "Unisex Kolleksiyası"
     },
     "checkout": {
         "title": "Sifarişin Rəsmiləşdirilməsi",
@@ -465,6 +487,9 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
     nav: {
       home: "Home",
       collections: "Collections",
+      men: "Men",
+      women: "Women",
+      unisex: "Unisex",
       shirts: "Shirts",
       hoodies: "Hoodies",
       pants: "Pants",
@@ -571,7 +596,15 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
         "fit": "Fit / Silhouette",
         "size": "Size",
         "filterByFit": "Filter by Fit",
-        "filterBySize": "Filter by Size"
+        "filterBySize": "Filter by Size",
+        "men": "Men",
+        "women": "Women",
+        "unisex": "Unisex",
+        "gender": "Gender",
+        "filterByGender": "Filter by Gender",
+        "menCollection": "Men's Collection",
+        "womenCollection": "Women's Collection",
+        "unisexCollection": "Unisex Collection"
     },
     "checkout": {
         "title": "Checkout & Delivery",
@@ -690,6 +723,9 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
     nav: {
       home: "Главная",
       collections: "Коллекция",
+      men: "Мужское",
+      women: "Женское",
+      unisex: "Унисекс",
       shirts: "Рубашки",
       hoodies: "Худи",
       pants: "Брюки",
@@ -796,7 +832,15 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
         "fit": "Покрой / Силуэт",
         "size": "Размер",
         "filterByFit": "Фильтр по крою",
-        "filterBySize": "Фильтр по размеру"
+        "filterBySize": "Фильтр по размеру",
+        "men": "Мужское",
+        "women": "Женское",
+        "unisex": "Унисекс",
+        "gender": "Пол",
+        "filterByGender": "Фильтр по полу",
+        "menCollection": "Мужская коллекция",
+        "womenCollection": "Женская коллекция",
+        "unisexCollection": "Унисекс коллекция"
     },
     "checkout": {
         "title": "Оформление Заказа",
@@ -915,6 +959,9 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
     nav: {
       home: "Ana Sayfa",
       collections: "Koleksiyon",
+      men: "Erkek",
+      women: "Kadın",
+      unisex: "Uniseks",
       shirts: "Gömlek",
       hoodies: "Hudi",
       pants: "Pantolon",
@@ -1021,7 +1068,15 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
         "fit": "Kalıp / Kesim",
         "size": "Beden",
         "filterByFit": "Kalıba göre filtrele",
-        "filterBySize": "Bedene göre filtrele"
+        "filterBySize": "Bedene göre filtrele",
+        "men": "Erkek",
+        "women": "Kadın",
+        "unisex": "Uniseks",
+        "gender": "Cinsiyet",
+        "filterByGender": "Cinsiyete göre filtrele",
+        "menCollection": "Erkek Koleksiyonu",
+        "womenCollection": "Kadın Koleksiyonu",
+        "unisexCollection": "Uniseks Koleksiyonu"
     },
     "checkout": {
         "title": "Siparişi Tamamla",
