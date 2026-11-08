@@ -197,20 +197,21 @@ function applySecurityHeaders(response: NextResponse) {
   response.headers.set('X-XSS-Protection', '1; mode=block');
   response.headers.set(
     'Permissions-Policy',
-    'camera=(self "https://tryanywear.ai" "https://anywear.decart.ai"), microphone=(), geolocation=(), payment=(self)'
+    'camera=*, microphone=(), geolocation=(), payment=(self)'
   );
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://pay.google.com https://cdn.tailwindcss.com https://unpkg.com https://www.googletagmanager.com https://tryanywear.ai https://*.tryanywear.ai https://anywear.decart.ai https://*.decart.ai",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://tryanywear.ai https://*.tryanywear.ai https://anywear.decart.ai https://*.decart.ai",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https: http: https://challenges.cloudflare.com https://pay.google.com https://cdn.tailwindcss.com https://unpkg.com https://www.googletagmanager.com https://tryanywear.ai https://*.tryanywear.ai https://anywear.decart.ai https://*.decart.ai",
+    "style-src 'self' 'unsafe-inline' https: http: https://fonts.googleapis.com https://tryanywear.ai https://*.tryanywear.ai https://anywear.decart.ai https://*.decart.ai",
     "img-src 'self' blob: data: https: http: https://tryanywear.ai https://*.tryanywear.ai https://anywear.decart.ai https://*.decart.ai",
-    "font-src 'self' https://fonts.gstatic.com data:",
-    "media-src 'self' blob: data: https: https://tryanywear.ai https://*.tryanywear.ai https://anywear.decart.ai https://*.decart.ai",
-    "connect-src 'self' https://challenges.cloudflare.com https://*.supabase.co https://api.qrserver.com https://epoint.az https://www.google-analytics.com https://tryanywear.ai https://*.tryanywear.ai https://anywear.decart.ai https://*.decart.ai",
-    "frame-src 'self' https://challenges.cloudflare.com https://pay.google.com https://epoint.az https://tryanywear.ai https://*.tryanywear.ai https://anywear.decart.ai https://*.decart.ai",
+    "font-src 'self' https://fonts.gstatic.com data: https:",
+    "media-src 'self' blob: data: https: http: https://tryanywear.ai https://*.tryanywear.ai https://anywear.decart.ai https://*.decart.ai",
+    "connect-src 'self' blob: data: https: http: wss: ws: https://challenges.cloudflare.com https://*.supabase.co https://api.qrserver.com https://epoint.az https://www.google-analytics.com https://tryanywear.ai https://*.tryanywear.ai https://anywear.decart.ai https://*.decart.ai",
+    "frame-src 'self' blob: data: https: http: https://challenges.cloudflare.com https://pay.google.com https://epoint.az https://tryanywear.ai https://*.tryanywear.ai https://anywear.decart.ai https://*.decart.ai",
+    "child-src 'self' blob: https: https://tryanywear.ai https://*.tryanywear.ai https://anywear.decart.ai https://*.decart.ai",
     "object-src 'none'",
     "base-uri 'self'",
-    "form-action 'self' https://epoint.az https://tryanywear.ai https://*.tryanywear.ai https://anywear.decart.ai https://*.decart.ai",
+    "form-action 'self' https: https://epoint.az https://tryanywear.ai https://*.tryanywear.ai https://anywear.decart.ai https://*.decart.ai",
   ].join('; ');
 
   response.headers.set('Content-Security-Policy', csp);

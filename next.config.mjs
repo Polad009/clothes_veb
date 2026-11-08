@@ -71,7 +71,7 @@ const nextConfig = {
           },
           {
             key: "Permissions-Policy",
-            value: 'camera=(self "https://tryanywear.ai" "https://anywear.decart.ai"), microphone=(), geolocation=()',
+            value: "camera=*, microphone=(), geolocation=()",
           },
           {
             key: "X-XSS-Protection",

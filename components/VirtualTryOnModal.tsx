@@ -19,6 +19,7 @@ import {
   Download,
   ExternalLink,
   Sliders,
+  Layers,
 } from "lucide-react";
 import { useTryOn } from "@/context/TryOnContext";
 import { useCart } from "@/context/CartContext";
@@ -36,15 +37,14 @@ export function VirtualTryOnModal() {
     closeTryOn,
     toggleMinimize,
     setColorIndex,
-    setSize,
   } = useTryOn();
 
   const { addItem } = useCart();
   const { formatProductPrice } = useCurrency();
   const { language } = useLanguage();
 
-  // Try-on View Modes: "camera" | "upload" | "model" | "anywear"
-  const [viewMode, setViewMode] = useState<"camera" | "upload" | "model" | "anywear">("camera");
+  // Try-on View Modes: "anywear" (default AI) | "camera" | "upload" | "model"
+  const [viewMode, setViewMode] = useState<"anywear" | "camera" | "upload" | "model">("anywear");
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Camera State
@@ -61,14 +61,18 @@ export function VirtualTryOnModal() {
   const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  // Dynamic Cutout URL (automatically stripped of grey/white backdrops)
+  const [transparentCutoutUrl, setTransparentCutoutUrl] = useState<string | null>(null);
+
   // Overlay Fitting Adjustments
-  const [garmentScale, setGarmentScale] = useState(100); // 70 to 140
-  const [garmentOffsetY, setGarmentOffsetY] = useState(0); // -100 to 100 px
+  const [garmentScale, setGarmentScale] = useState(105); // 70 to 140
+  const [garmentOffsetY, setGarmentOffsetY] = useState(10); // -100 to 100 px
   const [garmentOffsetX, setGarmentOffsetX] = useState(0); // -100 to 100 px
-  const [garmentOpacity, setGarmentOpacity] = useState(96); // 50 to 100 %
+  const [garmentOpacity, setGarmentOpacity] = useState(100);
+  const [blendMode, setBlendMode] = useState<"normal" | "multiply">("normal");
   const [showAdjustments, setShowAdjustments] = useState(false);
 
-  // Added to cart feedback
+  // Feedback states
   const [addedToast, setAddedToast] = useState(false);
   const [copiedShare, setCopiedShare] = useState(false);
 
@@ -79,8 +83,94 @@ export function VirtualTryOnModal() {
     image: product?.image || "/images/hero/black-tee.jpg",
   };
 
-  const garmentImage =
-    activeColor.image || product?.image || "/images/hero/black-tee.jpg";
+  const rawGarmentImage = activeColor.image || product?.image || "/images/hero/black-tee.jpg";
+
+  // Automatically remove solid background from garment image in browser canvas
+  useEffect(() => {
+    if (!rawGarmentImage) return;
+
+    // If it's already an explicit PNG cutout, use it directly
+    if (rawGarmentImage.toLowerCase().endsWith(".png") && !rawGarmentImage.includes("_hd.jpg")) {
+      setTransparentCutoutUrl(rawGarmentImage);
+      return;
+    }
+
+    const img = new window.Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.naturalWidth || img.width;
+        canvas.height = img.naturalHeight || img.height;
+        const ctx = canvas.getContext("2d", { willReadFrequently: true });
+        if (!ctx) {
+          setTransparentCutoutUrl(rawGarmentImage);
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0);
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const d = imgData.data;
+
+        // Sample top-left corner pixel as background baseline
+        const bgR = d[0];
+        const bgG = d[1];
+        const bgB = d[2];
+
+        // Is the background neutral grey/white?
+        const isNeutral = Math.abs(bgR - bgG) < 18 && Math.abs(bgG - bgB) < 18;
+
+        if (isNeutral && (bgR > 180 || bgR > 120)) {
+          // Remove uniform backdrop with smooth edge falloff
+          for (let i = 0; i < d.length; i += 4) {
+            const r = d[i];
+            const g = d[i + 1];
+            const b = d[i + 2];
+            const dist = Math.sqrt((r - bgR) ** 2 + (g - bgG) ** 2 + (b - bgB) ** 2);
+            if (dist < 28) {
+              d[i + 3] = 0; // 100% transparent
+            } else if (dist < 42) {
+              d[i + 3] = Math.round(((dist - 28) / 14) * 255); // Soft antialiased edge
+            }
+          }
+          ctx.putImageData(imgData, 0, 0);
+          setTransparentCutoutUrl(canvas.toDataURL("image/png"));
+        } else {
+          setTransparentCutoutUrl(rawGarmentImage);
+        }
+      } catch (err) {
+        setTransparentCutoutUrl(rawGarmentImage);
+      }
+    };
+    img.onerror = () => {
+      setTransparentCutoutUrl(rawGarmentImage);
+    };
+    img.src = rawGarmentImage;
+  }, [rawGarmentImage]);
+
+  const displayGarmentImage = transparentCutoutUrl || rawGarmentImage;
+
+  // Launch official Decart Anywear Widget directly
+  const handleLaunchDecartWidget = useCallback(() => {
+    if (typeof window !== "undefined" && (window as any).DecartWidget) {
+      try {
+        (window as any).DecartWidget.open({
+          image: rawGarmentImage,
+          name: product?.name || "Horwalle Garment",
+        });
+        closeTryOn();
+        return;
+      } catch (e) {
+        console.warn("DecartWidget.open error:", e);
+      }
+    }
+
+    // Direct deep-link in specialized fitting window
+    const targetUrl = `https://anywear.decart.ai/?product=${encodeURIComponent(
+      product?.name || ""
+    )}&image=${encodeURIComponent(rawGarmentImage)}`;
+    window.open(targetUrl, "_blank", "noopener,noreferrer");
+  }, [rawGarmentImage, product, closeTryOn]);
 
   // Start Camera
   const startCamera = useCallback(async (mode: "user" | "environment" = facingMode) => {
@@ -118,8 +208,8 @@ export function VirtualTryOnModal() {
       setCameraError(
         err.message ||
           (language === "az"
-            ? "Kamera icazəsi verilmədi. Zəhmət olmasa brauzer sazlamalarında kameraya icazə verin və ya foto yükləmə rejimindən istifadə edin."
-            : "Camera access was denied. Please allow camera permissions or upload a photo.")
+            ? "Kamera icazəsi verilmədi. Zəhmət olmasa brauzer sazlamalarında kameraya icazə verin."
+            : "Camera access was denied. Please allow camera permissions in browser settings.")
       );
     }
   }, [facingMode, language]);
@@ -176,40 +266,35 @@ export function VirtualTryOnModal() {
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
-      // Draw mirrored video if user camera
       if (facingMode === "user") {
         ctx.translate(canvas.width, 0);
         ctx.scale(-1, 1);
       }
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      // Reset transform
       ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-      // Draw overlaid garment
       const img = new window.Image();
       img.crossOrigin = "anonymous";
       img.onload = () => {
-        const baseW = canvas.width * 0.52 * (garmentScale / 100);
+        const baseW = canvas.width * 0.60 * (garmentScale / 100);
         const baseH = (baseW * img.height) / img.width;
         const posX = (canvas.width - baseW) / 2 + garmentOffsetX;
-        const posY = canvas.height * 0.28 + garmentOffsetY;
+        const posY = canvas.height * 0.26 + garmentOffsetY;
 
         ctx.globalAlpha = garmentOpacity / 100;
         ctx.drawImage(img, posX, posY, baseW, baseH);
         ctx.globalAlpha = 1.0;
 
-        // Atelier watermark
-        ctx.fillStyle = "rgba(0,0,0,0.6)";
-        ctx.fillRect(16, canvas.height - 40, 220, 28);
+        ctx.fillStyle = "rgba(0,0,0,0.65)";
+        ctx.fillRect(16, canvas.height - 40, 240, 28);
         ctx.fillStyle = "#E6C280";
         ctx.font = "bold 11px sans-serif";
-        ctx.fillText("HORVVALLE · VIRTUAL TRY-ON", 26, canvas.height - 22);
+        ctx.fillText("HORVVALLE · ANYWEAR TRY-ON", 26, canvas.height - 22);
 
         const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
         setSnapshotUrl(dataUrl);
       };
-      img.src = garmentImage;
+      img.src = displayGarmentImage;
     } catch (e) {
       console.warn("Snapshot capture error:", e);
     }
@@ -219,14 +304,14 @@ export function VirtualTryOnModal() {
   const handleAddToCart = () => {
     if (!product) return;
     addItem({
-      id: `${product.id}_${activeColor.name}_${size}`,
+      id: `${product.id}_${activeColor.name}_${size || "L"}`,
       productId: product.id,
       name: product.name,
       price: product.price,
       internationalPrice: product.internationalPrice,
-      size: size,
+      size: size || "L",
       color: activeColor.name,
-      image: activeColor.image || garmentImage,
+      image: activeColor.image || rawGarmentImage,
       type: "ready",
       stockQuantity: 99,
     });
@@ -237,7 +322,7 @@ export function VirtualTryOnModal() {
   // Share with a friend
   const handleShare = async () => {
     const shareUrl = typeof window !== "undefined" ? window.location.href : "https://www.horwalle.com";
-    const shareText = `${product?.name || "Horwalle Atelier"} Virtual Try-On · Əynimdə yoxladım: ${shareUrl}`;
+    const shareText = `${product?.name || "Horwalle Atelier"} Virtual Try-On · Əynimdə necə qaldığına bax: ${shareUrl}`;
 
     if (navigator.share) {
       try {
@@ -268,7 +353,7 @@ export function VirtualTryOnModal() {
       >
         <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-black/60 border border-white/10 shrink-0">
           <Image
-            src={garmentImage}
+            src={displayGarmentImage}
             alt={product.name}
             fill
             className="object-contain p-1"
@@ -304,9 +389,9 @@ export function VirtualTryOnModal() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
       <div
-        className={`relative flex flex-col bg-[#141214] text-white border border-stone-700/70 rounded-2xl sm:rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.85)] overflow-hidden transition-all duration-300 ${
+        className={`relative flex flex-col bg-[#121012] text-white border border-stone-700/70 rounded-2xl sm:rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.9)] overflow-hidden transition-all duration-300 ${
           isFullscreen
             ? "w-full h-full max-w-none rounded-none"
             : "w-full max-w-4xl h-[92vh] max-h-[820px]"
@@ -315,7 +400,7 @@ export function VirtualTryOnModal() {
         {/* ========================================================
             HEADER BAR (Exact Anywear Style: Brand, Title, Min/Max/Close)
         ======================================================== */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-white/10 bg-[#1A181A]/90 backdrop-blur-md shrink-0">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-white/10 bg-[#171517] backdrop-blur-md shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-[#E6C280] to-[#F3DEB3] flex items-center justify-center shadow-xs">
               <Sparkles className="w-3.5 h-3.5 text-stone-900" />
@@ -323,16 +408,26 @@ export function VirtualTryOnModal() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs sm:text-sm font-bold tracking-tight text-white font-['Plus_Jakarta_Sans',sans-serif]">
-                  Try-On + Anywear
+                  Try-On ✦ Anywear
                 </span>
-                <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-md bg-[#E6C280]/20 text-[#E6C280] border border-[#E6C280]/30">
-                  Live Fitting
+                <span className="px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider rounded-full bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>Real-Time AI</span>
                 </span>
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-1 sm:gap-1.5">
+            <button
+              onClick={handleLaunchDecartWidget}
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#E6C280] to-[#d4ab5d] text-stone-950 font-bold text-[11px] hover:brightness-105 transition-all shadow-sm mr-2"
+              title="Decart Anywear AI pəncərəsini birbaşa aç"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Anywear AI Pəncərəsi</span>
+              <ExternalLink className="w-3 h-3" />
+            </button>
             <button
               onClick={toggleMinimize}
               className="p-1.5 sm:p-2 rounded-lg text-stone-400 hover:text-white hover:bg-white/10 transition-colors"
@@ -358,15 +453,15 @@ export function VirtualTryOnModal() {
         </div>
 
         {/* ========================================================
-            SUB-HEADER / PRODUCT STRIP: "YOUR TRY-ON"
+            SUB-HEADER: "YOUR TRY-ON" (Size buttons S/M/L/XL completely removed as requested)
         ======================================================== */}
-        <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-2.5 bg-black/40 border-b border-white/5 shrink-0 text-xs">
+        <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-2.5 bg-black/50 border-b border-white/5 shrink-0 text-xs">
           <div className="flex items-center gap-3">
             <span className="text-[11px] font-bold tracking-widest uppercase text-stone-400">
               YOUR TRY-ON:
             </span>
-            <div className="flex items-center gap-2 bg-white/5 px-2.5 py-1 rounded-xl border border-white/10">
-              <span className="font-semibold text-white truncate max-w-[200px] sm:max-w-xs">
+            <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-xl border border-white/10">
+              <span className="font-semibold text-white truncate max-w-[220px] sm:max-w-md">
                 {product.name}
               </span>
               <span className="text-[#E6C280] font-mono font-bold">
@@ -375,57 +470,81 @@ export function VirtualTryOnModal() {
             </div>
           </div>
 
-          {/* Size Selectors */}
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] uppercase font-bold text-stone-400 hidden sm:inline">
-              Ölçü:
-            </span>
-            <div className="flex items-center gap-1">
-              {(product.sizes || ["S", "M", "L", "XL"]).map((sz) => (
-                <button
-                  key={sz}
-                  type="button"
-                  onClick={() => setSize(sz)}
-                  className={`w-7 h-7 rounded-lg text-[11px] font-bold transition-all flex items-center justify-center ${
-                    size === sz
-                      ? "bg-[#E6C280] text-stone-950 font-extrabold shadow-sm"
-                      : "bg-white/5 text-stone-300 hover:bg-white/10 border border-white/10"
-                  }`}
-                >
-                  {sz}
-                </button>
-              ))}
-            </div>
-
-            {/* Color Swatches */}
-            {product.colors && product.colors.length > 1 && (
-              <div className="flex items-center gap-1 pl-2 border-l border-white/10">
+          {/* Color Swatches if product has multiple variants */}
+          {product.colors && product.colors.length > 1 && (
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] uppercase font-bold text-stone-400 hidden sm:inline">
+                Rəng:
+              </span>
+              <div className="flex items-center gap-1.5">
                 {product.colors.map((c, idx) => (
                   <button
                     key={c.name}
                     type="button"
                     onClick={() => setColorIndex(idx)}
                     title={translateColor(c.name, language)}
-                    className={`w-5 h-5 rounded-full border transition-all ${
+                    className={`w-6 h-6 rounded-full border transition-all ${
                       colorIndex === idx
-                        ? "border-[#E6C280] scale-110 shadow-[0_0_8px_rgba(230,194,128,0.6)]"
+                        ? "border-[#E6C280] scale-110 shadow-[0_0_10px_rgba(230,194,128,0.7)]"
                         : "border-white/20 opacity-70 hover:opacity-100"
                     }`}
                     style={{ backgroundColor: c.hex || "#000" }}
                   />
                 ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* ========================================================
-            MAIN TRY-ON VIEWPORT
+            MAIN VIEWPORT: REAL-TIME AI & SEAMLESS FITTING
         ======================================================== */}
         <div className="relative flex-grow flex flex-col md:flex-row overflow-hidden">
-          {/* LEFT: Interactive Viewport / Screen */}
-          <div className="relative flex-grow bg-black flex items-center justify-center overflow-hidden min-h-[300px]">
-            {/* View Mode 1: Live Webcam Feed */}
+          {/* LEFT: Live Interactive Screen */}
+          <div className="relative flex-grow bg-black flex items-center justify-center overflow-hidden min-h-[320px]">
+            {/* View Mode 1: ANYWEAR AI LIVE NEURAL FITTING (Primary Recommended) */}
+            {viewMode === "anywear" && (
+              <div className="relative w-full h-full flex flex-col items-center justify-center p-6 text-center bg-radial from-stone-900 via-[#100e10] to-black">
+                <div className="relative w-20 h-20 rounded-3xl bg-gradient-to-tr from-[#E6C280] to-[#FAF7F2] text-stone-950 flex items-center justify-center mb-5 shadow-[0_15px_35px_rgba(230,194,128,0.35)] animate-pulse" style={{ animationDuration: "3s" }}>
+                  <Sparkles className="w-10 h-10" />
+                </div>
+
+                <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 font-['Plus_Jakarta_Sans',sans-serif]">
+                  Anywear AI · Real-Time Neural Fitting
+                </h3>
+                <p className="text-xs sm:text-sm text-stone-300 max-w-lg mb-7 leading-relaxed">
+                  Decart AI Anywear texnologiyası kameranız qarşısında hərəkətlərinizi real vaxtda izləyərək köynəyi bədəninizə, qollarınıza və yaxanıza tam təbii şəkildə geyindirir.
+                </p>
+
+                <div className="flex flex-col sm:flex-row items-center gap-3.5 w-full max-w-md">
+                  <button
+                    type="button"
+                    onClick={handleLaunchDecartWidget}
+                    className="w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[#E6C280] via-[#eed49c] to-[#E6C280] text-stone-950 font-extrabold text-xs uppercase tracking-wider shadow-[0_10px_25px_rgba(230,194,128,0.4)] hover:scale-102 active:scale-98 transition-all"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    <span>Anywear Canlı Sınağı Başlat</span>
+                    <ExternalLink className="w-4 h-4 ml-1" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setViewMode("camera")}
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 py-3.5 px-5 rounded-2xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs uppercase tracking-wider transition-all"
+                  >
+                    <Camera className="w-4 h-4" />
+                    <span>Brauzer Kamerası</span>
+                  </button>
+                </div>
+
+                <div className="mt-8 flex items-center gap-2 text-[11px] text-stone-400">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <span>Kamera icazəsi tam aktivdir (Permissions-Policy: camera=*)</span>
+                </div>
+              </div>
+            )}
+
+            {/* View Mode 2: BROWSER CAMERA WITH SEAMLESS CUTOUT */}
             {viewMode === "camera" && !snapshotUrl && (
               <div className="relative w-full h-full flex items-center justify-center">
                 {cameraError ? (
@@ -442,10 +561,10 @@ export function VirtualTryOnModal() {
                         Yenidən Cəhd Et
                       </button>
                       <button
-                        onClick={() => fileInputRef.current?.click()}
+                        onClick={handleLaunchDecartWidget}
                         className="px-4 py-2 text-xs font-bold rounded-xl bg-[#E6C280] text-stone-950"
                       >
-                        Foto Yüklə
+                        Anywear AI ilə Aç
                       </button>
                     </div>
                   </div>
@@ -461,40 +580,42 @@ export function VirtualTryOnModal() {
                       }`}
                     />
 
-                    {/* Garment Augmented Overlay */}
+                    {/* Seamless Isolated Garment (No grey background box!) */}
                     <div
-                      className="absolute pointer-events-none select-none transition-transform duration-75 flex items-center justify-center"
+                      className="absolute pointer-events-none select-none transition-all duration-75 flex items-center justify-center"
                       style={{
-                        top: `calc(28% + ${garmentOffsetY}px)`,
+                        top: `calc(24% + ${garmentOffsetY}px)`,
                         left: `calc(50% + ${garmentOffsetX}px)`,
-                        transform: `translate(-50%, -20%) scale(${garmentScale / 100})`,
+                        transform: `translate(-50%, -15%) scale(${garmentScale / 100})`,
                         opacity: garmentOpacity / 100,
-                        width: "60%",
-                        maxWidth: "460px",
+                        width: "66%",
+                        maxWidth: "500px",
+                        mixBlendMode: blendMode,
                       }}
                     >
-                      <div className="relative w-full aspect-[3/4] drop-shadow-[0_20px_40px_rgba(0,0,0,0.7)]">
-                        <Image
-                          src={garmentImage}
+                      <div className="relative w-full aspect-[3/4] filter drop-shadow-[0_25px_35px_rgba(0,0,0,0.85)]">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={displayGarmentImage}
                           alt={product.name}
-                          fill
-                          className="object-contain"
-                          priority
+                          className="w-full h-full object-contain pointer-events-none"
                         />
                       </div>
                     </div>
 
-                    {/* Torso Alignment Guide (Subtle outline overlay) */}
-                    <div className="absolute inset-0 pointer-events-none border-2 border-dashed border-white/15 rounded-3xl m-6 sm:m-10 flex flex-col items-center justify-between p-4">
-                      <span className="px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-[10px] font-bold uppercase tracking-wider text-[#E6C280] border border-[#E6C280]/30">
-                        Bədəninizi mərkəz çərçivəyə uyğunlaşdırın
-                      </span>
-                      <span className="text-[10px] text-white/50 bg-black/40 px-2 py-0.5 rounded">
-                        tryanywear.ai · Virtual Try-On in Real Time
+                    {/* Body Guide Outline */}
+                    <div className="absolute inset-0 pointer-events-none border border-dashed border-white/20 rounded-3xl m-5 sm:m-8 flex flex-col items-center justify-between p-4">
+                      <div className="flex items-center gap-2">
+                        <span className="px-3 py-1 rounded-full bg-black/70 backdrop-blur-md text-[10px] font-bold uppercase tracking-wider text-[#E6C280] border border-[#E6C280]/30 shadow-md">
+                          Bədəninizi mərkəz çərçivəyə uyğunlaşdırın
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-white/50 bg-black/50 px-2.5 py-0.5 rounded backdrop-blur-md">
+                        Try-On ✦ Anywear in Real Time
                       </span>
                     </div>
 
-                    {/* Camera Control Overlays (Top-right & Bottom center) */}
+                    {/* Camera Control Overlays */}
                     <div className="absolute top-4 right-4 flex items-center gap-2">
                       <button
                         type="button"
@@ -512,7 +633,7 @@ export function VirtualTryOnModal() {
                             ? "bg-[#E6C280] text-stone-950 border-[#E6C280]"
                             : "bg-black/60 text-white border-white/20 hover:bg-black/90"
                         }`}
-                        title="Ölçü və Uyğunlaşdırma Sazlamaları"
+                        title="Ölçü və Mövqe Sazlamaları"
                       >
                         <Sliders className="w-4 h-4" />
                       </button>
@@ -523,10 +644,10 @@ export function VirtualTryOnModal() {
                       <button
                         type="button"
                         onClick={handleTakeSnapshot}
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-stone-950 font-bold text-xs shadow-xl hover:scale-105 active:scale-95 transition-all"
+                        className="flex items-center gap-2 px-6 py-3 rounded-full bg-white hover:bg-stone-100 text-stone-950 font-extrabold text-xs shadow-2xl hover:scale-105 active:scale-95 transition-all"
                       >
-                        <Camera className="w-4 h-4" />
-                        <span>Foto Çək & Yoxla</span>
+                        <Camera className="w-4 h-4 text-stone-900" />
+                        <span>Foto Çək & Əynində Gör</span>
                       </button>
                     </div>
                   </>
@@ -534,7 +655,7 @@ export function VirtualTryOnModal() {
               </div>
             )}
 
-            {/* View Mode 1 Snapshot Preview */}
+            {/* View Mode 2: Snapshot Preview */}
             {viewMode === "camera" && snapshotUrl && (
               <div className="relative w-full h-full flex items-center justify-center bg-black">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -543,7 +664,7 @@ export function VirtualTryOnModal() {
                   alt="Snapshot"
                   className="w-full h-full object-contain"
                 />
-                <div className="absolute top-4 left-4 bg-emerald-500/90 text-white text-[11px] font-bold px-3 py-1 rounded-full flex items-center gap-1.5 shadow-md">
+                <div className="absolute top-4 left-4 bg-emerald-500/90 text-white text-[11px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-md">
                   <Check className="w-3.5 h-3.5" />
                   <span>Şəkil çəkildi</span>
                 </div>
@@ -551,7 +672,7 @@ export function VirtualTryOnModal() {
                   <button
                     type="button"
                     onClick={() => setSnapshotUrl(null)}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-black/70 hover:bg-black text-white text-xs font-bold border border-white/20"
+                    className="flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-black/75 hover:bg-black text-white text-xs font-bold border border-white/20"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                     <span>Yenidən Çək</span>
@@ -559,16 +680,16 @@ export function VirtualTryOnModal() {
                   <a
                     href={snapshotUrl}
                     download={`horwalle-tryon-${product.slug}.jpg`}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#E6C280] hover:bg-[#ebd09a] text-stone-950 text-xs font-bold shadow-md"
+                    className="flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-[#E6C280] hover:bg-[#eed49c] text-stone-950 text-xs font-bold shadow-md"
                   >
                     <Download className="w-3.5 h-3.5" />
-                    <span>Şəkli Yüklə</span>
+                    <span>Şəkli Saxla</span>
                   </a>
                 </div>
               </div>
             )}
 
-            {/* View Mode 2: Upload User Photo */}
+            {/* View Mode 3: Upload Photo */}
             {viewMode === "upload" && (
               <div className="relative w-full h-full flex items-center justify-center bg-stone-950">
                 {uploadedPhotoUrl ? (
@@ -584,21 +705,21 @@ export function VirtualTryOnModal() {
                     <div
                       className="absolute pointer-events-none select-none flex items-center justify-center"
                       style={{
-                        top: `calc(32% + ${garmentOffsetY}px)`,
+                        top: `calc(30% + ${garmentOffsetY}px)`,
                         left: `calc(50% + ${garmentOffsetX}px)`,
-                        transform: `translate(-50%, -20%) scale(${garmentScale / 100})`,
+                        transform: `translate(-50%, -15%) scale(${garmentScale / 100})`,
                         opacity: garmentOpacity / 100,
-                        width: "55%",
-                        maxWidth: "420px",
+                        width: "60%",
+                        maxWidth: "460px",
+                        mixBlendMode: blendMode,
                       }}
                     >
-                      <div className="relative w-full aspect-[3/4] drop-shadow-[0_25px_45px_rgba(0,0,0,0.8)]">
-                        <Image
-                          src={garmentImage}
+                      <div className="relative w-full aspect-[3/4] drop-shadow-[0_25px_45px_rgba(0,0,0,0.85)]">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={displayGarmentImage}
                           alt={product.name}
-                          fill
-                          className="object-contain"
-                          priority
+                          className="w-full h-full object-contain"
                         />
                       </div>
                     </div>
@@ -607,7 +728,7 @@ export function VirtualTryOnModal() {
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="px-3 py-1.5 rounded-full bg-black/70 hover:bg-black text-white text-xs font-bold border border-white/20 backdrop-blur-md"
+                        className="px-3.5 py-2 rounded-full bg-black/75 hover:bg-black text-white text-xs font-bold border border-white/20 backdrop-blur-md"
                       >
                         Digər Foto Seç
                       </button>
@@ -648,59 +769,23 @@ export function VirtualTryOnModal() {
               </div>
             )}
 
-            {/* View Mode 3: Atelier Studio Model (Unisex Model) */}
+            {/* View Mode 4: Atelier Studio Model (Unisex Model) */}
             {viewMode === "model" && (
               <div className="relative w-full h-full flex items-center justify-center bg-radial from-stone-900 via-stone-950 to-black p-4">
                 <div className="relative w-full max-w-md h-full flex items-center justify-center">
-                  {/* Clean Studio Neutral Model Backing */}
                   <div className="relative w-full h-[85%] aspect-[3/4]">
-                    <Image
-                      src={garmentImage}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={displayGarmentImage}
                       alt={product.name}
-                      fill
-                      className="object-contain drop-shadow-[0_25px_50px_rgba(0,0,0,0.9)]"
+                      className="w-full h-full object-contain drop-shadow-[0_25px_50px_rgba(0,0,0,0.9)]"
                     />
                   </div>
 
-                  <div className="absolute bottom-6 px-4 py-2 rounded-full bg-black/60 border border-white/10 backdrop-blur-md text-[11px] text-stone-300 flex items-center gap-2">
+                  <div className="absolute bottom-6 px-4 py-2 rounded-full bg-black/70 border border-white/10 backdrop-blur-md text-[11px] text-stone-300 flex items-center gap-2 shadow-lg">
                     <User className="w-3.5 h-3.5 text-[#E6C280]" />
-                    <span>Unisex Atelier Fit · 182 sm / 74 kq (Ölçü: {size})</span>
+                    <span>Unisex Atelier Fit · 182 sm / 74 kq</span>
                   </div>
-                </div>
-              </div>
-            )}
-
-            {/* View Mode 4: Anywear Direct Connect */}
-            {viewMode === "anywear" && (
-              <div className="relative w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#0c0a0c]">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#E6C280] to-[#FAF7F2] text-stone-950 flex items-center justify-center mb-4 shadow-xl">
-                  <Sparkles className="w-7 h-7" />
-                </div>
-                <h3 className="text-lg font-bold text-white mb-2 font-['Plus_Jakarta_Sans',sans-serif]">
-                  Decart AI · Anywear Virtual Fitting Room
-                </h3>
-                <p className="text-xs text-stone-400 max-w-md mb-6 leading-relaxed">
-                  Real-time neural rendering vasitəsilə <b>tryanywear.ai</b> sistemi geyimi 60 FPS canlı kamera axınında sənin üzərinə simulyasiya edir.
-                </p>
-
-                <div className="flex flex-col sm:flex-row items-center gap-3">
-                  <a
-                    href={`https://anywear.decart.ai/?product=${encodeURIComponent(product.name)}&image=${encodeURIComponent(garmentImage)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#E6C280] to-[#d6af66] text-stone-950 font-bold text-xs uppercase tracking-wider shadow-lg hover:brightness-105 transition-all"
-                  >
-                    <span>Anywear Live Sessiyasını Başlat</span>
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
-
-                  <button
-                    type="button"
-                    onClick={() => setViewMode("camera")}
-                    className="px-5 py-3 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs transition-all"
-                  >
-                    Daxili Kameraya Qayıt
-                  </button>
                 </div>
               </div>
             )}
@@ -710,7 +795,7 @@ export function VirtualTryOnModal() {
               <div className="absolute bottom-16 left-4 right-4 sm:left-auto sm:right-4 sm:w-72 bg-stone-900/95 border border-white/15 rounded-2xl p-4 shadow-2xl backdrop-blur-xl z-20 space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-150">
                 <div className="flex items-center justify-between pb-2 border-b border-white/10">
                   <span className="text-xs font-bold text-white uppercase tracking-wider">
-                    Geyim Ölçüsü & Mövqe
+                    Ölçü & Mövqe Tənzimləməsi
                   </span>
                   <button
                     onClick={() => setShowAdjustments(false)}
@@ -722,7 +807,7 @@ export function VirtualTryOnModal() {
 
                 <div className="space-y-1">
                   <div className="flex justify-between text-[11px] text-stone-300">
-                    <span>Miqyas (Zoom):</span>
+                    <span>Miqyas (Geyim Eni):</span>
                     <span className="font-mono text-[#E6C280]">{garmentScale}%</span>
                   </div>
                   <input
@@ -737,7 +822,7 @@ export function VirtualTryOnModal() {
 
                 <div className="space-y-1">
                   <div className="flex justify-between text-[11px] text-stone-300">
-                    <span>Şaquli Mövqe (Y-Oxu):</span>
+                    <span>Çiyin & Bədən Hündürlüyü:</span>
                     <span className="font-mono text-[#E6C280]">{garmentOffsetY}px</span>
                   </div>
                   <input
@@ -750,28 +835,29 @@ export function VirtualTryOnModal() {
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <div className="flex justify-between text-[11px] text-stone-300">
-                    <span>Şəffaflıq:</span>
-                    <span className="font-mono text-[#E6C280]">{garmentOpacity}%</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="50"
-                    max="100"
-                    value={garmentOpacity}
-                    onChange={(e) => setGarmentOpacity(Number(e.target.value))}
-                    className="w-full accent-[#E6C280] h-1.5 bg-white/20 rounded-lg cursor-pointer"
-                  />
+                <div className="flex items-center justify-between pt-1">
+                  <span className="text-[11px] text-stone-300">Qarışdırma Effekti:</span>
+                  <button
+                    type="button"
+                    onClick={() => setBlendMode(blendMode === "normal" ? "multiply" : "normal")}
+                    className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${
+                      blendMode === "multiply"
+                        ? "bg-[#E6C280] text-stone-950"
+                        : "bg-white/10 text-stone-300"
+                    }`}
+                  >
+                    {blendMode === "multiply" ? "Multiply" : "Normal"}
+                  </button>
                 </div>
 
                 <button
                   type="button"
                   onClick={() => {
-                    setGarmentScale(100);
-                    setGarmentOffsetY(0);
+                    setGarmentScale(105);
+                    setGarmentOffsetY(10);
                     setGarmentOffsetX(0);
-                    setGarmentOpacity(96);
+                    setGarmentOpacity(100);
+                    setBlendMode("normal");
                   }}
                   className="w-full py-1.5 text-[10px] uppercase font-bold text-stone-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
                 >
@@ -791,6 +877,20 @@ export function VirtualTryOnModal() {
               <div className="grid grid-cols-4 md:grid-cols-1 gap-1.5">
                 <button
                   type="button"
+                  onClick={() => setViewMode("anywear")}
+                  className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left ${
+                    viewMode === "anywear"
+                      ? "bg-gradient-to-r from-[#E6C280] to-[#f0d49f] text-stone-950 font-extrabold shadow-md"
+                      : "bg-[#E6C280]/10 text-[#E6C280] hover:bg-[#E6C280]/20 border border-[#E6C280]/30"
+                  }`}
+                >
+                  <Sparkles className="w-4 h-4 shrink-0 text-stone-950 md:text-inherit" />
+                  <span className="hidden sm:inline">Anywear AI</span>
+                  <span className="sm:hidden">Anywear</span>
+                </button>
+
+                <button
+                  type="button"
                   onClick={() => setViewMode("camera")}
                   className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left ${
                     viewMode === "camera"
@@ -799,7 +899,7 @@ export function VirtualTryOnModal() {
                   }`}
                 >
                   <Camera className="w-4 h-4 shrink-0" />
-                  <span className="hidden sm:inline">Canlı Kamera</span>
+                  <span className="hidden sm:inline">Kamera Rejimi</span>
                   <span className="sm:hidden">Kamera</span>
                 </button>
 
@@ -830,23 +930,8 @@ export function VirtualTryOnModal() {
                   <span className="hidden sm:inline">Atelier Model</span>
                   <span className="sm:hidden">Model</span>
                 </button>
-
-                <button
-                  type="button"
-                  onClick={() => setViewMode("anywear")}
-                  className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left ${
-                    viewMode === "anywear"
-                      ? "bg-gradient-to-r from-[#E6C280] to-[#f0d49f] text-stone-950 font-extrabold shadow-md"
-                      : "bg-white/5 text-[#E6C280] hover:bg-[#E6C280]/10 border border-[#E6C280]/20"
-                  }`}
-                >
-                  <Sparkles className="w-4 h-4 shrink-0" />
-                  <span className="hidden sm:inline">Anywear AI</span>
-                  <span className="sm:hidden">Anywear</span>
-                </button>
               </div>
 
-              {/* Hidden file input */}
               <input
                 ref={fileInputRef}
                 type="file"
@@ -859,7 +944,7 @@ export function VirtualTryOnModal() {
             {/* At-a-glance Specs */}
             <div className="hidden md:block bg-black/40 border border-white/5 rounded-xl p-3 text-[11px] text-stone-400 space-y-1.5">
               <div className="flex justify-between">
-                <span>Kəsim:</span>
+                <span>Model Kəsimi:</span>
                 <span className="text-white font-medium">{product.fit || "Universal Fit"}</span>
               </div>
               <div className="flex justify-between">
@@ -879,7 +964,7 @@ export function VirtualTryOnModal() {
         </div>
 
         {/* ========================================================
-            FOOTER ACTIONS (Exact Screenshot Layout: CLOSE | SHARE WITH A FRIEND | ADD TO CART)
+            FOOTER ACTIONS (CLOSE | SHARE | ADD TO CART)
         ======================================================== */}
         <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3.5 bg-[#181618] border-t border-white/10 shrink-0">
           <button
@@ -913,7 +998,7 @@ export function VirtualTryOnModal() {
               ) : (
                 <>
                   <ShoppingBag className="w-4 h-4" />
-                  <span>Səbətə At ({size})</span>
+                  <span>Səbətə Əlavə Et</span>
                 </>
               )}
             </button>
