@@ -61,52 +61,7 @@ export default function Home() {
       : products.filter((p) => p.category === activeCategory)
   ).slice(0, 12);
 
-  const categoryHighlights = [
-    {
-      id: "koynek",
-      num: "01",
-      title: t.home.shirtsCategory || "T-Shirt & Köynək",
-      desc: language === "en" ? "Oxford Button-Down & Minimalist Tee" : language === "ru" ? "Оксфордская рубашка и базовые футболки" : language === "tr" ? "Oxford Gömlek & Minimalist Tişört" : "Oxford Köynək & Minimalist Tee",
-      fabric: language === "en" ? "100% Combed Cotton · 220-240 GSM" : language === "ru" ? "100% Гребенной хлопок · 220-240 GSM" : language === "tr" ? "%100 Penye Pamuk · 220-240 GSM" : "100% Daranmış Pambıq · 220-240 GSM",
-      image: "/images/categories/tshirt-and-shirt-showcase.webp",
-      link: "/collections?category=koynek",
-      count: language === "en" ? "6 Models" : language === "ru" ? "6 Моделей" : language === "tr" ? "6 Model" : "6 Model",
-      tag: "240 GSM COUTURE",
-    },
-    {
-      id: "hudi",
-      num: "02",
-      title: t.home.hoodiesCategory || "Hudi & Sviter",
-      desc: language === "en" ? "Heavyweight Oversized Hoodie & Knitwear" : language === "ru" ? "Плотное оверсайз худи и трикотаж" : language === "tr" ? "Ağır Oversized Hudi & Triko" : "Oversized Hudi & Dərzi Trikotajı",
-      fabric: language === "en" ? "Heavy 3-Thread Fleece · 380 GSM" : language === "ru" ? "Плотный флис 3-нитка · 380 GSM" : language === "tr" ? "Ağır 3 İplik Polar · 380 GSM" : "Ağır 3iplik Fleece · 380 GSM",
-      image: "/images/categories/hudi-and-sviter-showcase.webp",
-      link: "/collections?category=hudi",
-      count: language === "en" ? "4 Models" : language === "ru" ? "4 Модели" : language === "tr" ? "4 Model" : "4 Model",
-      tag: "380 GSM FLEECE",
-    },
-    {
-      id: "salvar",
-      num: "03",
-      title: t.home.pantsCategory || "Şalvar & Şortik",
-      desc: language === "en" ? "Tailored Chino & Straight Indigo Denim" : language === "ru" ? "Классические чиносы и прямой деним" : language === "tr" ? "Terzi Chino & Düz Kesim Denim" : "Klassik Chino & Düz Kəsim Denim",
-      fabric: language === "en" ? "Cotton Twill & 12.5 oz Indigo" : language === "ru" ? "Хлопковый твил и 12.5 унций индиго" : language === "tr" ? "Pamuklu Dimi & 12.5 oz İndigo" : "Pambıq Twill & 12.5 oz İndiqo",
-      image: "/images/categories/salvar-and-shortik-showcase.webp",
-      link: "/collections?category=salvar",
-      count: language === "en" ? "5 Models" : language === "ru" ? "5 Моделей" : language === "tr" ? "5 Model" : "5 Model",
-      tag: language === "en" ? "PRECISION ATELIER CUT" : language === "ru" ? "ТОЧНЫЙ КРОЙ АТЕЛЬЕ" : language === "tr" ? "HASSAS ATÖLYE KESİMİ" : "DƏQİQ ATELYE KƏSİMİ",
-    },
-    {
-      id: "aksesuar",
-      num: "04",
-      title: t.home.accessoriesCategory || "Aksesuarlar",
-      desc: language === "en" ? "Heavy Snapback Cap & Canvas Tote" : language === "ru" ? "Плотные кепки и эко-сумки холст" : language === "tr" ? "Kalın Şapka & Doğal Keten Çanta" : "Qalın Kepka & Təbii Kətan Çanta",
-      fabric: language === "en" ? "Heavy Twill & Natural Canvas" : language === "ru" ? "Плотный твил и натуральный холст" : language === "tr" ? "Kalın Dimi & Doğal Keten" : "Qalın Twill & Təbii Kətan",
-      image: "/images/categories/accessories-showcase.webp",
-      link: "/collections?category=aksesuar",
-      count: language === "en" ? "1 Model" : language === "ru" ? "1 Модель" : language === "tr" ? "1 Model" : "1 Model",
-      tag: language === "en" ? "ATELIER ACCESSORIES" : language === "ru" ? "АТЕЛЬЕ АКСЕССУАРЫ" : language === "tr" ? "ATÖLYE AKSESUAR" : "ATELYE AKSESUARLARI",
-    },
-  ];
+
 
 
   return (
@@ -138,95 +93,6 @@ export default function Home() {
 
       {/* Remaining sections wrapped with spacing and light luxury background */}
       <div className="bg-[#FAF7F2] space-y-14 sm:space-y-20 pt-10 sm:pt-14 pb-20 sm:pb-28">
-        {/* 2. REFINED ATELIER DEPARTMENTS / 4 ƏSAS İSTİQAMƏT */}
-        <section data-cms-section="categories" data-cms-title="4 Əsas Kolleksiya Bölməsi" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 pb-5 border-b border-stone-200/80">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-stone-100 border border-stone-200/80 text-[10px] font-bold uppercase tracking-[0.2em] text-stone-600 mb-2">
-                <span>HORVVALLE ATELIER</span>
-                <span className="w-1 h-1 rounded-full bg-stone-400" />
-                <span>{t.home.fourDirections || "KOLLEKSİYA STRUKTURU"}</span>
-              </div>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-normal uppercase tracking-tight text-stone-900 font-serif-luxury">
-                {t.home.fourDirectionsTitle || "DÖRD ƏSAS DƏRZİLİK İSTİQAMƏTİ"}
-              </h2>
-            </div>
-            <p className="text-xs sm:text-sm text-stone-600 max-w-md leading-relaxed">
-              {t.home.fourDirectionsDesc || "Xalis daranmış sıx pambıq, isti 3iplik fleece və dəqiq kəsimli şalvarlar. İstənilən bölməni seçərək modelləri kəşf edin."}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
-            {categoryHighlights.map((cat) => (
-              <div
-                key={cat.id}
-                className="group relative flex flex-col justify-between bg-white border border-stone-200/90 hover:border-stone-900/80 rounded-3xl p-5 transition-all duration-400 hover:shadow-[0_20px_45px_-12px_rgba(0,0,0,0.08)] hover:-translate-y-1.5"
-              >
-                {/* Top Header inside Card */}
-                <div>
-                  <div className="flex items-center justify-between gap-2 pb-3.5 border-b border-stone-100 text-xs">
-                    <span className="font-mono font-semibold text-stone-600 tracking-wider">
-                      {cat.num}
-                    </span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-[#FAF7F2] border border-stone-200/70 text-[10px] font-bold uppercase tracking-wider text-stone-700">
-                      {cat.tag}
-                    </span>
-                  </div>
-
-                  {/* Clean Framed Visual with Model */}
-                  <Link
-                    href={cat.link}
-                    prefetch={true}
-                    className="block relative aspect-[4/3] rounded-2xl overflow-hidden bg-[#FAF7F2] my-4 cursor-pointer"
-                  >
-                    <Image
-                      src={cat.image}
-                      alt={cat.title}
-                      fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                      className="object-contain p-2 transition-transform duration-700 ease-out group-hover:scale-105"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-stone-900/0 group-hover:bg-stone-900/10 transition-colors" />
-                    <div className="absolute bottom-2.5 right-2.5 px-2.5 py-1 rounded-full bg-white/95 backdrop-blur-md border border-stone-200/80 text-[10px] font-semibold text-stone-800 shadow-sm flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <span>{t.home.view || "Bax"}</span>
-                      <ArrowRight size={11} />
-                    </div>
-                  </Link>
-
-                  {/* Typography & Details */}
-                  <div className="space-y-1">
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-amber-700 block">
-                      {cat.desc}
-                    </span>
-                    <h3 className="text-xl font-normal uppercase tracking-tight text-stone-900 font-serif-luxury group-hover:text-amber-900 transition-colors">
-                      {cat.title}
-                    </h3>
-                    <p className="text-xs text-stone-600 line-clamp-1 pt-0.5">
-                      {cat.fabric}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Card Action Footer */}
-                <div className="pt-4 mt-4 border-t border-stone-100 flex items-center justify-between text-xs">
-                  <span className="text-stone-600 font-medium">
-                    {cat.count}
-                  </span>
-                  <Link
-                    href={cat.link}
-                    prefetch={true}
-                    className="inline-flex items-center gap-1.5 font-semibold text-stone-900 group-hover:text-amber-800 transition-colors uppercase tracking-wider text-[11px]"
-                  >
-                    <span>{t.home.viewCollection || "Kolleksiyaya Keç"}</span>
-                    <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
       {/* 3. TRENDING PRODUCT GRID WITH CATEGORY TABS */}
       <section data-cms-section="products" data-cms-title="Seçilmiş Məhsullar Bölməsi" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         {/* Section Header & Filter Tabs */}
