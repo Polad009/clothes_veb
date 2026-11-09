@@ -5,7 +5,8 @@ import { verifyTurnstileToken } from "@/lib/turnstile";
 import { checkRateLimit } from "@/lib/rateLimiter";
 import { validateShippingRate, isDomesticDestination } from "@/lib/shipping";
 import { getCountryByCode } from "@/lib/countries";
-import { readStoreDb, writeStoreDb } from "@/lib/storeDb";
+import { listProducts, resolveUnitPrice } from "@/lib/db/products";
+import { checkPromo, incrementPromoUses } from "@/lib/db/site";
 
 export async function POST(req: NextRequest) {
   try {
@@ -103,33 +104,36 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Server-side Recalculation: Verify prices & subtotal against database (anti-tampering)
-    const db = readStoreDb();
+    // 3. Server-side Recalculation: prices always come from the live catalogue (anti-tampering)
+    const orderCurrency: "AZN" | "USD" = currency === "USD" ? "USD" : "AZN";
+    const catalogue = await listProducts();
     let serverSubtotal = 0;
     const validatedItems: OrderItem[] = [];
 
-    for (const clientItem of (items || [])) {
+    for (const clientItem of items) {
       const clientItemId = (clientItem as any).productId || clientItem.id || (clientItem as any).slug;
-      const matchingProduct = (db.products || []).find(
-        (p) => p.id === (clientItem as any).productId || p.id === clientItem.id || p.slug === (clientItem as any).slug || p.slug === clientItemId
-      );
-      const isCustom = Boolean((clientItem as any).isCustom || clientItem.type === 'custom');
-      const unitPrice = isCustom
-        ? (Number(clientItem.price) || 0)
-        : (matchingProduct ? Number(matchingProduct.price) : (Number(clientItem.price) || 0));
+      const isCustom = Boolean((clientItem as any).isCustom || clientItem.type === "custom");
+      const qty = Math.min(99, Math.max(1, Math.floor(Number(clientItem.quantity) || 1)));
+      let unitPrice: number;
 
-      const qty = Math.max(1, Math.floor(Number(clientItem.quantity) || 1));
+      if (isCustom) {
+        unitPrice = Math.max(0, Number(clientItem.price) || 0);
+      } else {
+        const product = catalogue.find((p) => p.id === clientItemId || p.slug === clientItemId);
+        if (!product) {
+          return NextResponse.json(
+            { success: false, message: "Səbətinizdəki məhsul artıq mövcud deyil. Zəhmət olmasa səbətinizi yeniləyin." },
+            { status: 409 }
+          );
+        }
+        unitPrice = resolveUnitPrice(product, orderCurrency, clientItem.price);
+      }
+
       serverSubtotal += unitPrice * qty;
-
-      validatedItems.push({
-        ...clientItem,
-        price: unitPrice,
-        quantity: qty,
-      });
+      validatedItems.push({ ...clientItem, price: unitPrice, quantity: qty });
     }
 
     const subtotal = Math.round(serverSubtotal * 100) / 100;
-    const orderCurrency: "AZN" | "USD" = currency === "USD" ? "USD" : "AZN";
 
     const defaultOptionId = isDomestic
       ? (/^(bak[ıi]|sumqay[ıi]t)/i.test(String(customer.city || '')) ? 'domestic_baku_sumgayit' : 'domestic_region')
@@ -156,56 +160,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3.1 Promo Code Validation (Expiration & Max Uses Enforcement - Item 22)
+    // 3.1 Promo Code Validation (expiry, usage limit, minimum amount)
     let serverDiscount = 0;
     let validatedPromoCode: string | null = null;
-    if (promoCode && typeof promoCode === 'string' && promoCode.trim()) {
-      const cleanCode = promoCode.trim().toUpperCase();
-      const promoObj = (db.promoCodes || []).find(
-        (p) => (p.code || '').trim().toUpperCase() === cleanCode
-      );
-
-      if (!promoObj || promoObj.active === false) {
-        return NextResponse.json(
-          { success: false, message: "Yanlış və ya deaktiv promokod." },
-          { status: 400 }
-        );
+    if (promoCode && typeof promoCode === "string" && promoCode.trim()) {
+      const promoCheck = await checkPromo(promoCode, subtotal);
+      if (!promoCheck.ok) {
+        const message =
+          promoCheck.reason === "expired"
+            ? "Bu promokodun istifadə müddəti bitmişdir."
+            : promoCheck.reason === "maxed"
+            ? "Bu promokodun maksimal istifadə sayı bitmişdir."
+            : promoCheck.reason === "min_amount"
+            ? `Minimum sifariş məbləği ${promoCheck.promo?.minAmount} ${orderCurrency} olmalıdır.`
+            : "Yanlış və ya deaktiv promokod.";
+        return NextResponse.json({ success: false, message }, { status: 400 });
       }
-
-      if (promoObj.expiresAt) {
-        const expTime = new Date(promoObj.expiresAt).getTime();
-        if (!isNaN(expTime) && Date.now() > expTime) {
-          return NextResponse.json(
-            { success: false, message: "Bu promokodun istifadə müddəti bitmişdir." },
-            { status: 400 }
-          );
-        }
-      }
-
-      if (typeof promoObj.maxUses === 'number' && promoObj.maxUses > 0) {
-        if ((Number(promoObj.uses) || 0) >= promoObj.maxUses) {
-          return NextResponse.json(
-            { success: false, message: "Bu promokodun maksimal istifadə sayı bitmişdir." },
-            { status: 400 }
-          );
-        }
-      }
-
-      const minAmt = Number(promoObj.minAmount) || 0;
-      if (minAmt > 0 && subtotal < minAmt) {
-        return NextResponse.json(
-          { success: false, message: `Minimum sifariş məbləği ${minAmt} ${orderCurrency} olmalıdır.` },
-          { status: 400 }
-        );
-      }
-
-      validatedPromoCode = promoObj.code;
-      if (promoObj.type === 'fixed') {
-        serverDiscount = Math.min(subtotal, Number(promoObj.value) || 0);
-      } else {
-        const pct = Math.min(100, Math.max(0, Number(promoObj.value) || 0));
-        serverDiscount = (subtotal * pct) / 100;
-      }
+      validatedPromoCode = promoCheck.promo.code;
+      serverDiscount = promoCheck.discount;
     }
 
     const serverShipping = shippingValidation.expectedRate;
@@ -253,17 +225,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (validatedPromoCode) {
-      const promoToUpdate = (db.promoCodes || []).find(
-        (p) => (p.code || '').trim().toUpperCase() === validatedPromoCode!.toUpperCase()
-      );
-      if (promoToUpdate) {
-        promoToUpdate.uses = (Number(promoToUpdate.uses) || 0) + 1;
-        try {
-          writeStoreDb(db);
-        } catch (e) {
-          console.warn("Error incrementing promo code uses:", e);
-        }
-      }
+      await incrementPromoUses(validatedPromoCode).catch((e) => console.warn("Promo usage update failed:", e));
     }
 
     return NextResponse.json({

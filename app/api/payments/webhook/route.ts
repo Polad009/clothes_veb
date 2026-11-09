@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getActivePaymentProvider } from "@/lib/payments";
-import { supabaseServer } from "@/lib/supabaseServer";
-import { readStoreDb, writeStoreDb } from "@/lib/storeDb";
+import { findOrder, updateOrder } from "@/lib/db/orders";
 
 export const dynamic = "force-dynamic";
 
@@ -28,37 +27,21 @@ export async function POST(req: NextRequest) {
 
     console.log(`[Webhook] Processing payment status '${status}' for order '${orderId}' via ${provider.name}`);
 
-    // 1. Update local database idempotently
-    const db = readStoreDb();
-    const existingIndex = (db.orders || []).findIndex((o: any) => o.id === orderId);
-    if (existingIndex >= 0) {
-      // Idempotency: if already paid, skip re-triggering
-      if (db.orders[existingIndex].paymentStatus !== "paid") {
-        db.orders[existingIndex].paymentStatus = status === "paid" ? "Paid" : status === "test_paid" ? "Test Paid" : "Failed";
-        if (status === "paid" || status === "test_paid") {
-          db.orders[existingIndex].orderStatus = "Təsdiqləndi";
-        }
-        writeStoreDb(db);
-      }
+    const existing = await findOrder(orderId);
+    if (!existing) {
+      console.warn(`[Webhook] Order '${orderId}' not found`);
+      return NextResponse.json({ success: true, message: "Webhook acknowledged, order not found" });
     }
 
-    // 2. Update Supabase database
-    if (supabaseServer) {
-      try {
-        const updatePayload: any = {
-          payment_status: status,
-        };
-        if (transactionId) {
-          updatePayload.provider_payment_id = transactionId;
-        }
-        if (status === "paid" || status === "test_paid") {
-          updatePayload.order_status = "Təsdiqləndi";
-        }
-
-        await supabaseServer.from("orders").update(updatePayload).eq("id", orderId);
-      } catch (err) {
-        console.warn("[Webhook] Supabase order update warning:", err);
-      }
+    // Idempotency: a paid order is never downgraded or re-confirmed by a repeated webhook
+    const alreadyPaid = ["paid", "test_paid"].includes(String(existing.paymentStatus).toLowerCase());
+    if (!alreadyPaid) {
+      const isPaid = status === "paid" || status === "test_paid";
+      await updateOrder(orderId, {
+        paymentStatus: status,
+        providerPaymentId: transactionId || undefined,
+        orderStatus: isPaid ? "Təsdiqləndi" : undefined,
+      });
     }
 
     return NextResponse.json({ success: true, orderId, status });

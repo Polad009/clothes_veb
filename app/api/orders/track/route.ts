@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readStoreDb } from "@/lib/storeDb";
-import { supabaseServer } from "@/lib/supabaseServer";
+import { findPodOrderByOrderId, searchOrders, searchPodOrders } from "@/lib/db/orders";
 import { getCountryByCode } from "@/lib/countries";
 
 export const dynamic = "force-dynamic";
@@ -118,174 +117,15 @@ export async function GET(req: NextRequest) {
     const isEmailSearch = searchType === "email" || query.includes("@");
     const isPhoneSearch = !isEmailSearch && (searchType === "phone" || (cleanDigits.length >= 7 && !/[A-Z]/i.test(query)));
 
-    const db = readStoreDb();
-    const localOrders = db.orders || [];
-    const podOrders = db.podOrders || [];
+    // Orders live in one place only: the database.
+    const found = await searchOrders(
+      isEmailSearch ? { email: query } : isPhoneSearch ? { phoneDigits: cleanDigits } : { code: cleanQuery }
+    );
+    const matchedOrders: any[] = found.map((o) => ({ ...o, statusMeta: getStepIndex(o.orderStatus) }));
 
-    const matchedOrders: any[] = [];
-    const matchedOrderIds = new Set<string>();
-    const matchedTrackingCodes = new Set<string>();
-
-    // 1. SEARCH LIVE SUPABASE CLOUD DATABASE FIRST (Live authoritative status)
-    if (supabaseServer) {
-      try {
-        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanQuery);
-        let supaQuery = supabaseServer.from("orders").select("*, order_items(*)");
-
-        if (isEmailSearch) {
-          supaQuery = supaQuery.ilike("customer_email", query.toLowerCase());
-        } else if (isPhoneSearch) {
-          supaQuery = supaQuery.ilike("customer_phone", `%${cleanDigits.slice(-7)}%`);
-        } else if (isUuid) {
-          supaQuery = supaQuery.eq("id", cleanQuery);
-        } else {
-          // By order code / tracking code: safely query tracking_code, notes, or phone without UUID cast error
-          const cleanSafeDigits = cleanDigits.length >= 4 ? cleanDigits.slice(-7) : cleanQuery;
-          try {
-            supaQuery = supaQuery.or(`tracking_code.ilike.%${cleanQuery}%,customer_phone.ilike.%${cleanSafeDigits}%`);
-          } catch {
-            supaQuery = supaQuery.or(`notes.ilike.%${cleanQuery}%,customer_phone.ilike.%${cleanSafeDigits}%`);
-          }
-        }
-
-        let { data: supaData, error: supaError } = await supaQuery.order("created_at", { ascending: false });
-
-        // If tracking_code column does not exist in some environments, fallback to querying notes/phone
-        if (supaError && !isUuid && !isEmailSearch && !isPhoneSearch) {
-          const cleanSafeDigits = cleanDigits.length >= 4 ? cleanDigits.slice(-7) : cleanQuery;
-          const fallbackQuery = supabaseServer
-            .from("orders")
-            .select("*, order_items(*)")
-            .or(`notes.ilike.%${cleanQuery}%,customer_phone.ilike.%${cleanSafeDigits}%`)
-            .order("created_at", { ascending: false });
-          const fbRes = await fallbackQuery;
-          if (!fbRes.error && fbRes.data) {
-            supaData = fbRes.data;
-            supaError = null;
-          }
-        }
-
-        if (!supaError && supaData && supaData.length > 0) {
-          const converted = supaData.map((so: any) => {
-            const rawTracking = so.tracking_code || (so.notes && so.notes.includes("AZ-EXP-") ? so.notes.match(/AZ-EXP-[A-Z0-9]+/)?.[0] : null);
-            const trackingCode = rawTracking || `AZ-EXP-${String(so.id).replace(/[^0-9]/g, "") || "8841"}`;
-
-            return {
-              id: String(so.id),
-              date: so.created_at,
-              customer: {
-                fullName: so.customer_name || "Müştəri",
-                phone: so.customer_phone || "-",
-                email: so.customer_email || "-",
-                address: so.delivery_address || "-",
-                addressLine2: so.delivery_address_line2 || undefined,
-                city: so.delivery_city || (so.delivery_country && so.delivery_country !== "Azərbaycan" && so.delivery_country !== "Azerbaijan" ? "-" : "Bakı"),
-                stateOrRegion: so.delivery_state || undefined,
-                postalCode: so.delivery_postal_code || undefined,
-                country: so.delivery_country || "Azərbaycan",
-              },
-              items: (so.order_items || []).map((it: any) => ({
-                name: it.item_name,
-                color: it.color || "Standart",
-                size: it.size || "L",
-                quantity: it.quantity || 1,
-                price: Number(it.unit_price) || 0,
-              })),
-              subtotal: Number(so.total_amount) || 0,
-              shipping: Number(so.shipping_amount) || 0,
-              discount: 0,
-              total: Number(so.total_amount) || 0,
-              paymentMethod: so.payment_method || "Kart",
-              paymentStatus: so.payment_status || "Ödənilib",
-              orderStatus: so.order_status || "Yeni Sifariş",
-              trackingCode,
-              statusMeta: getStepIndex(so.order_status),
-              source: "Supabase",
-            };
-          });
-
-          for (const co of converted) {
-            matchedOrders.push(co);
-            matchedOrderIds.add(co.id);
-            if (co.trackingCode) matchedTrackingCodes.add(co.trackingCode.toUpperCase());
-          }
-        }
-      } catch (err) {
-        console.warn("[OrdersTrack] Supabase search notice:", err);
-      }
-    }
-
-    // 2. SEARCH LOCAL STOREDB (FALLBACK & MERGE)
-    const localMatches = localOrders.filter((o: any) => {
-      const customerEmail = (o.customer?.email || "").trim().toLowerCase();
-      const customerPhone = normalizePhone(o.customer?.phone || "");
-      const orderId = (o.id || "").toUpperCase().replace(/^#/, "");
-      const orderRef = (o.trackingCode || "").toUpperCase();
-
-      if (isEmailSearch) {
-        return customerEmail === query.toLowerCase();
-      }
-
-      if (isPhoneSearch) {
-        if (!customerPhone || cleanDigits.length < 7) return false;
-        if (customerPhone === cleanDigits) return true;
-        if (cleanDigits.length >= 9 && customerPhone.length >= 9) {
-          return customerPhone.slice(-9) === cleanDigits.slice(-9);
-        }
-        if (cleanDigits.length === 7 && customerPhone.length >= 7) {
-          return customerPhone.slice(-7) === cleanDigits;
-        }
-        return false;
-      }
-
-      // Order code matching
-      if (orderId === cleanQuery || orderRef === cleanQuery) return true;
-      if (cleanQuery.length >= 4 && (orderId.includes(cleanQuery) || orderRef.includes(cleanQuery))) return true;
-
-      if (cleanDigits.length >= 4 && cleanDigits.length <= 6) {
-        const orderDigits = orderId.replace(/\D/g, "");
-        const trackDigits = orderRef.replace(/\D/g, "");
-        if (orderDigits === cleanDigits || trackDigits === cleanDigits) return true;
-      }
-
-      return false;
-    });
-
-    // Merge storeDb orders if not already retrieved with live status from Supabase
-    for (const lo of localMatches) {
-      const loId = String(lo.id);
-      const loTrack = (lo.trackingCode || "").toUpperCase();
-      if (!matchedOrderIds.has(loId) && (!loTrack || !matchedTrackingCodes.has(loTrack))) {
-        matchedOrders.push({
-          ...lo,
-          statusMeta: (lo as any).statusMeta || getStepIndex(lo.orderStatus),
-          source: (lo as any).source || "storeDb",
-        });
-        matchedOrderIds.add(loId);
-        if (loTrack) matchedTrackingCodes.add(loTrack);
-      }
-    }
-
-    // 3. SEARCH POD ORDERS (IF APPLICABLE)
-    const matchedPods = podOrders.filter((p: any) => {
-      const custPhone = normalizePhone(p.customerPhone || (p as any).customer?.phone || "");
-      const podId = (p.id || "").toUpperCase().replace(/^#/, "");
-
-      if (isPhoneSearch) {
-        if (!custPhone || cleanDigits.length < 7) return false;
-        if (custPhone === cleanDigits) return true;
-        if (cleanDigits.length >= 9 && custPhone.length >= 9) {
-          return custPhone.slice(-9) === cleanDigits.slice(-9);
-        }
-        if (cleanDigits.length === 7 && custPhone.length >= 7) {
-          return custPhone.slice(-7) === cleanDigits;
-        }
-        return false;
-      }
-
-      if (podId === cleanQuery || (cleanQuery.length >= 4 && podId.includes(cleanQuery))) return true;
-      return false;
-    });
+    const matchedPods = matchedOrders.length > 0 || isEmailSearch
+      ? []
+      : await searchPodOrders(isPhoneSearch ? { phoneDigits: cleanDigits } : { code: cleanQuery });
 
     if (matchedOrders.length > 0) {
       // Sort newest first
@@ -294,7 +134,7 @@ export async function GET(req: NextRequest) {
       const statusMeta = matchedOrder.statusMeta || getStepIndex(matchedOrder.orderStatus);
 
       // Look for related POD design if any
-      const relatedPod = podOrders.find((p: any) => p.orderId === matchedOrder.id);
+      const relatedPod = await findPodOrderByOrderId(matchedOrder.id);
 
       // Lightweight list of all matching orders (if multiple orders found for this email/phone)
       const allMatches = matchedOrders.map((o: any) => ({

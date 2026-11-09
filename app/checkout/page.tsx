@@ -613,7 +613,7 @@ export default function CheckoutPage() {
 
     setIsCheckingPromo(true);
     try {
-      const res = await fetch(`/api/store/data?_t=${Date.now()}`, {
+      const res = await fetch(`/api/store/promo?code=${encodeURIComponent(clean)}`, {
         cache: 'no-store',
       });
       const data = await res.json();
