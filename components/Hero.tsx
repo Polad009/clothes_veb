@@ -326,21 +326,21 @@ export function Hero() {
         ["--hero-bg" as any]: currentItem.bgGradient,
         ["--hero-ink" as any]: currentItem.colorHex,
       }}
-      className="relative w-full min-h-[100dvh] h-auto lg:h-[100dvh] lg:max-h-[100dvh] flex flex-col justify-between overflow-x-hidden text-white select-none isolate pb-8 lg:pb-0"
+      className="relative w-full h-[calc(100dvh-32px)] max-h-[calc(100dvh-32px)] lg:h-[100dvh] lg:max-h-[100dvh] flex flex-col justify-between overflow-hidden text-white select-none isolate pb-2 lg:pb-0"
       aria-label="Horvvalle Atelier Hero"
     >
       {/* =========================================================================
           MAIN HERO CONTENT (Left Typography, Center Product, Right Spec)
           ========================================================================= */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 lg:pt-22 pb-4 lg:pb-1 flex-1 flex flex-col justify-center min-h-0">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center w-full">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 lg:pt-20 pb-1 sm:pb-2 lg:pb-1 flex-1 flex flex-col justify-center min-h-0">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 sm:gap-4 lg:gap-8 items-center w-full my-auto">
           
           {/* =====================================================================
               LEFT COLUMN: HEADLINE (EB Garamond) + DESCRIPTION + CTAS
               ===================================================================== */}
-          <div className="lg:col-span-4 flex flex-col justify-center space-y-3 sm:space-y-3.5 text-center lg:text-left order-2 lg:order-1">
+          <div className="lg:col-span-4 flex flex-col justify-center space-y-1.5 sm:space-y-3 text-center lg:text-left order-2 lg:order-1">
             {/* Headline */}
-            <h1 className="font-eb-garamond text-2xl sm:text-3xl lg:text-[2.2rem] xl:text-[2.45rem] font-normal leading-[1.14] tracking-tight">
+            <h1 className="font-eb-garamond text-xl sm:text-2xl lg:text-[2.2rem] xl:text-[2.45rem] font-normal leading-[1.12] tracking-tight">
               {language === "az" ? (
                 <>
                   <span>Sənin ölçün,</span>
@@ -364,8 +364,8 @@ export function Hero() {
               )}
             </h1>
 
-            {/* Localized Description */}
-            <p className="text-white/80 text-xs sm:text-[13.5px] leading-relaxed max-w-sm mx-auto lg:mx-0 font-sans">
+            {/* Localized Description (compact on mobile) */}
+            <p className="text-white/80 text-[11px] sm:text-[13.5px] leading-relaxed max-w-xs sm:max-w-sm mx-auto lg:mx-0 font-sans line-clamp-2 sm:line-clamp-none">
               {language === "az"
                 ? "Atelyedə hər geyim ölçünə görə tikilir, istədiyin dizayn isə canlı DTG çapla köynəyə köçürülür."
                 : language === "en"
@@ -376,12 +376,12 @@ export function Hero() {
             </p>
 
             {/* Shared UI Buttons */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5 pt-1">
-              <Button variant="primary" href="/studio">
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 pt-0.5 sm:pt-1">
+              <Button variant="primary" href="/studio" className="!px-3.5 !py-1.5 sm:!px-5 sm:!py-2.5 text-xs sm:text-sm">
                 <span>{t.hero.designBtn || "Fərdi Studiyada dizayn et"}</span>
                 <svg
-                  width="13"
-                  height="13"
+                  width="12"
+                  height="12"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -393,7 +393,7 @@ export function Hero() {
                 </svg>
               </Button>
 
-              <Button variant="secondary" href="/collections">
+              <Button variant="secondary" href="/collections" className="!px-3.5 !py-1.5 sm:!px-5 sm:!py-2.5 text-xs sm:text-sm">
                 {t.hero.collectionBtn || "Kolleksiyaya bax"}
               </Button>
             </div>
@@ -402,7 +402,7 @@ export function Hero() {
           {/* =====================================================================
               CENTER COLUMN: DYNAMIC PRODUCT ON HANGER/CUTOUT + OVAL SHADOW + ‹ ›
               ===================================================================== */}
-          <div className="lg:col-span-5 flex flex-col items-center justify-center order-1 lg:order-2 my-2 lg:my-0">
+          <div className="lg:col-span-5 flex flex-col items-center justify-center order-1 lg:order-2 my-1 lg:my-0">
             <div className="relative w-full flex flex-col items-center justify-center">
               
               {/* Product with Horizontal Right-to-Left / Left-to-Right Entrance */}
@@ -423,13 +423,13 @@ export function Hero() {
                     aria-label={`Məhsula bax: ${currentItem.name}`}
                   >
                     {/* Transparent Cutout Image with natural ambient shadow */}
-                    <div className="relative select-none drop-shadow-[0_22px_38px_rgba(0,0,0,0.52)] transition-transform duration-300 group-hover:scale-[1.03] w-[300px] sm:w-[360px] lg:w-[430px] h-[30vh] sm:h-[36vh] lg:h-[45vh] max-h-[430px] min-h-[200px]">
+                    <div className="relative select-none drop-shadow-[0_16px_28px_rgba(0,0,0,0.52)] transition-transform duration-300 group-hover:scale-[1.03] w-[200px] xs:w-[240px] sm:w-[320px] lg:w-[420px] h-[21vh] xs:h-[24vh] sm:h-[32vh] lg:h-[44vh] max-h-[380px] min-h-[160px]">
                       <Image
                         src={currentItem.image}
                         alt={currentItem.name}
                         fill
                         priority
-                        sizes="(max-width: 640px) 300px, (max-width: 1024px) 360px, 430px"
+                        sizes="(max-width: 640px) 240px, (max-width: 1024px) 320px, 420px"
                         className="object-contain"
                       />
                     </div>
@@ -437,7 +437,7 @@ export function Hero() {
 
                   {/* Oval Blurred Floating Drop Shadow Directly Beneath the Garment */}
                   <div
-                    className="w-36 sm:w-48 h-3.5 sm:h-4 bg-black/45 rounded-[50%] blur-md mt-1.5 pointer-events-none select-none"
+                    className="w-28 xs:w-32 sm:w-44 h-2.5 sm:h-3.5 bg-black/45 rounded-[50%] blur-md mt-1 pointer-events-none select-none"
                     aria-hidden="true"
                   />
                 </motion.div>
@@ -445,12 +445,13 @@ export function Hero() {
             </div>
 
             {/* ‹ › Slider Controls positioned directly UNDER the product */}
-            <div className="flex items-center justify-center gap-10 sm:gap-20 mt-1.5 sm:mt-2 z-20">
+            <div className="flex items-center justify-center gap-8 sm:gap-16 mt-1 sm:mt-1.5 z-20">
               <Button
                 variant="arrow"
                 arrowDirection="left"
                 onClick={handlePrev}
                 aria-label="Əvvəlki məhsul"
+                className="!w-8 !h-8 sm:!w-10 sm:!h-10"
               />
 
               <Button
@@ -458,6 +459,7 @@ export function Hero() {
                 arrowDirection="right"
                 onClick={handleNext}
                 aria-label="Növbəti məhsul"
+                className="!w-8 !h-8 sm:!w-10 sm:!h-10"
               />
             </div>
           </div>
@@ -465,20 +467,20 @@ export function Hero() {
           {/* =====================================================================
               RIGHT COLUMN: PRODUCT TITLE + PRICE + COMPARE PRICE + SIZE CIRCLES
               ===================================================================== */}
-          <div className="lg:col-span-3 flex flex-col items-center lg:items-end justify-center space-y-3 sm:space-y-4 text-center lg:text-right order-3">
+          <div className="lg:col-span-3 flex flex-col items-center lg:items-end justify-center space-y-1.5 sm:space-y-3.5 text-center lg:text-right order-3">
             {/* Product Title and Price Block with Direct Product Link */}
             <Link
               href={`/products/${currentItem.slug}`}
               className="group hover:opacity-90 transition block focus:outline-none"
             >
-              <div className="text-[11px] sm:text-xs uppercase tracking-[0.14em] font-medium text-white/80 group-hover:text-white transition-colors line-clamp-2 max-w-xs">
+              <div className="text-[10px] sm:text-xs uppercase tracking-[0.14em] font-medium text-white/80 group-hover:text-white transition-colors line-clamp-1 sm:line-clamp-2 max-w-xs">
                 {currentItem.title}
               </div>
-              <div className="text-2xl sm:text-3xl lg:text-[2.6rem] font-bold text-white tracking-tight leading-none mt-1">
+              <div className="text-xl sm:text-2xl lg:text-[2.5rem] font-bold text-white tracking-tight leading-none mt-0.5 sm:mt-1">
                 {currentItem.price}
               </div>
               {currentItem.compareAtPrice && (
-                <div className="line-through text-white/75 text-sm sm:text-base font-normal mt-0.5">
+                <div className="line-through text-white/75 text-xs sm:text-sm font-normal mt-0.5">
                   {currentItem.compareAtPrice}
                 </div>
               )}
@@ -486,11 +488,11 @@ export function Hero() {
 
             {/* Size Selector */}
             <div className="pt-0.5">
-              <span className="text-white/90 text-xs sm:text-sm font-medium block mb-2">
+              <span className="text-white/80 text-[10px] sm:text-xs font-medium block mb-1 sm:mb-1.5">
                 {t.hero.selectSize || "Ölçünü seç"}
               </span>
 
-              <div className="flex items-center gap-2 flex-wrap justify-center lg:justify-end">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-center lg:justify-end">
                 {currentItem.sizes.map((size) => (
                   <SizeChip
                     key={size}
@@ -508,132 +510,101 @@ export function Hero() {
       {/* =========================================================================
           BOTTOM ROW: SOCIAL ICONS (LEFT), SLOGAN (CENTER), NEXT THUMBNAIL (RIGHT)
           ========================================================================= */}
-      <div className="relative z-30 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-5 sm:pb-6 lg:pb-5 pt-3 mt-4 lg:mt-0 flex flex-col sm:flex-row items-center justify-between shrink-0 gap-4">
+      <div className="relative z-30 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-3 sm:pb-5 lg:pb-4 pt-1 sm:pt-2 flex items-center justify-between shrink-0">
         
-        {/* Left: Social Media Icons + Mobile Thumbnail Toggle */}
-        <div className="flex items-center justify-between w-full sm:w-auto gap-4 order-2 sm:order-1">
-          <div className="flex items-center gap-2 text-white/90">
-            {/* Instagram */}
-            <a
-              href="https://www.instagram.com/horwalle?vrfl=dGJ0anppbmYyeXRy&utm_source=qr"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Instagram"
-              className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-full hover:bg-white/10 transition-colors cursor-pointer"
-            >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
-              </svg>
-            </a>
-
-            {/* TikTok */}
-            <a
-              href="https://www.tiktok.com/@horwalle"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="TikTok"
-              className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-full hover:bg-white/10 transition-colors cursor-pointer"
-            >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
-              </svg>
-            </a>
-          </div>
-
-          {/* Mobile-only compact Next Product Preview */}
-          <button
-            type="button"
-            onClick={handleNext}
-            aria-label={`${language === "az" ? "Növbəti məhsul" : language === "en" ? "Next piece" : language === "ru" ? "Следующий товар" : "Sonraki ürün"}: ${nextItem.title}`}
-            className="sm:hidden flex items-center gap-1.5 text-xs text-white/80 hover:text-white transition cursor-pointer"
+        {/* Left: Social Media Icons */}
+        <div className="flex items-center gap-1 text-white/90">
+          {/* Instagram */}
+          <a
+            href="https://www.instagram.com/horwalle?vrfl=dGJ0anppbmYyeXRy&utm_source=qr"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram"
+            className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors cursor-pointer"
           >
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-white/70">
-              {language === "az" ? "Növbəti" : language === "en" ? "Next" : language === "ru" ? "Далее" : "Sonraki"}
-            </span>
-            <div className="w-8 h-8 relative flex items-center justify-center">
-              <Image
-                src={nextItem.image}
-                alt={nextItem.title}
-                fill
-                sizes="32px"
-                className="object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.4)]"
-              />
-            </div>
-          </button>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+              <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+            </svg>
+          </a>
+
+          {/* TikTok */}
+          <a
+            href="https://www.tiktok.com/@horwalle"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="TikTok"
+            className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors cursor-pointer"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+            </svg>
+          </a>
         </div>
 
         {/* Center: Multilingual Slogan in EB Garamond */}
-        <div className="font-eb-garamond text-center text-white/95 text-lg sm:text-xl lg:text-2xl leading-snug order-1 sm:order-2">
+        <div className="font-eb-garamond text-center text-white/95 text-xs sm:text-base lg:text-lg leading-tight px-2">
           {language === "az" ? (
             <>
-              <div>Daha yaxşı geyin.</div>
-              <div>Daha yaxşı hiss et.</div>
+              <div>Daha yaxşı geyin. Daha yaxşı hiss et.</div>
             </>
           ) : language === "en" ? (
             <>
-              <div>Dress better.</div>
-              <div>Feel better.</div>
+              <div>Dress better. Feel better.</div>
             </>
           ) : language === "ru" ? (
             <>
-              <div>Одевайся лучше.</div>
-              <div>Чувствуй лучше.</div>
+              <div>Одевайся лучше. Чувствуй лучше.</div>
             </>
           ) : (
             <>
-              <div>Daha iyi giyin.</div>
-              <div>Daha iyi hisset.</div>
+              <div>Daha iyi giyin. Daha iyi hisset.</div>
             </>
           )}
         </div>
 
-        {/* Desktop/Tablet: Next Product Mini Thumbnail */}
-        <div className="hidden sm:flex order-3 shrink-0">
+        {/* Right: Next Product Mini Thumbnail */}
+        <div className="flex items-center shrink-0">
           <button
             type="button"
             onClick={handleNext}
-            aria-label={`Növbəti məhsul: ${nextItem.title}`}
-            className="group cursor-pointer flex items-center justify-center p-1 hover:scale-110 transition-transform shrink-0"
+            aria-label={`${language === "az" ? "Növbəti məhsul" : "Next"}: ${nextItem.title}`}
+            className="group cursor-pointer flex items-center gap-1.5 hover:scale-105 transition-transform"
           >
-            <div className="w-12 h-12 sm:w-16 sm:h-16 relative flex items-center justify-center">
+            <span className="hidden sm:inline-block text-[11px] font-medium uppercase tracking-wider text-white/70">
+              {language === "az" ? "Növbəti" : "Next"}
+            </span>
+            <div className="w-8 h-8 sm:w-10 sm:h-10 relative flex items-center justify-center">
               <Image
                 src={nextItem.image}
                 alt={nextItem.title}
                 fill
-                sizes="64px"
-                className="object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.4)] transition-transform duration-300 group-hover:scale-110 pointer-events-none select-none"
+                sizes="40px"
+                className="object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.4)]"
               />
             </div>
           </button>
         </div>
       </div>
-
-      {/* Seamless bottom fill contained inside overflow-hidden */}
-      <div
-        style={{ background: currentItem.bgGradient }}
-        className="absolute bottom-0 inset-x-0 h-4 pointer-events-none z-10"
-        aria-hidden="true"
-      />
     </section>
   );
 }
