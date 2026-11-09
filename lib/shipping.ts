@@ -69,8 +69,6 @@ export const SHIPPING_TIERS: Record<string, ShippingTier> = {
     estimatedDays: '7-14 business days',
     baseRateAZN: 25,
     baseRateUSD: 15,
-    freeThresholdAZN: 250,
-    freeThresholdUSD: 150,
     isDomestic: false,
   },
   intl_express: {
@@ -159,10 +157,9 @@ export function calculateShippingOptions(
     ];
   }
 
-  // International Destinations
+  // International Destinations (Always paid, never free)
   if (safeCurrency === 'USD') {
-    const isStandardFree = safeSubtotal >= 150;
-    const standardCost = isStandardFree ? 0 : 15;
+    const standardCost = 15;
 
     const isExpressDiscounted = safeSubtotal >= 200;
     const expressCost = isExpressDiscounted ? 20 : 35;
@@ -174,10 +171,9 @@ export function calculateShippingOptions(
         carrier: 'Tracked Priority Post',
         estimatedDays: '7-14 business days',
         price: standardCost,
-        isFree: isStandardFree,
+        isFree: false,
         currency: 'USD',
-        originalPrice: isStandardFree ? 15 : undefined,
-        description: 'Tracked international priority airmail (Free on orders >= $150 USD)',
+        description: 'Tracked international priority airmail ($15 flat rate)',
       },
       {
         id: 'intl_express',
@@ -193,9 +189,8 @@ export function calculateShippingOptions(
     ];
   }
 
-  // International in AZN
-  const isStandardFreeAZN = safeSubtotal >= 250;
-  const standardCostAZN = isStandardFreeAZN ? 0 : 25;
+  // International in AZN (Always paid, never free)
+  const standardCostAZN = 25;
 
   const isExpressDiscountedAZN = safeSubtotal >= 340;
   const expressCostAZN = isExpressDiscountedAZN ? 35 : 60;
@@ -207,10 +202,9 @@ export function calculateShippingOptions(
       carrier: 'Tracked Priority Post',
       estimatedDays: '7-14 business days',
       price: standardCostAZN,
-      isFree: isStandardFreeAZN,
+      isFree: false,
       currency: 'AZN',
-      originalPrice: isStandardFreeAZN ? 25 : undefined,
-      description: 'Beynəlxalq standart poçt çatdırılması (250 ₼-dən yuxarı pulsuz)',
+      description: 'Beynəlxalq standart poçt çatdırılması (25 ₼ sabit tarif)',
     },
     {
       id: 'intl_express',

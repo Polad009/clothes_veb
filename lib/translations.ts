@@ -93,7 +93,7 @@ export interface Translations {
     viewCollection: string;
     view: string;
     selectedModels: string;
-    wardrobeFoundation: string;
+    wardrobeFoundation?: string;
     atelierShowcase: string;
     selectedShowcase: string;
     fourDirections: string;

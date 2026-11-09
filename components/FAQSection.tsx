@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ChevronDown, HelpCircle, Sparkles } from "lucide-react";
+import { ChevronDown, HelpCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -123,7 +123,7 @@ export function FAQSection() {
         {/* Header */}
         <div className="text-center mb-14">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#E6C280]/10 text-[#E6C280] text-xs font-semibold uppercase tracking-widest mb-4 border border-[#E6C280]/20">
-            <Sparkles size={13} />
+            <HelpCircle size={13} />
             {language === "en" ? "Help Center" : language === "ru" ? "Частые вопросы" : language === "tr" ? "Yardım Merkezi" : "Kömək Mərkəzi"}
           </div>
           <h2 className="text-3xl sm:text-4xl font-serif font-bold text-white tracking-tight">
@@ -131,12 +131,12 @@ export function FAQSection() {
           </h2>
           <p className="mt-3 text-stone-400 text-sm max-w-xl mx-auto">
             {language === "en"
-              ? "Everything you need to know about Horvvalle atelier tailoring, delivery, and 3D studio."
+              ? "Everything you need to know about Horvvalle bespoke atelier tailoring, delivery, and design studio."
               : language === "ru"
-              ? "Всё, что вам нужно знать о пошиве в ателье, доставке и 3D студии."
+              ? "Всё, что вам нужно знать о пошиве в ателье, доставке и студии индивидуального дизайна."
               : language === "tr"
-              ? "Horvvalle atölye kesimi, teslimat ve 3D stüdyo hakkında merak ettiğiniz her şey."
-              : "Horvvalle fərdi atelye tikilişi, operativ çatdırılma və 3D studiya haqqında ən çox soruşulanlar."}
+              ? "Horvvalle atölye kesimi, teslimat ve özel tasarım stüdyosu hakkında merak ettiğiniz her şey."
+              : "Horvvalle fərdi atelye tikilişi, operativ çatdırılma və fərdi dizayn studiyası haqqında ən çox soruşulanlar."}
           </p>
         </div>
 

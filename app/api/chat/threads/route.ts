@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// DELETE /api/chat/threads?sessionId=... (Delete entire chat thread + messages from Supabase)
+// DELETE /api/chat/threads?sessionId=... or /api/chat/threads?all=true (Batch delete all chat threads + messages)
 export async function DELETE(req: NextRequest) {
   if (!isAdminAuthenticated(req)) {
     return NextResponse.json({ success: false, error: 'Unauthorized: Admin icazəsi tələb olunur' }, { status: 401 });
@@ -70,15 +70,50 @@ export async function DELETE(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const sessionId = searchParams.get('sessionId');
+    const deleteAll = searchParams.get('all') === 'true';
 
-    if (!sessionId) {
-      return NextResponse.json({ error: 'sessionId required' }, { status: 400 });
+    if (!sessionId && !deleteAll) {
+      return NextResponse.json({ error: 'sessionId or all=true required' }, { status: 400 });
     }
 
     if (!supabaseServer) {
-      return NextResponse.json({ success: true, deletedSessionId: sessionId });
+      return NextResponse.json({ success: true, deletedAll: deleteAll, deletedSessionId: sessionId });
     }
 
+    if (deleteAll) {
+      // 1. Purge all storage files under livechat/
+      const { data: files, error: listError } = await supabaseServer.storage
+        .from(BUCKET)
+        .list(CHAT_PREFIX, { limit: 1000 });
+
+      let removedCount = 0;
+      if (!listError && files && files.length > 0) {
+        const filePaths = files.map((f) => `${CHAT_PREFIX}/${f.name}`);
+        const { error: removeError } = await supabaseServer.storage.from(BUCKET).remove(filePaths);
+        if (removeError) {
+          console.warn('[ChatThreads] Warning deleting storage files:', removeError);
+        } else {
+          removedCount = filePaths.length;
+        }
+      }
+
+      // 2. Purge database tables if present
+      try {
+        await supabaseServer.from('chat_messages').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        await supabaseServer.from('chat_threads').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      } catch (e) {
+        // Database tables optional in storage-backed livechat
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: 'Bütün mesajlar və söhbət tarixçəsi uğurla silindi',
+        deletedAll: true,
+        deletedCount: removedCount,
+      });
+    }
+
+    // Single thread deletion
     const filesToRemove = [
       `${CHAT_PREFIX}/thread_${sessionId}.json`,
       `${CHAT_PREFIX}/messages_${sessionId}.json`,
@@ -88,6 +123,11 @@ export async function DELETE(req: NextRequest) {
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    try {
+      await supabaseServer.from('chat_messages').delete().eq('session_id', sessionId);
+      await supabaseServer.from('chat_threads').delete().eq('session_id', sessionId);
+    } catch (e) {}
 
     return NextResponse.json({ success: true, deletedSessionId: sessionId });
   } catch (err: any) {

@@ -241,17 +241,27 @@ function OrderTrackerContent() {
             const raw = localStorage.getItem("horvvalle_saved_orders");
             if (raw) {
               const list = JSON.parse(raw);
-              const idx = list.findIndex((item: any) => item.id === data.order.id);
-              if (idx >= 0) {
-                list[idx].orderStatus = data.order.orderStatus;
-                list[idx].statusMeta = data.order.statusMeta;
-                localStorage.setItem("horvvalle_saved_orders", JSON.stringify(list));
+              let updated = false;
+              const nextList = list.map((item: any) => {
+                if (item.id === data.order.id || (data.order.trackingCode && item.trackingCode === data.order.trackingCode)) {
+                  updated = true;
+                  return {
+                    ...item,
+                    orderStatus: data.order.orderStatus,
+                    statusMeta: data.order.statusMeta,
+                  };
+                }
+                return item;
+              });
+              if (updated) {
+                localStorage.setItem("horvvalle_saved_orders", JSON.stringify(nextList));
+                setRecentSavedOrders(nextList);
               }
             }
             const lastRaw = localStorage.getItem("horvvalle_last_order");
             if (lastRaw) {
               const lastObj = JSON.parse(lastRaw);
-              if (lastObj.id === data.order.id) {
+              if (lastObj.id === data.order.id || (data.order.trackingCode && lastObj.trackingCode === data.order.trackingCode)) {
                 lastObj.orderStatus = data.order.orderStatus;
                 lastObj.statusMeta = data.order.statusMeta;
                 localStorage.setItem("horvvalle_last_order", JSON.stringify(lastObj));
@@ -310,7 +320,7 @@ function OrderTrackerContent() {
     }
   }, [initialQuery]);
 
-  // Real-time synchronization: poll for order status updates every 8 seconds
+  // Real-time synchronization: poll for order status updates every 4 seconds
   useEffect(() => {
     if (!order?.id) return;
     const interval = setInterval(async () => {
@@ -325,11 +335,33 @@ function OrderTrackerContent() {
             }
             return prev;
           });
+
+          // Keep localStorage up-to-date with live status updates
+          if (typeof window !== "undefined") {
+            try {
+              const raw = localStorage.getItem("horvvalle_saved_orders");
+              if (raw) {
+                const list = JSON.parse(raw);
+                let changed = false;
+                const nextList = list.map((item: any) => {
+                  if ((item.id === data.order.id || item.trackingCode === data.order.trackingCode) && item.orderStatus !== data.order.orderStatus) {
+                    changed = true;
+                    return { ...item, orderStatus: data.order.orderStatus, statusMeta: data.order.statusMeta };
+                  }
+                  return item;
+                });
+                if (changed) {
+                  localStorage.setItem("horvvalle_saved_orders", JSON.stringify(nextList));
+                  setRecentSavedOrders(nextList);
+                }
+              }
+            } catch (e) {}
+          }
         }
       } catch (e) {
         // silent fail on network hiccups
       }
-    }, 8000);
+    }, 4000);
     return () => clearInterval(interval);
   }, [order?.id]);
 

@@ -128,7 +128,7 @@ export function Footer() {
               >
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span className="text-[11px]">
-                  WhatsApp VIP: <strong className="text-emerald-400 font-mono tracking-wider">+994 10 328 31 52</strong>
+                  WhatsApp Dəstək: <strong className="text-emerald-400 font-mono tracking-wider">+994 10 328 31 52</strong>
                 </span>
               </a>
 

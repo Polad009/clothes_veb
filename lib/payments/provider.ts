@@ -52,46 +52,15 @@ export function validatePaymentEligibility(
     customer = customerParam;
   }
 
-  // Check Cash on Delivery restrictions
+  // Check Cash on Delivery restrictions (Item 21: Total COD Removal)
+  // Cash on delivery is completely disabled for ALL countries (including Azerbaijan).
+  // All orders must be paid securely online.
   if (method === "cash_on_delivery") {
-    // 1. Custom / POD items rule
-    const hasCustomItems = (items || []).some((item) => item.type === "custom");
-    if (hasCustomItems) {
-      return {
-        valid: false,
-        eligible: false,
-        reason: "Fərdi çap (custom) məhsulları üçün qapıda ödəniş mövcud deyil. Zəhmət olmasa kart, Apple Pay və ya Google Pay ilə öncədən ödəniş edin.",
-      };
-    }
-
-    // 2. International Destination rule (Azerbaijan only for COD)
-    if (customer) {
-      let countryCode = '';
-      let countryName = '';
-
-      if (typeof customer === 'string') {
-        countryCode = customer.trim().toUpperCase();
-        countryName = customer.trim().toLowerCase();
-      } else {
-        countryCode = String(customer.countryCode || '').trim().toUpperCase();
-        countryName = String(customer.country || '').trim().toLowerCase();
-      }
-
-      const isAzCode = countryCode === 'AZ' || countryCode === 'AZE';
-      const isAzName =
-        countryName === 'az' ||
-        countryName === 'azərbaycan' ||
-        countryName === 'azerbaijan';
-
-      const hasLocation = Boolean(countryCode || countryName);
-      if (hasLocation && !isAzCode && !isAzName) {
-        return {
-          valid: false,
-          eligible: false,
-          reason: "Nağd ödəniş (COD) yalnız Azərbaycan daxili sifarişlər üçün keçərlidir. Beynəlxalq sifarişlər üçün kart və ya Apple/Google Pay seçin.",
-        };
-      }
-    }
+    return {
+      valid: false,
+      eligible: false,
+      reason: "Nağd ödəniş (COD) ləğv edilmişdir. Bütün sifarişlər təhlükəsiz onlayn ödənişlə (Bank kartı, Apple Pay, Google Pay) qəbul olunur.",
+    };
   }
 
   return { valid: true, eligible: true };
@@ -118,10 +87,9 @@ export class MockPaymentProvider implements PaymentProvider {
 
     if (request.method === "cash_on_delivery") {
       return {
-        success: true,
-        status: "confirmed_cod",
-        transactionId,
-        message: "Sifarişiniz qapıda ödəniş seçimi ilə qeydə alındı.",
+        success: false,
+        status: "failed",
+        message: "Nağd ödəniş (COD) ləğv edilmişdir. Bütün sifarişlər təhlükəsiz onlayn ödənişlə qəbul olunur.",
       };
     }
 

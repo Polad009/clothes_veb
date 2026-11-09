@@ -616,10 +616,10 @@
           </button>
         </div>
 
-        <!-- 6, 7, 8, 9. SATIŞ & LOYALLIQ -->
+        <!-- 6, 7, 8. SATIŞ & MÜŞTƏRİLƏR -->
         <div class="space-y-1">
           <div class="nav-section-title text-[10px] font-bold text-blue-200/80 uppercase tracking-wider px-3 mb-1.5 flex items-center justify-between">
-            <span>SATIŞ & LOYALLIQ</span>
+            <span>SATIŞ & MÜŞTƏRİLƏR</span>
             <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
           </div>
           <button onclick="switchTab('orders')" id="nav-orders"
@@ -633,11 +633,6 @@
             class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-blue-100 hover:text-white hover:bg-white/10 transition cursor-pointer">
             <i data-lucide="users" class="w-4 h-4 text-blue-200 shrink-0"></i>
             <span class="nav-label">Müştəri Bazası</span>
-          </button>
-          <button onclick="switchTab('loyalty')" id="nav-loyalty"
-            class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-blue-100 hover:text-white hover:bg-white/10 transition cursor-pointer">
-            <i data-lucide="gem" class="w-4 h-4 text-blue-200 shrink-0"></i>
-            <span class="nav-label">Loyallıq Terminalı</span>
           </button>
           <button onclick="switchTab('promos')" id="nav-promos"
             class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-xs text-blue-100 hover:text-white hover:bg-white/10 transition cursor-pointer">
@@ -1070,65 +1065,161 @@
       <section id="tab-staticPages" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-5xl w-full">
         <div>
           <h1 class="text-2xl font-black text-slate-900 tracking-tight">STATİK SƏHİFƏLƏR VƏ MƏZMUN</h1>
-          <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Ana Səhifə Başlıqları, Bannerlər Və
-            Elan Zolaqları</p>
-        </div>
-
-        <!-- Hero Settings Card -->
-        <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
-          <h3
-            class="text-sm font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center gap-2">
-            <i data-lucide="layout" class="w-4 h-4"></i>
-            <span>Ana Səhifə Hero Bölməsi</span>
-          </h3>
-          <div class="space-y-3">
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Əsas Şüar
-                (Headline)</label>
-              <input type="text" id="heroHeadlineInput"
-                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-black">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Alt Şüar
-                (Subheadline)</label>
-              <textarea id="heroSubheadlineInput" rows="3"
-                class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs focus:bg-white focus:outline-none focus:border-black"></textarea>
-            </div>
-          </div>
+          <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Ana Səhifə Başlıqları, Bannerlər Və Elan Zolaqları</p>
         </div>
 
         <!-- Announcement Bar Card -->
         <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
-          <h3
-            class="text-sm font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center gap-2">
-            <i data-lucide="megaphone" class="w-4 h-4"></i>
-            <span>Yuxarı Elan Zolağı (Announcement Bar)</span>
+          <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center gap-2">
+            <i data-lucide="megaphone" class="w-4 h-4 text-blue-600"></i>
+            <span>Yuxarı Qaçan Sətir və Elan Zolaqları (Announcements)</span>
           </h3>
           <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Elan Mətni</label>
-            <input type="text" id="announcementTextInput"
-              placeholder="Bakı daxili 60₼ üzəri sifarişlərə PULSUZ çatdırılma!"
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+              Elanlar (Hər sətirdə bir elan mətni yazın)
+            </label>
+            <textarea id="announcementsInput" rows="4"
+              placeholder="🚚 BAKI VƏ SUMQAYIT ƏRAZİSİNƏ 60₼-DƏN YUXARI SİFARİŞLƏRƏ ÇATDIRILMA TAM PULSUZDUR!&#10;🎨 3D FƏRDİ DƏRZİLİK STUDİYASI İLƏ ÖZ EKSKLÜZİV GEYİMİNİ YARAT!&#10;🔥 PREMİUM FRENCH TERRY HUDİLƏR VƏ QALIN İSTİ MATERİALLAR!"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs focus:bg-white focus:outline-none focus:border-black font-mono"></textarea>
+            <p class="text-[11px] text-slate-400 mt-1">Canlı saytda bu elanlar yuxarı lentdə avtomatik fasiləsiz dövr edir.</p>
+          </div>
+        </div>
+
+        <!-- Hero Settings Card -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+          <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center gap-2">
+            <i data-lucide="layout" class="w-4 h-4 text-blue-600"></i>
+            <span>Ana Səhifə Hero Bölməsi</span>
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Rubrika / Tag</label>
+              <input type="text" id="heroTagInput" placeholder="HORVVALLE ATELIER"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-black">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Əsas Şüar (Headline)</label>
+              <input type="text" id="heroHeadlineInput" placeholder="SEÇİLMİŞ MODELLƏR"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-black">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Alt Şüar (Subheadline)</label>
+            <textarea id="heroSubheadlineInput" rows="2" placeholder="Klassik dərzi sənətkarlığı və müasir küçə estetikası"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs focus:bg-white focus:outline-none focus:border-black"></textarea>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Əsas Düymə Mətni (Primary CTA)</label>
+              <input type="text" id="heroCtaTextInput" placeholder="Kolleksiyanı Kəşf Et"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-black">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Əsas Düymə Keçidi (CTA Link)</label>
+              <input type="text" id="heroCtaLinkInput" placeholder="/collections"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-black">
+            </div>
+          </div>
+        </div>
+
+        <!-- Promo Banner Card (Əsas Kampaniya Banneri) -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+          <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center gap-2">
+            <i data-lucide="sparkles" class="w-4 h-4 text-amber-500"></i>
+            <span>Əsas Kampaniya Banneri (Promo Banner)</span>
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Tag / Rubrika</label>
+              <input type="text" id="promoBannerTagInput" placeholder="YENİ MÖVSÜM"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-black">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Banner Başlığı</label>
+              <input type="text" id="promoBannerTitleInput" placeholder="PREMİUM HUDİ KOLLEKSİYASI"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-black">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Banner Alt Mətni / Təsvir</label>
+            <input type="text" id="promoBannerSubtitleInput" placeholder="Ağırçəkili 480 GSM pambıq və rahat kəsimlər"
               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-black">
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Düymə Mətni</label>
+              <input type="text" id="promoBannerCtaTextInput" placeholder="İndi Sifariş Et"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-black">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Düymə Keçidi</label>
+              <input type="text" id="promoBannerCtaLinkInput" placeholder="/collections?category=hudi"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-black">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Banner Şəkil URL</label>
+              <input type="text" id="promoBannerImageInput" placeholder="/images/hero/black-hoodie.jpg"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-black font-mono">
+            </div>
+          </div>
+        </div>
+
+        <!-- Secondary Campaign Banner Card -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+          <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center gap-2">
+            <i data-lucide="palette" class="w-4 h-4 text-purple-600"></i>
+            <span>İkinci Kampaniya Banneri (Secondary Campaign)</span>
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Tag / Rubrika</label>
+              <input type="text" id="campaignTagInput" placeholder="FƏRDİ STUDİYA"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-black">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Banner Başlığı</label>
+              <input type="text" id="campaignTitleInput" placeholder="3D DƏRZİLİK VƏ ÇAP STUDİYASI"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-black">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Banner Alt Mətni / Təsvir</label>
+            <input type="text" id="campaignSubtitleInput" placeholder="Öz qrafikanı yüklə və fərdi geyimini dizayn et"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-black">
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Düymə Mətni</label>
+              <input type="text" id="campaignCtaTextInput" placeholder="Studiyaya Başla"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-black">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Düymə Keçidi</label>
+              <input type="text" id="campaignCtaLinkInput" placeholder="/studio"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-black">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Banner Şəkil URL</label>
+              <input type="text" id="campaignImageInput" placeholder="/images/hero/studio-preview.jpg"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-black font-mono">
+            </div>
           </div>
         </div>
 
         <!-- Policy Rules Card -->
         <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
-          <h3
-            class="text-sm font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center gap-2">
-            <i data-lucide="shield-check" class="w-4 h-4"></i>
+          <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center gap-2">
+            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
             <span>Çatdırılma Və Geri Qaytarma Şərtləri</span>
           </h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Çatdırılma Müddəti &
-                Qaydası</label>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Çatdırılma Müddəti & Qaydası</label>
               <textarea id="shippingPolicyInput" rows="3"
                 class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs">Bakı daxili 24 saat ərzində sürətli kuryer çatdırılması. Rayonlara poçtla 2-3 iş günü.</textarea>
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Qaytarma &
-                Dəyişdirmə</label>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Qaytarma & Dəyişdirmə</label>
               <textarea id="returnPolicyInput" rows="3"
                 class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs">Məhsul çatdırıldıqdan sonra 14 gün ərzində etiketləri zədələnmədən dəyişdirmə və ya qaytarma imkanı.</textarea>
             </div>
@@ -1136,8 +1227,9 @@
         </div>
 
         <button onclick="saveCmsContent()"
-          class="px-6 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs transition cursor-pointer">
-          Məzmun Dəyişikliklərini Yadda Saxla
+          class="px-6 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs transition cursor-pointer flex items-center gap-2">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>Məzmun Dəyişikliklərini Yadda Saxla</span>
         </button>
       </section>
 
@@ -1253,6 +1345,48 @@
           </div>
         </div>
 
+        <!-- Customer Order & Tracking Code Recovery Lookup (Item 24) -->
+        <div class="bg-gradient-to-r from-blue-50/70 via-indigo-50/40 to-slate-50/70 border border-blue-200/80 rounded-2xl p-4 sm:p-5 shadow-2xs space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                <i data-lucide="search" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h3 class="text-xs font-black uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                  <span>Müştəri Axtarışı & İzləmə Kodu Bərpa Aləti (Customer Support Lookup)</span>
+                  <span class="text-[10px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full border border-blue-200">24/7 Dəstək</span>
+                </h3>
+                <p class="text-[11px] text-slate-500">Müştəri izləmə kodunu itirdikdə və ya unutduqda, telefon nömrəsi və ya email ilə axtararaq bütün sifarişlərini tapın və izləmə kodunu kopyalayın.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row items-center gap-2">
+            <div class="relative flex-1 w-full">
+              <i data-lucide="phone" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+              <input type="text" id="customerTrackingLookupInput" onkeydown="if(event.key==='Enter') executeCustomerTrackingLookup()"
+                placeholder="Müştərinin telefon nömrəsi (+994 50 123 45 67) və ya E-poçt ünvanı (ad@example.com)..."
+                class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition shadow-2xs">
+            </div>
+            <button onclick="executeCustomerTrackingLookup()" 
+              class="w-full sm:w-auto px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer shrink-0">
+              <i data-lucide="search" class="w-3.5 h-3.5"></i>
+              <span>Sifarişləri Axtar</span>
+            </button>
+            <button onclick="clearCustomerTrackingLookup()" 
+              class="w-full sm:w-auto px-3 py-2 bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer shrink-0"
+              title="Təmizlə">
+              <span>Təmizlə</span>
+            </button>
+          </div>
+
+          <!-- Lookup Results Container -->
+          <div id="customerTrackingLookupResults" class="hidden pt-3 space-y-2 border-t border-blue-100">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
         <!-- Orders Filter & Search Toolbar -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-2xs">
           <!-- Status Tabs Filter -->
@@ -1348,11 +1482,11 @@
           </div>
           <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs flex items-center justify-between">
             <div>
-              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">VIP MÜŞTƏRİLƏR</div>
-              <div id="crm-vip-count" class="text-2xl font-black text-amber-600 mt-1">0</div>
+              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">AKTİV ALICILAR</div>
+              <div id="crm-active-count" class="text-2xl font-black text-emerald-600 mt-1">0</div>
             </div>
-            <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
-              <i data-lucide="crown" class="w-5 h-5"></i>
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+              <i data-lucide="user-check" class="w-5 h-5"></i>
             </div>
           </div>
         </div>
@@ -1391,92 +1525,6 @@
 
 
       <!-- ============================================================ -->
-      <!-- SLIDE 8: LOYALLIQ TERMİNALI (LOYALTY & REWARDS) -->
-      <!-- ============================================================ -->
-      <section id="tab-loyalty" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-7xl w-full">
-        <div>
-          <h1 class="text-2xl font-black text-slate-900 tracking-tight">LOYALLIQ TERMİNALI</h1>
-          <p class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Müştəri Keşbeki, Bonus Xalları Və
-            VIP Tiers</p>
-        </div>
-
-        <!-- 3 Tier Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <!-- Bronze -->
-          <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs flex flex-col justify-between">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-              <span class="text-xs font-black tracking-wider text-slate-800 uppercase">BRONZE / GÜMÜŞ</span>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">3% Keşbek</span>
-            </div>
-            <p class="text-xs text-slate-500 mt-3">0 — 200 ₼ arası alış edən bütün ilkin alıcılar üçün standart dərəcə.
-            </p>
-            <div class="mt-4 pt-3 border-t border-slate-100 text-[10px] text-slate-400">Standart çatdırılma imtiyazı
-            </div>
-          </div>
-
-          <!-- Gold -->
-          <div
-            class="bg-white rounded-2xl p-5 border border-amber-200 bg-amber-50/20 shadow-xs flex flex-col justify-between">
-            <div class="flex items-center justify-between pb-3 border-b border-amber-100">
-              <span class="text-xs font-black tracking-wider text-amber-800 uppercase">GOLD TIER</span>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">7% Keşbek</span>
-            </div>
-            <p class="text-xs text-slate-600 mt-3">200 ₼ — 500 ₼ arası alış edən aktiv daimi müştərilər üçün imtiyaz.
-            </p>
-            <div class="mt-4 pt-3 border-t border-amber-100 text-[10px] text-amber-700 font-bold">Prioritet qablaşdırma
-              & Hədiyyələr</div>
-          </div>
-
-          <!-- Platinum VIP -->
-          <div
-            class="bg-white rounded-2xl p-5 border border-purple-200 bg-purple-50/20 shadow-xs flex flex-col justify-between">
-            <div class="flex items-center justify-between pb-3 border-b border-purple-100">
-              <span class="text-xs font-black tracking-wider text-purple-900 uppercase">PLATINUM VIP</span>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-800">12%
-                Keşbek</span>
-            </div>
-            <p class="text-xs text-slate-600 mt-3">500 ₼-dən yuxarı alış-veriş edən fərdi Couture müştəriləri.</p>
-            <div class="mt-4 pt-3 border-t border-purple-100 text-[10px] text-purple-800 font-bold">Həmişə PULSUZ
-              ekspress kuryer</div>
-          </div>
-        </div>
-
-        <!-- Loyalty Balances Table -->
-        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
-          <div class="p-5 border-b border-slate-100 flex items-center justify-between">
-            <div>
-              <h3 class="font-bold text-sm text-slate-900 uppercase tracking-wider">Müştəri Keşbek & Xal Balansları</h3>
-              <p class="text-xs text-slate-400">Hər müştərinin cari toplanmış balansı və səviyyəsi</p>
-            </div>
-            <button onclick="openAddBonusModal()"
-              class="px-4 py-2 bg-black hover:bg-neutral-800 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 transition cursor-pointer">
-              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-              <span>Bonus Xalı Əlavə Et</span>
-            </button>
-          </div>
-
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
-              <thead
-                class="bg-slate-50 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-slate-100">
-                <tr>
-                  <th class="p-3.5">Müştəri</th>
-                  <th class="p-3.5">Telefon</th>
-                  <th class="p-3.5">Keşbek Balansı</th>
-                  <th class="p-3.5">VIP Tier</th>
-                  <th class="p-3.5 text-right">Əməliyyat</th>
-                </tr>
-              </thead>
-              <tbody id="loyaltyTableBody" class="divide-y divide-slate-100">
-                <!-- Dynamically populated -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-
-      <!-- ============================================================ -->
       <!-- SLIDE 9: REKLAM KODLARI (PROMO CODES) -->
       <!-- ============================================================ -->
       <section id="tab-promos" class="tab-pane hidden p-6 sm:p-8 space-y-6 max-w-7xl w-full">
@@ -1504,6 +1552,7 @@
                   <th class="p-3.5">Dəyər</th>
                   <th class="p-3.5">Min. Məbləğ</th>
                   <th class="p-3.5">İstifadə Sayı</th>
+                  <th class="p-3.5">Bitmə Tarixi</th>
                   <th class="p-3.5">Status</th>
                   <th class="p-3.5 text-right">Əməliyyat</th>
                 </tr>
@@ -1577,7 +1626,7 @@
                   </label>
                   <input type="text" id="broadcastPromo" 
                     class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm uppercase font-mono focus:outline-none focus:border-black transition"
-                    placeholder="VIP20"
+                    placeholder="HORVVALLE20"
                     oninput="updateEmailPreview()" />
                 </div>
                 <div>
@@ -1629,7 +1678,7 @@
                 </p>
                 <div id="prevPromoBox" class="p-3 bg-stone-50 border border-dashed border-stone-300 rounded-xl my-2">
                   <span class="text-[10px] text-stone-500 uppercase block mb-1">Xüsusi Promokod:</span>
-                  <span id="prevPromoCode" class="text-sm font-black font-mono tracking-widest text-slate-900">VIP20</span>
+                  <span id="prevPromoCode" class="text-sm font-black font-mono tracking-widest text-slate-900">HORVVALLE20</span>
                 </div>
                 <div class="pt-2">
                   <div class="inline-block bg-[#111011] text-white px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
@@ -2014,6 +2063,10 @@
             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100/90 text-emerald-800 border border-emerald-200 shadow-2xs">
               <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> SİSTEM ONLAYNDIR
             </span>
+            <button onclick="deleteAllLiveChatMessages()" class="px-3.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-2xs" title="Bütün canlı dəstək mesajlarını birdəfəlik sil">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              <span>Bütün mesajları sil</span>
+            </button>
             <button onclick="loadLiveChatThreads()" class="p-2 glass-card hover:bg-white text-slate-700 transition cursor-pointer shadow-2xs" title="Yenilə">
               <i data-lucide="refresh-cw" class="w-4 h-4"></i>
             </button>
@@ -2352,63 +2405,29 @@
               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
           </div>
         </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Minimum Səbət Məbləği (₼)</label>
+            <input type="number" id="promoMinAmount" placeholder="50"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Maksimal İstifadə Sayı</label>
+            <input type="number" id="promoMaxUses" min="1" placeholder="Məs. 10 (Limitsiz üçün boş)"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+          </div>
+        </div>
         <div>
-          <label class="block font-bold text-slate-700 mb-1">Minimum Səbət Məbləği (₼)</label>
-          <input type="number" id="promoMinAmount" placeholder="50"
+          <label class="block font-bold text-slate-700 mb-1">Bitmə Tarixi (Son Gün)</label>
+          <input type="date" id="promoExpiresAt"
             class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+          <p class="text-[10px] text-slate-400 mt-1">Bu tarixdən sonra promokod avtomatik deaktiv olacaq.</p>
         </div>
         <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
           <button type="button" onclick="closePromoModal()"
             class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold cursor-pointer">Ləğv Et</button>
           <button type="submit" class="px-5 py-2 bg-black text-white rounded-xl font-bold cursor-pointer">Yadda
             Saxla</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-
-  <!-- ADD BONUS MODAL (Loyallıq) -->
-  <div id="bonusModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-        <h3 class="font-bold text-base text-slate-900">Müştəriyə Bonus Xalı Əlavə Et</h3>
-        <button onclick="closeAddBonusModal()" class="text-slate-400 hover:text-black cursor-pointer">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <form id="bonusForm" onsubmit="handleBonusSubmit(event)" class="space-y-3 text-xs">
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">Müştərinin Telefon Nömrəsi *</label>
-          <input type="text" id="bonusPhone" required placeholder="+994 50 123 45 67"
-            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
-        </div>
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">Müştərinin Tam Adı</label>
-          <input type="text" id="bonusFullName" placeholder="Ad Soyad"
-            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block font-bold text-slate-700 mb-1">Əlavə Ediləcək Xal (₼) *</label>
-            <input type="number" step="0.5" id="bonusPoints" required placeholder="10.00"
-              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
-          </div>
-          <div>
-            <label class="block font-bold text-slate-700 mb-1">VIP Tier</label>
-            <select id="bonusTier" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
-              <option value="Bronze">Bronze (3%)</option>
-              <option value="Gold">Gold (7%)</option>
-              <option value="Platinum VIP">Platinum VIP (12%)</option>
-            </select>
-          </div>
-        </div>
-        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-          <button type="button" onclick="closeAddBonusModal()"
-            class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold cursor-pointer">Ləğv Et</button>
-          <button type="submit" class="px-5 py-2 bg-black text-white rounded-xl font-bold cursor-pointer">Balansa Əlavə
-            Et</button>
         </div>
       </form>
     </div>
@@ -2745,7 +2764,6 @@
           else if (tabId === 'categories') { renderCategories(); }
           else if (tabId === 'orders') { renderOrdersTable(); }
           else if (tabId === 'customers') { renderCustomersTable(); }
-          else if (tabId === 'loyalty') { renderLoyaltyTable(); }
           else if (tabId === 'promos') { renderPromosTable(); }
           else if (tabId === 'podOrders') { renderPodOrders(); }
           else if (tabId === 'taxReports') { generateTaxReport(); }
@@ -3310,11 +3328,23 @@
     async function deleteOrder(id) {
       if (!confirm('Bu sifarişi silmək istədiyinizdən əminsiniz?')) return;
       try {
-        const res = await fetch(`/api/admin/orders/${id}`, { method: 'DELETE' });
+        const res = await fetch(`/api/admin/orders/${encodeURIComponent(id)}`, { method: 'DELETE' });
         const result = await res.json();
         if (result.success) {
+          // Clear any matching cached orders in localStorage
+          try {
+            const saved = localStorage.getItem('horvvalle_saved_orders');
+            if (saved) {
+              const arr = JSON.parse(saved);
+              const filtered = arr.filter(o => o.id !== id && o.trackingCode !== id && o.tracking_code !== id);
+              localStorage.setItem('horvvalle_saved_orders', JSON.stringify(filtered));
+            }
+          } catch (e) {}
           notifyStoreSync('DATA_UPDATED');
           await loadData();
+          showToast('✓ Sifariş uğurla və birdəfəlik silindi', 'success');
+        } else {
+          alert('Silinmə xətası: ' + (result.error || 'Xəta baş verdi'));
         }
       } catch (err) {
         alert('Silinmə xətası: ' + err.message);
@@ -3327,9 +3357,14 @@
         const res = await fetch('/api/admin/orders/clear-all', { method: 'POST' });
         const result = await res.json();
         if (result.success) {
+          try {
+            localStorage.removeItem('horvvalle_saved_orders');
+          } catch (e) {}
           notifyStoreSync('DATA_UPDATED');
           await loadData();
-          alert('✓ Bütün sınaq sifarişləri uğurla sıfırlandı.');
+          showToast('✓ Bütün sınaq sifarişləri uğurla sıfırlandı.', 'success');
+        } else {
+          alert('Sıfırlanma xətası: ' + (result.error || 'Xəta'));
         }
       } catch (err) {
         alert('Server xətası: ' + err.message);
@@ -3394,8 +3429,9 @@
       document.getElementById('crm-total-customers').innerText = list.length;
       const totalRev = list.reduce((acc, c) => acc + c.totalSpent, 0);
       document.getElementById('crm-avg-order').innerText = list.length ? `${(totalRev / list.length).toFixed(2)} ₼` : '0.00 ₼';
-      const vipCount = list.filter(c => c.totalSpent > 200 || c.orderCount >= 3).length;
-      document.getElementById('crm-vip-count').innerText = vipCount;
+      const activeCount = list.filter(c => c.orderCount >= 1).length;
+      const crmCountEl = document.getElementById('crm-active-count') || document.getElementById('crm-vip-count');
+      if (crmCountEl) crmCountEl.innerText = activeCount;
 
       if (list.length === 0) {
         container.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400">Heç bir müştəri tapılmadı.</td></tr>`;
@@ -3403,8 +3439,8 @@
       }
 
       container.innerHTML = list.map(c => {
-        const isVip = c.totalSpent >= 500 ? 'Platinum VIP' : (c.totalSpent >= 200 ? 'Gold' : 'Aktiv');
-        const badgeColor = isVip === 'Platinum VIP' ? 'bg-purple-100 text-purple-800' : (isVip === 'Gold' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700');
+        const statusLabel = c.orderCount >= 3 ? 'Daimi Alıcı' : 'Aktiv Alıcı';
+        const badgeColor = c.orderCount >= 3 ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-slate-100 text-slate-700';
         return `
           <tr class="hover:bg-slate-50/60 transition">
             <td class="p-3.5 flex items-center gap-2.5">
@@ -3432,7 +3468,7 @@
             <td class="p-3.5 font-bold text-xs">${c.orderCount}</td>
             <td class="p-3.5">
               <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeColor}">
-                ${isVip}
+                ${statusLabel}
               </span>
             </td>
             <td class="p-3.5 font-black text-slate-900 text-right">${c.totalSpent.toFixed(2)} ₼</td>
@@ -3451,110 +3487,6 @@
 
 
     // ----------------------------------------------------
-    // LOYALTY TERMINAL
-    // ----------------------------------------------------
-    function renderLoyaltyTable() {
-      const container = document.getElementById('loyaltyTableBody');
-      const orders = STORE_DATA.orders || [];
-      const savedLoyalty = (STORE_DATA.loyalty || []);
-
-      const map = new Map();
-      orders.forEach(o => {
-        if (!o.customer || !o.customer.phone) return;
-        const key = o.customer.phone;
-        const spent = Number(o.total || 0);
-        const existing = map.get(key) || {
-          phone: key,
-          fullName: o.customer.fullName || 'Müştəri',
-          points: (spent * 0.05), // standard 5%
-          tier: spent > 500 ? 'Platinum VIP' : (spent > 200 ? 'Gold' : 'Bronze')
-        };
-        map.set(key, existing);
-      });
-
-      // Merge with custom added loyalty points
-      savedLoyalty.forEach(s => {
-        if (map.has(s.phone)) {
-          const item = map.get(s.phone);
-          item.points += Number(s.points || 0);
-          if (s.tier) item.tier = s.tier;
-        } else {
-          map.set(s.phone, s);
-        }
-      });
-
-      const list = Array.from(map.values());
-      if (list.length === 0) {
-        container.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400">Müştəri loyallıq qeydi tapılmadı.</td></tr>`;
-        return;
-      }
-
-      container.innerHTML = list.map(l => `
-        <tr class="hover:bg-slate-50/60 transition">
-          <td class="p-3.5 font-bold text-slate-900">${l.fullName}</td>
-          <td class="p-3.5 font-mono text-slate-600">${l.phone}</td>
-          <td class="p-3.5 font-black text-emerald-600 text-sm">${Number(l.points || 0).toFixed(2)} ₼</td>
-          <td class="p-3.5">
-            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${l.tier === 'Platinum VIP' ? 'bg-purple-100 text-purple-800' : (l.tier === 'Gold' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700')}">
-              ${l.tier}
-            </span>
-          </td>
-          <td class="p-3.5 text-right">
-            <button onclick="quickAddBonusToPhone('${l.phone}', '${l.fullName}')" class="px-3 py-1 bg-black hover:bg-neutral-800 text-white text-[10px] font-bold rounded-lg cursor-pointer">
-              Bonus Yüklə
-            </button>
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    function openAddBonusModal() {
-      document.getElementById('bonusPhone').value = '';
-      document.getElementById('bonusFullName').value = '';
-      document.getElementById('bonusPoints').value = '10.00';
-      document.getElementById('bonusModal').classList.remove('hidden');
-      document.getElementById('bonusModal').classList.add('flex');
-    }
-
-    function quickAddBonusToPhone(phone, name) {
-      document.getElementById('bonusPhone').value = phone;
-      document.getElementById('bonusFullName').value = name;
-      document.getElementById('bonusPoints').value = '15.00';
-      document.getElementById('bonusModal').classList.remove('hidden');
-      document.getElementById('bonusModal').classList.add('flex');
-    }
-
-    function closeAddBonusModal() {
-      document.getElementById('bonusModal').classList.add('hidden');
-      document.getElementById('bonusModal').classList.remove('flex');
-    }
-
-    async function handleBonusSubmit(e) {
-      e.preventDefault();
-      const phone = document.getElementById('bonusPhone').value.trim();
-      const fullName = document.getElementById('bonusFullName').value.trim();
-      const points = Number(document.getElementById('bonusPoints').value) || 0;
-      const tier = document.getElementById('bonusTier').value;
-
-      try {
-        const res = await fetch('/api/admin/loyalty', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone, fullName, points, tier })
-        });
-        const result = await res.json();
-        if (result.success) {
-          closeAddBonusModal();
-          await loadData();
-          alert(`✓ ${points} ₼ bonus uğurla müştərinin balansına əlavə edildi!`);
-        }
-      } catch (err) {
-        alert('Xəta: ' + err.message);
-      }
-    }
-
-
-    // ----------------------------------------------------
     // PROMO CODES
     // ----------------------------------------------------
     function renderPromosTable() {
@@ -3562,35 +3494,50 @@
       const promos = STORE_DATA.promoCodes || [];
 
       if (promos.length === 0) {
-        container.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400">Heç bir promokod yoxdur.</td></tr>`;
+        container.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-400">Heç bir promokod yoxdur.</td></tr>`;
         return;
       }
 
-      container.innerHTML = promos.map(p => `
-        <tr class="hover:bg-slate-50/60 transition">
-          <td class="p-3.5 font-bold text-slate-900 font-mono tracking-wider">${p.code}</td>
-          <td class="p-3.5 uppercase text-[10px] font-bold text-slate-500">${p.type}</td>
-          <td class="p-3.5 font-black text-slate-900">${p.type === 'percent' ? `${p.value}%` : `${p.value} ₼`}</td>
-          <td class="p-3.5 text-slate-600">${p.minAmount ? `${p.minAmount} ₼` : 'Limitsiz'}</td>
-          <td class="p-3.5 font-bold">${p.uses || 0}</td>
-          <td class="p-3.5">
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${p.active !== false ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'}">
-              ${p.active !== false ? 'Aktiv' : 'Deaktiv'}
-            </span>
-          </td>
-          <td class="p-3.5 text-right">
-            <button onclick="deletePromo('${p.id || p.code}')" class="p-1 text-rose-500 hover:text-rose-700 rounded-lg hover:bg-rose-50 cursor-pointer">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-            </button>
-          </td>
-        </tr>
-      `).join('');
+      container.innerHTML = promos.map(p => {
+        const isExpired = p.expiresAt && new Date(p.expiresAt + 'T23:59:59').getTime() < Date.now();
+        const isLimitReached = typeof p.maxUses === 'number' && p.maxUses > 0 && (p.uses || 0) >= p.maxUses;
+        let statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Aktiv</span>`;
+        if (p.active === false) {
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">Deaktiv</span>`;
+        } else if (isExpired) {
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800">Müddəti bitib</span>`;
+        } else if (isLimitReached) {
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">Limit dolub</span>`;
+        }
+
+        const usageText = `${p.uses || 0} / ${p.maxUses ? p.maxUses : '∞'}`;
+        const expiryText = p.expiresAt ? p.expiresAt : 'Müddətsiz';
+
+        return `
+          <tr class="hover:bg-slate-50/60 transition">
+            <td class="p-3.5 font-bold text-slate-900 font-mono tracking-wider">${p.code}</td>
+            <td class="p-3.5 uppercase text-[10px] font-bold text-slate-500">${p.type}</td>
+            <td class="p-3.5 font-black text-slate-900">${p.type === 'percent' ? `${p.value}%` : `${p.value} ₼`}</td>
+            <td class="p-3.5 text-slate-600">${p.minAmount ? `${p.minAmount} ₼` : 'Limitsiz'}</td>
+            <td class="p-3.5 font-bold font-mono">${usageText}</td>
+            <td class="p-3.5 text-slate-600 text-xs">${expiryText}</td>
+            <td class="p-3.5">${statusBadge}</td>
+            <td class="p-3.5 text-right">
+              <button onclick="deletePromo('${p.id || p.code}')" class="p-1 text-rose-500 hover:text-rose-700 rounded-lg hover:bg-rose-50 cursor-pointer">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
     }
 
     function openPromoModal() {
       document.getElementById('promoCode').value = '';
       document.getElementById('promoValue').value = '';
       document.getElementById('promoMinAmount').value = '';
+      if (document.getElementById('promoExpiresAt')) document.getElementById('promoExpiresAt').value = '';
+      if (document.getElementById('promoMaxUses')) document.getElementById('promoMaxUses').value = '';
       document.getElementById('promoModal').classList.remove('hidden');
       document.getElementById('promoModal').classList.add('flex');
     }
@@ -3606,18 +3553,24 @@
       const type = document.getElementById('promoType').value;
       const value = Number(document.getElementById('promoValue').value) || 0;
       const minAmount = Number(document.getElementById('promoMinAmount').value) || 0;
+      const expiresAt = document.getElementById('promoExpiresAt')?.value || null;
+      const maxUsesRaw = document.getElementById('promoMaxUses')?.value;
+      const maxUses = maxUsesRaw ? Number(maxUsesRaw) : null;
 
       try {
         const res = await fetch('/api/admin/promos', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code, type, value, minAmount, active: true, uses: 0 })
+          body: JSON.stringify({ code, type, value, minAmount, active: true, uses: 0, expiresAt, maxUses })
         });
         const r = await res.json();
         if (r.success) {
           closePromoModal();
+          notifyStoreSync('DATA_UPDATED');
           await loadData();
-          alert('✓ Promokod yaradıldı!');
+          showToast('✓ Promokod uğurla yaradıldı!', 'success');
+        } else {
+          alert('Xəta: ' + (r.error || 'Promokod yaradılmadı'));
         }
       } catch (err) {
         alert('Xəta: ' + err.message);
@@ -3627,9 +3580,15 @@
     async function deletePromo(id) {
       if (!confirm('Bu promokodu silmək istəyirsiniz?')) return;
       try {
-        const res = await fetch(`/api/admin/promos/${id}`, { method: 'DELETE' });
+        const res = await fetch(`/api/admin/promos/${encodeURIComponent(id)}`, { method: 'DELETE' });
         const result = await res.json();
-        if (result.success) await loadData();
+        if (result.success) {
+          notifyStoreSync('DATA_UPDATED');
+          await loadData();
+          showToast('✓ Promokod silindi', 'success');
+        } else {
+          alert('Silinmə xətası: ' + (result.error || 'Xəta'));
+        }
       } catch (err) {
         alert('Silinmə xətası: ' + err.message);
       }
@@ -4225,8 +4184,37 @@
 
 
     // ----------------------------------------------------
-    // POD ORDERS (Fərdi Çap)
+    // POD ORDERS (Fərdi Çap) & ARTWORK DOWNLOAD
     // ----------------------------------------------------
+    async function downloadArtworkFile(url, orderId, label = 'qrafika') {
+      if (!url) {
+        alert('Çap qrafikası faylı tapılmadı!');
+        return;
+      }
+      try {
+        showToast('Qrafika faylı yüklənir...', 'info', 2000);
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Şəkil yüklənə bilmədi: ' + res.statusText);
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        let ext = 'png';
+        if (blob.type.includes('jpeg') || blob.type.includes('jpg')) ext = 'jpg';
+        else if (blob.type.includes('svg')) ext = 'svg';
+        else if (blob.type.includes('webp')) ext = 'webp';
+        a.download = `POD_${orderId}_${label}.${ext}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+        showToast('✓ Çap qrafikası kompyuterə yükləndi!', 'success');
+      } catch (err) {
+        console.warn('Direct blob download failed, opening in new window:', err);
+        window.open(url, '_blank');
+      }
+    }
+
     function renderPodOrders() {
       const container = document.getElementById('podOrdersGrid');
       const pods = STORE_DATA.podOrders || [];
@@ -4236,30 +4224,56 @@
         return;
       }
 
-      container.innerHTML = pods.map(p => `
-        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-3">
-          <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-            <span class="font-bold text-xs text-slate-900">${p.id}</span>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700">${p.status || 'Pending'}</span>
-          </div>
+      container.innerHTML = pods.map(p => {
+        const frontArtwork = p.originalImage || p.frontDesign?.artworkUrl || p.customData?.uploadedImage || p.customData?.frontDesign?.artworkUrl || p.previewImage || '';
+        const backArtwork = p.backDesign?.artworkUrl || p.customData?.backDesign?.artworkUrl || '';
+        const previewImg = p.previewImage || frontArtwork || '/images/hero/black-tee.jpg';
 
-          <div class="h-44 bg-slate-50 rounded-xl overflow-hidden relative flex items-center justify-center p-2">
-            <img src="${p.previewImage || p.originalImage || '/images/hero/black-tee.jpg'}" class="w-full h-full object-contain" />
-            ${p.originalImage ? `
-              <a href="${p.originalImage}" download="print_${p.id}.png" target="_blank" class="absolute bottom-2 right-2 bg-black/80 hover:bg-black text-white text-[10px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-sm">
-                <i data-lucide="download" class="w-3 h-3"></i> Qrafika
-              </a>
+        return `
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-3 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+              <span class="font-bold text-xs text-slate-900">${p.id}</span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700">${p.status || 'Pending'}</span>
+            </div>
+
+            <div class="h-44 bg-slate-50 rounded-xl overflow-hidden relative flex items-center justify-center p-2 mt-2">
+              <img src="${previewImg}" class="w-full h-full object-contain" />
+              ${frontArtwork ? `
+                <button onclick="downloadArtworkFile('${frontArtwork}', '${p.id}', 'on_qrafika')"
+                  title="Müştərinin yüklədiyi çap qrafikasını kompyuterə endir"
+                  class="absolute bottom-2 right-2 bg-black/85 hover:bg-black text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 shadow-md transition cursor-pointer">
+                  <i data-lucide="download" class="w-3 h-3"></i> Qrafika
+                </button>
+              ` : ''}
+            </div>
+
+            <div class="text-xs space-y-1 mt-3">
+              <div class="font-bold text-slate-900">${p.customerName || 'Müştəri'} · ${p.customerPhone || ''}</div>
+              <div class="text-slate-500">${p.garmentType || 'Geyim'} (${p.size || 'L'}, ${p.garmentColor || ''})</div>
+              ${p.placement ? `<div class="text-[11px] text-blue-700 font-semibold">Çap Mövqeyi: ${p.placement}</div>` : ''}
+              ${p.customerNote ? `<div class="text-[11px] text-amber-700 bg-amber-50 p-2 rounded-xl">Qeyd: "${p.customerNote}"</div>` : ''}
+            </div>
+
+            ${frontArtwork ? `
+              <div class="mt-3 space-y-1.5">
+                <button onclick="downloadArtworkFile('${frontArtwork}', '${p.id}', 'on_qrafika')"
+                  class="w-full py-2 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs transition cursor-pointer">
+                  <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                  <span>Çap Qrafikasını Endir (PNG)</span>
+                </button>
+                ${backArtwork ? `
+                  <button onclick="downloadArtworkFile('${backArtwork}', '${p.id}', 'arxa_qrafika')"
+                    class="w-full py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer">
+                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                    <span>Arxa Çap Qrafikasını Endir</span>
+                  </button>
+                ` : ''}
+              </div>
             ` : ''}
           </div>
 
-          <div class="text-xs space-y-1">
-            <div class="font-bold text-slate-900">${p.customerName || 'Müştəri'} · ${p.customerPhone || ''}</div>
-            <div class="text-slate-500">${p.garmentType || 'Geyim'} (${p.size || 'L'}, ${p.garmentColor || ''})</div>
-            ${p.placement ? `<div class="text-[11px] text-blue-700 font-semibold">Çap: ${p.placement}</div>` : ''}
-            ${p.customerNote ? `<div class="text-[11px] text-amber-700 bg-amber-50 p-1.5 rounded-md">Qeyd: "${p.customerNote}"</div>` : ''}
-          </div>
-
-          <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+          <div class="pt-2 border-t border-slate-100 flex items-center justify-between mt-3">
             <div class="font-black text-sm text-slate-900">${Number(p.price || 0).toFixed(2)} ₼</div>
             <select onchange="updatePodStatus('${p.id}', this.value)" class="text-[10px] font-bold border border-slate-200 rounded-lg px-2 py-1 outline-none">
               <option value="Pending Print" ${p.status === 'Pending Print' ? 'selected' : ''}>Gözləmədə</option>
@@ -4269,7 +4283,8 @@
             </select>
           </div>
         </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     async function updatePodStatus(id, status) {
@@ -5196,7 +5211,6 @@
           else if (tabId === 'orders') renderOrdersTable();
           else if (tabId === 'customers') renderCustomersTable();
           else if (tabId === 'categories') renderCategories();
-          else if (tabId === 'loyalty') renderLoyaltyTable();
           else if (tabId === 'promos') renderPromosTable();
           else if (tabId === 'podOrders') renderPodOrders();
           else if (tabId === 'taxReports') generateTaxReport();
@@ -5240,17 +5254,69 @@
       if (thresholdEl && (force || document.activeElement !== thresholdEl)) thresholdEl.value = s.freeShippingThreshold || 60;
       if (courierEl && (force || document.activeElement !== courierEl)) courierEl.value = s.courierRate || 4;
 
+      // Populate Hero CMS fields
+      const heroTagEl = document.getElementById('heroTagInput');
       const heroHeadEl = document.getElementById('heroHeadlineInput');
       const heroSubEl = document.getElementById('heroSubheadlineInput');
-      const annEl = document.getElementById('announcementTextInput');
+      const heroCtaTextEl = document.getElementById('heroCtaTextInput');
+      const heroCtaLinkEl = document.getElementById('heroCtaLinkInput');
 
       if (c.hero) {
+        if (heroTagEl && (force || document.activeElement !== heroTagEl)) heroTagEl.value = c.hero.tag || '';
         if (heroHeadEl && (force || document.activeElement !== heroHeadEl)) heroHeadEl.value = c.hero.headline || '';
         if (heroSubEl && (force || document.activeElement !== heroSubEl)) heroSubEl.value = c.hero.subheadline || '';
+        if (heroCtaTextEl && (force || document.activeElement !== heroCtaTextEl)) heroCtaTextEl.value = c.hero.primaryCta?.label || '';
+        if (heroCtaLinkEl && (force || document.activeElement !== heroCtaLinkEl)) heroCtaLinkEl.value = c.hero.primaryCta?.link || '';
       }
-      if (c.announcements && c.announcements.length > 0) {
-        if (annEl && (force || document.activeElement !== annEl)) annEl.value = c.announcements[0];
+
+      // Populate Announcements CMS
+      const annEl = document.getElementById('announcementsInput');
+      if (annEl && (force || document.activeElement !== annEl)) {
+        if (Array.isArray(c.announcements) && c.announcements.length > 0) {
+          annEl.value = c.announcements.join('\n');
+        } else {
+          annEl.value = '';
+        }
       }
+
+      // Populate Promo Banner CMS
+      const pb = c.promoBanner || {};
+      const pbTagEl = document.getElementById('promoBannerTagInput');
+      const pbTitleEl = document.getElementById('promoBannerTitleInput');
+      const pbSubEl = document.getElementById('promoBannerSubtitleInput');
+      const pbCtaTextEl = document.getElementById('promoBannerCtaTextInput');
+      const pbCtaLinkEl = document.getElementById('promoBannerCtaLinkInput');
+      const pbImgEl = document.getElementById('promoBannerImageInput');
+
+      if (pbTagEl && (force || document.activeElement !== pbTagEl)) pbTagEl.value = pb.tag || '';
+      if (pbTitleEl && (force || document.activeElement !== pbTitleEl)) pbTitleEl.value = pb.title || '';
+      if (pbSubEl && (force || document.activeElement !== pbSubEl)) pbSubEl.value = pb.subtitle || '';
+      if (pbCtaTextEl && (force || document.activeElement !== pbCtaTextEl)) pbCtaTextEl.value = pb.ctaText || '';
+      if (pbCtaLinkEl && (force || document.activeElement !== pbCtaLinkEl)) pbCtaLinkEl.value = pb.ctaLink || '';
+      if (pbImgEl && (force || document.activeElement !== pbImgEl)) pbImgEl.value = pb.image || '';
+
+      // Populate Secondary Campaign CMS
+      const cs = c.campaignSecondary || {};
+      const csTagEl = document.getElementById('campaignTagInput');
+      const csTitleEl = document.getElementById('campaignTitleInput');
+      const csSubEl = document.getElementById('campaignSubtitleInput');
+      const csCtaTextEl = document.getElementById('campaignCtaTextInput');
+      const csCtaLinkEl = document.getElementById('campaignCtaLinkInput');
+      const csImgEl = document.getElementById('campaignImageInput');
+
+      if (csTagEl && (force || document.activeElement !== csTagEl)) csTagEl.value = cs.tag || '';
+      if (csTitleEl && (force || document.activeElement !== csTitleEl)) csTitleEl.value = cs.title || '';
+      if (csSubEl && (force || document.activeElement !== csSubEl)) csSubEl.value = cs.subtitle || '';
+      if (csCtaTextEl && (force || document.activeElement !== csCtaTextEl)) csCtaTextEl.value = cs.ctaText || '';
+      if (csCtaLinkEl && (force || document.activeElement !== csCtaLinkEl)) csCtaLinkEl.value = cs.ctaLink || '';
+      if (csImgEl && (force || document.activeElement !== csImgEl)) csImgEl.value = cs.image || '';
+
+      // Populate Policy CMS
+      const pol = c.policies || {};
+      const shipPolEl = document.getElementById('shippingPolicyInput');
+      const retPolEl = document.getElementById('returnPolicyInput');
+      if (shipPolEl && (force || document.activeElement !== shipPolEl)) shipPolEl.value = pol.shipping || 'Bakı daxili 24 saat ərzində sürətli kuryer çatdırılması. Rayonlara poçtla 2-3 iş günü.';
+      if (retPolEl && (force || document.activeElement !== retPolEl)) retPolEl.value = pol.return || 'Məhsul çatdırıldıqdan sonra 14 gün ərzində etiketləri zədələnmədən dəyişdirmə və ya qaytarma imkanı.';
     }
 
     async function saveGeneralSettings() {
@@ -5269,9 +5335,9 @@
         });
         const r = await res.json();
         if (r.success) {
-          alert('✓ Parametrlər uğurla yeniləndi!');
-          // Update in-memory store
+          notifyStoreSync('DATA_UPDATED');
           if (STORE_DATA) STORE_DATA.settings = { ...(STORE_DATA.settings || {}), storeName, tagline, contactPhone, contactEmail, freeShippingThreshold, courierRate };
+          showToast('✓ Parametrlər uğurla yeniləndi!', 'success');
         } else {
           alert('Xəta: ' + (r.error || 'Naməlum xəta'));
         }
@@ -5281,9 +5347,39 @@
     }
 
     async function saveCmsContent() {
-      const headline = document.getElementById('heroHeadlineInput').value;
-      const subheadline = document.getElementById('heroSubheadlineInput').value;
-      const ann = document.getElementById('announcementTextInput').value;
+      const heroTag = document.getElementById('heroTagInput')?.value || '';
+      const headline = document.getElementById('heroHeadlineInput')?.value || '';
+      const subheadline = document.getElementById('heroSubheadlineInput')?.value || '';
+      const heroCtaText = document.getElementById('heroCtaTextInput')?.value || '';
+      const heroCtaLink = document.getElementById('heroCtaLinkInput')?.value || '';
+
+      const annRaw = document.getElementById('announcementsInput')?.value || '';
+      const announcements = annRaw.split('\n').map(s => s.trim()).filter(Boolean);
+
+      const promoBanner = {
+        tag: document.getElementById('promoBannerTagInput')?.value || '',
+        title: document.getElementById('promoBannerTitleInput')?.value || '',
+        subtitle: document.getElementById('promoBannerSubtitleInput')?.value || '',
+        ctaText: document.getElementById('promoBannerCtaTextInput')?.value || '',
+        ctaLink: document.getElementById('promoBannerCtaLinkInput')?.value || '',
+        image: document.getElementById('promoBannerImageInput')?.value || '',
+      };
+
+      const campaignSecondary = {
+        tag: document.getElementById('campaignTagInput')?.value || '',
+        title: document.getElementById('campaignTitleInput')?.value || '',
+        subtitle: document.getElementById('campaignSubtitleInput')?.value || '',
+        ctaText: document.getElementById('campaignCtaTextInput')?.value || '',
+        ctaLink: document.getElementById('campaignCtaLinkInput')?.value || '',
+        image: document.getElementById('campaignImageInput')?.value || '',
+      };
+
+      const policies = {
+        shipping: document.getElementById('shippingPolicyInput')?.value || '',
+        return: document.getElementById('returnPolicyInput')?.value || '',
+      };
+
+      const existingHero = STORE_DATA?.content?.hero || {};
 
       try {
         const res = await fetch('/api/admin/content', {
@@ -5291,13 +5387,30 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             content: {
-              hero: { ...(STORE_DATA.content?.hero || {}), headline, subheadline },
-              announcements: ann ? [ann] : []
+              hero: {
+                ...existingHero,
+                tag: heroTag,
+                headline,
+                subheadline,
+                primaryCta: { label: heroCtaText, link: heroCtaLink }
+              },
+              announcements,
+              promoBanner,
+              campaignSecondary,
+              policies
             }
           })
         });
         const r = await res.json();
-        if (r.success) alert('✓ Məzmun yeniləndi!');
+        if (r.success) {
+          notifyStoreSync('DATA_UPDATED');
+          if (STORE_DATA) {
+            STORE_DATA.content = r.content || STORE_DATA.content;
+          }
+          showToast('✓ Statik səhifələr və məzmun uğurla yeniləndi!', 'success');
+        } else {
+          alert('Xəta: ' + (r.error || 'Naməlum xəta'));
+        }
       } catch (e) {
         alert('Xəta: ' + e.message);
       }
@@ -6121,6 +6234,224 @@
         }
       } catch (err) {
         alert('Şəbəkə xətası: ' + err.message);
+      }
+    }
+
+    async function deleteAllLiveChatMessages() {
+      if (!confirm('Bütün canlı dəstək mesajlarını və söhbət tarixçəsini birdəfəlik silmək istədiyinizdən əminsiniz? Bu əməliyyat geri qaytarıla bilməz.')) {
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/chat/threads?all=true', {
+          method: 'DELETE',
+        });
+        if (res.ok) {
+          allChatThreads = [];
+          activeChatSessionId = null;
+          if (chatPollInterval) clearInterval(chatPollInterval);
+          const panel = document.getElementById('liveChatConversationPanel');
+          if (panel) {
+            panel.innerHTML = `
+              <div class="flex-1 flex flex-col items-center justify-center text-slate-400 p-8 text-center">
+                <div class="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-300 mb-3">
+                  <i data-lucide="message-circle" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-sm font-bold text-slate-700 mb-1">Söhbət Seçilməyib</h3>
+                <p class="text-xs text-slate-400 max-w-sm">Bütün canlı dəstək mesajları və söhbətləri uğurla təmizləndi.</p>
+              </div>
+            `;
+            if (window.lucide) lucide.createIcons();
+          }
+          renderLiveChatThreads([]);
+          const badgeEl = document.getElementById('badge-livechat-count');
+          if (badgeEl) badgeEl.classList.add('hidden');
+          if (typeof showToast === 'function') {
+            showToast('✓ Bütün canlı dəstək mesajları uğurla silindi', 'success');
+          } else {
+            alert('Bütün canlı dəstək mesajları uğurla silindi');
+          }
+        } else {
+          const err = await res.json().catch(() => ({}));
+          alert('Mesajlar silinərkən xəta baş verdi: ' + (err.error || 'Naməlum xəta'));
+        }
+      } catch (err) {
+        alert('Şəbəkə xətası: ' + err.message);
+      }
+    }
+    window.deleteAllChatMessages = deleteAllLiveChatMessages;
+    window.clearAllThreads = deleteAllLiveChatMessages;
+
+    // Customer Order & Tracking Code Recovery Lookup (Item 24)
+    async function executeCustomerTrackingLookup() {
+      const input = document.getElementById('customerTrackingLookupInput');
+      const resultsContainer = document.getElementById('customerTrackingLookupResults');
+      if (!input || !resultsContainer) return;
+
+      const rawVal = input.value.trim();
+      if (!rawVal) {
+        alert('Zəhmət olmasa müştərinin telefon nömrəsini və ya e-poçt ünvanını daxil edin.');
+        input.focus();
+        return;
+      }
+
+      resultsContainer.classList.remove('hidden');
+      resultsContainer.innerHTML = `
+        <div class="p-4 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
+          <i data-lucide="loader-2" class="w-4 h-4 animate-spin text-blue-600"></i>
+          <span>Müştərinin sifarişləri axtarılır...</span>
+        </div>
+      `;
+      if (window.lucide) lucide.createIcons();
+
+      const isEmail = rawVal.includes('@');
+      const cleanDigits = rawVal.replace(/\D/g, '');
+      const searchMode = isEmail ? 'email' : (cleanDigits.length >= 7 ? 'phone' : 'code');
+
+      // 1. Search local memory
+      const allOrders = (STORE_DATA.orders || []);
+      const localMatches = allOrders.filter(o => {
+        const phone = (o.customer?.phone || o.customer_phone || '').replace(/\D/g, '');
+        const email = (o.customer?.email || o.customer_email || '').toLowerCase().trim();
+        const id = String(o.id || '').toUpperCase();
+        const tracking = String(o.trackingCode || o.tracking_code || '').toUpperCase();
+
+        if (isEmail) return email === rawVal.toLowerCase();
+        if (cleanDigits.length >= 7) {
+          return phone.includes(cleanDigits.slice(-7)) || cleanDigits.includes(phone.slice(-7));
+        }
+        return id.includes(rawVal.toUpperCase()) || tracking.includes(rawVal.toUpperCase());
+      });
+
+      // 2. Query live server tracking API for cloud orders
+      let cloudMatches = [];
+      try {
+        const res = await fetch(`/api/orders/track?q=${encodeURIComponent(rawVal)}&type=${searchMode}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success) {
+            if (data.allMatches && Array.isArray(data.allMatches)) {
+              cloudMatches = data.allMatches;
+            } else if (data.order) {
+              cloudMatches = [data.order];
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Lookup live API query error:', e);
+      }
+
+      // Merge and deduplicate
+      const combined = [...localMatches];
+      const seenIds = new Set(localMatches.map(o => String(o.id)));
+      for (const co of cloudMatches) {
+        if (!seenIds.has(String(co.id))) {
+          combined.push(co);
+          seenIds.add(String(co.id));
+        }
+      }
+
+      if (combined.length === 0) {
+        resultsContainer.innerHTML = `
+          <div class="p-4 bg-white/80 rounded-xl border border-slate-200 text-center text-xs text-slate-500">
+            "${escapeHtml(rawVal)}" üzrə heç bir sifariş tapılmadı. Zəhmət olmasa nömrəni və ya emaili yoxlayıb yenidən cəhd edin.
+          </div>
+        `;
+        return;
+      }
+
+      resultsContainer.innerHTML = `
+        <div class="text-xs font-bold text-slate-700 mb-2 flex items-center justify-between">
+          <span>Tapılan Sifarişlər (${combined.length}):</span>
+          <span class="text-[11px] text-blue-600 font-normal">Bir kliklə izləmə kodunu kopyalayıb müştəriyə göndərə bilərsiniz</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+          ${combined.map(o => {
+            const customerName = o.customer?.fullName || o.customer?.name || o.customer_name || 'Müştəri';
+            const customerPhone = o.customer?.phone || o.customer_phone || '-';
+            const customerEmail = o.customer?.email || o.customer_email || '-';
+            const tracking = o.trackingCode || o.tracking_code || `AZ-EXP-${String(o.id).replace(/\D/g, '') || '8841'}`;
+            const status = o.orderStatus || o.order_status || 'Yeni Sifariş';
+            const total = o.total || o.total_amount || 0;
+            const dateStr = o.date || o.created_at ? new Date(o.date || o.created_at).toLocaleDateString('az-AZ') : '';
+
+            const waPhone = customerPhone.replace(/\D/g, '');
+            const waMsg = encodeURIComponent(`Salam ${customerName}! HORVVALLE Atelier sifarişinizin izləmə kodu: ${tracking}. Canlı izləmək üçün link: https://horwalle.com/track?q=${tracking}`);
+
+            return `
+              <div class="p-3 bg-white rounded-xl border border-blue-200/80 shadow-2xs space-y-2">
+                <div class="flex items-start justify-between gap-2">
+                  <div>
+                    <div class="font-bold text-xs text-slate-900">${escapeHtml(customerName)}</div>
+                    <div class="text-[11px] text-slate-500 flex items-center gap-2">
+                      <span>${escapeHtml(customerPhone)}</span>
+                      ${customerEmail !== '-' ? `<span>· ${escapeHtml(customerEmail)}</span>` : ''}
+                    </div>
+                  </div>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                    ${escapeHtml(status)}
+                  </span>
+                </div>
+
+                <div class="flex items-center justify-between pt-1 border-t border-slate-100 text-xs">
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-slate-400 text-[11px]">İzləmə:</span>
+                    <span class="font-mono font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 text-xs select-all">${escapeHtml(tracking)}</span>
+                  </div>
+                  <div class="text-[11px] font-semibold text-slate-700">
+                    ${total} ₼ ${dateStr ? `· ${dateStr}` : ''}
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-1.5 pt-1">
+                  <button type="button" onclick="copyTrackingCodeToClipboard('${escapeHtml(tracking)}')"
+                    class="flex-1 py-1.5 px-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-2xs cursor-pointer">
+                    <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                    <span>Kodu kopyala</span>
+                  </button>
+                  ${waPhone ? `
+                    <a href="https://wa.me/${waPhone}?text=${waMsg}" target="_blank"
+                      class="py-1.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1 transition shadow-2xs">
+                      <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                      <span>WhatsApp</span>
+                    </a>
+                  ` : ''}
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function clearCustomerTrackingLookup() {
+      const input = document.getElementById('customerTrackingLookupInput');
+      const resultsContainer = document.getElementById('customerTrackingLookupResults');
+      if (input) input.value = '';
+      if (resultsContainer) {
+        resultsContainer.innerHTML = '';
+        resultsContainer.classList.add('hidden');
+      }
+    }
+
+    async function copyTrackingCodeToClipboard(code) {
+      if (!code) return;
+      try {
+        await navigator.clipboard.writeText(code);
+        if (typeof showToast === 'function') {
+          showToast(`✓ İzləmə kodu kopyalandı: ${code}`, 'success');
+        } else {
+          alert(`İzləmə kodu kopyalandı: ${code}`);
+        }
+      } catch (e) {
+        const textarea = document.createElement('textarea');
+        textarea.value = code;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        alert(`İzləmə kodu kopyalandı: ${code}`);
       }
     }
 

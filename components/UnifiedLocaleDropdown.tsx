@@ -13,6 +13,12 @@ import {
 import { LanguageCode } from "@/lib/translations";
 import { LANGUAGES, LanguageInfo, useLanguage } from "@/context/LanguageContext";
 import { useCurrency, CurrencyCode, CURRENCY_CONFIG } from "@/context/CurrencyContext";
+import {
+  DROPDOWN_MENU_VARIANTS,
+  DROPDOWN_LIST_VARIANTS,
+  DROPDOWN_ITEM_VARIANTS,
+  CHEVRON_ROTATE_TRANSITION,
+} from "@/components/ui/CustomDropdown";
 
 export function renderFlag(countryCode: string, className = "w-4 h-3") {
   switch (countryCode.toUpperCase()) {
@@ -114,7 +120,7 @@ export function UnifiedLocaleDropdown({
 
         <motion.div
           animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ duration: 0.18, ease: "easeInOut" }}
+          transition={CHEVRON_ROTATE_TRANSITION}
           className={`${isDark ? "text-white/70 group-hover:text-white" : "text-zinc-400 group-hover:text-zinc-900"} ml-0.5`}
         >
           <ChevronDown size={13} />
@@ -125,15 +131,13 @@ export function UnifiedLocaleDropdown({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: direction === "down" ? -6 : 6, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: direction === "down" ? -6 : 6, scale: 0.98, transition: { duration: 0.15, ease: "easeIn" } }}
-            transition={{
-              duration: 0.22,
-              ease: [0.16, 1, 0.3, 1],
-            }}
+            variants={DROPDOWN_MENU_VARIANTS}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            custom={direction}
             style={{
-              backgroundColor: isDark ? "#140B05" : "#FAF7F2",
+              backgroundColor: isDark ? "#121013" : "#FAF7F2",
               transformOrigin:
                 direction === "down"
                   ? align === "right"
@@ -179,33 +183,39 @@ export function UnifiedLocaleDropdown({
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-1.5">
+              <motion.div
+                variants={DROPDOWN_LIST_VARIANTS}
+                initial="hidden"
+                animate="visible"
+                className="grid grid-cols-2 gap-1.5"
+              >
                 {languagesList.map((item) => {
                   const isSelected = item.code === language;
                   return (
-                    <button
-                      key={item.code}
-                      type="button"
-                      onClick={() => setLanguage(item.code)}
-                      className={`flex items-center justify-between px-2.5 py-2 rounded-xl text-xs transition-all border cursor-pointer ${
-                        isSelected
-                          ? isDark
-                            ? "bg-white text-black font-bold border-white shadow-sm"
-                            : "bg-zinc-900 text-white font-bold border-zinc-900 shadow-sm"
-                          : isDark
-                          ? "bg-white/10 hover:bg-white/20 text-white border-white/15"
-                          : "bg-white hover:bg-stone-50 text-zinc-800 hover:text-black border-stone-200/90 shadow-2xs"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        {renderFlag(item.countryCode, "w-4 h-3")}
-                        <span className="truncate">{item.nativeName}</span>
-                      </div>
-                      {isSelected && <Check size={13} className={`${isDark ? "text-black" : "text-white"} shrink-0`} />}
-                    </button>
+                    <motion.div key={item.code} variants={DROPDOWN_ITEM_VARIANTS}>
+                      <button
+                        type="button"
+                        onClick={() => setLanguage(item.code)}
+                        className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs transition-all border cursor-pointer ${
+                          isSelected
+                            ? isDark
+                              ? "bg-white text-black font-bold border-white shadow-sm"
+                              : "bg-zinc-900 text-white font-bold border-zinc-900 shadow-sm"
+                            : isDark
+                            ? "bg-white/10 hover:bg-white/20 text-white border-white/15"
+                            : "bg-white hover:bg-stone-50 text-zinc-800 hover:text-black border-stone-200/90 shadow-2xs"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          {renderFlag(item.countryCode, "w-4 h-3")}
+                          <span className="truncate">{item.nativeName}</span>
+                        </div>
+                        {isSelected && <Check size={13} className={`${isDark ? "text-black" : "text-white"} shrink-0`} />}
+                      </button>
+                    </motion.div>
                   );
                 })}
-              </div>
+              </motion.div>
             </div>
 
             {/* Section 2: Valyuta / Currency */}
@@ -219,36 +229,42 @@ export function UnifiedLocaleDropdown({
                 </span>
               </div>
 
-              <div className="grid grid-cols-3 gap-1.5">
+              <motion.div
+                variants={DROPDOWN_LIST_VARIANTS}
+                initial="hidden"
+                animate="visible"
+                className="grid grid-cols-3 gap-1.5"
+              >
                 {currenciesList.map((code) => {
                   const curr = CURRENCY_CONFIG[code];
                   const isSelected = curr.code === currency;
                   return (
-                    <button
-                      key={curr.code}
-                      type="button"
-                      onClick={() => setCurrency(curr.code)}
-                      className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl text-xs transition-all border cursor-pointer ${
-                        isSelected
-                          ? isDark
-                            ? "bg-white text-black font-bold border-white shadow-sm"
-                            : "bg-zinc-900 text-white font-bold border-zinc-900 shadow-sm"
-                          : isDark
-                          ? "bg-white/10 hover:bg-white/20 text-white border-white/15"
-                          : "bg-white hover:bg-stone-50 text-zinc-800 hover:text-black border-stone-200/90 shadow-2xs"
-                      }`}
-                    >
-                      <div className="flex items-center gap-1 font-bold">
-                        <span className={`text-sm ${isSelected && isDark ? "text-black" : isDark ? "text-[#E6C280]" : ""}`}>{curr.symbol}</span>
-                        <span>{curr.code}</span>
-                      </div>
-                      <span className={`text-[9px] mt-0.5 truncate ${isSelected ? (isDark ? "text-black/70" : "text-zinc-300") : (isDark ? "text-white/50" : "text-zinc-400")}`}>
-                        {code === "AZN" ? "Manat" : code === "USD" ? "Dollar" : "Avro"}
-                      </span>
-                    </button>
+                    <motion.div key={curr.code} variants={DROPDOWN_ITEM_VARIANTS}>
+                      <button
+                        type="button"
+                        onClick={() => setCurrency(curr.code)}
+                        className={`w-full flex flex-col items-center justify-center py-2 px-1 rounded-xl text-xs transition-all border cursor-pointer ${
+                          isSelected
+                            ? isDark
+                              ? "bg-white text-black font-bold border-white shadow-sm"
+                              : "bg-zinc-900 text-white font-bold border-zinc-900 shadow-sm"
+                            : isDark
+                            ? "bg-white/10 hover:bg-white/20 text-white border-white/15"
+                            : "bg-white hover:bg-stone-50 text-zinc-800 hover:text-black border-stone-200/90 shadow-2xs"
+                        }`}
+                      >
+                        <div className="flex items-center gap-1 font-bold">
+                          <span className={`text-sm ${isSelected && isDark ? "text-black" : isDark ? "text-[#E6C280]" : ""}`}>{curr.symbol}</span>
+                          <span>{curr.code}</span>
+                        </div>
+                        <span className={`text-[9px] mt-0.5 truncate ${isSelected ? (isDark ? "text-black/70" : "text-zinc-300") : (isDark ? "text-white/50" : "text-zinc-400")}`}>
+                          {code === "AZN" ? "Manat" : code === "USD" ? "Dollar" : "Avro"}
+                        </span>
+                      </button>
+                    </motion.div>
                   );
                 })}
-              </div>
+              </motion.div>
             </div>
 
             {/* Smart Auto-save Footer Note */}

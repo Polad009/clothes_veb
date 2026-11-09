@@ -5,7 +5,7 @@ import { verifyTurnstileToken } from "@/lib/turnstile";
 import { checkRateLimit } from "@/lib/rateLimiter";
 import { validateShippingRate, isDomesticDestination } from "@/lib/shipping";
 import { getCountryByCode } from "@/lib/countries";
-import { readStoreDb } from "@/lib/storeDb";
+import { readStoreDb, writeStoreDb } from "@/lib/storeDb";
 
 export async function POST(req: NextRequest) {
   try {
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { customer, method, items, turnstileToken, shippingMethod, shipping, currency } = body as {
+    const { customer, method, items, turnstileToken, shippingMethod, shipping, currency, promoCode } = body as {
       customer: {
         fullName: string;
         phone: string;
@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
       shippingMethod?: string;
       shipping?: number;
       currency?: "AZN" | "USD";
+      promoCode?: string;
     };
 
     if (turnstileToken) {
@@ -92,11 +93,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (method === 'cash_on_delivery' && (!isDomestic || countryCode !== 'AZ')) {
+    if (method === 'cash_on_delivery') {
       return NextResponse.json(
         {
           success: false,
-          message: "Nağd ödəniş (COD) yalnız Azərbaycan daxili sifarişlər üçün keçərlidir. Beynəlxalq sifarişlər üçün kart və ya Apple/Google Pay seçin.",
+          message: "Nağd ödəniş (COD) ləğv edilmişdir. Bütün sifarişlər təhlükəsiz onlayn ödənişlə qəbul olunur.",
         },
         { status: 400 }
       );
@@ -155,8 +156,60 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // 3.1 Promo Code Validation (Expiration & Max Uses Enforcement - Item 22)
+    let serverDiscount = 0;
+    let validatedPromoCode: string | null = null;
+    if (promoCode && typeof promoCode === 'string' && promoCode.trim()) {
+      const cleanCode = promoCode.trim().toUpperCase();
+      const promoObj = (db.promoCodes || []).find(
+        (p) => (p.code || '').trim().toUpperCase() === cleanCode
+      );
+
+      if (!promoObj || promoObj.active === false) {
+        return NextResponse.json(
+          { success: false, message: "Yanlış və ya deaktiv promokod." },
+          { status: 400 }
+        );
+      }
+
+      if (promoObj.expiresAt) {
+        const expTime = new Date(promoObj.expiresAt).getTime();
+        if (!isNaN(expTime) && Date.now() > expTime) {
+          return NextResponse.json(
+            { success: false, message: "Bu promokodun istifadə müddəti bitmişdir." },
+            { status: 400 }
+          );
+        }
+      }
+
+      if (typeof promoObj.maxUses === 'number' && promoObj.maxUses > 0) {
+        if ((Number(promoObj.uses) || 0) >= promoObj.maxUses) {
+          return NextResponse.json(
+            { success: false, message: "Bu promokodun maksimal istifadə sayı bitmişdir." },
+            { status: 400 }
+          );
+        }
+      }
+
+      const minAmt = Number(promoObj.minAmount) || 0;
+      if (minAmt > 0 && subtotal < minAmt) {
+        return NextResponse.json(
+          { success: false, message: `Minimum sifariş məbləği ${minAmt} ${orderCurrency} olmalıdır.` },
+          { status: 400 }
+        );
+      }
+
+      validatedPromoCode = promoObj.code;
+      if (promoObj.type === 'fixed') {
+        serverDiscount = Math.min(subtotal, Number(promoObj.value) || 0);
+      } else {
+        const pct = Math.min(100, Math.max(0, Number(promoObj.value) || 0));
+        serverDiscount = (subtotal * pct) / 100;
+      }
+    }
+
     const serverShipping = shippingValidation.expectedRate;
-    const totalAmount = Math.max(0, Math.round((subtotal + serverShipping) * 100) / 100);
+    const totalAmount = Math.max(0, Math.round((subtotal - serverDiscount + serverShipping) * 100) / 100);
     const orderId = `ATL-${Date.now().toString().slice(-6)}`;
 
     const sanitizedCustomer = {
@@ -197,6 +250,20 @@ export async function POST(req: NextRequest) {
         { success: false, message: paymentResponse.message || "Ödəniş xətası baş verdi." },
         { status: 400 }
       );
+    }
+
+    if (validatedPromoCode) {
+      const promoToUpdate = (db.promoCodes || []).find(
+        (p) => (p.code || '').trim().toUpperCase() === validatedPromoCode!.toUpperCase()
+      );
+      if (promoToUpdate) {
+        promoToUpdate.uses = (Number(promoToUpdate.uses) || 0) + 1;
+        try {
+          writeStoreDb(db);
+        } catch (e) {
+          console.warn("Error incrementing promo code uses:", e);
+        }
+      }
     }
 
     return NextResponse.json({

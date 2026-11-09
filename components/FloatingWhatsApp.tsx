@@ -16,6 +16,7 @@ import {
 import { playMessageReceivedSound, playMessageSentSound } from "@/lib/chatSound";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 
 // WhatsApp Brand Icon
 function WhatsAppBrandIcon({ className = "w-6 h-6" }: { className?: string }) {
@@ -76,6 +77,7 @@ const CHAT_I18N = {
     phonePlaceholder: "+994 50 123 45 67",
     startChatSubmit: "Söhbətə Başla",
     nameRequired: "Zəhmət olmasa adınızı qeyd edin",
+    waitingMessage: "Zəhmət olmasa xətdə qalın, operatorumuz ən qısa zamanda sizə cavab verəcək.",
     liveChatAria: "Canlı Dəstək",
     closeAria: "Çatı bağla",
   },
@@ -100,6 +102,7 @@ const CHAT_I18N = {
     phonePlaceholder: "+1 234 567 8900",
     startChatSubmit: "Start Chat",
     nameRequired: "Please enter your name",
+    waitingMessage: "Please stay on the line, our operator will respond to you shortly.",
     liveChatAria: "Live Support",
     closeAria: "Close chat",
   },
@@ -124,6 +127,7 @@ const CHAT_I18N = {
     phonePlaceholder: "+7 999 123 45 67",
     startChatSubmit: "Начать диалог",
     nameRequired: "Пожалуйста, укажите ваше имя",
+    waitingMessage: "Пожалуйста, оставайтесь на линии, наш оператор ответит вам в ближайшее время.",
     liveChatAria: "Живая поддержка",
     closeAria: "Закрыть чат",
   },
@@ -148,6 +152,7 @@ const CHAT_I18N = {
     phonePlaceholder: "+90 555 123 45 67",
     startChatSubmit: "Sohbete Başla",
     nameRequired: "Lütfen adınızı giriniz",
+    waitingMessage: "Lütfen hatta kalın, müşteri temsilcimiz en kısa sürede size yanıt verecektir.",
     liveChatAria: "Canlı Destek",
     closeAria: "Sohbeti kapat",
   },
@@ -159,6 +164,7 @@ export function FloatingWhatsApp() {
   const t = CHAT_I18N[language as keyof typeof CHAT_I18N] || CHAT_I18N.az;
 
   const [isChatOpen, setIsChatOpen] = useState(false);
+  useBodyScrollLock(isChatOpen);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
@@ -358,6 +364,16 @@ export function FloatingWhatsApp() {
     } catch {}
 
     setHasCompletedOnboarding(true);
+
+    // Polite assistant message after capturing name and phone
+    const politeWaitingMsg: Message = {
+      id: `bot_wait_${Date.now()}`,
+      sender: "admin",
+      text: t.waitingMessage || "Zəhmət olmasa xətdə qalın, operatorumuz ən qısa zamanda sizə cavab verəcək.",
+      timestamp: Date.now(),
+      status: "delivered",
+    };
+    setMessages((prev) => (prev.length === 0 ? [politeWaitingMsg] : prev));
 
     try {
       await fetch("/api/chat", {

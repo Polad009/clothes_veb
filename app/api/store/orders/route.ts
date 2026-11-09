@@ -221,7 +221,7 @@ export async function POST(req: NextRequest) {
     const serverShipping = shippingValidation.expectedRate;
     const validatedShippingOption = shippingValidation.option;
 
-    // 3. Server-side Promo Code Validation
+    // 3. Server-side Promo Code Validation (Expiration & Max Uses Enforcement - Item 22)
     let serverDiscount = 0;
     let validatedPromoCode: string | null = null;
     if (promoCode && typeof promoCode === 'string' && promoCode.trim()) {
@@ -230,14 +230,19 @@ export async function POST(req: NextRequest) {
         (p) => (p.code || '').trim().toUpperCase() === cleanCode && p.active !== false
       );
       if (promoObj) {
-        const minAmt = Number(promoObj.minAmount) || 0;
-        if (serverSubtotal >= minAmt) {
-          validatedPromoCode = promoObj.code;
-          if (promoObj.type === 'fixed') {
-            serverDiscount = Math.min(serverSubtotal, Number(promoObj.value) || 0);
-          } else {
-            const pct = Math.min(100, Math.max(0, Number(promoObj.value) || 0));
-            serverDiscount = (serverSubtotal * pct) / 100;
+        const isExpired = promoObj.expiresAt && !isNaN(new Date(promoObj.expiresAt).getTime()) && Date.now() > new Date(promoObj.expiresAt).getTime();
+        const isMaxedOut = typeof promoObj.maxUses === 'number' && promoObj.maxUses > 0 && (Number(promoObj.uses) || 0) >= promoObj.maxUses;
+
+        if (!isExpired && !isMaxedOut) {
+          const minAmt = Number(promoObj.minAmount) || 0;
+          if (serverSubtotal >= minAmt) {
+            validatedPromoCode = promoObj.code;
+            if (promoObj.type === 'fixed') {
+              serverDiscount = Math.min(serverSubtotal, Number(promoObj.value) || 0);
+            } else {
+              const pct = Math.min(100, Math.max(0, Number(promoObj.value) || 0));
+              serverDiscount = (serverSubtotal * pct) / 100;
+            }
           }
         }
       }
@@ -245,7 +250,7 @@ export async function POST(req: NextRequest) {
 
     const serverTotal = Math.max(0, Math.round((serverSubtotal - serverDiscount + serverShipping) * 100) / 100);
 
-    // 4. Normalize Payment Method & Enforce COD Gating
+    // 4. Normalize Payment Method & Enforce COD Total Removal (Item 21)
     let method: PaymentMethod = 'card';
     const methodStr = String(rawMethod || '').toLowerCase();
     if (methodStr.includes('apple')) {
@@ -256,25 +261,14 @@ export async function POST(req: NextRequest) {
       method = 'cash_on_delivery';
     }
 
-    // COD Gating Rules
+    // COD Gating Rules (Item 21: Completely disabled for ALL countries)
     if (method === 'cash_on_delivery') {
-      if (!isDomestic || countryCode !== 'AZ') {
-        return NextResponse.json(
-          {
-            error: 'Nağd ödəniş (COD) yalnız Azərbaycan daxili sifarişlər üçün keçərlidir. Beynəlxalq sifarişlər üçün kart və ya Apple/Google Pay seçin.',
-          },
-          { status: 400 }
-        );
-      }
-
-      // Check COD eligibility for custom POD items
-      const hasCustomItems = validatedItems.some((i) => i.isCustom);
-      if (hasCustomItems) {
-        return NextResponse.json(
-          { error: 'Fərdi dizaynlı məhsullar üçün çatdırılmada ödəniş keçərli deyil. Zəhmət olmasa kart və ya Apple/Google Pay seçin.' },
-          { status: 400 }
-        );
-      }
+      return NextResponse.json(
+        {
+          error: 'Nağd ödəniş (COD) ləğv edilmişdir. Bütün sifarişlər təhlükəsiz onlayn ödənişlə qəbul olunur.',
+        },
+        { status: 400 }
+      );
     }
 
     const orderId = body.id || ('VTX-ORD-' + Math.floor(1000 + Math.random() * 9000));
@@ -374,11 +368,9 @@ export async function POST(req: NextRequest) {
           ? 'Apple Pay'
           : method === 'google_pay'
           ? 'Google Pay'
-          : method === 'cash_on_delivery'
-          ? 'Çatdırılmada Ödəniş (COD)'
           : 'Bank Kartı (Visa/Mastercard)',
       paymentStatus: paymentResponse.status,
-      orderStatus: method === 'cash_on_delivery' ? 'Təsdiqləndi (COD)' : 'Yeni Sifariş',
+      orderStatus: 'Yeni Sifariş',
       subtotal: serverSubtotal,
       shipping: serverShipping,
       shippingMethod: validatedShippingOption.id,
@@ -421,6 +413,15 @@ export async function POST(req: NextRequest) {
           status: 'Pending Print',
           createdAt: new Date().toISOString(),
         });
+      }
+    }
+
+    if (validatedPromoCode) {
+      const promoToUpdate = (db.promoCodes || []).find(
+        (p) => (p.code || '').trim().toUpperCase() === validatedPromoCode!.toUpperCase()
+      );
+      if (promoToUpdate) {
+        promoToUpdate.uses = (Number(promoToUpdate.uses) || 0) + 1;
       }
     }
 

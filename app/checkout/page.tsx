@@ -107,8 +107,13 @@ const CHECKOUT_I18N = {
     postalCode: "Poçt indeksi / ZIP",
     enterPostalCode: "Poçt indeksini daxil edin",
     shippingMethodsTitle: "Çatdırılma Xidməti",
-    codAzOnly: "Nağd ödəniş yalnız Azərbaycan daxili sifarişlər üçün keçərlidir",
+    codAzOnly: "Nağd ödəniş (COD) ləğv edilmişdir. Yalnız təhlükəsiz onlayn ödənişlər qəbul edilir.",
     dduNotice: "Beynəlxalq sifarişlər DDU (Delivered Duty Unpaid) şərtilə göndərilir. Yerli gömrük rüsumları müştəri tərəfindən ödənilir.",
+    enterCity: "Zəhmət olmasa şəhər və ya rayonu qeyd edin",
+    validCity: "Düzgün şəhər adı daxil edin",
+    promoExpired: "Bu promokodun istifadə müddəti bitmişdir.",
+    promoMaxUses: "Bu promokodun maksimal istifadə sayı bitmişdir.",
+    secureOnlineOnly: "Bütün sifarişlər 256-bit SSL şifrələmə ilə yalnız onlayn qəbul edilir.",
   },
   en: {
     testBanner: "No real payment is charged. You can safely complete a test order in test mode.",
@@ -173,8 +178,13 @@ const CHECKOUT_I18N = {
     postalCode: "Postal / ZIP Code",
     enterPostalCode: "Please enter postal/ZIP code",
     shippingMethodsTitle: "Shipping Method",
-    codAzOnly: "Cash on delivery is only available within Azerbaijan",
+    codAzOnly: "Cash on delivery has been disabled. All orders are securely pre-paid online.",
     dduNotice: "International shipments are delivered DDU (Delivered Duty Unpaid). Applicable local customs fees are handled by customer.",
+    enterCity: "Please enter your city or district",
+    validCity: "Please enter a valid city name",
+    promoExpired: "This promo code has expired.",
+    promoMaxUses: "This promo code has reached its maximum usage limit.",
+    secureOnlineOnly: "All orders are processed securely online with 256-bit SSL encryption.",
   },
   ru: {
     testBanner: "Списание средств не производится. В тестовом режиме вы можете безопасно оформить заказ.",
@@ -239,8 +249,13 @@ const CHECKOUT_I18N = {
     postalCode: "Почтовый индекс / ZIP",
     enterPostalCode: "Введите почтовый индекс",
     shippingMethodsTitle: "Способ доставки",
-    codAzOnly: "Оплата при получении доступна только для заказов по Азербайджану",
+    codAzOnly: "Оплата при получении (COD) отключена. Все заказы оплачиваются онлайн.",
     dduNotice: "Международная доставка осуществляется на условиях DDU.",
+    enterCity: "Пожалуйста, укажите город или район",
+    validCity: "Введите корректное название города",
+    promoExpired: "Срок действия этого промокода истек.",
+    promoMaxUses: "Этот промокод исчерпал максимальный лимит использований.",
+    secureOnlineOnly: "Все заказы принимаются исключительно онлайн с 256-битным SSL-шифрованием.",
   },
   tr: {
     testBanner: "Gerçek ödeme alınmaz. Test modunda güvenle deneme siparişi verebilirsiniz.",
@@ -305,8 +320,13 @@ const CHECKOUT_I18N = {
     postalCode: "Posta Kodu / ZIP",
     enterPostalCode: "Posta kodunu girin",
     shippingMethodsTitle: "Teslimat Yöntemi",
-    codAzOnly: "Kapıda ödeme yalnızca Azerbaycan içi siparişlerde geçerlidir",
+    codAzOnly: "Kapıda ödeme (COD) kaldırılmıştır. Tüm siparişler güvenli çevrimiçi ödeme ile alınır.",
     dduNotice: "Uluslararası siparişler DDU (gümrük vergileri alıcıya ait) olarak gönderilir.",
+    enterCity: "Lütfen şehir veya ilçeyi giriniz",
+    validCity: "Geçerli bir şehir adı giriniz",
+    promoExpired: "Bu promosyon kodunun kullanım süresi dolmuştur.",
+    promoMaxUses: "Bu promosyon kodunun kullanım limiti dolmuştur.",
+    secureOnlineOnly: "Tüm siparişler 256-bit SSL şifreleme ile yalnızca çevrimiçi kabul edilir.",
   },
 };
 
@@ -393,9 +413,6 @@ export default function CheckoutPage() {
         setSelectedShippingMethodId("intl_standard");
       }
     }
-    if (newCode !== "AZ" && paymentMethod === "cod") {
-      setPaymentMethod("card");
-    }
     clearFieldError("country");
     clearFieldError("city");
     clearFieldError("postalCode");
@@ -403,10 +420,9 @@ export default function CheckoutPage() {
   };
 
   // Payment Selection - default to card so bank fields are ready and strictly validated
-  const [paymentMethod, setPaymentMethod] = useState<"apple_pay" | "google_pay" | "card" | "cod">("card");
+  const [paymentMethod, setPaymentMethod] = useState<"apple_pay" | "google_pay" | "card">("card");
   const [turnstileToken, setTurnstileToken] = useState<string>("");
   const isTestMode = process.env.NEXT_PUBLIC_PAYMENT_MODE === "test";
-  const enableCod = process.env.NEXT_PUBLIC_ENABLE_COD !== "false";
   const [walletDebugMsg, setWalletDebugMsg] = useState<{ text: string; method?: string } | null>(null);
 
   // Load Google Pay SDK in background
@@ -518,13 +534,13 @@ export default function CheckoutPage() {
 
     if (isDomestic) {
       if (!city.trim()) {
-        errors.city = "Zəhmət olmasa şəhər və ya rayonu qeyd edin";
+        errors.city = cT.enterCity || "Zəhmət olmasa şəhər və ya rayonu qeyd edin";
       }
     } else {
       if (!city.trim()) {
-        errors.city = "Zəhmət olmasa şəhəri qeyd edin";
+        errors.city = cT.enterCity || "Zəhmət olmasa şəhəri qeyd edin";
       } else if (city.trim().length < 2) {
-        errors.city = "Düzgün şəhər adı daxil edin";
+        errors.city = cT.validCity || "Düzgün şəhər adı daxil edin";
       }
 
       if (currentCountry?.requiresState && !stateOrRegion.trim()) {
@@ -612,8 +628,34 @@ export default function CheckoutPage() {
         setDiscountPercent(0);
         setPromoDiscountAmount(0);
         setAppliedPromoCode(null);
-        setPromoError("Yanlış promokod.");
+        setPromoError(langKey === "en" ? "Invalid promo code." : langKey === "ru" ? "Неверный промокод." : langKey === "tr" ? "Geçersiz promosyon kodu." : "Yanlış promokod.");
         return;
+      }
+
+      // Check Expiration (Item 22)
+      if (found.expiresAt) {
+        const expTime = new Date(found.expiresAt).getTime();
+        if (!isNaN(expTime) && Date.now() > expTime) {
+          setPromoApplied(false);
+          setDiscountPercent(0);
+          setPromoDiscountAmount(0);
+          setAppliedPromoCode(null);
+          setPromoError(cT.promoExpired || "Bu promokodun istifadə müddəti bitmişdir.");
+          return;
+        }
+      }
+
+      // Check Maximum Usage Limit (Item 22)
+      if (typeof found.maxUses === "number" && found.maxUses > 0) {
+        const currentUses = Number(found.uses) || 0;
+        if (currentUses >= found.maxUses) {
+          setPromoApplied(false);
+          setDiscountPercent(0);
+          setPromoDiscountAmount(0);
+          setAppliedPromoCode(null);
+          setPromoError(cT.promoMaxUses || "Bu promokodun maksimal istifadə sayı bitmişdir.");
+          return;
+        }
       }
 
       const minAmount = Number(found.minAmount) || 0;
@@ -622,7 +664,15 @@ export default function CheckoutPage() {
         setDiscountPercent(0);
         setPromoDiscountAmount(0);
         setAppliedPromoCode(null);
-        setPromoError(`Minimum sifariş məbləği ${minAmount} ₼ olmalıdır.`);
+        setPromoError(
+          langKey === "en"
+            ? `Minimum order amount must be ${minAmount}`
+            : langKey === "ru"
+            ? `Минимальная сумма заказа должна быть ${minAmount} ₼`
+            : langKey === "tr"
+            ? `Minimum sipariş tutarı ${minAmount} ₼ olmalıdır`
+            : `Minimum sifariş məbləği ${minAmount} ₼ olmalıdır.`
+        );
         return;
       }
 
@@ -662,6 +712,12 @@ export default function CheckoutPage() {
 
   const processOrder = async (chosenMethod: string) => {
     setErrorMsg(null);
+
+    if (!user) {
+      setErrorMsg(cT.loginToBuy || "Sifariş üçün giriş və ya qeydiyyat tələb olunur");
+      openAuthModal();
+      return;
+    }
 
     if (items.length === 0) {
       setErrorMsg("Səbətiniz boşdur.");
@@ -711,8 +767,6 @@ export default function CheckoutPage() {
               ? "Apple Pay"
               : chosenMethod === "google_pay"
               ? "Google Pay"
-              : chosenMethod === "cod"
-              ? "Çatdırılmada Ödəniş (COD)"
               : "Bank Kartı (Visa/Mastercard)",
           shippingMethod: activeShippingOption.id,
           shippingMethodLabel: activeShippingOption.name,
@@ -722,7 +776,7 @@ export default function CheckoutPage() {
           discount: discountAmount,
           promoCode: appliedPromoCode || null,
           currency: currency || "AZN",
-          orderStatus: chosenMethod === "cod" ? "Təsdiqləndi (COD)" : "Yeni Sifariş",
+          orderStatus: "Yeni Sifariş",
           total: finalTotal,
           turnstileToken: turnstileToken || undefined,
         }),
@@ -747,9 +801,9 @@ export default function CheckoutPage() {
             subtotal: totalPrice,
             shipping: shippingCost,
             discount: discountAmount,
-            paymentMethod: data.order.paymentMethod || chosenMethod,
-            paymentStatus: data.order.paymentStatus || (chosenMethod === "cod" ? "confirmed_cod" : isTestMode ? "test_paid" : "Ödənilib"),
-            orderStatus: data.order.orderStatus || (chosenMethod === "cod" ? "Təsdiqləndi (COD)" : "Yeni Sifariş"),
+            paymentMethod: data.order.paymentMethod || (chosenMethod === "apple_pay" ? "Apple Pay" : chosenMethod === "google_pay" ? "Google Pay" : "Bank Kartı"),
+            paymentStatus: data.order.paymentStatus || (isTestMode ? "test_paid" : "Ödənilib"),
+            orderStatus: data.order.orderStatus || "Yeni Sifariş",
             isTest: Boolean(data.order.isTest || isTestMode),
             customer: {
               fullName: fullName || "Müştəri",
@@ -792,6 +846,12 @@ export default function CheckoutPage() {
   };
 
   const handleNativePayment = async (method: "apple_pay" | "google_pay") => {
+    if (!user) {
+      setErrorMsg(cT.loginToBuy || "Sifariş üçün giriş və ya qeydiyyat tələb olunur");
+      openAuthModal();
+      return;
+    }
+
     setWalletDebugMsg(null);
     setPaymentMethod(method);
     const errors = validateShipping();
@@ -1047,6 +1107,12 @@ export default function CheckoutPage() {
   const handleCardSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!user) {
+      setErrorMsg(cT.loginToBuy || "Sifariş üçün giriş və ya qeydiyyat tələb olunur");
+      openAuthModal();
+      return;
+    }
+
     if (paymentMethod === "apple_pay") {
       handleNativePayment("apple_pay");
       return;
@@ -1054,25 +1120,6 @@ export default function CheckoutPage() {
 
     if (paymentMethod === "google_pay") {
       handleNativePayment("google_pay");
-      return;
-    }
-
-    if (paymentMethod === "cod") {
-      const shippingErrors = validateShipping();
-      setFieldErrors(shippingErrors);
-      if (Object.keys(shippingErrors).length > 0) {
-        const firstField = Object.keys(shippingErrors)[0];
-        setShakingField(firstField);
-        setTimeout(() => setShakingField(null), 600);
-        const el = document.getElementById(`field-${firstField}`);
-        if (el) {
-          el.focus();
-          el.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-        setErrorMsg(cT.checkErrorsBelow);
-        return;
-      }
-      processOrder("cod");
       return;
     }
 
@@ -1201,40 +1248,41 @@ export default function CheckoutPage() {
               )}
             </AnimatePresence>
 
-            {/* Customer Authentication Gate / Guest Checkout */}
+            {/* Customer Authentication Gate (Item 24: Mandatory Customer Account for Tracking) */}
             {!user ? (
-              <div className="bg-stone-50/90 border border-stone-200/90 rounded-3xl p-5 sm:p-6 space-y-3 shadow-2xs text-stone-900">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-stone-200/80 text-stone-700 flex items-center justify-center shrink-0">
-                      <User size={20} />
+              <div className="bg-amber-50/80 border border-amber-200/90 rounded-3xl p-5 sm:p-6 space-y-3 shadow-2xs text-stone-900">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-start sm:items-center gap-3.5">
+                    <div className="w-11 h-11 rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center shrink-0 border border-amber-200">
+                      <Lock size={20} />
                     </div>
-                    <div className="space-y-0.5">
+                    <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-eb-garamond text-lg font-normal text-stone-900">
-                          {language === "az" ? "Qonaq kimi sifariş" : language === "tr" ? "Misafir Siparişi" : language === "ru" ? "Заказ как гость" : "Guest Checkout"}
+                        <h3 className="font-eb-garamond text-lg font-semibold text-stone-900">
+                          {language === "az" ? "Müştəri Hesabı Tələb Olunur" : language === "tr" ? "Müşteri Hesabı Gereklidir" : language === "ru" ? "Требуется аккаунт клиента" : "Customer Account Required"}
                         </h3>
-                        <span className="text-[10px] font-bold bg-stone-200/80 text-stone-700 px-2 py-0.5 rounded-full">
-                          {language === "az" ? "Qeydiyyatsız" : language === "tr" ? "Kayıtsız" : language === "ru" ? "Без регистрации" : "Seamless"}
+                        <span className="text-[10px] font-bold bg-amber-200 text-amber-900 px-2.5 py-0.5 rounded-full border border-amber-300">
+                          {language === "az" ? "Təhlükəsiz İzləmə" : language === "tr" ? "Güvenli Takip" : language === "ru" ? "Безопасное отслеживание" : "Secure Tracking"}
                         </span>
                       </div>
-                      <p className="text-xs text-stone-500 leading-relaxed">
+                      <p className="text-xs text-stone-600 leading-relaxed max-w-xl">
                         {language === "az"
-                          ? "Qeydiyyatdan keçmədən birbaşa sifariş verə və ya VIP üstünlüklər üçün daxil ola bilərsiniz."
+                          ? "Sifarişinizin və kuryer izləmə kodunuzun heç vaxt itməməsi üçün sifarişdən əvvəl hesabınıza daxil olun və ya pulsuz qeydiyyatdan keçin."
                           : language === "tr"
-                          ? "Kayıt olmadan doğrudan sipariş verebilir veya VIP avantajlar için giriş yapabilirsiniz."
+                          ? "Siparişinizin ve kargo takip kodunuzun kaybolmaması için lütfen sipariş vermeden önce giriş yapın veya kayıt olun."
                           : language === "ru"
-                          ? "Вы можете оформить заказ без регистрации или войти для получения VIP-привилегий."
-                          : "You can place your order directly as a guest or sign in for VIP atelier perks."}
+                          ? "Чтобы ваш трек-код и данные заказа никогда не потерялись, пожалуйста, войдите в аккаунт или зарегистрируйтесь перед оформлением."
+                          : "To ensure your order tracking codes are never lost, please sign in or register an account before placing your order."}
                       </p>
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={openAuthModal}
-                    className="self-start sm:self-center shrink-0 py-2 px-4 rounded-full bg-stone-900 hover:bg-black text-white text-xs font-semibold uppercase tracking-wider transition shadow-2xs cursor-pointer"
+                    className="self-start sm:self-center shrink-0 py-2.5 px-5 rounded-full bg-stone-900 hover:bg-black text-white text-xs font-bold uppercase tracking-wider transition shadow-xs active:scale-98 cursor-pointer flex items-center gap-2"
                   >
-                    {t.auth.signIn}
+                    <User size={14} />
+                    <span>{t.auth.signIn} / {t.auth.signUp || "Qeydiyyat"}</span>
                   </button>
                 </div>
               </div>
@@ -1248,7 +1296,7 @@ export default function CheckoutPage() {
                     <div className="text-xs font-bold text-stone-900 flex items-center gap-2">
                       <span>{profile?.full_name || user.email}</span>
                       <span className="text-[9px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-200">
-                        VIP
+                        {language === "az" ? "Daxil olundu" : "Signed In"}
                       </span>
                     </div>
                     <div className="text-[11px] text-stone-500 font-mono">{user.email}</div>
@@ -1392,7 +1440,7 @@ export default function CheckoutPage() {
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-semibold text-stone-700 uppercase">{t.checkout.email} *</label>
                       {user?.email && (
-                        <span className="text-[10px] text-emerald-700 font-bold">VIP</span>
+                        <span className="text-[10px] text-emerald-700 font-bold">✓ {language === "az" ? "Təsdiqlənib" : "Verified"}</span>
                       )}
                     </div>
                     <input
@@ -1901,52 +1949,11 @@ export default function CheckoutPage() {
                     </span>
                   </label>
 
-                  {/* Option 4: Cash on Delivery (COD) */}
-                  {isDomestic ? (
-                    <label
-                      onClick={() => {
-                        if (!hasCustomItems) {
-                          setPaymentMethod("cod");
-                        }
-                      }}
-                      className={`p-4 rounded-2xl border flex items-center justify-between transition-all ${
-                        hasCustomItems
-                          ? "border-stone-200 bg-stone-100/60 opacity-60 cursor-not-allowed"
-                          : paymentMethod === "cod"
-                          ? "border-stone-900 bg-stone-50 text-stone-900 ring-1 ring-stone-900/10 shadow-xs cursor-pointer"
-                          : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:text-stone-900 cursor-pointer"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <Truck size={20} className={paymentMethod === "cod" ? "text-stone-900" : "text-stone-400"} />
-                        <div>
-                          <div className="text-xs font-bold text-stone-900 flex items-center gap-2">
-                            <span>{cT.codTitle}</span>
-                            {hasCustomItems && (
-                              <span className="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded font-semibold">
-                                {cT.codNoCustom}
-                              </span>
-                            )}
-                          </div>
-                          <div className="text-[11px] text-stone-500">
-                            {hasCustomItems
-                              ? "Fərdi studiya məhsulları üçün yalnız onlayn ödəniş keçərlidir"
-                              : cT.codSubtitle}
-                          </div>
-                        </div>
-                      </div>
-                      <span className="w-4 h-4 rounded-full border-2 border-stone-300 flex items-center justify-center">
-                        {paymentMethod === "cod" && <span className="w-2 h-2 rounded-full bg-stone-900" />}
-                      </span>
-                    </label>
-                  ) : (
-                    <div className="p-3.5 rounded-2xl bg-amber-500/5 border border-amber-500/20 text-xs text-amber-900 flex items-center gap-2.5">
-                      <AlertCircle size={15} className="text-amber-700 shrink-0" />
-                      <span className="text-[11px]">
-                        {cT.codAzOnly}
-                      </span>
-                    </div>
-                  )}
+                  {/* Secure Online Payment Guarantee Notice */}
+                  <div className="pt-2 flex items-center gap-2.5 text-[11px] text-stone-600 bg-stone-50 border border-stone-200/80 rounded-2xl p-3">
+                    <ShieldCheck size={16} className="text-emerald-700 shrink-0" />
+                    <span>{cT.secureOnlineOnly}</span>
+                  </div>
 
                   {/* Card Form when selected */}
                   {paymentMethod === "card" && (
@@ -2120,11 +2127,6 @@ export default function CheckoutPage() {
                     <GooglePayLogo className="h-5 w-auto" />
                     <span className="font-semibold tracking-normal lowercase first-letter:uppercase">ilə ödə — {currency === "USD" ? `$${finalTotal.toFixed(2)}` : `${finalTotal.toFixed(2)} ₼`}</span>
                   </>
-                ) : paymentMethod === "cod" ? (
-                  <>
-                    <Truck size={15} />
-                    <span>{t.checkout.confirmOrder} (Qapıda Ödəniş) — {currency === "USD" ? `$${finalTotal.toFixed(2)}` : `${finalTotal.toFixed(2)} ₼`}</span>
-                  </>
                 ) : (
                   <>
                     <Lock size={15} />
@@ -2173,7 +2175,7 @@ export default function CheckoutPage() {
 
               {/* Promo Code Form */}
               <div className="pt-3 border-t border-stone-100">
-                <form onSubmit={applyPromo} className="flex gap-2">
+                <form noValidate onSubmit={applyPromo} className="flex gap-2">
                   <input
                     type="text"
                     placeholder={language === "az" ? "Promokod daxil edin" : language === "ru" ? "Введите промокод" : language === "tr" ? "Promosyon kodu" : "Enter promo code"}

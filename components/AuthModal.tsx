@@ -38,6 +38,17 @@ export function AuthModal() {
     setIsSubmitting(true);
 
     try {
+      if (!email.trim()) {
+        setErrorMsg(t.checkout.email);
+        setIsSubmitting(false);
+        return;
+      }
+      if (!password.trim()) {
+        setErrorMsg(t.auth.password);
+        setIsSubmitting(false);
+        return;
+      }
+
       if (mode === "signin") {
         const res = await signInWithEmail(email, password);
         if (res.error) {
@@ -168,7 +179,7 @@ export function AuthModal() {
         </AnimatePresence>
 
         {/* Email & Password Form */}
-        <form onSubmit={handleSubmit} className="space-y-3.5">
+        <form noValidate onSubmit={handleSubmit} className="space-y-3.5">
           {mode === "signup" && (
             <div className="space-y-1">
               <label className="text-[11px] font-semibold text-stone-700 uppercase">

@@ -123,8 +123,99 @@ export async function GET(req: NextRequest) {
     const podOrders = db.podOrders || [];
 
     const matchedOrders: any[] = [];
+    const matchedOrderIds = new Set<string>();
+    const matchedTrackingCodes = new Set<string>();
 
-    // 1. SEARCH LOCAL DATABASE
+    // 1. SEARCH LIVE SUPABASE CLOUD DATABASE FIRST (Live authoritative status)
+    if (supabaseServer) {
+      try {
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanQuery);
+        let supaQuery = supabaseServer.from("orders").select("*, order_items(*)");
+
+        if (isEmailSearch) {
+          supaQuery = supaQuery.ilike("customer_email", query.toLowerCase());
+        } else if (isPhoneSearch) {
+          supaQuery = supaQuery.ilike("customer_phone", `%${cleanDigits.slice(-7)}%`);
+        } else if (isUuid) {
+          supaQuery = supaQuery.eq("id", cleanQuery);
+        } else {
+          // By order code / tracking code: safely query tracking_code, notes, or phone without UUID cast error
+          const cleanSafeDigits = cleanDigits.length >= 4 ? cleanDigits.slice(-7) : cleanQuery;
+          try {
+            supaQuery = supaQuery.or(`tracking_code.ilike.%${cleanQuery}%,customer_phone.ilike.%${cleanSafeDigits}%`);
+          } catch {
+            supaQuery = supaQuery.or(`notes.ilike.%${cleanQuery}%,customer_phone.ilike.%${cleanSafeDigits}%`);
+          }
+        }
+
+        let { data: supaData, error: supaError } = await supaQuery.order("created_at", { ascending: false });
+
+        // If tracking_code column does not exist in some environments, fallback to querying notes/phone
+        if (supaError && !isUuid && !isEmailSearch && !isPhoneSearch) {
+          const cleanSafeDigits = cleanDigits.length >= 4 ? cleanDigits.slice(-7) : cleanQuery;
+          const fallbackQuery = supabaseServer
+            .from("orders")
+            .select("*, order_items(*)")
+            .or(`notes.ilike.%${cleanQuery}%,customer_phone.ilike.%${cleanSafeDigits}%`)
+            .order("created_at", { ascending: false });
+          const fbRes = await fallbackQuery;
+          if (!fbRes.error && fbRes.data) {
+            supaData = fbRes.data;
+            supaError = null;
+          }
+        }
+
+        if (!supaError && supaData && supaData.length > 0) {
+          const converted = supaData.map((so: any) => {
+            const rawTracking = so.tracking_code || (so.notes && so.notes.includes("AZ-EXP-") ? so.notes.match(/AZ-EXP-[A-Z0-9]+/)?.[0] : null);
+            const trackingCode = rawTracking || `AZ-EXP-${String(so.id).replace(/[^0-9]/g, "") || "8841"}`;
+
+            return {
+              id: String(so.id),
+              date: so.created_at,
+              customer: {
+                fullName: so.customer_name || "Müştəri",
+                phone: so.customer_phone || "-",
+                email: so.customer_email || "-",
+                address: so.delivery_address || "-",
+                addressLine2: so.delivery_address_line2 || undefined,
+                city: so.delivery_city || (so.delivery_country && so.delivery_country !== "Azərbaycan" && so.delivery_country !== "Azerbaijan" ? "-" : "Bakı"),
+                stateOrRegion: so.delivery_state || undefined,
+                postalCode: so.delivery_postal_code || undefined,
+                country: so.delivery_country || "Azərbaycan",
+              },
+              items: (so.order_items || []).map((it: any) => ({
+                name: it.item_name,
+                color: it.color || "Standart",
+                size: it.size || "L",
+                quantity: it.quantity || 1,
+                price: Number(it.unit_price) || 0,
+              })),
+              subtotal: Number(so.total_amount) || 0,
+              shipping: Number(so.shipping_amount) || 0,
+              discount: 0,
+              total: Number(so.total_amount) || 0,
+              paymentMethod: so.payment_method || "Kart",
+              paymentStatus: so.payment_status || "Ödənilib",
+              orderStatus: so.order_status || "Yeni Sifariş",
+              trackingCode,
+              statusMeta: getStepIndex(so.order_status),
+              source: "Supabase",
+            };
+          });
+
+          for (const co of converted) {
+            matchedOrders.push(co);
+            matchedOrderIds.add(co.id);
+            if (co.trackingCode) matchedTrackingCodes.add(co.trackingCode.toUpperCase());
+          }
+        }
+      } catch (err) {
+        console.warn("[OrdersTrack] Supabase search notice:", err);
+      }
+    }
+
+    // 2. SEARCH LOCAL STOREDB (FALLBACK & MERGE)
     const localMatches = localOrders.filter((o: any) => {
       const customerEmail = (o.customer?.email || "").trim().toLowerCase();
       const customerPhone = normalizePhone(o.customer?.phone || "");
@@ -160,69 +251,18 @@ export async function GET(req: NextRequest) {
       return false;
     });
 
-    matchedOrders.push(...localMatches);
-
-    // 2. SEARCH SUPABASE CLOUD DATABASE
-    if (supabaseServer) {
-      try {
-        let supaQuery = supabaseServer.from("orders").select("*, order_items(*)");
-
-        if (isEmailSearch) {
-          supaQuery = supaQuery.ilike("customer_email", query.toLowerCase());
-        } else if (isPhoneSearch) {
-          supaQuery = supaQuery.ilike("customer_phone", `%${cleanDigits.slice(-7)}%`);
-        } else {
-          // By order code: match by ID
-          supaQuery = supaQuery.ilike("id", `%${query.replace(/^#/, "")}%`);
-        }
-
-        const { data: supaData, error: supaError } = await supaQuery.order("created_at", { ascending: false });
-
-        if (!supaError && supaData && supaData.length > 0) {
-          const converted = supaData.map((so: any) => ({
-            id: String(so.id),
-            date: so.created_at,
-            customer: {
-              fullName: so.customer_name || "Müştəri",
-              phone: so.customer_phone || "-",
-              email: so.customer_email || "-",
-              address: so.delivery_address || "-",
-              addressLine2: so.delivery_address_line2 || undefined,
-              city: so.delivery_city || (so.delivery_country && so.delivery_country !== "Azərbaycan" && so.delivery_country !== "Azerbaijan" ? "-" : "Bakı"),
-              stateOrRegion: so.delivery_state || undefined,
-              postalCode: so.delivery_postal_code || undefined,
-              country: so.delivery_country || "Azərbaycan",
-            },
-            items: (so.order_items || []).map((it: any) => ({
-              name: it.item_name,
-              color: it.color || "Standart",
-              size: it.size || "L",
-              quantity: it.quantity || 1,
-              price: Number(it.unit_price) || 0,
-            })),
-            subtotal: Number(so.total_amount) || 0,
-            shipping: 0,
-            discount: 0,
-            total: Number(so.total_amount) || 0,
-            paymentMethod: so.payment_method || "Kart",
-            paymentStatus: so.payment_status || "Ödənilib",
-            orderStatus: so.order_status || "Yeni Sifariş",
-            trackingCode: `AZ-EXP-${String(so.id).replace(/[^0-9]/g, "") || "8841"}`,
-            statusMeta: getStepIndex(so.order_status),
-            source: "Supabase",
-          }));
-
-          // Merge and deduplicate
-          const existingIds = new Set(matchedOrders.map((o) => String(o.id)));
-          for (const co of converted) {
-            if (!existingIds.has(co.id)) {
-              matchedOrders.push(co);
-              existingIds.add(co.id);
-            }
-          }
-        }
-      } catch (err) {
-        console.warn("[OrdersTrack] Supabase search notice:", err);
+    // Merge storeDb orders if not already retrieved with live status from Supabase
+    for (const lo of localMatches) {
+      const loId = String(lo.id);
+      const loTrack = (lo.trackingCode || "").toUpperCase();
+      if (!matchedOrderIds.has(loId) && (!loTrack || !matchedTrackingCodes.has(loTrack))) {
+        matchedOrders.push({
+          ...lo,
+          statusMeta: (lo as any).statusMeta || getStepIndex(lo.orderStatus),
+          source: (lo as any).source || "storeDb",
+        });
+        matchedOrderIds.add(loId);
+        if (loTrack) matchedTrackingCodes.add(loTrack);
       }
     }
 

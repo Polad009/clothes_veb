@@ -125,9 +125,9 @@ export default function AccountPage() {
               {(profile?.full_name || user.email || "H")[0].toUpperCase()}
             </div>
             <div>
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-[10px] font-bold uppercase tracking-wider mb-1">
-                <ShieldCheck size={12} className="text-amber-700" />
-                <span>HORVVALLE VIP</span>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-stone-100 border border-stone-200 text-stone-800 text-[10px] font-bold uppercase tracking-wider mb-1">
+                <ShieldCheck size={12} className="text-stone-600" />
+                <span>HORVVALLE ATELIER</span>
               </div>
               <h1 className="font-eb-garamond text-2xl sm:text-3xl font-normal text-stone-900">
                 {profile?.full_name || user.email?.split('@')[0]}
@@ -266,7 +266,7 @@ export default function AccountPage() {
                 WhatsApp Concierge
               </h4>
               <p className="text-xs text-stone-300 leading-relaxed">
-                7/24 VIP Support
+                24/7 Dəstək Xidməti
               </p>
               <a
                 href="https://wa.me/994103283152"

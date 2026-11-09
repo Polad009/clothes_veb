@@ -16,7 +16,7 @@ function localizeHeroFit(fit: string | undefined, lang: string) {
   return fit;
 }
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -243,6 +243,9 @@ export function Hero() {
     setTimeout(() => setIsAnimating(false), 450);
   }, [isAnimating, total]);
 
+  const heroRef = useRef<HTMLElement | null>(null);
+  const lastWheelTimeRef = useRef<number>(0);
+
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -254,6 +257,34 @@ export function Hero() {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleNext, handlePrev]);
+
+  // Intercept horizontal wheel / trackpad gestures (deltaX) on the hero container to cycle slides
+  // smoothly and prevent horizontal trackpad swipes from triggering Lenis vertical scroll and stretching.
+  useEffect(() => {
+    const el = heroRef.current;
+    if (!el) return;
+
+    const onWheel = (e: WheelEvent) => {
+      // If horizontal gesture is clearly dominant
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY) && Math.abs(e.deltaX) > 18) {
+        e.preventDefault();
+        const now = Date.now();
+        if (now - lastWheelTimeRef.current > 420) {
+          lastWheelTimeRef.current = now;
+          if (e.deltaX > 0) {
+            handleNext();
+          } else {
+            handlePrev();
+          }
+        }
+      }
+    };
+
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+    };
   }, [handleNext, handlePrev]);
 
   // Slider animation - Smooth horizontal glide (right-to-left / left-to-right)
@@ -287,6 +318,7 @@ export function Hero() {
 
   return (
     <section
+      ref={heroRef}
       id="hero-section"
       style={{
         background: currentItem.bgGradient,
@@ -294,13 +326,13 @@ export function Hero() {
         ["--hero-bg" as any]: currentItem.bgGradient,
         ["--hero-ink" as any]: currentItem.colorHex,
       }}
-      className="relative w-full min-h-[100dvh] h-auto lg:h-[100dvh] lg:max-h-[100dvh] flex flex-col justify-between overflow-x-hidden text-white select-none isolate"
+      className="relative w-full h-[100dvh] max-h-[100dvh] -mt-[88px] sm:-mt-[96px] flex flex-col justify-between overflow-hidden text-white select-none isolate"
       aria-label="Horvvalle Atelier Hero"
     >
       {/* =========================================================================
           MAIN HERO CONTENT (Left Typography, Center Product, Right Spec)
           ========================================================================= */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 lg:pt-24 pb-2 lg:pb-1 flex-1 flex flex-col justify-center min-h-0">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 lg:pt-22 pb-1 flex-1 flex flex-col justify-center min-h-0 overflow-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-8 items-center w-full">
           
           {/* =====================================================================
@@ -476,7 +508,7 @@ export function Hero() {
       {/* =========================================================================
           BOTTOM ROW: SOCIAL ICONS (LEFT), SLOGAN (CENTER), NEXT THUMBNAIL (RIGHT)
           ========================================================================= */}
-      <div className="relative z-30 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-5 sm:pb-6 lg:pb-6 pt-3 mt-4 lg:mt-0 flex flex-col sm:flex-row items-center justify-between shrink-0 gap-3.5 sm:gap-4">
+      <div className="relative z-30 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-3 sm:pb-4 lg:pb-5 pt-1 mt-1 lg:mt-0 flex flex-col sm:flex-row items-center justify-between shrink-0 gap-3 sm:gap-4">
         
         {/* Left: Social Media Icons + Mobile Thumbnail Toggle */}
         <div className="flex items-center justify-between w-full sm:w-auto gap-4 order-2 sm:order-1">
@@ -596,10 +628,10 @@ export function Hero() {
         </div>
       </div>
 
-      {/* Seamless bottom brown extension to eliminate any subpixel/scaling white gap */}
+      {/* Seamless bottom fill contained inside overflow-hidden */}
       <div
         style={{ background: currentItem.bgGradient }}
-        className="absolute -bottom-8 inset-x-0 h-10 pointer-events-none z-10"
+        className="absolute bottom-0 inset-x-0 h-4 pointer-events-none z-10"
         aria-hidden="true"
       />
     </section>

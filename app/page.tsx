@@ -66,9 +66,9 @@ export default function Home() {
       id: "koynek",
       num: "01",
       title: t.home.shirtsCategory || "T-Shirt & Köynək",
-      desc: language === "en" ? "McLaren 750S & Vintage Polo" : language === "ru" ? "McLaren 750S и поло" : language === "tr" ? "McLaren 750S & Polo" : "McLaren 750S & Vintage Polo",
-      fabric: language === "en" ? "100% Pure Cotton · 220-240 GSM" : language === "ru" ? "100% Чистый Хлопок · 220-240 GSM" : language === "tr" ? "%100 Saf Pamuk · 220-240 GSM" : "100% Xalis Pambıq · 220-240 GSM",
-      image: "/images/uploads/mclaren_presentation_board.png",
+      desc: language === "en" ? "Oxford Button-Down & Minimalist Tee" : language === "ru" ? "Оксфордская рубашка и базовые футболки" : language === "tr" ? "Oxford Gömlek & Minimalist Tişört" : "Oxford Köynək & Minimalist Tee",
+      fabric: language === "en" ? "100% Combed Cotton · 220-240 GSM" : language === "ru" ? "100% Гребенной хлопок · 220-240 GSM" : language === "tr" ? "%100 Penye Pamuk · 220-240 GSM" : "100% Daranmış Pambıq · 220-240 GSM",
+      image: "/images/products/white-oxford-button-down-shirt/mockup.jpg",
       link: "/collections?category=koynek",
       count: language === "en" ? "6 Models" : language === "ru" ? "6 Моделей" : language === "tr" ? "6 Model" : "6 Model",
       tag: "240 GSM COUTURE",
@@ -77,9 +77,9 @@ export default function Home() {
       id: "hudi",
       num: "02",
       title: t.home.hoodiesCategory || "Hudi & Sviter",
-      desc: language === "en" ? "BMW M Motorsport & Angel Dust" : language === "ru" ? "BMW M Motorsport и Angel Dust" : language === "tr" ? "BMW M Motorsport & Hudi" : "BMW M Motorsport & Angel Dust",
+      desc: language === "en" ? "Heavyweight Oversized Hoodie & Knitwear" : language === "ru" ? "Плотное оверсайз худи и трикотаж" : language === "tr" ? "Ağır Oversized Hudi & Triko" : "Oversized Hudi & Dərzi Trikotajı",
       fabric: language === "en" ? "Heavy 3-Thread Fleece · 380 GSM" : language === "ru" ? "Плотный флис 3-нитка · 380 GSM" : language === "tr" ? "Ağır 3 İplik Polar · 380 GSM" : "Ağır 3iplik Fleece · 380 GSM",
-      image: "/images/uploads/bmw_hoodie_presentation.png",
+      image: "/images/products/heavyweight-hoodie-black/mockup.jpg",
       link: "/collections?category=hudi",
       count: language === "en" ? "4 Models" : language === "ru" ? "4 Модели" : language === "tr" ? "4 Model" : "4 Model",
       tag: "380 GSM FLEECE",
@@ -88,9 +88,9 @@ export default function Home() {
       id: "salvar",
       num: "03",
       title: t.home.pantsCategory || "Şalvar & Şortik",
-      desc: language === "en" ? "Chino, Denim & Cargo" : language === "ru" ? "Чинос, деним и карго" : language === "tr" ? "Chino, Denim & Kargo" : "Chino & Denim & Kargo",
+      desc: language === "en" ? "Tailored Chino & Straight Indigo Denim" : language === "ru" ? "Классические чиносы и прямой деним" : language === "tr" ? "Terzi Chino & Düz Kesim Denim" : "Klassik Chino & Düz Kəsim Denim",
       fabric: language === "en" ? "Cotton Twill & 12.5 oz Indigo" : language === "ru" ? "Хлопковый твил и 12.5 унций индиго" : language === "tr" ? "Pamuklu Dimi & 12.5 oz İndigo" : "Pambıq Twill & 12.5 oz İndiqo",
-      image: "/images/categories/salvar-and-shortik-showcase.webp",
+      image: "/images/products/classic-straight-indigo-jeans/mockup.jpg",
       link: "/collections?category=salvar",
       count: language === "en" ? "5 Models" : language === "ru" ? "5 Моделей" : language === "tr" ? "5 Model" : "5 Model",
       tag: language === "en" ? "PRECISION ATELIER CUT" : language === "ru" ? "ТОЧНЫЙ КРОЙ АТЕЛЬЕ" : language === "tr" ? "HASSAS ATÖLYE KESİMİ" : "DƏQİQ ATELYE KƏSİMİ",
@@ -99,12 +99,12 @@ export default function Home() {
       id: "aksesuar",
       num: "04",
       title: t.home.accessoriesCategory || "Aksesuarlar",
-      desc: language === "en" ? "Caps & Eco Tote Bags" : language === "ru" ? "Кепки и эко-сумки" : language === "tr" ? "Şapkalar & Eko Çantalar" : "Kepkalar & Eko Çantalar",
+      desc: language === "en" ? "Heavy Snapback Cap & Canvas Tote" : language === "ru" ? "Плотные кепки и эко-сумки холст" : language === "tr" ? "Kalın Şapka & Doğal Keten Çanta" : "Qalın Kepka & Təbii Kətan Çanta",
       fabric: language === "en" ? "Heavy Twill & Natural Canvas" : language === "ru" ? "Плотный твил и натуральный холст" : language === "tr" ? "Kalın Dimi & Doğal Keten" : "Qalın Twill & Təbii Kətan",
-      image: "/images/products/bmw-m-motorsport-cap/black_front.webp",
+      image: "/images/products/snapback-cap-heavy/mockup.jpg",
       link: "/collections?category=aksesuar",
       count: language === "en" ? "1 Model" : language === "ru" ? "1 Модель" : language === "tr" ? "1 Model" : "1 Model",
-      tag: language === "en" ? "ATELIER PRINT STUDIO" : language === "ru" ? "АТЕЛЬЕ СТУДИЯ ПЕЧАТИ" : language === "tr" ? "ATÖLYE BASKI STÜDYOSU" : "ATELYE ÇAP STUDİYASI",
+      tag: language === "en" ? "ATELIER ACCESSORIES" : language === "ru" ? "АТЕЛЬЕ АКСЕССУАРЫ" : language === "tr" ? "ATÖLYE AKSESUAR" : "ATELYE AKSESUARLARI",
     },
   ];
 
@@ -177,14 +177,14 @@ export default function Home() {
                   <Link
                     href={cat.link}
                     prefetch={true}
-                    className="block relative aspect-[4/3] rounded-2xl overflow-hidden bg-[#FAF7F2] my-4 cursor-pointer"
+                    className="block relative aspect-[3/4] rounded-2xl overflow-hidden bg-[#FAF7F2] my-4 cursor-pointer"
                   >
                     <Image
                       src={cat.image}
                       alt={cat.title}
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                      className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-108"
+                      className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
                       loading="lazy"
                     />
                     <div className="absolute inset-0 bg-stone-900/0 group-hover:bg-stone-900/10 transition-colors" />
@@ -232,11 +232,13 @@ export default function Home() {
         {/* Section Header & Filter Tabs */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-stone-200/80">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-[0.25em] text-stone-600 block mb-1">
-              {t.home.selectedModels || "SEÇİLMİŞ MODELLƏR"}
-            </span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-stone-100 border border-stone-200/80 text-[10px] font-bold uppercase tracking-[0.2em] text-stone-600 mb-2">
+              <span>HORVVALLE ATELIER</span>
+              <span className="w-1 h-1 rounded-full bg-stone-400" />
+              <span>COUTURE</span>
+            </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-normal uppercase tracking-tight text-stone-900 font-serif-luxury">
-              {t.home.wardrobeFoundation || "QARDEROBUNUZUN TƏMƏLİ"}
+              {t.home.selectedModels || "SEÇİLMİŞ MODELLƏR"}
             </h2>
           </div>
 
@@ -387,38 +389,45 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 5. DUAL CAMPAIGN BANNERS (Şalvarlar & Corablar) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Banner 1: Chino & Cins Şalvarlar */}
-          <div data-cms-section="promoBanner" data-cms-title="Şalvar Kolleksiyası Banneri" className="relative aspect-[4/5] sm:aspect-[16/11] rounded-3xl overflow-hidden border border-stone-200/80 group bg-white shadow-2xs">
+      {/* 5. PANTS EDITORIAL SPLIT SHOWCASE (ON ACTUAL MODELS) */}
+      <section data-cms-section="promoBanner" data-cms-title="Şalvar Kolleksiyası Banneri" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+          {/* Left Column: Full Editorial Hero on Model */}
+          <div className="lg:col-span-7 relative min-h-[460px] rounded-3xl overflow-hidden border border-stone-200/80 group bg-stone-900 shadow-sm flex flex-col justify-end p-7 sm:p-10">
             <Image
               src={
-                promoBanner?.image && !promoBanner.image.includes("beige-slim-chino-pants/mockup")
+                promoBanner?.image && !promoBanner.image.includes("pants_collection_banner")
                   ? promoBanner.image
-                  : "/images/categories/pants_collection_banner.jpg"
+                  : "/images/products/beige-slim-chino-pants/mockup.jpg"
               }
-              alt="Şalvar Kolleksiyası"
+              alt="Horvvalle Şalvar Kolleksiyası"
               fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover transition-transform duration-700 group-hover:scale-103"
+              sizes="(max-width: 1024px) 100vw, 60vw"
+              className="object-cover object-top transition-transform duration-700 group-hover:scale-103 opacity-90"
               loading="lazy"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-6 sm:p-10 text-white z-10">
-              <span className="text-xs font-semibold text-stone-300 uppercase tracking-wider">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10 pointer-events-none" />
+            <div className="relative z-20 text-white space-y-3">
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[10px] font-bold uppercase tracking-[0.2em] text-[#E6C280]">
                 {language === "en" ? "HORVVALLE TAILORING" : language === "ru" ? "КРОЙ HORVVALLE" : language === "tr" ? "HORVVALLE KESİMLERİ" : (promoBanner?.tag || "HORVVALLE KƏSİMLƏRİ")}
               </span>
-              <h3 className="text-2xl sm:text-3xl font-serif-luxury font-normal uppercase mt-1">
+              <h3 className="text-2xl sm:text-3xl lg:text-4xl font-serif-luxury font-normal uppercase tracking-tight leading-snug">
                 {language === "en" ? "PERFECT PANTS FOR EVERY DAY" : language === "ru" ? "ИДЕАЛЬНЫЕ БРЮКИ НА КАЖДЫЙ ДЕНЬ" : language === "tr" ? "HER GÜN İÇİN İDEAL PANTOLONLAR" : (promoBanner?.title || "HƏR GÜN ÜÇÜN İDEAL ŞALVARLAR")}
               </h3>
-              <p className="text-xs text-stone-200 mt-1.5 max-w-sm line-clamp-2">
-                {language === "en" ? "Classic chinos, comfortable linen, and straight-fit denim. Perfect for office or city strolls." : language === "ru" ? "Классические чиносы, удобный лен и прямой деним. Идеально для офиса и прогулок." : language === "tr" ? "Klasik chino, rahat keten ve düz kesim denim pantolonlar. Ofis veya şehir yürüyüşleri için ideal." : (promoBanner?.subtitle || "Klassik chino, rahat kətan və düz kəsim denim şalvarlar. İstər ofis, istərsə də şəhər gəzintisi üçün.")}
+              <p className="text-xs sm:text-sm text-stone-200 max-w-lg leading-relaxed">
+                {language === "en"
+                  ? "Precision cut tailored chinos, straight indigo denim, and breathable linen trousers. Model-tested fits crafted for elevated everyday comfort."
+                  : language === "ru"
+                  ? "Точный крой чинос, прямой деним индиго и легкие брюки. Проверенные на моделях силуэты для безупречного стиля."
+                  : language === "tr"
+                  ? "Hassas terzi kesimi chino, düz indigo denim ve nefes alabilir pantolonlar. Günlük konfor için tasarlandı."
+                  : (promoBanner?.subtitle || "Klassik chino, rahat kətan və düz kəsim denim şalvarlar. Model üzərində dəqiqləşdirilmiş xüsusi atelye kəsimi.")}
               </p>
-              <div className="pt-4">
+              <div className="pt-2">
                 <Link
                   href={promoBanner?.ctaLink || "/collections?category=salvar"}
                   prefetch={true}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white text-stone-900 font-medium text-xs uppercase tracking-wider hover:bg-stone-100 transition shadow-sm"
+                  className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-white text-stone-900 font-semibold text-xs uppercase tracking-wider hover:bg-stone-100 transition shadow-sm active:scale-95"
                 >
                   <span>{language === "en" ? "ALL PANTS" : language === "ru" ? "ВСЕ БРЮКИ" : language === "tr" ? "TÜM PANTOLONLAR" : (promoBanner?.ctaText || "BÜTÜN ŞALVARLAR")}</span>
                   <ArrowRight size={14} />
@@ -427,36 +436,102 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Banner 2: Premium 3iplik Hudi Kolleksiyası */}
-          <div data-cms-section="campaignSecondary" data-cms-title="Hudi Kolleksiyası Banneri" className="relative aspect-[4/5] sm:aspect-[16/11] rounded-3xl overflow-hidden border border-stone-200/80 group bg-white shadow-2xs">
-            <Image
-              src={campaignSecondary?.image || "/images/products/heavyweight-hoodie-black/mockup.jpg"}
-              alt="Hudi Kolleksiyası"
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover transition-transform duration-700 group-hover:scale-103"
-              loading="lazy"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-6 sm:p-10 text-white z-10">
-              <span className="text-xs font-semibold text-stone-300 uppercase tracking-wider">
-                {language === "en" ? "HORVVALLE COUTURE" : language === "ru" ? "HORVVALLE COUTURE" : language === "tr" ? "HORVVALLE COUTURE" : (campaignSecondary?.tag || "HORVVALLE COUTURE")}
-              </span>
-              <h3 className="text-2xl sm:text-3xl font-serif-luxury font-normal uppercase mt-1">
-                {language === "en" ? "WARM & COMFORTABLE OVERSIZED HOODIE COLLECTION" : language === "ru" ? "ТЕПЛАЯ И УДОБНАЯ КОЛЛЕКЦИЯ ОВЕРСАЙЗ ХУДИ" : language === "tr" ? "SICAK VE RAHAT OVERSIZED HUDİ KOLEKSİYONU" : (campaignSecondary?.title || "İSTİ VƏ RAHAT OVERSIZED HUDİ KOLLEKSİYASI")}
-              </h3>
-              <p className="text-xs text-stone-200 mt-1.5 max-w-sm line-clamp-2">
-                {language === "en" ? "Thick 380 GSM cotton feel, warm lining, and vibrant DTF print quality. Ideal for streetwear style." : language === "ru" ? "Плотный хлопок 380 GSM, теплая подкладка и яркая печать DTF. Идеально для уличного стиля." : language === "tr" ? "Kalın 380 GSM pamuk dokusu, sıcak astar ve canlı DTF baskı kalitesi. Şehir stili için ideal." : (campaignSecondary?.subtitle || "Qalın 380 GSM pambıq toxunuşu, isti astar və canlı DTF çap keyfiyyəti. Şəhər stili üçün ideal.")}
-              </p>
-              <div className="pt-4">
-                <Link
-                  href={campaignSecondary?.ctaLink || "/collections?category=hudi"}
-                  prefetch={true}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white text-stone-900 font-medium text-xs uppercase tracking-wider hover:bg-stone-100 transition shadow-sm"
-                >
-                  <span>{language === "en" ? "VIEW HOODIES" : language === "ru" ? "СМОТРЕТЬ ХУДИ" : language === "tr" ? "HUDİLERE BAK" : (campaignSecondary?.ctaText || "HUDİLƏRƏ BAX")}</span>
-                  <ArrowRight size={14} />
-                </Link>
+          {/* Right Column: Model Fitting Lookbook Duo */}
+          <div className="lg:col-span-5 flex flex-col gap-6">
+            {/* Card 1: Straight Indigo Denim on Model */}
+            <Link
+              href="/products/classic-straight-indigo-jeans"
+              prefetch={true}
+              className="group relative flex-1 min-h-[220px] rounded-3xl overflow-hidden border border-stone-200/80 bg-stone-900 shadow-2xs p-6 flex flex-col justify-end"
+            >
+              <Image
+                src="/images/products/classic-straight-indigo-jeans/mockup.jpg"
+                alt="Classic Straight Indigo Jeans"
+                fill
+                sizes="(max-width: 1024px) 100vw, 40vw"
+                className="object-cover object-top transition-transform duration-700 group-hover:scale-104 opacity-90"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent z-10" />
+              <div className="relative z-20 text-white flex items-end justify-between">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#E6C280] block">
+                    12.5 OZ DENIM
+                  </span>
+                  <h4 className="text-base sm:text-lg font-serif-luxury font-normal uppercase">
+                    {language === "en" ? "Straight Indigo Jeans" : "Düz Kəsim Indigo Denim"}
+                  </h4>
+                </div>
+                <span className="text-sm font-bold font-serif-luxury px-3 py-1 rounded-full bg-white/20 backdrop-blur-md">
+                  65.00 ₼
+                </span>
               </div>
+            </Link>
+
+            {/* Card 2: Slim Chino on Model */}
+            <Link
+              href="/products/beige-slim-chino-pants"
+              prefetch={true}
+              className="group relative flex-1 min-h-[220px] rounded-3xl overflow-hidden border border-stone-200/80 bg-stone-900 shadow-2xs p-6 flex flex-col justify-end"
+            >
+              <Image
+                src="/images/categories/tailored_pants_banner_1.jpg"
+                alt="Tailored Pants Look"
+                fill
+                sizes="(max-width: 1024px) 100vw, 40vw"
+                className="object-cover object-center transition-transform duration-700 group-hover:scale-104 opacity-90"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent z-10" />
+              <div className="relative z-20 text-white flex items-end justify-between">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#E6C280] block">
+                    COTTON TWILL
+                  </span>
+                  <h4 className="text-base sm:text-lg font-serif-luxury font-normal uppercase">
+                    {language === "en" ? "Tailored Chino Trousers" : "Klassik Chino Şalvar"}
+                  </h4>
+                </div>
+                <span className="text-sm font-bold font-serif-luxury px-3 py-1 rounded-full bg-white/20 backdrop-blur-md">
+                  59.00 ₼
+                </span>
+              </div>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. SECONDARY CAMPAIGN: OVERSIZED HUDİ KOLLEKSİYASI */}
+      <section data-cms-section="campaignSecondary" data-cms-title="Hudi Kolleksiyası Banneri" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div className="relative aspect-[16/9] sm:aspect-[21/9] rounded-3xl overflow-hidden border border-stone-200/80 group bg-stone-900 shadow-sm flex flex-col justify-end p-6 sm:p-12">
+          <Image
+            src={campaignSecondary?.image || "/images/products/heavyweight-hoodie-black/mockup.jpg"}
+            alt="Hudi Kolleksiyası"
+            fill
+            sizes="100vw"
+            className="object-cover object-top transition-transform duration-700 group-hover:scale-103 opacity-90"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10 pointer-events-none" />
+          <div className="relative z-20 text-white space-y-2 max-w-xl">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[10px] font-bold uppercase tracking-[0.2em] text-[#E6C280]">
+              {language === "en" ? "HORVVALLE COUTURE" : language === "ru" ? "HORVVALLE COUTURE" : language === "tr" ? "HORVVALLE COUTURE" : (campaignSecondary?.tag || "HORVVALLE COUTURE")}
+            </span>
+            <h3 className="text-2xl sm:text-3xl lg:text-4xl font-serif-luxury font-normal uppercase tracking-tight">
+              {language === "en" ? "WARM & COMFORTABLE OVERSIZED HOODIE COLLECTION" : language === "ru" ? "ТЕПЛАЯ И УДОБНАЯ КОЛЛЕКЦИЯ ОВЕРСАЙЗ ХУДИ" : language === "tr" ? "SICAK VE RAHAT OVERSIZED HUDİ KOLEKSİYONU" : (campaignSecondary?.title || "İSTİ VƏ RAHAT OVERSIZED HUDİ KOLLEKSİYASI")}
+            </h3>
+            <p className="text-xs sm:text-sm text-stone-200 leading-relaxed line-clamp-2">
+              {language === "en" ? "Thick 380 GSM cotton feel, warm lining, and vibrant DTF print quality. Ideal for streetwear style." : language === "ru" ? "Плотный хлопок 380 GSM, теплая подкладка и яркая печать DTF. Идеально для уличного стиля." : language === "tr" ? "Kalın 380 GSM pamuk dokusu, sıcak astar ve canlı DTF baskı kalitesi. Şehir stili için ideal." : (campaignSecondary?.subtitle || "Qalın 380 GSM pambıq toxunuşu, isti astar və canlı DTF çap keyfiyyəti. Şəhər stili üçün ideal.")}
+            </p>
+            <div className="pt-2">
+              <Link
+                href={campaignSecondary?.ctaLink || "/collections?category=hudi"}
+                prefetch={true}
+                className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-white text-stone-900 font-semibold text-xs uppercase tracking-wider hover:bg-stone-100 transition shadow-sm active:scale-95"
+              >
+                <span>{language === "en" ? "VIEW HOODIES" : language === "ru" ? "СМОТРЕТЬ ХУДИ" : language === "tr" ? "HUDİLERE BAK" : (campaignSecondary?.ctaText || "HUDİLƏRƏ BAX")}</span>
+                <ArrowRight size={14} />
+              </Link>
             </div>
           </div>
         </div>

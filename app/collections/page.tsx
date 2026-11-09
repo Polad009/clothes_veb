@@ -4,6 +4,10 @@
 function getLocalizedFit(f: string, lang: string) {
   if (f === "all") return "";
   const map: Record<string, { en: string; ru: string; tr: string }> = {
+    "Regular Fit": { en: "Regular Fit", ru: "Классический крой (Regular Fit)", tr: "Klasik Kesim (Regular Fit)" },
+    "Oversize Fit": { en: "Oversized Fit", ru: "Оверсайз крой (Oversize)", tr: "Oversize Kesim" },
+    "Slim Fit": { en: "Slim Fit", ru: "Приталенный крой (Slim Fit)", tr: "Dar Kesim (Slim Fit)" },
+    "Relaxed Fit": { en: "Relaxed Fit", ru: "Свободный крой (Relaxed)", tr: "Rahat Kesim" },
     "T-shirt Regular (Süprəm)": { en: "Regular T-Shirt (Supreme Cotton)", ru: "Классическая футболка (Супрем)", tr: "Klasik T-Shirt (Süprem)" },
     "T-shirt Regular (2iplik / TS Parça)": { en: "Regular T-Shirt (2-Thread)", ru: "Классическая футболка (2-нитка)", tr: "Klasik T-Shirt (2 İplik)" },
     "Oversize T-shirt (Süprəm / 2iplik)": { en: "Oversized T-Shirt (2-Thread)", ru: "Оверсайз футболка (2-нитка)", tr: "Oversize T-Shirt (2 İplik)" },
@@ -134,25 +138,39 @@ function CollectionsContent() {
     { id: "rating", label: t.collections?.sortRating || "Ən yüksək reytinq" },
   ];
 
-  const fits = [
-    "all",
-    "T-shirt Regular (Süprəm)",
-    "T-shirt Regular (2iplik / TS Parça)",
-    "Oversize T-shirt (Süprəm / 2iplik)",
-    "Polo - qısaqol",
-    "Polo - uzunqol",
-    "Sviter - nazik (2iplik)",
-    "Sviter - qalın (3iplik)",
-    "Hody nazik (2iplik)",
-    "Hody qalın (3iplik)",
-    "Yarımzamok nazik (2iplik)",
-    "Yarımzamok qalın (3iplik)",
-    "Balonka",
-    "Şalvar nazik (2iplik)",
-    "Şalvar qalın (3iplik / TS Parça)",
-    "Kepka - nazik",
-    "Kepka - qalın",
-  ];
+  // Dynamic stock-derived fits (aligning Siluet & Kəsim with active in-stock products, purging 0-product dead options)
+  const fits = useMemo(() => {
+    let scoped = products.filter((p) => p.inStock !== false);
+    if (selectedCategory !== "all") {
+      scoped = scoped.filter((p) => p.category === selectedCategory);
+    }
+    if (selectedGender !== "all") {
+      if (selectedGender === "men") {
+        scoped = scoped.filter((p) => p.gender === "men" || p.gender === "unisex");
+      } else if (selectedGender === "women") {
+        scoped = scoped.filter((p) => p.gender === "women" || p.gender === "unisex");
+      } else if (selectedGender === "unisex") {
+        scoped = scoped.filter((p) => p.gender === "unisex");
+      }
+    }
+
+    const fitSet = new Set<string>();
+    scoped.forEach((p) => {
+      const f = (p.fit || "").trim();
+      if (f && f.toLowerCase() !== "all") {
+        fitSet.add(f);
+      }
+    });
+
+    return ["all", ...Array.from(fitSet)];
+  }, [products, selectedCategory, selectedGender]);
+
+  // Reset selectedFit if it is no longer available in the active category/gender
+  useEffect(() => {
+    if (selectedFit !== "all" && !fits.includes(selectedFit)) {
+      setSelectedFit("all");
+    }
+  }, [fits, selectedFit]);
 
   const sizes = ["all", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "30", "32", "34", "36"];
 
@@ -177,6 +195,7 @@ function CollectionsContent() {
       if (selectedFit !== "all") {
         const pFit = (product.fit || "").toLowerCase().trim();
         const sFit = selectedFit.toLowerCase().trim();
+        // Substring comparison resilience: pFit.includes(sFit) || sFit.includes(pFit)
         if (!pFit || (pFit !== sFit && !pFit.includes(sFit) && !sFit.includes(pFit))) {
           return false;
         }
@@ -778,7 +797,7 @@ function CollectionsContent() {
                               : "text-stone-600 hover:bg-stone-50"
                           }`}
                         >
-                          <span>{f === "all" ? "Bütün kəsimlər" : f}</span>
+                          <span>{f === "all" ? "Bütün kəsimlər" : getLocalizedFit(f, language)}</span>
                           {isActive && <Check size={14} className="text-stone-900" />}
                         </button>
                       );

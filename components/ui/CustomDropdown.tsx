@@ -22,6 +22,51 @@ interface CustomDropdownProps {
   variant?: "dark" | "light";
 }
 
+export const DROPDOWN_MENU_VARIANTS = {
+  hidden: (direction: "down" | "up" = "down") => ({
+    opacity: 0,
+    y: direction === "down" ? -10 : 10,
+    scale: 0.95,
+    transition: { duration: 0.14, ease: "easeIn" },
+  }),
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      type: "spring",
+      damping: 24,
+      stiffness: 380,
+      mass: 0.7,
+    },
+  },
+};
+
+export const DROPDOWN_LIST_VARIANTS = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.025,
+      delayChildren: 0.02,
+    },
+  },
+};
+
+export const DROPDOWN_ITEM_VARIANTS = {
+  hidden: { opacity: 0, x: -6 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.15, ease: "easeOut" },
+  },
+};
+
+export const CHEVRON_ROTATE_TRANSITION = {
+  duration: 0.22,
+  ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
+};
+
 export function CustomDropdown({
   options,
   value,
@@ -79,25 +124,8 @@ export function CustomDropdown({
     },
   };
 
-  const listVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.025,
-        delayChildren: 0.02,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, x: -6 },
-    visible: {
-      opacity: 1,
-      x: 0,
-      transition: { duration: 0.15, ease: "easeOut" },
-    },
-  };
+  const listVariants = DROPDOWN_LIST_VARIANTS;
+  const itemVariants = DROPDOWN_ITEM_VARIANTS;
 
   return (
     <div className={`relative inline-block text-left ${className}`} ref={dropdownRef}>

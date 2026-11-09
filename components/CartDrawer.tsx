@@ -91,27 +91,21 @@ export function CartDrawer() {
   );
 
   const isUsd = currency === "USD";
-  const FREE_SHIPPING_THRESHOLD = isUsd ? 150 : 60;
+  const FREE_SHIPPING_THRESHOLD = 60; // strictly domestic Azerbaijan threshold
   const currentTotal = effectiveTotal > 0 ? effectiveTotal : totalPrice;
   const progressPercent = Math.min(
     100,
     Math.round((currentTotal / FREE_SHIPPING_THRESHOLD) * 100)
   );
   const remainingForFree = Math.max(0, FREE_SHIPPING_THRESHOLD - currentTotal);
-  const isFreeUnlocked = currentTotal >= FREE_SHIPPING_THRESHOLD;
+  const isFreeUnlocked = !isUsd && currentTotal >= FREE_SHIPPING_THRESHOLD;
 
-  const getFreeDeliveryMessage = () => {
+  const getDeliveryBannerMessage = () => {
     if (isUsd) {
-      if (isFreeUnlocked) {
-        if (langKey === "az") return "PULSUZ Beynəlxalq Standart Çatdırılma aktivdir!";
-        if (langKey === "tr") return "ÜCRETSİZ Uluslararası Standart Teslimat kazandınız!";
-        if (langKey === "ru") return "Вам доступна БЕСПЛАТНАЯ международная доставка!";
-        return "You unlocked FREE International Priority Shipping!";
-      }
-      if (langKey === "az") return `Pulsuz beynəlxalq çatdırılma üçün daha $${remainingForFree.toFixed(2)} əlavə edin`;
-      if (langKey === "tr") return `Ücretsiz uluslararası kargo için $${remainingForFree.toFixed(2)} daha ekleyin`;
-      if (langKey === "ru") return `Добавьте еще $${remainingForFree.toFixed(2)} для бесплатной доставки`;
-      return `Add $${remainingForFree.toFixed(2)} more for FREE International Shipping`;
+      if (langKey === "az") return "Beynəlxalq standart çatdırılma: $15 sabit tarif (Tracked Priority)";
+      if (langKey === "tr") return "Uluslararası standart kargo: $15 sabit ücret (Tracked Priority)";
+      if (langKey === "ru") return "Международная доставка: $15 фиксированный тариф (Tracked Priority)";
+      return "Tracked International Priority Shipping: $15 flat rate";
     }
 
     // Domestic AZN delivery
@@ -178,25 +172,34 @@ export function CartDrawer() {
                 </button>
               </div>
 
-              {/* Free Shipping Banner & Dynamic Progress Bar */}
+              {/* Shipping Banner & Progress Bar */}
               <div className="bg-[#F5EFE6] px-5 py-3 border-b border-[#E8E2D8] space-y-2">
                 <div className="flex items-center justify-between text-xs font-medium">
                   <span className="flex items-center gap-1.5 text-[#5C5247]">
                     <Truck size={14} className="text-[#B08D57] shrink-0" />
-                    <span>{getFreeDeliveryMessage()}</span>
+                    <span>{getDeliveryBannerMessage()}</span>
                   </span>
-                  <span className="text-[11px] font-bold text-[#B08D57] font-mono shrink-0 ml-2">
-                    {progressPercent}%
-                  </span>
+                  {!isUsd && (
+                    <span className="text-[11px] font-bold text-[#B08D57] font-mono shrink-0 ml-2">
+                      {progressPercent}%
+                    </span>
+                  )}
+                  {isUsd && (
+                    <span className="text-[11px] font-bold text-[#1A1517] font-mono shrink-0 ml-2">
+                      $15 USD
+                    </span>
+                  )}
                 </div>
-                <div className="w-full h-1.5 bg-[#E8E2D8] rounded-full overflow-hidden">
-                  <motion.div
-                    className="h-full bg-gradient-to-r from-[#B08D57] to-[#D4AF37] rounded-full"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${progressPercent}%` }}
-                    transition={{ duration: 0.35, ease: "easeOut" }}
-                  />
-                </div>
+                {!isUsd && (
+                  <div className="w-full h-1.5 bg-[#E8E2D8] rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full bg-gradient-to-r from-[#B08D57] to-[#D4AF37] rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${progressPercent}%` }}
+                      transition={{ duration: 0.35, ease: "easeOut" }}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Cart Items List */}
@@ -333,11 +336,9 @@ export function CartDrawer() {
                     </div>
                     <div className="flex justify-between">
                       <span>{t.checkout.delivery}:</span>
-                      <span className="font-bold text-[#047857]">
+                      <span className="font-bold text-[#1A1517]">
                         {isUsd
-                          ? isFreeUnlocked
-                            ? (langKey === "en" ? "FREE (Standard Priority)" : "PULSUZ (Standart)")
-                            : (langKey === "en" ? "From $15 (Free over $150)" : "15 $ (150 $-dan yuxarı pulsuz)")
+                          ? (langKey === "en" ? "$15 (Tracked International)" : "15 $ (Beynəlxalq çatdırılma)")
                           : cT.deliveryFreeBaku}
                       </span>
                     </div>

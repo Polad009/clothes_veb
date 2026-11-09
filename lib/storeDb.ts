@@ -68,6 +68,7 @@ export interface StoreContent {
     image: string;
   };
   categories?: any[];
+  policies?: any;
 }
 
 export interface StoreSettings {
@@ -96,6 +97,9 @@ export interface StoreCustomerAddress {
 export interface StoreOrder {
   id: string;
   trackingCode?: string;
+  tracking_code?: string;
+  refCode?: string;
+  customerPhone?: string;
   userId?: string;
   source?: string;
   date: string;
@@ -158,6 +162,8 @@ export interface StorePromoCode {
   active: boolean;
   desc?: string;
   uses?: number;
+  maxUses?: number | null;
+  expiresAt?: string | null;
 }
 
 export interface StoreData {
@@ -167,11 +173,44 @@ export interface StoreData {
   orders: StoreOrder[];
   podOrders: PodOrder[];
   promoCodes?: StorePromoCode[];
-  loyalty?: any[];
 }
 
 const GLOBAL_STORE_KEY = '__HORVVALLE_STORE_DATA__';
 const ORDERS_BACKUP_PATH = path.join(os.tmpdir(), 'horvvalle_orders_backup.json');
+const TOMBSTONES_PATH = path.join(os.tmpdir(), 'horvvalle_deleted_orders.json');
+
+export function getDeletedOrderIds(): Set<string> {
+  const g = globalThis as any;
+  if (!g.__HORVVALLE_DELETED_ORDERS__) {
+    g.__HORVVALLE_DELETED_ORDERS__ = new Set<string>();
+    if (fs.existsSync(TOMBSTONES_PATH)) {
+      try {
+        const raw = fs.readFileSync(TOMBSTONES_PATH, 'utf-8');
+        const list = JSON.parse(raw);
+        if (Array.isArray(list)) {
+          list.forEach((id: string) => g.__HORVVALLE_DELETED_ORDERS__.add(String(id)));
+        }
+      } catch (e) {}
+    }
+  }
+  return g.__HORVVALLE_DELETED_ORDERS__;
+}
+
+export function markOrderDeleted(id: string, trackingCode?: string): void {
+  const deleted = getDeletedOrderIds();
+  if (id) deleted.add(String(id));
+  if (trackingCode) deleted.add(String(trackingCode));
+  try {
+    fs.writeFileSync(TOMBSTONES_PATH, JSON.stringify(Array.from(deleted)), 'utf-8');
+  } catch (e) {}
+}
+
+export function isOrderDeleted(id?: string, trackingCode?: string): boolean {
+  const deleted = getDeletedOrderIds();
+  if (id && deleted.has(String(id))) return true;
+  if (trackingCode && deleted.has(String(trackingCode))) return true;
+  return false;
+}
 
 export function readStoreDb(): StoreData {
   const g = globalThis as any;
@@ -226,19 +265,24 @@ export function readStoreDb(): StoreData {
     };
   }
 
-  // Ensure orders array exists
+  // Ensure orders array exists and filter out tombstoned deleted orders
   if (!Array.isArray(dbData.orders)) {
     dbData.orders = [];
+  } else {
+    dbData.orders = dbData.orders.filter((o) => !isOrderDeleted(o.id, o.trackingCode || (o as any).tracking_code));
+  }
+  if (Array.isArray(dbData.podOrders)) {
+    dbData.podOrders = dbData.podOrders.filter((p) => !isOrderDeleted(p.orderId) && !isOrderDeleted(p.id));
   }
 
-  // Merge extra orders backup if available in /tmp
+  // Merge extra orders backup if available in /tmp (only non-deleted orders)
   if (fs.existsSync(ORDERS_BACKUP_PATH)) {
     try {
       const backupRaw = fs.readFileSync(ORDERS_BACKUP_PATH, 'utf-8');
       const backupOrders = JSON.parse(backupRaw);
       if (Array.isArray(backupOrders)) {
         for (const bo of backupOrders) {
-          if (!dbData.orders.some((o) => o.id === bo.id)) {
+          if (!isOrderDeleted(bo.id, bo.trackingCode || bo.tracking_code) && !dbData.orders.some((o) => o.id === bo.id)) {
             dbData.orders.unshift(bo);
           }
         }
@@ -252,6 +296,14 @@ export function readStoreDb(): StoreData {
 }
 
 export function writeStoreDb(data: StoreData): void {
+  // Purge any tombstoned orders from data before saving
+  if (data.orders && Array.isArray(data.orders)) {
+    data.orders = data.orders.filter((o) => !isOrderDeleted(o.id, o.trackingCode || (o as any).tracking_code));
+  }
+  if (data.podOrders && Array.isArray(data.podOrders)) {
+    data.podOrders = data.podOrders.filter((p) => !isOrderDeleted(p.orderId) && !isOrderDeleted(p.id));
+  }
+
   // Always update in-memory global cache first
   cachedDb = data;
   const g = globalThis as any;

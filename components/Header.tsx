@@ -34,6 +34,8 @@ export function Header({ className = "" }: HeaderProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentCategory = searchParams?.get("category") || null;
+  const rawGender = searchParams?.get("gender") || null;
+  const currentGender = rawGender ? rawGender.toLowerCase().trim() : null;
 
   const { totalCount, openCart } = useCart();
   const { formatPrice, formatProductPrice } = useCurrency();
@@ -121,11 +123,13 @@ export function Header({ className = "" }: HeaderProps) {
   // Close mobile sidebar on route change
   useEffect(() => {
     setMobileMenuOpen(false);
-  }, [pathname, currentCategory]);
+  }, [pathname, currentCategory, currentGender]);
 
   useBodyScrollLock(mobileMenuOpen);
 
   const navLinks = [
+    { label: t.nav.men, href: "/collections?gender=men", genderId: "men" },
+    { label: t.nav.women, href: "/collections?gender=women", genderId: "women" },
     { label: t.nav.shirts, href: "/collections?category=koynek", categoryId: "koynek" },
     { label: t.nav.hoodies, href: "/collections?category=hudi", categoryId: "hudi" },
     { label: t.nav.pants, href: "/collections?category=salvar", categoryId: "salvar" },
@@ -134,18 +138,21 @@ export function Header({ className = "" }: HeaderProps) {
     { label: t.nav.track, href: "/track", categoryId: "track" },
   ];
 
-  const isLinkActive = (categoryId: string, href: string) => {
-    if (categoryId !== "all") {
-      if (pathname === "/collections" && currentCategory === categoryId) {
+  const isLinkActive = (item: { categoryId?: string; genderId?: string; href: string }) => {
+    if (item.genderId) {
+      return pathname === "/collections" && currentGender === item.genderId;
+    }
+    if (item.categoryId && item.categoryId !== "all") {
+      if (pathname === "/collections" && currentCategory === item.categoryId && !currentGender) {
         return true;
       }
-      if (pathname === "/" && categoryId === "koynek") {
+      if (pathname === "/" && item.categoryId === "koynek") {
         return true;
       }
       return false;
     }
-    if (categoryId === "all") {
-      return pathname === "/collections" && (!currentCategory || currentCategory === "all");
+    if (item.categoryId === "all") {
+      return pathname === "/collections" && (!currentCategory || currentCategory === "all") && !currentGender;
     }
     return false;
   };
@@ -196,7 +203,8 @@ export function Header({ className = "" }: HeaderProps) {
             }`}
           >
             {navLinks.map((link) => {
-              const active = isLinkActive(link.categoryId, link.href);
+              if (link.genderId) return null;
+              const active = isLinkActive(link);
               return (
                 <Link
                   key={link.label}
@@ -245,6 +253,41 @@ export function Header({ className = "" }: HeaderProps) {
 
           {/* Right: Search, Language/Currency, Cart */}
           <div className="flex items-center gap-1.5 sm:gap-2 xl:gap-2.5 shrink-0">
+            {/* Discreet Desktop Gender Segmented Switch (~100px) */}
+            <div
+              className={`hidden lg:flex items-center p-0.5 rounded-full border transition-all duration-200 shadow-2xs shrink-0 ${
+                isSearchOpen ? "opacity-0 pointer-events-none scale-95" : "opacity-100 scale-100"
+              } ${
+                isLightMode
+                  ? "border-stone-200/90 bg-stone-100/90 text-stone-700"
+                  : "border-white/20 bg-white/10 text-white/90"
+              }`}
+              role="group"
+              aria-label={t.collections?.gender || "Cins"}
+            >
+              {navLinks.filter((link) => link.genderId).map((link) => {
+                const active = isLinkActive(link);
+                return (
+                  <Link
+                    key={link.label}
+                    href={link.href}
+                    prefetch={true}
+                    className={`h-7 xl:h-8 px-2.5 xl:px-3 rounded-full flex items-center justify-center transition-all cursor-pointer whitespace-nowrap text-[11px] xl:text-xs font-semibold ${
+                      active
+                        ? isLightMode
+                          ? "bg-stone-900 text-white shadow-2xs"
+                          : "bg-white text-stone-900 shadow-2xs"
+                        : isLightMode
+                        ? "text-stone-700 hover:text-stone-950 hover:bg-stone-200/60"
+                        : "text-white/80 hover:text-white hover:bg-white/15"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </div>
+
             {/* Smooth Animated Inline Header Quick Search */}
             <HeaderQuickSearch isLightMode={isLightMode} onOpenChange={setIsSearchOpen} />
 
@@ -479,6 +522,31 @@ export function Header({ className = "" }: HeaderProps) {
                 </div>
 
                 <div className="pt-2">
+                  <div className="mb-3 pb-3 border-b border-[#E8E2D8]">
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-[#9A7B4F] px-1 pb-2">
+                      {t.collections?.gender || "Cins"}
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {navLinks.filter((link) => link.genderId).map((link) => {
+                        const active = isLinkActive(link);
+                        return (
+                          <Link
+                            key={link.label}
+                            href={link.href}
+                            prefetch={true}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className={`flex items-center justify-center py-2.5 px-3 rounded-full text-xs font-bold border transition shadow-2xs ${
+                              active
+                                ? "bg-stone-900 text-white border-stone-900"
+                                : "border-[#E5DFD5] bg-[#FAF7F2] text-stone-900 hover:bg-stone-900 hover:text-white"
+                            }`}
+                          >
+                            {link.label}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
                   <div className="text-[10px] font-bold uppercase tracking-widest text-[#9A7B4F] px-1 pb-2">
                     {t.nav.categories || "Kolleksiyalar"}
                   </div>
@@ -500,7 +568,8 @@ export function Header({ className = "" }: HeaderProps) {
                     animate="visible"
                   >
                     {navLinks.map((link) => {
-                      const active = isLinkActive(link.categoryId, link.href);
+                      if (link.genderId) return null;
+                      const active = isLinkActive(link);
                       return (
                         <motion.div
                           key={link.label}

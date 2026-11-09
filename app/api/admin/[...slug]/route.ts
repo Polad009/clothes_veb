@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readStoreDb, writeStoreDb, StoreProduct } from '@/lib/storeDb';
+import { readStoreDb, writeStoreDb, StoreProduct, markOrderDeleted, isOrderDeleted } from '@/lib/storeDb';
 import {
   verifyAdminCredentials,
   createAdminToken,
@@ -72,9 +72,9 @@ async function getEnrichedStoreData() {
         provider: so.provider || 'mock',
       }));
 
-      // Add any Supabase orders that aren't in local DB yet
+      // Add any Supabase orders that aren't in local DB yet and have not been deleted
       for (const co of convertedSupaOrders) {
-        if (!existingIds.has(co.id)) {
+        if (!existingIds.has(co.id) && !isOrderDeleted(co.id, (co as any).trackingCode)) {
           db.orders.push(co);
           existingIds.add(co.id);
         }
@@ -591,7 +591,17 @@ export async function POST(
     if (route === 'content') {
       const { settings, content } = body;
       if (settings) db.settings = { ...db.settings, ...settings };
-      if (content) db.content = { ...db.content, ...content };
+      if (content) {
+        db.content = {
+          ...db.content,
+          ...content,
+          hero: { ...(db.content?.hero || {}), ...(content.hero || {}) },
+          promoBanner: { ...(db.content?.promoBanner || {}), ...(content.promoBanner || {}) },
+          campaignSecondary: { ...(db.content?.campaignSecondary || {}), ...(content.campaignSecondary || {}) },
+          announcements: Array.isArray(content.announcements) ? content.announcements : (db.content?.announcements || []),
+          policies: { ...(db.content?.policies || {}), ...(content.policies || {}) },
+        };
+      }
       writeStoreDb(db);
 
       if (supabaseServer) {
@@ -608,11 +618,14 @@ export async function POST(
         }
       }
 
-      return NextResponse.json({ success: true, settings: db.settings, content: db.content });
+      return NextResponse.json({ success: true, settings: db.settings, content: db.content }, {
+        headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' }
+      });
     }
 
     // 3. Clear All Orders
     if (route === 'orders' && subRoute === 'clear-all') {
+      (db.orders || []).forEach((o: any) => markOrderDeleted(o.id, o.trackingCode || o.tracking_code));
       db.orders = [];
       db.podOrders = [];
       writeStoreDb(db);
@@ -626,7 +639,9 @@ export async function POST(
         }
       }
 
-      return NextResponse.json({ success: true });
+      return NextResponse.json({ success: true }, {
+        headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' }
+      });
     }
 
     // 4. Add or Edit Promo Code
@@ -635,6 +650,12 @@ export async function POST(
       if (!db.promoCodes) db.promoCodes = [];
       const cleanCode = (promo.code || '').trim().toUpperCase();
       promo.code = cleanCode;
+      if (promo.expiresAt !== undefined) {
+        promo.expiresAt = promo.expiresAt ? String(promo.expiresAt) : null;
+      }
+      if (promo.maxUses !== undefined) {
+        promo.maxUses = (typeof promo.maxUses === 'number' && promo.maxUses > 0) ? promo.maxUses : (promo.maxUses ? Number(promo.maxUses) : null);
+      }
 
       const index = db.promoCodes.findIndex((p: any) => p.id === promo.id || (p.code || '').toUpperCase() === cleanCode);
       if (index >= 0) {
@@ -658,7 +679,9 @@ export async function POST(
         }
       }
 
-      return NextResponse.json({ success: true, promo });
+      return NextResponse.json({ success: true, promo }, {
+        headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' }
+      });
     }
 
     // 5. Upload Image
@@ -689,29 +712,6 @@ export async function POST(
       }
       writeStoreDb(db);
       return NextResponse.json({ success: true, category: cat, categories: db.content.categories });
-    }
-
-    // 7. Loyalty Terminal Balance Update
-    if (route === 'loyalty') {
-      const { phone, points, tier, fullName } = body;
-      if (!phone) return NextResponse.json({ error: 'Phone required' }, { status: 400 });
-      if (!(db as any).loyalty) (db as any).loyalty = [];
-      const list = (db as any).loyalty;
-      const idx = list.findIndex((l: any) => l.phone === phone);
-      if (idx >= 0) {
-        list[idx].points = (Number(list[idx].points) || 0) + Number(points || 0);
-        if (tier) list[idx].tier = tier;
-        if (fullName) list[idx].fullName = fullName;
-      } else {
-        list.push({
-          phone,
-          fullName: fullName || 'Müştəri',
-          points: Number(points || 0),
-          tier: tier || 'Bronze'
-        });
-      }
-      writeStoreDb(db);
-      return NextResponse.json({ success: true, loyalty: (db as any).loyalty });
     }
 
     // 8. Marketing Email Broadcast
@@ -752,7 +752,12 @@ export async function PATCH(
     // 1. Update Order Status
     if (route === 'orders' && id) {
       const { orderStatus, paymentStatus } = body;
-      const index = db.orders.findIndex((o: any) => o.id === id);
+      const index = db.orders.findIndex((o: any) =>
+        String(o.id) === id ||
+        String(o.trackingCode || '') === id ||
+        String(o.tracking_code || '') === id ||
+        String(o.refCode || '') === id
+      );
       if (index >= 0) {
         if (orderStatus) {
           db.orders[index].orderStatus = orderStatus;
@@ -769,13 +774,27 @@ export async function PATCH(
             const updatePayload: any = {};
             if (orderStatus) updatePayload.order_status = orderStatus;
             if (paymentStatus) updatePayload.payment_status = paymentStatus;
-            await supabaseServer.from('orders').update(updatePayload).eq('id', id);
+
+            const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+            if (isUuid) {
+              await supabaseServer.from('orders').update(updatePayload).eq('id', id);
+            } else {
+              const targetTracking = db.orders[index].trackingCode || (db.orders[index] as any).tracking_code;
+              const targetPhone = db.orders[index].customer?.phone || (db.orders[index] as any).customerPhone;
+              if (targetTracking) {
+                await supabaseServer.from('orders').update(updatePayload).or(`tracking_code.eq.${targetTracking},notes.ilike.%${targetTracking}%`);
+              } else if (targetPhone) {
+                await supabaseServer.from('orders').update(updatePayload).eq('customer_phone', targetPhone);
+              }
+            }
           } catch (e) {
             console.warn('Supabase status update warning:', e);
           }
         }
 
-        return NextResponse.json({ success: true, order: db.orders[index] });
+        return NextResponse.json({ success: true, order: db.orders[index] }, {
+          headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' }
+        });
       }
       return NextResponse.json({ error: 'Sifariş tapılmadı' }, { status: 404 });
     }
@@ -868,12 +887,12 @@ export async function DELETE(
 
     // 2. Delete Order or Clear Test Orders
     if (route === 'orders' && id === 'clear-test') {
-      const testIds = new Set(
-        (db.orders || [])
-          .filter((o: any) => o.isTest === true || o.paymentStatus === 'test_paid')
-          .map((o: any) => String(o.id))
-      );
+      const testOrders = (db.orders || []).filter((o: any) => o.isTest === true || o.paymentStatus === 'test_paid');
+      const testIds = new Set(testOrders.map((o: any) => String(o.id)));
       const count = testIds.size;
+
+      testOrders.forEach((o: any) => markOrderDeleted(o.id, o.trackingCode || o.tracking_code));
+
       db.orders = (db.orders || []).filter((o: any) => !testIds.has(String(o.id)));
       db.podOrders = (db.podOrders || []).filter((p: any) => !testIds.has(String(p.orderId)));
       writeStoreDb(db);
@@ -886,24 +905,78 @@ export async function DELETE(
         }
       }
 
-      return NextResponse.json({ success: true, count, message: `${count} test sifarişi silindi.` });
+      return NextResponse.json({ success: true, count, message: `${count} test sifarişi silindi.` }, {
+        headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' }
+      });
     }
 
     if (route === 'orders' && id) {
-      db.orders = (db.orders || []).filter((o: any) => o.id !== id);
-      db.podOrders = (db.podOrders || []).filter((p: any) => p.orderId !== id && p.id !== id);
+      // Find the order before removing to collect all possible identifiers
+      const targetOrder = (db.orders || []).find((o: any) =>
+        String(o.id) === id ||
+        String(o.trackingCode || '') === id ||
+        String(o.tracking_code || '') === id ||
+        String(o.refCode || '') === id
+      );
+
+      const tracking = targetOrder?.trackingCode || targetOrder?.tracking_code || targetOrder?.refCode;
+      const targetPhone = targetOrder?.customer?.phone || targetOrder?.customerPhone;
+
+      // Mark tombstone in memory and /tmp/horvvalle_deleted_orders.json
+      markOrderDeleted(id, tracking);
+
+      db.orders = (db.orders || []).filter((o: any) => {
+        if (String(o.id) === id) return false;
+        if (tracking && (o.trackingCode === tracking || o.tracking_code === tracking || o.refCode === tracking)) return false;
+        if (o.trackingCode === id || o.tracking_code === id || o.refCode === id) return false;
+        return true;
+      });
+      db.podOrders = (db.podOrders || []).filter((p: any) =>
+        String(p.orderId) !== id && String(p.id) !== id && (tracking ? (p.orderId !== tracking && p.id !== tracking) : true)
+      );
       writeStoreDb(db);
 
       if (supabaseServer) {
         try {
-          await supabaseServer.from('order_items').delete().eq('order_id', id);
-          await supabaseServer.from('orders').delete().eq('id', id);
+          const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+          if (isUuid) {
+            await supabaseServer.from('order_items').delete().eq('order_id', id);
+            await supabaseServer.from('orders').delete().eq('id', id);
+          } else {
+            // Delete matching tracking code or notes or phone
+            if (tracking) {
+              const { data: matchedOrders } = await supabaseServer
+                .from('orders')
+                .select('id')
+                .or(`tracking_code.eq.${tracking},notes.ilike.%${tracking}%`);
+              if (matchedOrders && matchedOrders.length > 0) {
+                for (const mo of matchedOrders) {
+                  await supabaseServer.from('order_items').delete().eq('order_id', mo.id);
+                  await supabaseServer.from('orders').delete().eq('id', mo.id);
+                }
+              }
+            }
+            if (targetPhone) {
+              const { data: phoneMatches } = await supabaseServer
+                .from('orders')
+                .select('id')
+                .eq('customer_phone', targetPhone);
+              if (phoneMatches && phoneMatches.length > 0) {
+                for (const pm of phoneMatches) {
+                  await supabaseServer.from('order_items').delete().eq('order_id', pm.id);
+                  await supabaseServer.from('orders').delete().eq('id', pm.id);
+                }
+              }
+            }
+          }
         } catch (e) {
           console.warn('Supabase delete order warning:', e);
         }
       }
 
-      return NextResponse.json({ success: true });
+      return NextResponse.json({ success: true }, {
+        headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' }
+      });
     }
 
     // 3. Delete Promo

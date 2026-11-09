@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { MoveHorizontal, ArrowUpRight } from "lucide-react";
 import { useStoreData } from "@/context/StoreDataContext";
 import { useCurrency } from "@/context/CurrencyContext";
 
@@ -16,120 +15,6 @@ interface RunwayItem {
   defaultPrice: number;
   link: string;
 }
-
-const RUNWAY_TOP: RunwayItem[] = [
-  {
-    id: "1",
-    slug: "horwalle-bmw-m-motorsport-heavyweight-fleece-hoodie",
-    src: "/images/uploads/bmw_hoodie_black_front_v3.png",
-    title: "BMW M Motorsport Qara Hudi",
-    tag: "380 GSM FLEECE",
-    defaultPrice: 20,
-    link: "/products/horwalle-bmw-m-motorsport-heavyweight-fleece-hoodie",
-  },
-  {
-    id: "2",
-    slug: "horwalle-mclaren-750s-heavyweight-oversized-tee",
-    src: "/images/uploads/mclaren_tee_white_studio_front.png",
-    title: "McLaren 750S Oversized Ağ Tee",
-    tag: "240 GSM HEAVYWEIGHT",
-    defaultPrice: 29.99,
-    link: "/products/horwalle-mclaren-750s-heavyweight-oversized-tee",
-  },
-  {
-    id: "3",
-    slug: "horwalle-bmw-m-motorsport-heavyweight-fleece-hoodie",
-    src: "/images/uploads/bmw_hoodie_grey_front_v3.png",
-    title: "BMW M Motorsport Melanj Boz",
-    tag: "PREMIUM FLEECE",
-    defaultPrice: 20,
-    link: "/products/horwalle-bmw-m-motorsport-heavyweight-fleece-hoodie",
-  },
-  {
-    id: "4",
-    slug: "horwalle-angelus-heavyweight-vintage-polo",
-    src: "/images/uploads/polo_angel_black_front_cutout.png",
-    title: "Angelus Vintage Qara Polo",
-    tag: "HEAVY PIQUE",
-    defaultPrice: 79,
-    link: "/products/horwalle-angelus-heavyweight-vintage-polo",
-  },
-  {
-    id: "5",
-    slug: "horwalle-mclaren-750s-heavyweight-oversized-tee",
-    src: "/images/uploads/mclaren_tee_black_front_v2.png",
-    title: "McLaren 750S Qara Edition",
-    tag: "STREETWEAR OVERSIZE",
-    defaultPrice: 29.99,
-    link: "/products/horwalle-mclaren-750s-heavyweight-oversized-tee",
-  },
-  {
-    id: "6",
-    slug: "horwalle-angel-dust-vintage-hoodie",
-    src: "/images/uploads/angel_dust_hoodie_cutout.png",
-    title: "Angel Dust Vintage Hudi",
-    tag: "380 GSM COUTURE",
-    defaultPrice: 49,
-    link: "/products/horwalle-angel-dust-vintage-hoodie",
-  },
-];
-
-const RUNWAY_BOTTOM: RunwayItem[] = [
-  {
-    id: "7",
-    slug: "horwalle-mclaren-750s-heavyweight-oversized-tee",
-    src: "/images/uploads/mclaren_tee_white_studio_back.png",
-    title: "McLaren 750S Supercar Çap",
-    tag: "ULTRA HD DTG",
-    defaultPrice: 29.99,
-    link: "/products/horwalle-mclaren-750s-heavyweight-oversized-tee",
-  },
-  {
-    id: "8",
-    slug: "horwalle-bmw-m-motorsport-heavyweight-fleece-hoodie",
-    src: "/images/uploads/bmw_hoodie_black_back_v3.png",
-    title: "BMW M Motorsport Arxa Loqo",
-    tag: "DTF ARTWORK",
-    defaultPrice: 20,
-    link: "/products/horwalle-bmw-m-motorsport-heavyweight-fleece-hoodie",
-  },
-  {
-    id: "9",
-    slug: "horwalle-angelus-heavyweight-vintage-polo",
-    src: "/images/uploads/polo_angel_white_front_v8.png",
-    title: "Angelus Vintage Ağ Polo",
-    tag: "EMBROIDERED LUXURY",
-    defaultPrice: 79,
-    link: "/products/horwalle-angelus-heavyweight-vintage-polo",
-  },
-  {
-    id: "10",
-    slug: "horwalle-mclaren-750s-heavyweight-oversized-tee",
-    src: "/images/uploads/mclaren_tee_sand_front_v3.png",
-    title: "McLaren 750S Qum Beji",
-    tag: "VINTAGE DYE",
-    defaultPrice: 29.99,
-    link: "/products/horwalle-mclaren-750s-heavyweight-oversized-tee",
-  },
-  {
-    id: "11",
-    slug: "horwalle-bmw-m-motorsport-heavyweight-fleece-hoodie",
-    src: "/images/uploads/bmw_hoodie_white_front_v3.png",
-    title: "BMW M Motorsport Ağ Hudi",
-    tag: "LIMITED EDITION",
-    defaultPrice: 20,
-    link: "/products/horwalle-bmw-m-motorsport-heavyweight-fleece-hoodie",
-  },
-  {
-    id: "12",
-    slug: "horwalle-angelus-heavyweight-vintage-polo",
-    src: "/images/uploads/polo_angel_black_back.png",
-    title: "Angelus Arxa Mələk Dizayn",
-    tag: "VINTAGE WASH",
-    defaultPrice: 79,
-    link: "/products/horwalle-angelus-heavyweight-vintage-polo",
-  },
-];
 
 interface RunwayCardProps {
   item: RunwayItem;
@@ -255,32 +140,109 @@ export function UnwovenLoom() {
   const { products } = useStoreData();
   const { formatPrice } = useCurrency();
 
+  // Dynamic runway items derived from active catalog products (filtering out inStock === false)
+  const { runwayTop, runwayBottom } = useMemo(() => {
+    const active = products.filter((p) => p.inStock !== false);
+    const cards: RunwayItem[] = [];
+
+    active.forEach((p) => {
+      const mainImg = p.image || p.colors?.[0]?.image || "";
+      if (p.colors && p.colors.length > 0) {
+        p.colors.forEach((c, cIdx) => {
+          const imgSrc = c.image || mainImg;
+          if (imgSrc) {
+            cards.push({
+              id: `${p.id || p.slug}-c${cIdx}-front`,
+              slug: p.slug,
+              src: imgSrc,
+              title: c.name && c.name !== "Standart" ? `${p.name} (${c.name})` : p.name,
+              tag: p.composition?.split(",")[0]?.trim() || p.fit || "ATELIER COUTURE",
+              defaultPrice: p.price,
+              link: `/products/${p.slug}`,
+            });
+          }
+          if (c.hoverImage && c.hoverImage !== imgSrc) {
+            cards.push({
+              id: `${p.id || p.slug}-c${cIdx}-back`,
+              slug: p.slug,
+              src: c.hoverImage,
+              title: `${p.name} · Studio View`,
+              tag: p.fit || "PREMIUM FIT",
+              defaultPrice: p.price,
+              link: `/products/${p.slug}`,
+            });
+          }
+        });
+      } else if (mainImg) {
+        cards.push({
+          id: `${p.id || p.slug}-main`,
+          slug: p.slug,
+          src: mainImg,
+          title: p.name,
+          tag: p.composition?.split(",")[0]?.trim() || p.fit || "ATELIER COUTURE",
+          defaultPrice: p.price,
+          link: `/products/${p.slug}`,
+        });
+      }
+    });
+
+    if (cards.length === 0) {
+      return { runwayTop: [], runwayBottom: [] };
+    }
+
+    const topList: RunwayItem[] = [];
+    const bottomList: RunwayItem[] = [];
+
+    cards.forEach((card, index) => {
+      if (index % 2 === 0) {
+        topList.push(card);
+      } else {
+        bottomList.push(card);
+      }
+    });
+
+    if (bottomList.length === 0) {
+      bottomList.push(...topList);
+    }
+
+    const ensureMinItems = (list: RunwayItem[], minCount: number): RunwayItem[] => {
+      if (list.length === 0) return [];
+      let result = [...list];
+      let multiplier = 1;
+      while (result.length < minCount) {
+        multiplier++;
+        result = [
+          ...result,
+          ...list.map((item, idx) => ({
+            ...item,
+            id: `${item.id}-dup${multiplier}-${idx}`,
+          })),
+        ];
+      }
+      return result;
+    };
+
+    return {
+      runwayTop: ensureMinItems(topList, 4),
+      runwayBottom: ensureMinItems(bottomList, 4),
+    };
+  }, [products]);
+
   const getPrice = (item: RunwayItem) => {
     const prod = products.find((p) => p.slug === item.slug);
     const p = prod ? prod.price : item.defaultPrice;
     return formatPrice(p);
   };
 
+  if (runwayTop.length === 0) {
+    return null;
+  }
+
   return (
     <div
       ref={containerRef}
-      className="relative w-full py-8 sm:py-12 select-none overflow-hidden"
+      className="relative w-full py-6 sm:py-10 select-none overflow-hidden"
     >
-      {/* Top Status Header */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 sm:mb-8 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <span className="w-2 h-2 rounded-full bg-[#B08D57] animate-pulse" />
-          <span className="text-[11px] sm:text-xs uppercase font-bold tracking-[0.25em] text-[#3D1424]">
-            HORVVALLE CANLI DALĞALI RUNWAY · 2026 COUTURE
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2 text-stone-500 text-[11px] font-medium hidden sm:flex">
-          <MoveHorizontal size={14} className="text-[#B08D57]" />
-          <span>Davamlı axıcı dalğalı kətan · 2026 Couture</span>
-        </div>
-      </div>
-
       {/* Row 1: Flowing Leftward with Continuous Wave (Non-stopping, always fluid) */}
       <div className="relative w-full overflow-hidden mb-5 sm:mb-8 py-3">
         <div
@@ -289,7 +251,7 @@ export function UnwovenLoom() {
         >
           {/* Primary Set */}
           <div className="flex items-center gap-4 sm:gap-6 pr-4 sm:pr-6">
-            {RUNWAY_TOP.map((item, idx) => (
+            {runwayTop.map((item, idx) => (
               <RunwayCard
                 key={`top-a-${item.id}`}
                 item={item}
@@ -304,7 +266,7 @@ export function UnwovenLoom() {
 
           {/* Seamless Duplicate Set (Exact identical width + padding for seamless 50% loop) */}
           <div className="flex items-center gap-4 sm:gap-6 pr-4 sm:pr-6" aria-hidden="true">
-            {RUNWAY_TOP.map((item, idx) => (
+            {runwayTop.map((item, idx) => (
               <RunwayCard
                 key={`top-b-${item.id}`}
                 item={item}
@@ -327,7 +289,7 @@ export function UnwovenLoom() {
         >
           {/* Primary Set */}
           <div className="flex items-center gap-4 sm:gap-6 pr-4 sm:pr-6">
-            {RUNWAY_BOTTOM.map((item, idx) => (
+            {runwayBottom.map((item, idx) => (
               <RunwayCard
                 key={`bot-a-${item.id}`}
                 item={item}
@@ -342,7 +304,7 @@ export function UnwovenLoom() {
 
           {/* Seamless Duplicate Set (Exact identical width + padding for seamless 50% loop) */}
           <div className="flex items-center gap-4 sm:gap-6 pr-4 sm:pr-6" aria-hidden="true">
-            {RUNWAY_BOTTOM.map((item, idx) => (
+            {runwayBottom.map((item, idx) => (
               <RunwayCard
                 key={`bot-b-${item.id}`}
                 item={item}
