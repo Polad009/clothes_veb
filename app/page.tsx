@@ -258,32 +258,34 @@ export default function Home() {
       {/* 5. DUAL CAMPAIGN BANNERS (Şalvarlar & Hudilər) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Banner 1: Chino & Cins Şalvarlar */}
-          <div data-cms-section="promoBanner" data-cms-title="Şalvar Kolleksiyası Banneri" className="relative aspect-[4/5] sm:aspect-[16/11] rounded-3xl overflow-hidden border border-stone-200/80 group bg-stone-900 shadow-2xs">
+          {/* Banner 1: Chino & Cins Şalvarlar (User Trio Trousers Studio Design) */}
+          <div data-cms-section="promoBanner" data-cms-title="Şalvar Kolleksiyası Banneri" className="relative aspect-[4/5] sm:aspect-[16/11] rounded-3xl overflow-hidden border border-stone-200/80 group bg-[#161415] shadow-2xs">
             <Image
-              src="/images/categories/pants_collection_banner.jpg"
-              alt="Şalvar Kolleksiyası"
+              src="/images/categories/pants_collection_banner.webp"
+              alt="HORVVALLE Kəsimləri — Şalvar Kolleksiyası"
               fill
               sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover object-center transition-transform duration-700 group-hover:scale-103 opacity-90"
+              className="object-cover object-right sm:object-center transition-transform duration-700 group-hover:scale-103"
+              priority={false}
               loading="lazy"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-6 sm:p-10 text-white z-10 pointer-events-none" />
+            {/* Subtle Gradient Veil for Perfect Text Readability */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-transparent flex flex-col justify-end p-6 sm:p-10 text-white z-10 pointer-events-none" />
             <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-10 text-white z-20">
               <span className="text-xs font-semibold text-[#E6C280] uppercase tracking-wider">
                 {language === "en" ? "HORVVALLE TAILORING" : language === "ru" ? "КРОЙ HORVVALLE" : language === "tr" ? "HORVVALLE KESİMLERİ" : (promoBanner?.tag || "HORVVALLE KƏSİMLƏRİ")}
               </span>
-              <h3 className="text-2xl sm:text-3xl font-serif-luxury font-normal uppercase mt-1 leading-tight">
+              <h3 className="text-2xl sm:text-3xl font-serif-luxury font-normal uppercase mt-1 leading-tight drop-shadow-sm">
                 {language === "en" ? "PERFECT PANTS FOR EVERY DAY" : language === "ru" ? "ИДЕАЛЬНЫЕ БРЮКИ НА КАЖДЫЙ ДЕНЬ" : language === "tr" ? "HER GÜN İÇİN İDEAL PANTOLONLAR" : (promoBanner?.title || "HƏR GÜN ÜÇÜN İDEAL ŞALVARLAR")}
               </h3>
-              <p className="text-xs sm:text-sm text-stone-200 mt-1.5 max-w-sm line-clamp-2 leading-relaxed">
+              <p className="text-xs sm:text-sm text-stone-200 mt-1.5 max-w-sm line-clamp-2 leading-relaxed drop-shadow-xs">
                 {language === "en" ? "Classic chinos, comfortable linen, and straight-fit denim. Perfect for office or city strolls." : language === "ru" ? "Классические чиносы, удобный лен и прямой деним. Идеально для офиса и прогулок." : language === "tr" ? "Klasik chino, rahat keten ve düz kesim denim pantolonlar. Ofis veya şehir yürüyüşleri için ideal." : (promoBanner?.subtitle || "Klassik chino, rahat kətan və düz kəsim denim şalvarlar. İstər ofis, istərsə də şəhər gəzintisi üçün.")}
               </p>
               <div className="pt-4">
                 <Link
                   href={promoBanner?.ctaLink || "/collections?category=salvar"}
                   prefetch={true}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white text-stone-900 font-semibold text-xs uppercase tracking-wider hover:bg-stone-100 transition shadow-sm active:scale-95"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white text-stone-900 font-semibold text-xs uppercase tracking-wider hover:bg-stone-100 transition shadow-sm active:scale-95 cursor-pointer"
                 >
                   <span>{language === "en" ? "ALL PANTS" : language === "ru" ? "ВСЕ БРЮКИ" : language === "tr" ? "TÜM PANTOLONLAR" : (promoBanner?.ctaText || "BÜTÜN ŞALVARLAR")}</span>
                   <ArrowRight size={14} />
