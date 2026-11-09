@@ -253,40 +253,6 @@ export function Header({ className = "" }: HeaderProps) {
 
           {/* Right: Search, Language/Currency, Cart */}
           <div className="flex items-center gap-1.5 sm:gap-2 xl:gap-2.5 shrink-0">
-            {/* Discreet Desktop Gender Segmented Switch (~100px) */}
-            <div
-              className={`hidden lg:flex items-center p-0.5 rounded-full border transition-all duration-200 shadow-2xs shrink-0 ${
-                isSearchOpen ? "opacity-0 pointer-events-none scale-95" : "opacity-100 scale-100"
-              } ${
-                isLightMode
-                  ? "border-stone-200/90 bg-stone-100/90 text-stone-700"
-                  : "border-white/20 bg-white/10 text-white/90"
-              }`}
-              role="group"
-              aria-label={t.collections?.gender || "Cins"}
-            >
-              {navLinks.filter((link) => link.genderId).map((link) => {
-                const active = isLinkActive(link);
-                return (
-                  <Link
-                    key={link.label}
-                    href={link.href}
-                    prefetch={true}
-                    className={`h-7 xl:h-8 px-2.5 xl:px-3 rounded-full flex items-center justify-center transition-all cursor-pointer whitespace-nowrap text-[11px] xl:text-xs font-semibold ${
-                      active
-                        ? isLightMode
-                          ? "bg-stone-900 text-white shadow-2xs"
-                          : "bg-white text-stone-900 shadow-2xs"
-                        : isLightMode
-                        ? "text-stone-700 hover:text-stone-950 hover:bg-stone-200/60"
-                        : "text-white/80 hover:text-white hover:bg-white/15"
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                );
-              })}
-            </div>
 
             {/* Smooth Animated Inline Header Quick Search */}
             <HeaderQuickSearch isLightMode={isLightMode} onOpenChange={setIsSearchOpen} />
