@@ -12,6 +12,6 @@ export const metadata: Metadata = {
 
 export default async function AdminPanelLayout({ children }: { children: React.ReactNode }) {
   requireAdmin();
-  const counts = await countOpenWork().catch(() => ({ orders: 0, pod: 0 }));
+  const counts = await countOpenWork().catch(() => ({ orders: 0, pod: 0, chat: 0 }));
   return <AdminShell counts={counts}>{children}</AdminShell>;
 }

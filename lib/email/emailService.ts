@@ -15,7 +15,7 @@ export function isEmailConfigured(): boolean {
   return Boolean(resend);
 }
 
-const SENDER_EMAIL = process.env.EMAIL_FROM || "HORVVALLE <orders@horvvalle.com>";
+export const SENDER_EMAIL = process.env.EMAIL_FROM || "HORWALLE <orders@horwalle.com>";
 
 /**
  * Sends order confirmation email to the customer.

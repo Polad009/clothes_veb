@@ -23,7 +23,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ToastProvider } from "@/components/admin/ui";
 
-const NAV: Array<{ heading: string; items: Array<{ href: string; label: string; icon: React.ElementType; badgeKey?: "orders" | "pod" }> }> = [
+const NAV: Array<{ heading: string; items: Array<{ href: string; label: string; icon: React.ElementType; badgeKey?: "orders" | "pod" | "chat" }> }> = [
   {
     heading: "Mağaza",
     items: [
@@ -39,7 +39,7 @@ const NAV: Array<{ heading: string; items: Array<{ href: string; label: string; 
     heading: "Müştərilər",
     items: [
       { href: "/admin/customers", label: "Müştərilər", icon: Users },
-      { href: "/admin/live-chat", label: "Canlı çat", icon: MessageCircle },
+      { href: "/admin/live-chat", label: "Canlı çat", icon: MessageCircle, badgeKey: "chat" },
       { href: "/admin/campaigns", label: "E-poçt kampaniyası", icon: Mail },
     ],
   },
@@ -56,7 +56,7 @@ function isActive(pathname: string, href: string) {
   return href === "/admin" ? pathname === "/admin" : pathname === href || pathname.startsWith(href + "/");
 }
 
-export function AdminShell({ counts, children }: { counts: { orders: number; pod: number }; children: React.ReactNode }) {
+export function AdminShell({ counts, children }: { counts: { orders: number; pod: number; chat: number }; children: React.ReactNode }) {
   const pathname = usePathname() || "/admin";
   const [menuOpen, setMenuOpen] = useState(false);
 

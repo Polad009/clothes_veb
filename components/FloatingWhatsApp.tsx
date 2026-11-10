@@ -1,7 +1,7 @@
 "use client";
 
 import { useSupport } from "@/context/StoreDataContext";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   MessageCircle,
   X,
@@ -29,7 +29,7 @@ function WhatsAppBrandIcon({ className = "w-6 h-6" }: { className?: string }) {
 }
 
 // WhatsApp-style Status Checkmark
-function MessageStatusIcon({ status }: { status?: "sending" | "sent" | "delivered" | "read" }) {
+function MessageStatusIcon({ status }: { status?: "sending" | "sent" | "delivered" | "read" | "failed" }) {
   if (status === "sending") {
     // Dotted/single check outline
     return <Check size={12} className="text-stone-400 opacity-60 stroke-[1.5]" />;
@@ -51,13 +51,15 @@ export interface Message {
   sender: "customer" | "admin";
   text: string;
   timestamp: number;
-  status?: "sending" | "sent" | "delivered" | "read";
+  status?: "sending" | "sent" | "delivered" | "read" | "failed";
   read?: boolean;
+  system?: boolean;
 }
 
 // Multi-language UI Dictionaries for Live Chat
 const CHAT_I18N = {
   az: {
+    sendFailed: "Göndərilmədi — yenidən cəhd edin",
     headerTitle: "Horwalle Dəstək",
     onlineBadge: "Onlayn • Dərhal cavab",
     offlineBadge: "Tezliklə cavablandırılacaq",
@@ -83,6 +85,7 @@ const CHAT_I18N = {
     closeAria: "Çatı bağla",
   },
   en: {
+    sendFailed: "Not sent — tap to retry",
     headerTitle: "Horwalle Support",
     onlineBadge: "Online • Instant reply",
     offlineBadge: "Will reply shortly",
@@ -108,6 +111,7 @@ const CHAT_I18N = {
     closeAria: "Close chat",
   },
   ru: {
+    sendFailed: "Не отправлено — повторить",
     headerTitle: "Служба Поддержки",
     onlineBadge: "В сети • Быстрый ответ",
     offlineBadge: "Ответим в ближайшее время",
@@ -133,6 +137,7 @@ const CHAT_I18N = {
     closeAria: "Закрыть чат",
   },
   tr: {
+    sendFailed: "Gönderilemedi — tekrar deneyin",
     headerTitle: "Horwalle Canlı Destek",
     onlineBadge: "Çevrimiçi • Anında yanıt",
     offlineBadge: "Kısa sürede yanıtlanacak",
@@ -170,10 +175,13 @@ export function FloatingWhatsApp() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
-  const [isAdminOnline, setIsAdminOnline] = useState(true);
+  const [isAdminOnline, setIsAdminOnline] = useState(false);
   const [isTypingAdmin, setIsTypingAdmin] = useState(false);
   const [sessionId, setSessionId] = useState<string>("");
   const [isChatClosed, setIsChatClosed] = useState(false);
+  // True once this visitor has a conversation on the server (they wrote or left their details)
+  const [hasThread, setHasThread] = useState(false);
+  const [sendError, setSendError] = useState("");
 
   // Onboarding Lead Form state
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(true);
@@ -182,12 +190,24 @@ export function FloatingWhatsApp() {
   const [leadError, setLeadError] = useState("");
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const lastKnownMsgIdRef = useRef<string>("");
-  const hasInitializedSoundRef = useRef<boolean>(false);
-  const typingTimeoutRef = useRef<any>(null);
+  const lastAdminMsgIdRef = useRef<string | null>(null);
+  const isOpenRef = useRef(false);
+  const typingSentAtRef = useRef(0);
+  const typingStopRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const phoneNumber = support.phone;
   const whatsappUrl = support.link("Salam! Horwalle atelyesinə yazıram. Məhsul və ya sifarişlə bağlı kömək edə bilərsiniz?");
+
+  useEffect(() => {
+    isOpenRef.current = isChatOpen;
+  }, [isChatOpen]);
+
+  const markActive = (sid: string) => {
+    setHasThread(true);
+    try {
+      localStorage.setItem("hv_livechat_active", sid);
+    } catch {}
+  };
 
   // Initialize unique customer session ID & onboarding check
   useEffect(() => {
@@ -202,101 +222,75 @@ export function FloatingWhatsApp() {
 
       // If user is already logged in, onboarding is auto-filled
       const autoName = profile?.full_name || user?.user_metadata?.full_name || "";
-      if (autoName || savedName) {
-        setHasCompletedOnboarding(true);
-      } else {
-        // If brand new visitor with no messages yet, show onboarding
-        setHasCompletedOnboarding(false);
-      }
+      setHasCompletedOnboarding(Boolean(autoName || savedName));
 
       if (!sid) {
         sid = `cust_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
         localStorage.setItem("hv_livechat_session_id", sid);
       }
+      if (localStorage.getItem("hv_livechat_active") === sid) setHasThread(true);
     } catch {
-      sid = `cust_${Date.now()}`;
+      sid = `cust_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
     }
     setSessionId(sid);
   }, [profile, user]);
 
-  // Poll for messages and admin status (Fast 1.5s interval)
+  // One check with the server. Only marks the shop's messages as read while the chat is open on screen.
+  const poll = useCallback(async () => {
+    if (!sessionId || document.hidden) return;
+    const markRead = isOpenRef.current;
+    try {
+      const res = await fetch(
+        `/api/chat?sessionId=${encodeURIComponent(sessionId)}&role=customer${markRead ? "&read=1" : ""}`,
+        { cache: "no-store" }
+      );
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data?.success) return;
+      setIsAdminOnline(Boolean(data.adminOnline));
+
+      const thread = data.thread;
+      if (!thread) {
+        setHasThread(false);
+        return;
+      }
+      setHasThread(true);
+      setIsTypingAdmin(Boolean(thread.isTypingAdmin));
+      setIsChatClosed(Boolean(thread.isClosed));
+      setUnreadCount(isOpenRef.current ? 0 : thread.unreadCustomer || 0);
+
+      const fetched: Message[] = data.messages || [];
+      if (fetched.length > 0) setHasCompletedOnboarding(true);
+
+      // Chime for a new reply from the shop (not on the first load)
+      const lastAdmin = [...fetched].reverse().find((m) => m.sender === "admin");
+      if (lastAdmin && lastAdminMsgIdRef.current !== null && lastAdmin.id !== lastAdminMsgIdRef.current) {
+        playMessageReceivedSound();
+      }
+      lastAdminMsgIdRef.current = lastAdmin?.id || "";
+
+      // Keep messages that are still on their way (or failed) after the server copy
+      setMessages((prev) => [...fetched, ...prev.filter((m) => m.status === "sending" || m.status === "failed")]);
+    } catch {
+      /* the next check retries */
+    }
+  }, [sessionId]);
+
+  // Open chat: check every 2.5s. Closed, with a conversation: every 15s for the unread badge.
+  // A visitor who never wrote is not polled at all.
   useEffect(() => {
     if (!sessionId) return;
-
-    let active = true;
-
-    const pollChat = async () => {
-      try {
-        const res = await fetch(`/api/chat?sessionId=${sessionId}&role=customer&_t=${Date.now()}`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.success && active) {
-            const thread = data.thread;
-            setIsAdminOnline(thread?.adminOnline ?? true);
-            setIsTypingAdmin(Boolean(thread?.isTypingAdmin));
-            setIsChatClosed(Boolean(thread?.isClosed));
-
-            const fetchedMessages: Message[] = data.messages || [];
-
-            // If there are existing messages in this session, user already onboarded
-            if (fetchedMessages.length > 0) {
-              setHasCompletedOnboarding(true);
-            }
-
-            // Check for new incoming message sound
-            if (fetchedMessages.length > 0) {
-              const lastMsg = fetchedMessages[fetchedMessages.length - 1];
-              if (
-                hasInitializedSoundRef.current &&
-                lastKnownMsgIdRef.current &&
-                lastMsg.id !== lastKnownMsgIdRef.current &&
-                lastMsg.sender === "admin"
-              ) {
-                playMessageReceivedSound();
-                if (!isChatOpen) {
-                  setUnreadCount((prev) => prev + 1);
-                }
-              }
-              lastKnownMsgIdRef.current = lastMsg.id;
-              hasInitializedSoundRef.current = true;
-            } else {
-              hasInitializedSoundRef.current = true;
-            }
-
-            // Sync messages list cleanly preserving pending local optimistic messages
-            setMessages((prev) => {
-              const pendingTemps = prev.filter((m) => m.id.startsWith("temp_"));
-              if (pendingTemps.length === 0) {
-                if (
-                  prev.length === fetchedMessages.length &&
-                  prev[prev.length - 1]?.id === fetchedMessages[fetchedMessages.length - 1]?.id &&
-                  prev[prev.length - 1]?.status === fetchedMessages[fetchedMessages.length - 1]?.status
-                ) {
-                  return prev;
-                }
-                return fetchedMessages;
-              }
-
-              // Filter out temp messages that are now present in fetchedMessages
-              const remainingTemps = pendingTemps.filter(
-                (temp) => !fetchedMessages.some((fm) => fm.text === temp.text && Math.abs(fm.timestamp - temp.timestamp) < 10000)
-              );
-              return [...fetchedMessages, ...remainingTemps];
-            });
-          }
-        }
-      } catch (e) {
-        // silent
-      }
-    };
-
-    pollChat();
-    const interval = setInterval(pollChat, 1500);
+    const every = isChatOpen ? 2500 : hasThread && !isChatClosed ? 15000 : 0;
+    if (!every) return;
+    poll();
+    const interval = setInterval(poll, every);
+    const onVisible = () => !document.hidden && poll();
+    document.addEventListener("visibilitychange", onVisible);
     return () => {
-      active = false;
       clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [sessionId, isChatOpen]);
+  }, [sessionId, isChatOpen, hasThread, isChatClosed, poll]);
 
   // Reset unread count when opening chat & lock background scroll on all devices
   useEffect(() => {
@@ -332,19 +326,30 @@ export function FloatingWhatsApp() {
     if (isChatOpen) {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages, isChatOpen]);
+  }, [messages, isChatOpen, isTypingAdmin]);
 
-  // Handle customer typing notification
+  const sendTyping = (typing: boolean) => {
+    if (!sessionId || !hasThread) return;
+    fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessionId, action: "typing", role: "customer", typing }),
+    }).catch(() => {});
+  };
+
+  // Handle customer typing notification (at most one update every 3 seconds)
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputText(e.target.value);
-
-    if (sessionId) {
-      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-      fetch(`/api/chat?sessionId=${sessionId}&role=customer&typing=true`).catch(() => {});
-      typingTimeoutRef.current = setTimeout(() => {
-        fetch(`/api/chat?sessionId=${sessionId}&role=customer&typing=false`).catch(() => {});
-      }, 2500);
+    setSendError("");
+    if (Date.now() - typingSentAtRef.current > 3000) {
+      typingSentAtRef.current = Date.now();
+      sendTyping(true);
     }
+    if (typingStopRef.current) clearTimeout(typingStopRef.current);
+    typingStopRef.current = setTimeout(() => {
+      typingSentAtRef.current = 0;
+      sendTyping(false);
+    }, 4000);
   };
 
   // Submit onboarding lead form
@@ -365,18 +370,8 @@ export function FloatingWhatsApp() {
 
     setHasCompletedOnboarding(true);
 
-    // Polite assistant message after capturing name and phone
-    const politeWaitingMsg: Message = {
-      id: `bot_wait_${Date.now()}`,
-      sender: "admin",
-      text: t.waitingMessage || "Zəhmət olmasa xətdə qalın, operatorumuz ən qısa zamanda sizə cavab verəcək.",
-      timestamp: Date.now(),
-      status: "delivered",
-    };
-    setMessages((prev) => (prev.length === 0 ? [politeWaitingMsg] : prev));
-
     try {
-      await fetch("/api/chat", {
+      const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -387,38 +382,16 @@ export function FloatingWhatsApp() {
           customerEmail: user?.email || undefined,
         }),
       });
+      if (res.ok) markActive(sessionId);
     } catch {}
   };
 
-  // Send message
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const text = inputText.trim();
-    if (!text || !sessionId || isChatClosed) return;
-
-    setInputText("");
-    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-
+  const deliver = async (local: Message) => {
     const customerName =
       leadName ||
       profile?.full_name ||
       user?.user_metadata?.full_name ||
       (user?.email ? user.email.split("@")[0] : "Müştəri");
-    const customerPhone = leadPhone || profile?.phone || undefined;
-    const customerEmail = user?.email || undefined;
-
-    // Optimistic local add with "sending" status
-    const tempId = `temp_${Date.now()}`;
-    const tempMsg: Message = {
-      id: tempId,
-      sender: "customer",
-      text,
-      timestamp: Date.now(),
-      status: "sending",
-    };
-    setMessages((prev) => [...prev, tempMsg]);
-    playMessageSentSound();
-
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -426,42 +399,59 @@ export function FloatingWhatsApp() {
         body: JSON.stringify({
           sessionId,
           sender: "customer",
-          text,
+          text: local.text,
           customerName,
-          customerPhone,
-          customerEmail,
+          customerPhone: leadPhone || profile?.phone || undefined,
+          customerEmail: user?.email || undefined,
         }),
       });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.message) {
-          lastKnownMsgIdRef.current = data.message.id;
-          setMessages((prev) =>
-            prev.map((m) => (m.id === tempId ? { ...data.message, status: "delivered" } : m))
-          );
-        }
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.message) {
+        markActive(sessionId);
+        setMessages((prev) => prev.map((m) => (m.id === local.id ? data.message : m)));
+        return;
       }
-    } catch (e) {
-      // mark as sent fallback
-      setMessages((prev) =>
-        prev.map((m) => (m.id === tempId ? { ...m, status: "sent" } : m))
-      );
+      if (data.isClosed) setIsChatClosed(true);
+      setSendError(data.error || t.sendFailed);
+    } catch {
+      setSendError(t.sendFailed);
     }
+    setMessages((prev) => prev.map((m) => (m.id === local.id ? { ...m, status: "failed" } : m)));
+  };
+
+  // Send message
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    const text = inputText.trim().slice(0, 2000);
+    if (!text || !sessionId || isChatClosed) return;
+
+    setInputText("");
+    setSendError("");
+    if (typingStopRef.current) clearTimeout(typingStopRef.current);
+    typingSentAtRef.current = 0;
+
+    const local: Message = { id: `temp_${Date.now()}`, sender: "customer", text, timestamp: Date.now(), status: "sending" };
+    setMessages((prev) => [...prev, local]);
+    playMessageSentSound();
+    deliver(local);
+  };
+
+  const retryMessage = (m: Message) => {
+    setSendError("");
+    setMessages((prev) => prev.map((x) => (x.id === m.id ? { ...x, status: "sending" } : x)));
+    deliver({ ...m, status: "sending" });
   };
 
   // End Chat Action
   const handleEndChat = async () => {
     if (!confirm(t.endChatConfirm)) return;
     try {
-      await fetch("/api/chat", {
+      const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sessionId,
-          action: "end_chat",
-        }),
+        body: JSON.stringify({ sessionId, action: "end_chat" }),
       });
-      setIsChatClosed(true);
+      if (res.ok) setIsChatClosed(true);
     } catch {}
   };
 
@@ -470,13 +460,17 @@ export function FloatingWhatsApp() {
     const newSid = `cust_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
     try {
       localStorage.setItem("hv_livechat_session_id", newSid);
+      localStorage.removeItem("hv_livechat_active");
     } catch {}
     setSessionId(newSid);
     setMessages([]);
     setIsChatClosed(false);
-    lastKnownMsgIdRef.current = "";
-    hasInitializedSoundRef.current = false;
+    setHasThread(false);
+    setSendError("");
+    lastAdminMsgIdRef.current = null;
   };
+
+  const awaitingReply = messages.some((m) => m.sender === "customer") && !messages.some((m) => m.sender === "admin" && !m.system);
 
   return (
     <aside
@@ -648,6 +642,13 @@ export function FloatingWhatsApp() {
 
                 {messages.map((m) => {
                   const isCust = m.sender === "customer";
+                  if (m.system) {
+                    return (
+                      <p key={m.id} className="text-center text-[11px] text-stone-500 px-4">
+                        {m.text}
+                      </p>
+                    );
+                  }
                   return (
                     <div
                       key={m.id}
@@ -671,11 +672,28 @@ export function FloatingWhatsApp() {
                             minute: "2-digit",
                           })}
                         </span>
-                        {isCust && <MessageStatusIcon status={m.status} />}
+                        {isCust && m.status !== "failed" && <MessageStatusIcon status={m.status} />}
                       </div>
+                      {m.status === "failed" && (
+                        <button
+                          type="button"
+                          onClick={() => retryMessage(m)}
+                          className="mt-0.5 px-1 text-[10.5px] font-semibold text-rose-600 underline cursor-pointer"
+                        >
+                          {t.sendFailed}
+                        </button>
+                      )}
                     </div>
                   );
                 })}
+
+                {awaitingReply && !isTypingAdmin && (
+                  <div className="flex flex-col items-start">
+                    <div className="max-w-[84%] px-3.5 py-2.5 rounded-2xl rounded-bl-xs text-xs leading-relaxed bg-white text-stone-600 border border-stone-200/90 shadow-2xs">
+                      {t.waitingMessage}
+                    </div>
+                  </div>
+                )}
 
                 {/* Admin typing indicator animation */}
                 {isTypingAdmin && (
@@ -702,6 +720,7 @@ export function FloatingWhatsApp() {
                   value={inputText}
                   onChange={handleInputChange}
                   placeholder={t.inputPlaceholder}
+                  maxLength={2000}
                   className="flex-1 bg-stone-100 border border-stone-200/80 rounded-full px-4 py-2.5 text-base sm:text-xs text-stone-900 focus:outline-none focus:border-stone-400 placeholder:text-stone-400 font-medium"
                 />
                 <button
@@ -713,6 +732,11 @@ export function FloatingWhatsApp() {
                   <Send size={15} className="ml-0.5" />
                 </button>
               </form>
+              {sendError && (
+                <p className="px-4 pb-2 -mt-1 text-[11px] text-rose-600 bg-white" role="alert">
+                  {sendError}
+                </p>
+              )}
             </>
           )}
         </div>
@@ -733,7 +757,9 @@ export function FloatingWhatsApp() {
             <>
               <MessageCircle size={28} className="text-white" />
               {/* Online Green Indicator */}
-              <span className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
+              {isAdminOnline && (
+                <span className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
+              )}
               {/* Unread badge counter */}
               {unreadCount > 0 && (
                 <span className="absolute -top-1.5 -left-1.5 px-2 py-0.5 rounded-full bg-rose-600 text-white text-[11px] font-bold shadow-md animate-pulse">

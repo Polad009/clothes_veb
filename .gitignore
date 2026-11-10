@@ -51,3 +51,9 @@ public/models/*.bin
 .vercel
 
 .agents/
+
+# local-only secrets and backups
+.claude/admin-credentials.txt
+.claude/admin-test.json
+.claude/legacy-config-backup/
+.claude/new-admin-secrets.json

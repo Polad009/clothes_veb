@@ -1,5 +1,6 @@
 import { db, unwrap } from './client';
 import { listOrders } from './orders';
+import { countUnreadThreads } from './chat';
 import type { StoreOrder } from './types';
 
 const AZN_PER_USD = 1.7;
@@ -17,12 +18,13 @@ function isPaid(order: StoreOrder): boolean {
 }
 
 /** Work waiting for the shop owner; shown as badges in the navigation. */
-export async function countOpenWork(): Promise<{ orders: number; pod: number }> {
-  const [orders, pod] = await Promise.all([
+export async function countOpenWork(): Promise<{ orders: number; pod: number; chat: number }> {
+  const [orders, pod, chat] = await Promise.all([
     db().from('orders').select('id', { count: 'exact', head: true }).eq('order_status', 'Yeni Sifariş').eq('is_test', false),
     db().from('pod_orders').select('id', { count: 'exact', head: true }).eq('status', 'Pending Print'),
+    countUnreadThreads().catch(() => 0),
   ]);
-  return { orders: orders.count || 0, pod: pod.count || 0 };
+  return { orders: orders.count || 0, pod: pod.count || 0, chat };
 }
 
 export interface DashboardData {

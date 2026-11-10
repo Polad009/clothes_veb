@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { ShippingRates } from "@/lib/shipping";
 import { adminFetch } from "@/lib/adminClient";
 import { Button, Card, Field, Input, PageHeader, Textarea, useToast } from "@/components/admin/ui";
+import { EmailDomainCard } from "@/components/admin/EmailDomainCard";
 
 type RateKey = keyof ShippingRates;
 
@@ -65,6 +66,8 @@ export function SettingsEditor({ shipping, privacy, terms }: { shipping: Shippin
       />
 
       <div className="space-y-6">
+        <EmailDomainCard />
+
         <Card title="Çatdırılma qiymətləri">
           <div className="divide-y divide-stone-100">
             {RATE_ROWS.map((row) => (
