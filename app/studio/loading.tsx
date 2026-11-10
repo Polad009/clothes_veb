@@ -2,14 +2,16 @@ import React from "react";
 
 export default function StudioLoading() {
   return (
-    <div className="w-full bg-[#140B05] text-white min-h-screen py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col justify-center items-center">
-      <div className="flex flex-col items-center gap-4 text-center">
-        <div className="w-12 h-12 rounded-full border-2 border-white/20 border-t-[#E6C280] animate-spin" />
-        <div className="space-y-1">
-          <h3 className="text-sm font-semibold tracking-[0.2em] uppercase text-[#E6C280] font-mono">
-            3D Dizayn Studiyası
-          </h3>
-          <p className="text-xs text-white/50">Mühit hazırlanır...</p>
+    <div className="min-h-screen w-full bg-ink font-grotesk">
+      <div className="mx-auto max-w-[1600px] px-4 pb-16 pt-8 sm:px-6 lg:px-10">
+        <div className="h-12 w-72 max-w-full animate-pulse bg-ink-700 sm:h-16 sm:w-[28rem]" />
+        <div className="mt-8 grid gap-6 lg:grid-cols-12">
+          <div className="aspect-[4/5] animate-pulse bg-ink-800 lg:col-span-7" />
+          <div className="space-y-4 lg:col-span-5">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="h-24 animate-pulse bg-ink-800" />
+            ))}
+          </div>
         </div>
       </div>
     </div>

@@ -37,12 +37,26 @@ function AnnouncementBar() {
     return () => clearInterval(id);
   }, [items.length]);
 
+  // Phones: every announcement scrolls by in one continuous line, so nothing gets cut off.
+  const seconds = Math.max(18, items.join("").length * 0.28);
+  const track = (copy: number) => (
+    <div className="flex shrink-0 items-center" aria-hidden={copy > 0 || undefined}>
+      {items.map((text, n) => (
+        <span key={`${copy}-${n}`} className="flex items-center whitespace-nowrap">
+          <span className="px-6">{text}</span>
+          <span className="h-1 w-1 rounded-full bg-ink/40" />
+        </span>
+      ))}
+    </div>
+  );
+
   return (
-    <div className="relative z-50 h-9 overflow-hidden bg-bone text-ink">
-      <p
-        key={i % items.length}
-        className="hw-rise block truncate px-4 text-center font-grotesk text-[10px] font-extrabold uppercase leading-9 tracking-[0.14em] [font-stretch:105%] sm:text-[11px] sm:tracking-[0.16em]"
-      >
+    <div className="relative z-50 h-9 overflow-hidden bg-bone font-grotesk text-[10px] font-extrabold uppercase leading-9 tracking-[0.14em] text-ink [font-stretch:105%] sm:text-[11px] sm:tracking-[0.16em]">
+      <div className="hw-marquee flex w-max sm:hidden" style={{ animationDuration: `${seconds}s` }}>
+        {track(0)}
+        {track(1)}
+      </div>
+      <p key={i % items.length} className="hw-rise hidden truncate px-4 text-center sm:block">
         {items[i % items.length]}
       </p>
     </div>

@@ -475,7 +475,7 @@ export function FloatingWhatsApp() {
   return (
     <aside
       aria-label="Canlı Dəstək və Əlaqə"
-      className="fixed bottom-5 right-4 z-50 flex flex-col items-end gap-2.5 select-none pointer-events-auto sm:bottom-6 sm:right-6"
+      className="hw-fab-stack fixed bottom-5 right-4 z-50 flex flex-col items-end gap-2.5 select-none pointer-events-auto sm:bottom-6 sm:right-6"
     >
       {/* ─── LIVE CHAT POPUP WINDOW ─────────────────────────────────────────── */}
       {isChatOpen && (

@@ -1,882 +1,545 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useMemo, useRef, useState } from "react";
+import { Check, ImagePlus, Minus, Move, Plus, RotateCcw, X } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useCurrency } from "@/context/CurrencyContext";
-import { playAddToCartSound } from "@/lib/soundEffects";
-import {
-  Upload,
-  RotateCcw,
-  ShoppingBag,
-  Check,
-  Trash2,
-  CheckCircle2,
-  Info,
-  ArrowRight,
-  Layers,
-  FileText,
-  Move,
-  ZoomIn,
-  ZoomOut,
-  Maximize2,
-} from "lucide-react";
-
+import { useLanguage } from "@/context/LanguageContext";
 import { GARMENTS, PLACEMENTS, type GarmentOption, type PlacementOption } from "@/lib/studio/catalog";
+import { tr, type Phrase } from "@/components/store/i18n";
 
-interface ColorOption {
-  key: string;
-  name: string;
-  hex: string;
-}
+type Side = "front" | "back" | "left" | "right";
+type Transform = { posX: number; posY: number; scale: number; rotation: number };
 
-const COLORS: ColorOption[] = [
-  { key: "white", name: "Ağ", hex: "#FFFFFF" },
-  { key: "black", name: "Qara", hex: "#18181B" },
-  { key: "sand", name: "Qum Beji", hex: "#D7CEC7" },
-  { key: "sky-blue", name: "Açıq Mavi", hex: "#93C5FD" },
-  { key: "darkblue", name: "Tünd Göy", hex: "#1E293B" },
-  { key: "green", name: "Zeytun Yaşılı", hex: "#3F4F38" },
-  { key: "red", name: "Qırmızı", hex: "#A32C2C" },
+const COLORS: Array<{ key: string; name: string; label: Phrase; hex: string }> = [
+  { key: "white", name: "Ağ", label: { az: "Ağ", en: "White", ru: "Белый", tr: "Beyaz" }, hex: "#FFFFFF" },
+  { key: "black", name: "Qara", label: { az: "Qara", en: "Black", ru: "Чёрный", tr: "Siyah" }, hex: "#18181B" },
+  { key: "sand", name: "Qum Beji", label: { az: "Qum beji", en: "Sand", ru: "Песочный", tr: "Kum bej" }, hex: "#D7CEC7" },
+  { key: "sky-blue", name: "Açıq Mavi", label: { az: "Açıq mavi", en: "Sky blue", ru: "Голубой", tr: "Açık mavi" }, hex: "#93C5FD" },
+  { key: "darkblue", name: "Tünd Göy", label: { az: "Tünd göy", en: "Navy", ru: "Тёмно-синий", tr: "Lacivert" }, hex: "#1E293B" },
+  { key: "green", name: "Zeytun Yaşılı", label: { az: "Zeytun yaşılı", en: "Olive", ru: "Оливковый", tr: "Zeytin yeşili" }, hex: "#3F4F38" },
+  { key: "red", name: "Qırmızı", label: { az: "Qırmızı", en: "Red", ru: "Красный", tr: "Kırmızı" }, hex: "#A32C2C" },
 ];
-
 const SIZES = ["S", "M", "L", "XL", "2XL", "3XL"];
 
-export type StudioSide = "front" | "back" | "left" | "right";
+const SIDE_LABEL: Record<Side, Phrase> = {
+  front: { az: "Ön", en: "Front", ru: "Перед", tr: "Ön" },
+  back: { az: "Arxa", en: "Back", ru: "Спина", tr: "Arka" },
+  left: { az: "Sol qol", en: "Left sleeve", ru: "Левый рукав", tr: "Sol kol" },
+  right: { az: "Sağ qol", en: "Right sleeve", ru: "Правый рукав", tr: "Sağ kol" },
+};
 
-export interface SideDesignState {
-  uploadedImage: string | null;
-  originalImage?: string | null;
-  customText: string;
-  textColor: string;
-  fontFamily: string;
-  scale: number;
-  posX: number;
-  posY: number;
-  rotation: number;
-  textScale?: number;
-  textPosX?: number;
-  textPosY?: number;
-  textRotation?: number;
-}
+const PLACEMENT_LABEL: Record<string, Phrase> = {
+  "front-center": { az: "Sinə — böyük", en: "Chest — large", ru: "Грудь — крупно", tr: "Göğüs — büyük" },
+  "front-left": { az: "Sol sinə — kiçik loqo", en: "Left chest — small logo", ru: "Левая грудь — логотип", tr: "Sol göğüs — küçük logo" },
+  "back-center": { az: "Kürək — böyük", en: "Back — large", ru: "Спина — крупно", tr: "Sırt — büyük" },
+  "back-neck": { az: "Boyun altı — kiçik", en: "Below the collar — small", ru: "Под воротником — мелко", tr: "Yaka altı — küçük" },
+  "sleeve-left": { az: "Sol qol", en: "Left sleeve", ru: "Левый рукав", tr: "Sol kol" },
+  "sleeve-right": { az: "Sağ qol", en: "Right sleeve", ru: "Правый рукав", tr: "Sağ kol" },
+  "both-sides": { az: "Ön və arxa", en: "Front and back", ru: "Перед и спина", tr: "Ön ve arka" },
+};
 
-// Helper to get garment mockup image path
-function getGarmentMockupUrl(garmentCategory: string, colorKey: string, side: StudioSide): string {
-  let cat = garmentCategory;
+const GROUP_LABEL: Record<string, Phrase> = {
+  tshirt: { az: "Futbolka", en: "T-shirt", ru: "Футболка", tr: "Tişört" },
+  oversize: { az: "Oversize futbolka", en: "Oversized tee", ru: "Оверсайз", tr: "Oversize tişört" },
+  polo: { az: "Polo", en: "Polo", ru: "Поло", tr: "Polo" },
+  "polo-long": { az: "Polo", en: "Polo", ru: "Поло", tr: "Polo" },
+  sweatshirt: { az: "Sviter", en: "Sweatshirt", ru: "Свитшот", tr: "Sweatshirt" },
+  hoodie: { az: "Hudi", en: "Hoodie", ru: "Худи", tr: "Hoodie" },
+  yarimzamok: { az: "Yarımzamok", en: "Half-zip", ru: "Полузамок", tr: "Yarım fermuar" },
+  balonka: { az: "Balonka", en: "Track jacket", ru: "Олимпийка", tr: "Eşofman üstü" },
+  salvar: { az: "Şalvar", en: "Pants", ru: "Брюки", tr: "Pantolon" },
+  kepka: { az: "Kepka", en: "Cap", ru: "Кепка", tr: "Şapka" },
+};
+
+/** Garment mockup on disk. Only t-shirts have sleeve views. */
+function mockupUrl(category: string, colorKey: string, side: Side): string {
+  let cat = category;
   if (cat === "polo-long") cat = "polo";
   if (cat === "balonka") cat = "hoodie";
-
-  // Use crisp sleeve view mockups available for all colors
-  if (side === "left" || side === "right") {
-    return `/images/studio/tshirt/${colorKey}-${side}-shirt.png`;
-  }
-
-  let noun = cat;
-  if (noun === "tshirt") noun = "shirt";
-  if (noun === "oversize") noun = "oversize";
-  if (noun === "hoodie") noun = "hoodie";
-  if (noun === "polo") noun = "polo";
-  if (noun === "sweatshirt") noun = "sweatshirt";
-  if (noun === "salvar") noun = "salvar";
-  if (noun === "kepka") noun = "kepka";
-  if (noun === "yarimzamok") noun = "yarimzamok";
-
+  if (side === "left" || side === "right") return `/images/studio/tshirt/${colorKey}-${side}-shirt.png`;
+  const noun = cat === "tshirt" ? "shirt" : cat;
   return `/images/studio/${cat}/${colorKey}-${side}-${noun}.png`;
 }
 
-export default function SimpleStudioPage() {
+/** Where the design sits on the garment before the customer moves it (percent of the stage). */
+function baseBox(side: Side, placementId: string) {
+  if (side === "left") return { top: 48, left: 54, width: 25, maxHeight: 30 };
+  if (side === "right") return { top: 48, left: 46, width: 25, maxHeight: 30 };
+  if (side === "back") return placementId === "back-neck" ? { top: 25, left: 50, width: 20, maxHeight: 16 } : { top: 48, left: 50, width: 40, maxHeight: 44 };
+  if (placementId === "front-left") return { top: 36, left: 60, width: 18, maxHeight: 18 };
+  return { top: 48, left: 50, width: 38, maxHeight: 44 };
+}
+
+const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
+const ZERO: Transform = { posX: 0, posY: 0, scale: 1, rotation: 0 };
+
+function Step({ n, title, aside, children }: { n: number; title: string; aside?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <section className="border-t border-white/10 py-7">
+      <div className="mb-4 flex items-baseline justify-between gap-3">
+        <h2 className="text-[13px] font-extrabold uppercase tracking-[0.16em]">
+          <span className="mr-2 text-bone-faint">{String(n).padStart(2, "0")}</span>
+          {title}
+        </h2>
+        {aside}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+export default function StudioPage() {
   const { addItem, openCart } = useCart();
   const { formatPrice } = useCurrency();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const previewBoxRef = useRef<HTMLDivElement>(null);
+  const { language } = useLanguage();
+  const L = (p: Phrase) => tr(language, p);
 
-  // Selections
-  const [selectedGarment, setSelectedGarment] = useState<GarmentOption>(GARMENTS[0]);
-  const [selectedColor, setSelectedColor] = useState<ColorOption>(COLORS[0]);
-  const [selectedSize, setSelectedSize] = useState<string>("L");
-  const [selectedPlacement, setSelectedPlacement] = useState<PlacementOption>(PLACEMENTS[0]);
-  const [activeSide, setActiveSide] = useState<StudioSide>("front");
+  const fileRef = useRef<HTMLInputElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
 
-  // Uploaded Design State
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
-  const [uploadedFileSize, setUploadedFileSize] = useState<string | null>(null);
+  const [garment, setGarment] = useState<GarmentOption>(GARMENTS[0]);
+  const [color, setColor] = useState(COLORS[0]);
+  const [size, setSize] = useState("L");
+  const [placement, setPlacement] = useState<PlacementOption>(PLACEMENTS[0]);
+  const [side, setSide] = useState<Side>("front");
+  const [image, setImage] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
+  const [note, setNote] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [added, setAdded] = useState(false);
+  const [transforms, setTransforms] = useState<Record<Side, Transform>>({ front: ZERO, back: ZERO, left: ZERO, right: ZERO });
+  const t = transforms[side];
+  const setT = (patch: Partial<Transform>) => setTransforms((all) => ({ ...all, [side]: { ...all[side], ...patch } }));
 
-  // Interactive transforms per side (drag, scale, position)
-  const [transforms, setTransforms] = useState<Record<StudioSide, { posX: number; posY: number; scale: number; rotation: number }>>({
-    front: { posX: 0, posY: 0, scale: 1, rotation: 0 },
-    back: { posX: 0, posY: 0, scale: 1, rotation: 0 },
-    left: { posX: 0, posY: 0, scale: 1, rotation: 0 },
-    right: { posX: 0, posY: 0, scale: 1, rotation: 0 },
-  });
+  const hasSleeves = garment.category === "tshirt";
+  const sides: Side[] = hasSleeves ? ["front", "back", "left", "right"] : ["front", "back"];
+  const placements = useMemo(
+    () => PLACEMENTS.filter((p) => hasSleeves || (p.side !== "left" && p.side !== "right")),
+    [hasSleeves]
+  );
+  const groups = useMemo(() => {
+    const map = new Map<string, GarmentOption[]>();
+    for (const g of GARMENTS) {
+      const key = g.category === "polo-long" ? "polo" : g.category;
+      map.set(key, [...(map.get(key) || []), g]);
+    }
+    return Array.from(map.entries());
+  }, []);
 
-  const currentTransform = transforms[activeSide];
+  const price = garment.basePrice + placement.extraPrice;
+  const mockup = mockupUrl(garment.category, color.key, side);
 
-  const updateTransform = (updates: Partial<{ posX: number; posY: number; scale: number; rotation: number }>) => {
-    setTransforms((prev) => ({
-      ...prev,
-      [activeSide]: {
-        ...prev[activeSide],
-        ...updates,
-      },
-    }));
-  };
-
-  // Dragging state
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStartRef = useRef<{ clientX: number; clientY: number; startPosX: number; startPosY: number }>({ clientX: 0, clientY: 0, startPosX: 0, startPosY: 0 });
-
-  // Resizing state
-  const [isResizing, setIsResizing] = useState(false);
-  const resizeStartRef = useRef<{ clientX: number; clientY: number; startScale: number }>({ clientX: 0, clientY: 0, startScale: 1 });
-
-  // Pointer drag handlers
-  const handlePointerDownDrag = (e: React.PointerEvent) => {
-    e.stopPropagation();
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    setIsDragging(true);
-    dragStartRef.current = {
-      clientX: e.clientX,
-      clientY: e.clientY,
-      startPosX: currentTransform.posX,
-      startPosY: currentTransform.posY,
-    };
-  };
-
-  const handlePointerMoveDrag = (e: React.PointerEvent) => {
-    if (!isDragging || !previewBoxRef.current) return;
-    const rect = previewBoxRef.current.getBoundingClientRect();
-    const deltaX = ((e.clientX - dragStartRef.current.clientX) / rect.width) * 100;
-    const deltaY = ((e.clientY - dragStartRef.current.clientY) / rect.height) * 100;
-    const newX = Math.max(-35, Math.min(35, Math.round(dragStartRef.current.startPosX + deltaX)));
-    const newY = Math.max(-35, Math.min(35, Math.round(dragStartRef.current.startPosY + deltaY)));
-    updateTransform({ posX: newX, posY: newY });
-  };
-
-  const handlePointerUpDrag = (e: React.PointerEvent) => {
-    if (isDragging) {
-      try {
-        (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
-      } catch (err) {}
-      setIsDragging(false);
+  const chooseGarment = (g: GarmentOption) => {
+    setGarment(g);
+    if (g.category !== "tshirt") {
+      if (side === "left" || side === "right") setSide("front");
+      if (placement.side === "left" || placement.side === "right") setPlacement(PLACEMENTS[0]);
     }
   };
-
-  // Pointer resize handlers (Corner handle)
-  const handlePointerDownResize = (e: React.PointerEvent) => {
-    e.stopPropagation();
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    setIsResizing(true);
-    resizeStartRef.current = {
-      clientX: e.clientX,
-      clientY: e.clientY,
-      startScale: currentTransform.scale,
-    };
+  const choosePlacement = (p: PlacementOption) => {
+    setPlacement(p);
+    setSide(p.side);
   };
 
-  const handlePointerMoveResize = (e: React.PointerEvent) => {
-    if (!isResizing || !previewBoxRef.current) return;
-    const rect = previewBoxRef.current.getBoundingClientRect();
-    const delta = ((e.clientX - resizeStartRef.current.clientX) + (e.clientY - resizeStartRef.current.clientY)) / (rect.width * 0.45);
-    const newScale = Math.max(0.4, Math.min(1.8, Number((resizeStartRef.current.startScale + delta).toFixed(2))));
-    updateTransform({ scale: newScale });
-  };
-
-  const handlePointerUpResize = (e: React.PointerEvent) => {
-    if (isResizing) {
-      try {
-        (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
-      } catch (err) {}
-      setIsResizing(false);
-    }
-  };
-
-  // Wheel zoom
-  const handleWheelZoom = (e: React.WheelEvent) => {
-    if (!uploadedImage) return;
-    const delta = e.deltaY < 0 ? 0.05 : -0.05;
-    const newScale = Math.max(0.4, Math.min(1.8, Number((currentTransform.scale + delta).toFixed(2))));
-    updateTransform({ scale: newScale });
-  };
-
-  // Customer Note
-  const [customerNote, setCustomerNote] = useState<string>("");
-
-  // UI status
-  const [isAdding, setIsAdding] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-
-  // Handle File Upload
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
-
-    setUploadError(null);
-
-    // Max 30MB
+    setError(null);
     if (file.size > 30 * 1024 * 1024) {
-      setUploadError("Fayl ölçüsü maksimum 30MB ola bilər.");
+      setError(L({ az: "Fayl 30 MB-dan böyük olmamalıdır.", en: "The file must be smaller than 30 MB.", ru: "Файл должен быть меньше 30 МБ.", tr: "Dosya 30 MB'den küçük olmalı." }));
       return;
     }
-
-    const sizeInMB = (file.size / (1024 * 1024)).toFixed(1);
-    setUploadedFileName(file.name);
-    setUploadedFileSize(`${sizeInMB} MB`);
-
     const reader = new FileReader();
     reader.onload = () => {
       if (typeof reader.result === "string") {
-        setUploadedImage(reader.result);
+        setImage(reader.result);
+        setFileName(file.name);
       }
     };
     reader.readAsDataURL(file);
   };
 
-  const handleSelectPlacement = (placement: PlacementOption) => {
-    setSelectedPlacement(placement);
-    setActiveSide(placement.side);
+  // drag to move, corner handle to resize, wheel to zoom
+  const drag = useRef<{ x: number; y: number; posX: number; posY: number; scale: number; mode: "move" | "resize" } | null>(null);
+  const startDrag = (mode: "move" | "resize") => (e: React.PointerEvent) => {
+    e.stopPropagation();
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    drag.current = { x: e.clientX, y: e.clientY, posX: t.posX, posY: t.posY, scale: t.scale, mode };
+  };
+  const moveDrag = (e: React.PointerEvent) => {
+    const d = drag.current;
+    const rect = stageRef.current?.getBoundingClientRect();
+    if (!d || !rect) return;
+    if (d.mode === "move") {
+      setT({
+        posX: clamp(Math.round(d.posX + ((e.clientX - d.x) / rect.width) * 100), -35, 35),
+        posY: clamp(Math.round(d.posY + ((e.clientY - d.y) / rect.height) * 100), -35, 35),
+      });
+    } else {
+      const delta = (e.clientX - d.x + (e.clientY - d.y)) / (rect.width * 0.45);
+      setT({ scale: clamp(Number((d.scale + delta).toFixed(2)), 0.4, 1.8) });
+    }
+  };
+  const endDrag = (e: React.PointerEvent) => {
+    try {
+      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+    } catch {}
+    drag.current = null;
   };
 
-  // Price Calculation
-  const totalPrice = selectedGarment.basePrice + selectedPlacement.extraPrice;
+  const box = baseBox(side, placement.id);
+  const overlay: React.CSSProperties = {
+    top: `${box.top + t.posY}%`,
+    left: `${box.left + t.posX}%`,
+    width: `${box.width}%`,
+    maxHeight: `${box.maxHeight}%`,
+    transform: `translate(-50%, -50%) scale(${t.scale}) rotate(${t.rotation}deg)`,
+    touchAction: "none",
+  };
 
-  // Add to Bag / Order
-  const handleAddToCart = async () => {
-    if (!uploadedImage) {
-      setUploadError("Zəhmət olmasa dizayn şəklinizi yükləyin.");
-      if (fileInputRef.current) {
-        fileInputRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
+  const addToBag = () => {
+    if (!image) {
+      setError(L({ az: "Əvvəlcə dizayn faylını yükləyin.", en: "Upload your design file first.", ru: "Сначала загрузите файл дизайна.", tr: "Önce tasarım dosyanızı yükleyin." }));
+      document.getElementById("studio-upload")?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
-
-    setIsAdding(true);
-    try {
-      playAddToCartSound();
-    } catch (e) {}
-
-    const mockupUrl = getGarmentMockupUrl(selectedGarment.category, selectedColor.key, activeSide);
-
-    const customData = {
-      garmentType: selectedGarment.name,
-      garmentColor: selectedColor.name,
-      size: selectedSize,
-      placement: selectedPlacement.label,
-      placementKey: selectedPlacement.id,
-      customerNote: customerNote.trim(),
-      transform: currentTransform,
-      uploadedImage: uploadedImage,
-      previewImage: mockupUrl,
-      price: totalPrice,
-    };
-
     addItem({
-      id: `pod_${Date.now()}_${selectedGarment.id}_${selectedSize}`,
-      productId: selectedGarment.id,
-      name: `Öz dizayn: ${selectedGarment.name}`,
-      price: totalPrice,
-      size: selectedSize,
-      color: selectedColor.name,
-      image: mockupUrl,
+      id: `pod_${Date.now()}_${garment.id}_${size}`,
+      productId: garment.id,
+      name: `Öz dizayn: ${garment.name}`,
+      price,
+      size,
+      color: color.name,
+      image: mockup,
       type: "custom",
-      customDesignPreview: uploadedImage,
-      customData: customData,
+      customDesignPreview: image,
+      customData: {
+        garmentType: garment.name,
+        garmentColor: color.name,
+        size,
+        placement: placement.label,
+        placementKey: placement.id,
+        customerNote: note.trim(),
+        transform: t,
+        uploadedImage: image,
+        previewImage: mockup,
+        price,
+      },
       stockQuantity: 99,
     });
-
+    setAdded(true);
     setTimeout(() => {
-      setIsAdding(false);
+      setAdded(false);
       openCart();
-    }, 350);
+    }, 400);
   };
 
-  // Compute CSS placement for realistic overlay
-  // Natural chest position (starting well below collar)
-  const getOverlayBase = () => {
-    // Left Sleeve view
-    if (activeSide === "left") {
-      return {
-        top: 48,
-        left: 54,
-        width: 25,
-        maxHeight: 30,
-      };
-    }
-
-    // Right Sleeve view
-    if (activeSide === "right") {
-      return {
-        top: 48,
-        left: 46,
-        width: 25,
-        maxHeight: 30,
-      };
-    }
-
-    // Back view
-    if (activeSide === "back") {
-      if (selectedPlacement.id === "back-neck") {
-        return {
-          top: 25,
-          left: 50,
-          width: 20,
-          maxHeight: 16,
-        };
-      }
-      return {
-        top: 48,
-        left: 50,
-        width: 40,
-        maxHeight: 44,
-      };
-    }
-
-    // Front view
-    if (selectedPlacement.id === "front-left") {
-      return {
-        top: 36,
-        left: 60,
-        width: 18,
-        maxHeight: 18,
-      };
-    }
-
-    // Front Center (Chest - well below collar)
-    return {
-      top: 48,
-      left: 50,
-      width: 38,
-      maxHeight: 44,
-    };
-  };
-
-  const getOverlayStyle = (): React.CSSProperties => {
-    const base = getOverlayBase();
-    const t = currentTransform;
-    return {
-      top: `${base.top + t.posY}%`,
-      left: `${base.left + t.posX}%`,
-      width: `${base.width}%`,
-      maxHeight: `${base.maxHeight}%`,
-      transform: `translate(-50%, -50%) scale(${t.scale}) rotate(${t.rotation}deg)`,
-      transformOrigin: "center center",
-      touchAction: "none",
-    };
-  };
-
-  const garmentMockup = getGarmentMockupUrl(selectedGarment.category, selectedColor.key, activeSide);
+  const iconBtn = "flex h-9 w-9 items-center justify-center border border-white/15 text-bone transition hover:border-bone";
 
   return (
-    <div className="w-full min-h-screen bg-ink font-grotesk text-bone pt-6 pb-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="py-6 border-b border-white/12 mb-8">
-          <h1 className="text-5xl font-black uppercase leading-[0.9] tracking-[-0.02em] text-bone [font-stretch:115%] sm:text-7xl">
-            Öz dizaynını yarat
-          </h1>
-          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-bone-dim">
-            Şəklini, loqonu və ya yazını yüklə, geyimdə yerini seç və sifariş ver. Hazırlamadan əvvəl rəngi və ölçünü sənin üçün yoxlayırıq.
-          </p>
-        </div>
+    <div className="min-h-screen w-full bg-ink font-grotesk text-bone">
+      <div className="mx-auto max-w-[1600px] px-4 pb-32 pt-8 sm:px-6 lg:px-10 lg:pb-24">
+        <h1 className="text-[12vw] font-black uppercase leading-[0.88] tracking-[-0.02em] [font-stretch:115%] sm:text-7xl">
+          {L({ az: "Öz dizaynını yarat", en: "Create your own", ru: "Создай свой дизайн", tr: "Kendi tasarımını yap" })}
+        </h1>
+        <p className="mt-4 max-w-xl text-[14px] leading-relaxed text-bone-dim">
+          {L({
+            az: "Geyimi seç, şəklini və ya loqonu yüklə, yerini göstər. Hazırlamadan əvvəl rəngi və ölçünü sənin üçün yoxlayırıq.",
+            en: "Pick a garment, upload your image or logo and place it. We check colour and size for you before production.",
+            ru: "Выбери вещь, загрузи изображение или логотип и размести его. Перед производством мы проверим цвет и размер.",
+            tr: "Giysiyi seç, görselini veya logonu yükle ve yerleştir. Üretimden önce renk ve boyutu senin için kontrol ederiz.",
+          })}
+        </p>
 
-        {/* 2-Column Main Workspace (Stretches full height so left preview remains sticky during scrolling) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
-          
-          {/* LEFT: Garment & Placement Visual Preview (Stabil / Sticky) */}
-          <div className="lg:col-span-5 relative">
-            <div className="lg:sticky lg:top-24 space-y-4">
-              <div
-                ref={previewBoxRef}
-                onWheel={handleWheelZoom}
-                className="relative w-full aspect-square bg-ink-800 rounded-3xl border border-white/12 p-4 sm:p-6 shadow-sm flex items-center justify-center overflow-hidden select-none"
-              >
-                {/* Garment Base Mockup */}
-                <img
-                  src={garmentMockup}
-                  alt={selectedGarment.name}
-                  className="w-full h-full object-contain pointer-events-none select-none transition-opacity duration-300"
-                  onError={(e) => {
-                    // Fallback to basic t-shirt if specific mockup file is missing
-                    e.currentTarget.src = `/images/studio/tshirt/${selectedColor.key}-${activeSide}-shirt.png`;
-                  }}
-                />
-
-                {/* Uploaded Design Placement Overlay with Direct Interactive Manipulation */}
-                {uploadedImage ? (
-                  <div
-                    onPointerDown={handlePointerDownDrag}
-                    onPointerMove={handlePointerMoveDrag}
-                    onPointerUp={handlePointerUpDrag}
-                    style={getOverlayStyle()}
-                    className={`absolute z-10 flex items-center justify-center transition-shadow group ${
-                      isDragging ? "cursor-grabbing" : "cursor-grab"
-                    }`}
-                  >
-                    {/* Active Bounding Box with micro-animations */}
-                    <div className="relative w-full h-full flex items-center justify-center border-2 border-dashed border-amber-500/80 rounded-xl p-1 bg-amber-500/5 group-hover:border-amber-600 transition-all">
-                      <img
-                        src={uploadedImage}
-                        alt="Müştəri Dizaynı"
-                        draggable={false}
-                        className="max-w-full max-h-full object-contain drop-shadow-md pointer-events-none select-none"
-                      />
-
-                      {/* Four Corner Indicator Dots */}
-                      <span className="absolute -top-1.5 -left-1.5 w-3 h-3 rounded-full bg-ink-800 border-2 border-amber-600 shadow-2xs pointer-events-none" />
-                      <span className="absolute -top-1.5 -right-1.5 w-3 h-3 rounded-full bg-ink-800 border-2 border-amber-600 shadow-2xs pointer-events-none" />
-                      <span className="absolute -bottom-1.5 -left-1.5 w-3 h-3 rounded-full bg-ink-800 border-2 border-amber-600 shadow-2xs pointer-events-none" />
-                      
-                      {/* Interactive Bottom-Right Resize Handle */}
-                      <div
-                        onPointerDown={handlePointerDownResize}
-                        onPointerMove={handlePointerMoveResize}
-                        onPointerUp={handlePointerUpResize}
-                        className="absolute -bottom-2.5 -right-2.5 w-6 h-6 rounded-full bg-amber-600 hover:bg-amber-700 text-white shadow-md flex items-center justify-center cursor-nwse-resize active:scale-110 transition z-20"
-                        title="Dartaraq ölçünü böyüdün və ya kiçildin"
-                      >
-                        <Maximize2 size={11} className="rotate-90 pointer-events-none" />
-                      </div>
-
-                      {/* Floating Tooltip Pill */}
-                      <span className="absolute -top-7 left-1/2 -translate-x-1/2 bg-stone-900/90 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none">
-                        Toxunub sürüşdürün
-                      </span>
-                    </div>
-                  </div>
-                ) : (
-                  <div
-                    className="absolute pointer-events-none border-2 border-dashed border-white/25 rounded-xl flex items-center justify-center p-2 transition-all duration-300"
-                    style={getOverlayStyle()}
-                  >
-                    <span className="text-[10px] font-bold text-bone-dim bg-ink-800/90 backdrop-blur-xs px-2 py-1 rounded-md shadow-2xs">
-                      Dizayn Sahəsi ({selectedPlacement.label.split(" ")[0]})
-                    </span>
-                  </div>
-                )}
-
-                {/* Side Switcher (Ön / Arxa / Sol qol / Sağ qol) */}
-                <div className="absolute top-4 left-4 z-10 flex items-center gap-1 bg-stone-900/85 backdrop-blur-md p-1 rounded-xl shadow-md">
+        <div className="mt-10 grid gap-10 lg:grid-cols-12">
+          {/* preview */}
+          <div className="lg:col-span-7">
+            <div className="lg:sticky lg:top-24">
+              <div className="mb-3 flex flex-wrap gap-2">
+                {sides.map((s) => (
                   <button
+                    key={s}
                     type="button"
-                    onClick={() => setActiveSide("front")}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
-                      activeSide === "front"
-                        ? "bg-ink-800 text-bone shadow-xs"
-                        : "text-bone-faint hover:text-white"
+                    onClick={() => setSide(s)}
+                    className={`border px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] transition ${
+                      side === s ? "border-bone bg-bone text-ink" : "border-white/20 hover:border-bone"
                     }`}
                   >
-                    Ön
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveSide("back")}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
-                      activeSide === "back"
-                        ? "bg-ink-800 text-bone shadow-xs"
-                        : "text-bone-faint hover:text-white"
-                    }`}
-                  >
-                    Arxa
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveSide("left")}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
-                      activeSide === "left"
-                        ? "bg-ink-800 text-bone shadow-xs"
-                        : "text-bone-faint hover:text-white"
-                    }`}
-                  >
-                    Sol qol
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveSide("right")}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
-                      activeSide === "right"
-                        ? "bg-ink-800 text-bone shadow-xs"
-                        : "text-bone-faint hover:text-white"
-                    }`}
-                  >
-                    Sağ qol
-                  </button>
-                </div>
-
-                {/* Color & Size badge */}
-                <div className="absolute bottom-4 right-4 z-10 px-3 py-1 rounded-full bg-ink-800/90 backdrop-blur-md border border-white/12 text-[11px] font-bold text-bone shadow-2xs">
-                  {selectedColor.name} · {selectedSize}
-                </div>
-              </div>
-
-              {/* Interactive Precision Control Bar (Scale, Nudge, Center Reset) */}
-              {uploadedImage && (
-                <div className="bg-ink-800 rounded-3xl p-4 border border-white/12 shadow-2xs space-y-3">
-                  <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                    <span className="font-bold text-xs text-bone flex items-center gap-1.5">
-                      <Move size={14} className="text-amber-300" />
-                      <span>Dizaynın Ölçü və Mövqeyi</span>
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => updateTransform({ posX: 0, posY: 0, scale: 1, rotation: 0 })}
-                      className="text-[11px] font-bold text-bone-dim hover:text-bone flex items-center gap-1 hover:underline transition cursor-pointer"
-                    >
-                      <RotateCcw size={12} />
-                      <span>Mərkəzə Qaytar</span>
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {/* Scale Slider & +/- */}
-                    <div className="bg-ink-700 p-2.5 rounded-2xl border border-white/12 flex items-center gap-2">
-                      <span className="text-[11px] font-bold text-bone-dim shrink-0">Ölçü:</span>
-                      <button
-                        type="button"
-                        onClick={() => updateTransform({ scale: Math.max(0.4, Number((currentTransform.scale - 0.1).toFixed(2))) })}
-                        className="w-7 h-7 rounded-lg bg-ink-800 border border-white/12 text-bone font-bold hover:bg-ink-600 transition active:scale-95 flex items-center justify-center cursor-pointer shadow-2xs"
-                        title="Kiçilt"
-                      >
-                        -
-                      </button>
-                      <input
-                        type="range"
-                        min="0.4"
-                        max="1.8"
-                        step="0.05"
-                        value={currentTransform.scale}
-                        onChange={(e) => updateTransform({ scale: parseFloat(e.target.value) })}
-                        className="flex-1 accent-stone-900 cursor-pointer h-1.5"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => updateTransform({ scale: Math.min(1.8, Number((currentTransform.scale + 0.1).toFixed(2))) })}
-                        className="w-7 h-7 rounded-lg bg-ink-800 border border-white/12 text-bone font-bold hover:bg-ink-600 transition active:scale-95 flex items-center justify-center cursor-pointer shadow-2xs"
-                        title="Böyüt"
-                      >
-                        +
-                      </button>
-                      <span className="text-[11px] font-mono font-bold text-bone w-10 text-right">
-                        {Math.round(currentTransform.scale * 100)}%
-                      </span>
-                    </div>
-
-                    {/* Position Nudge Arrows */}
-                    <div className="bg-ink-700 p-2.5 rounded-2xl border border-white/12 flex items-center justify-between">
-                      <span className="text-[11px] font-bold text-bone-dim shrink-0">Sürüşdür:</span>
-                      <div className="flex items-center gap-1">
-                        <button
-                          type="button"
-                          onClick={() => updateTransform({ posX: Math.max(-35, currentTransform.posX - 4) })}
-                          className="w-7 h-7 rounded-lg bg-ink-800 border border-white/12 text-bone font-bold hover:bg-ink-600 transition active:scale-95 flex items-center justify-center cursor-pointer shadow-2xs text-xs"
-                          title="Sola"
-                        >
-                          ←
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => updateTransform({ posY: Math.max(-35, currentTransform.posY - 4) })}
-                          className="w-7 h-7 rounded-lg bg-ink-800 border border-white/12 text-bone font-bold hover:bg-ink-600 transition active:scale-95 flex items-center justify-center cursor-pointer shadow-2xs text-xs"
-                          title="Yuxarı"
-                        >
-                          ↑
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => updateTransform({ posY: Math.min(35, currentTransform.posY + 4) })}
-                          className="w-7 h-7 rounded-lg bg-ink-800 border border-white/12 text-bone font-bold hover:bg-ink-600 transition active:scale-95 flex items-center justify-center cursor-pointer shadow-2xs text-xs"
-                          title="Aşağı"
-                        >
-                          ↓
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => updateTransform({ posX: Math.min(35, currentTransform.posX + 4) })}
-                          className="w-7 h-7 rounded-lg bg-ink-800 border border-white/12 text-bone font-bold hover:bg-ink-600 transition active:scale-95 flex items-center justify-center cursor-pointer shadow-2xs text-xs"
-                          title="Sağa"
-                        >
-                          →
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <p className="text-[10px] text-bone-dim leading-relaxed text-center">
-                    💡 <strong>İpucu:</strong> Şəkli həmçinin birbaşa köynəyin üzərində tutub istədiyiniz yerə çəkə və küncündəki düyməni dartaraq ölçüsünü dəyişə bilərsiniz.
-                  </p>
-                </div>
-              )}
-
-              {/* Quick Assurance Notice */}
-              <div className="p-3.5 rounded-2xl bg-ink-700 border border-white/12 text-xs text-bone-dim flex items-start gap-2.5">
-                <Info size={16} className="text-bone-dim shrink-0 mt-0.5" />
-                <p className="text-[11px] leading-relaxed text-bone-dim">
-                  Göstərilən şəkil vizual önbaxış üçündür. Hazırlıq zamanı dəqiqlik, rəng balansı və ölçülər mütəxəssislərimiz tərəfindən tənzimlənir.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* RIGHT: Simplified Studio Configurator */}
-          <div className="lg:col-span-7 space-y-7">
-            
-            {/* STEP 1: Garment Selection */}
-            <div data-lenis-prevent className="bg-ink-800 rounded-3xl p-5 sm:p-6 border border-white/12 shadow-2xs space-y-4">
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-bone text-ink text-[11px] font-bold flex items-center justify-center">1</span>
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-bone">Geyim Növü və Rəngi</h3>
-                </div>
-                <span className="text-xs font-mono font-bold text-bone">{formatPrice(selectedGarment.basePrice)}</span>
-              </div>
-
-              {/* Garment Type Dropdown/Buttons */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <label className="font-semibold text-bone-dim uppercase">Geyim Modeli ({GARMENTS.length} Çeşid)</label>
-                  <span className="text-bone-dim text-[11px]">Seçilmiş: <strong className="text-bone">{selectedGarment.name}</strong></span>
-                </div>
-                <div
-                  data-lenis-prevent
-                  onWheel={(e) => e.stopPropagation()}
-                  className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-80 sm:max-h-96 overflow-y-auto pr-1 scrollbar-thin overscroll-contain"
-                  style={{ overscrollBehavior: "contain", WebkitOverflowScrolling: "touch" }}
-                >
-                  {GARMENTS.map((g) => (
-                    <button
-                      key={g.id}
-                      type="button"
-                      onClick={() => setSelectedGarment(g)}
-                      className={`p-3 rounded-2xl border text-left transition cursor-pointer flex flex-col justify-between ${
-                        selectedGarment.id === g.id
-                          ? "bg-bone text-ink border-bone shadow-sm ring-2 ring-bone/25"
-                          : "bg-ink-700 text-bone border-white/12 hover:border-white/40 hover:bg-ink-600"
-                      }`}
-                    >
-                      <div className="text-xs font-bold leading-snug">{g.name}</div>
-                      <div className="text-[10px] opacity-70 mt-1 line-clamp-1">{g.description}</div>
-                      <div className="flex items-center justify-between mt-2 pt-1 border-t border-current/10">
-                        <span className="text-[9.5px] opacity-75 uppercase font-mono">{g.category}</span>
-                        <span className="text-xs font-black">{formatPrice(g.basePrice)}</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Color Selection */}
-              <div className="space-y-2 pt-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-semibold text-bone-dim uppercase">Rəng: <strong>{selectedColor.name}</strong></span>
-                </div>
-                <div className="flex flex-wrap items-center gap-2.5">
-                  {COLORS.map((c) => (
-                    <button
-                      key={c.key}
-                      type="button"
-                      onClick={() => setSelectedColor(c)}
-                      className={`w-9 h-9 rounded-xl border-2 transition-all flex items-center justify-center cursor-pointer ${
-                        selectedColor.key === c.key
-                          ? "border-bone ring-2 ring-bone/25 scale-105"
-                          : "border-white/12 opacity-80 hover:opacity-100 hover:border-white/40"
-                      }`}
-                      style={{ backgroundColor: c.hex }}
-                      title={c.name}
-                    >
-                      {selectedColor.key === c.key && (
-                        <Check size={14} className={c.hex === "#FFFFFF" || c.hex === "#D7CEC7" ? "text-ink" : "text-white"} />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Size Selection */}
-              <div className="space-y-2 pt-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-semibold text-bone-dim uppercase">Ölçü</span>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  {SIZES.map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => setSelectedSize(s)}
-                      className={`w-11 h-9 rounded-xl border text-xs font-bold transition cursor-pointer ${
-                        selectedSize === s
-                          ? "bg-bone text-ink border-bone shadow-xs"
-                          : "bg-ink-700 text-bone-dim border-white/12 hover:border-white/40"
-                      }`}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* STEP 2: File Upload (Müştərinin Dizaynı) */}
-            <div className="bg-ink-800 rounded-3xl p-5 sm:p-6 border border-white/12 shadow-2xs space-y-4">
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-bone text-ink text-[11px] font-bold flex items-center justify-center">2</span>
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-bone">Dizayn Şəklini Yükləyin *</h3>
-                </div>
-                <span className="text-[11px] text-bone-dim font-medium">Bütün formatlar dəstəklənir</span>
-              </div>
-
-              {uploadedImage ? (
-                <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-400/30 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-14 h-14 rounded-xl bg-ink-800 border border-emerald-400/30 p-1 flex items-center justify-center shrink-0 overflow-hidden">
-                      <img src={uploadedImage} alt="Yüklənmiş Dizayn" className="max-h-full max-w-full object-contain" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-xs font-bold text-bone truncate">{uploadedFileName}</div>
-                      <div className="text-[11px] text-emerald-300 flex items-center gap-1 mt-0.5">
-                        <CheckCircle2 size={13} />
-                        <span>Fayl uğurla yükləndi ({uploadedFileSize})</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="px-3 py-1.5 rounded-xl bg-ink-800 hover:bg-ink-600 border border-white/12 text-bone text-xs font-semibold transition cursor-pointer"
-                    >
-                      Dəyiş
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setUploadedImage(null);
-                        setUploadedFileName(null);
-                        setUploadedFileSize(null);
-                      }}
-                      className="p-2 rounded-xl text-bone-faint hover:text-rose-600 hover:bg-rose-500/10 transition cursor-pointer"
-                      title="Sil"
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div
-                  onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed border-white/20 hover:border-white/50 rounded-3xl p-8 text-center cursor-pointer transition-all duration-200 bg-ink-700 hover:bg-ink-600 flex flex-col items-center justify-center space-y-3 group"
-                >
-                  <div className="w-14 h-14 rounded-2xl bg-ink-800 border border-white/12 flex items-center justify-center text-bone-dim shadow-2xs group-hover:scale-105 transition">
-                    <Upload size={24} />
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-bone group-hover:text-bone">Dizayn faylını seçmək üçün bura klikləyin</span>
-                    <p className="text-[11px] text-bone-dim mt-1">PNG, JPG, WEBP, PDF, SVG, AI formatları (Maksimum 30MB)</p>
-                  </div>
-                </div>
-              )}
-
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*,.pdf,.svg,.ai"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-
-              {uploadError && (
-                <div className="text-[11px] text-rose-400 font-medium flex items-center gap-1.5 bg-rose-50 border border-rose-400/30 rounded-xl px-3 py-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
-                  <span>{uploadError}</span>
-                </div>
-              )}
-            </div>
-
-            {/* STEP 3: Placement Selection (Dizaynı hansı hissəyə vurmaq istəyirsiniz?) */}
-            <div className="bg-ink-800 rounded-3xl p-5 sm:p-6 border border-white/12 shadow-2xs space-y-4">
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-bone text-ink text-[11px] font-bold flex items-center justify-center">3</span>
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-bone">Dizaynın Yeri</h3>
-                </div>
-                <span className="text-[11px] text-bone-dim font-medium">Hissəni seçin</span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {PLACEMENTS.map((p) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => handleSelectPlacement(p)}
-                    className={`p-3.5 rounded-2xl border text-left transition cursor-pointer flex flex-col justify-between ${
-                      selectedPlacement.id === p.id
-                        ? "bg-bone text-ink border-bone shadow-sm"
-                        : "bg-ink-700 text-bone border-white/12 hover:border-white/40 hover:bg-ink-600"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold">{p.label}</span>
-                      {selectedPlacement.id === p.id && <Check size={14} className="text-white" />}
-                    </div>
-                    <span className="text-[10px] opacity-75 mt-1">{p.sublabel}</span>
+                    {L(SIDE_LABEL[s])}
                   </button>
                 ))}
               </div>
-            </div>
 
-            {/* STEP 4: Customer Note & Special Instructions */}
-            <div className="bg-ink-800 rounded-3xl p-5 sm:p-6 border border-white/12 shadow-2xs space-y-3">
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-bone text-ink text-[11px] font-bold flex items-center justify-center">4</span>
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-bone">Əlavə Qeyd və İstəkləriniz</h3>
-                </div>
-                <span className="text-[10px] text-bone-faint font-semibold uppercase">İstəyə bağlı</span>
-              </div>
-
-              <p className="text-[11px] text-bone-dim">
-                Dizaynın dəqiq ölçüsü, yerləşməsi və ya xüsusi istəyiniz varsa qeyd edin. Ustalarımız hazırlıqdan öncə bunu mütləq nəzərə alacaq.
-              </p>
-
-              <textarea
-                rows={3}
-                value={customerNote}
-                onChange={(e) => setCustomerNote(e.target.value)}
-                placeholder="Məs: Dizayn sinənin bir qədər yuxarısında olsun, ölçüsü təxminən 25 sm olsun, arxada əlavə ad/nömrə yazılsın..."
-                className="w-full rounded-2xl p-3.5 text-xs text-bone bg-ink-700 border border-white/12 placeholder-bone-faint focus:outline-none focus:border-bone focus:bg-ink-700 focus:ring-1 focus:ring-bone transition"
-              />
-            </div>
-
-            {/* SUMMARY & ORDER BUTTON */}
-            <div className="bg-ink-850 text-bone border border-white/10 rounded-2xl p-6 space-y-4">
-              <div className="flex items-center justify-between text-xs text-bone-faint pb-3 border-b border-white/10">
-                <span>Geyim & Dizayn Xülasəsi:</span>
-                <span className="font-semibold text-white">
-                  {selectedGarment.name} · {selectedColor.name} · {selectedSize}
+              <div
+                ref={stageRef}
+                onWheel={(e) => image && setT({ scale: clamp(Number((t.scale + (e.deltaY < 0 ? 0.05 : -0.05)).toFixed(2)), 0.4, 1.8) })}
+                className="relative aspect-square w-full select-none overflow-hidden bg-tile"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={mockup}
+                  alt={garment.name}
+                  className="pointer-events-none h-full w-full object-contain p-[6%] mix-blend-multiply"
+                  onError={(e) => {
+                    e.currentTarget.src = `/images/studio/tshirt/${color.key}-front-shirt.png`;
+                  }}
+                />
+                {image ? (
+                  <div
+                    onPointerDown={startDrag("move")}
+                    onPointerMove={moveDrag}
+                    onPointerUp={endDrag}
+                    style={overlay}
+                    className="absolute z-10 flex cursor-grab items-center justify-center active:cursor-grabbing"
+                  >
+                    <div className="relative flex h-full w-full items-center justify-center border border-dashed border-ink/50 p-1">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={image} alt="" draggable={false} className="pointer-events-none max-h-full max-w-full object-contain" />
+                      <div
+                        onPointerDown={startDrag("resize")}
+                        onPointerMove={moveDrag}
+                        onPointerUp={endDrag}
+                        className="absolute -bottom-3 -right-3 flex h-6 w-6 cursor-nwse-resize items-center justify-center rounded-full bg-ink text-bone"
+                        title={L({ az: "Dartıb ölçünü dəyiş", en: "Drag to resize", ru: "Потяни, чтобы изменить размер", tr: "Boyutlandırmak için sürükle" })}
+                      >
+                        <Plus size={12} />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={overlay} className="pointer-events-none absolute flex items-center justify-center border border-dashed border-ink/40">
+                    <span className="bg-ink px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-bone">
+                      {L({ az: "Dizayn yeri", en: "Design area", ru: "Зона дизайна", tr: "Tasarım alanı" })}
+                    </span>
+                  </div>
+                )}
+                <span className="absolute bottom-3 left-3 bg-ink px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-bone">
+                  {L(color.label)} · {size}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="text-xs text-bone-faint block">Yekun Qiymət:</span>
-                  <span className="text-3xl font-black text-white tracking-tight">
-                    {formatPrice(totalPrice)}
+              {image && (
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <span className="mr-1 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-bone-dim">
+                    <Move size={13} /> {L({ az: "Ölçü", en: "Size", ru: "Размер", tr: "Boyut" })}
                   </span>
+                  <button type="button" className={iconBtn} onClick={() => setT({ scale: clamp(Number((t.scale - 0.1).toFixed(2)), 0.4, 1.8) })} aria-label="−">
+                    <Minus size={14} />
+                  </button>
+                  <span className="w-12 text-center text-[12px] font-bold tabular-nums">{Math.round(t.scale * 100)}%</span>
+                  <button type="button" className={iconBtn} onClick={() => setT({ scale: clamp(Number((t.scale + 0.1).toFixed(2)), 0.4, 1.8) })} aria-label="+">
+                    <Plus size={14} />
+                  </button>
+                  <span className="mx-1 h-5 w-px bg-white/15" />
+                  {[
+                    { k: "←", p: { posX: clamp(t.posX - 4, -35, 35) } },
+                    { k: "↑", p: { posY: clamp(t.posY - 4, -35, 35) } },
+                    { k: "↓", p: { posY: clamp(t.posY + 4, -35, 35) } },
+                    { k: "→", p: { posX: clamp(t.posX + 4, -35, 35) } },
+                  ].map((b) => (
+                    <button key={b.k} type="button" className={`${iconBtn} text-sm`} onClick={() => setT(b.p)} aria-label={b.k}>
+                      {b.k}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setT(ZERO)}
+                    className="ml-auto flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-bone-dim hover:text-bone"
+                  >
+                    <RotateCcw size={13} /> {L({ az: "Sıfırla", en: "Reset", ru: "Сбросить", tr: "Sıfırla" })}
+                  </button>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={handleAddToCart}
-                  disabled={isAdding}
-                  className="px-6 py-3.5 rounded-full bg-bone hover:bg-white text-ink font-extrabold text-xs uppercase tracking-wider transition-all flex items-center gap-2 shadow-md active:scale-98 cursor-pointer disabled:opacity-50"
-                >
-                  <ShoppingBag size={16} />
-                  <span>{isAdding ? "Əlavə edilir..." : "Səbətə Əlavə Et"}</span>
-                  <ArrowRight size={15} />
-                </button>
-              </div>
+              )}
+              <p className="mt-3 text-[12px] text-bone-faint">
+                {L({
+                  az: "Şəkli geyimin üzərində sürüşdürə, küncündən dartıb ölçüsünü dəyişə bilərsiniz. Önbaxış təxminidir.",
+                  en: "Drag the design on the garment and pull its corner to resize. The preview is approximate.",
+                  ru: "Перетаскивайте дизайн и тяните за угол, чтобы изменить размер. Превью приблизительное.",
+                  tr: "Tasarımı giysi üzerinde sürükleyin, köşesinden çekerek boyutlandırın. Önizleme yaklaşıktır.",
+                })}
+              </p>
             </div>
-
           </div>
+
+          {/* configurator */}
+          <div className="lg:col-span-5">
+            <Step n={1} title={L({ az: "Geyim", en: "Garment", ru: "Изделие", tr: "Giysi" })} aside={<span className="text-[12px] text-bone-dim">{garment.name}</span>}>
+              <div className="space-y-5">
+                {groups.map(([cat, list]) => (
+                  <div key={cat}>
+                    <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-bone-faint">{L(GROUP_LABEL[cat] || { az: cat, en: cat, ru: cat, tr: cat })}</p>
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      {list.map((g) => {
+                        const on = g.id === garment.id;
+                        return (
+                          <button
+                            key={g.id}
+                            type="button"
+                            onClick={() => chooseGarment(g)}
+                            className={`flex items-center justify-between gap-3 border px-3.5 py-3 text-left transition ${
+                              on ? "border-bone bg-bone text-ink" : "border-white/15 hover:border-white/40"
+                            }`}
+                          >
+                            <span className="text-[13px] font-semibold leading-snug">{g.name}</span>
+                            <span className={`shrink-0 text-[13px] font-bold tabular-nums ${on ? "text-ink" : "text-bone-dim"}`}>{formatPrice(g.basePrice)}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Step>
+
+            <Step n={2} title={L({ az: "Rəng və ölçü", en: "Colour & size", ru: "Цвет и размер", tr: "Renk ve beden" })} aside={<span className="text-[12px] text-bone-dim">{L(color.label)}</span>}>
+              <div className="flex flex-wrap gap-2">
+                {COLORS.map((c) => (
+                  <button
+                    key={c.key}
+                    type="button"
+                    onClick={() => setColor(c)}
+                    title={L(c.label)}
+                    aria-label={L(c.label)}
+                    className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition ${c.key === color.key ? "border-bone" : "border-transparent hover:border-white/40"}`}
+                  >
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full border border-white/20" style={{ backgroundColor: c.hex }}>
+                      {c.key === color.key && <Check size={13} className={c.key === "white" || c.key === "sand" || c.key === "sky-blue" ? "text-ink" : "text-white"} />}
+                    </span>
+                  </button>
+                ))}
+              </div>
+              <div className="mt-5 grid grid-cols-6 gap-2">
+                {SIZES.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setSize(s)}
+                    className={`h-11 border text-[12px] font-bold transition ${s === size ? "border-bone bg-bone text-ink" : "border-white/20 hover:border-bone"}`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </Step>
+
+            <Step n={3} title={L({ az: "Dizayn faylı", en: "Design file", ru: "Файл дизайна", tr: "Tasarım dosyası" })}>
+              <div id="studio-upload">
+                {image ? (
+                  <div className="flex items-center gap-3 border border-white/15 p-3">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={image} alt="" className="h-14 w-14 shrink-0 bg-tile object-contain p-1" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[13px] font-semibold">{fileName}</p>
+                      <button type="button" onClick={() => fileRef.current?.click()} className="mt-1 text-[11px] font-bold uppercase tracking-[0.14em] text-bone-dim hover:text-bone">
+                        {L({ az: "Dəyiş", en: "Replace", ru: "Заменить", tr: "Değiştir" })}
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setImage(null);
+                        setFileName(null);
+                        setTransforms({ front: ZERO, back: ZERO, left: ZERO, right: ZERO });
+                      }}
+                      className="p-2 text-bone-faint hover:text-bone"
+                      aria-label={L({ az: "Sil", en: "Remove", ru: "Удалить", tr: "Kaldır" })}
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => fileRef.current?.click()}
+                    className="flex w-full flex-col items-center justify-center gap-2 border border-dashed border-white/25 px-4 py-10 text-center transition hover:border-bone"
+                  >
+                    <ImagePlus size={22} strokeWidth={1.6} />
+                    <span className="text-[13px] font-semibold">{L({ az: "Faylı seç", en: "Choose a file", ru: "Выбрать файл", tr: "Dosya seç" })}</span>
+                    <span className="text-[12px] text-bone-faint">PNG, JPG, WEBP, SVG, PDF · max 30 MB</span>
+                  </button>
+                )}
+                <input ref={fileRef} type="file" accept="image/*,.pdf,.svg,.ai" className="hidden" onChange={onFile} />
+                {error && <p className="mt-3 text-[13px] font-semibold text-sale">{error}</p>}
+              </div>
+            </Step>
+
+            <Step n={4} title={L({ az: "Yeri", en: "Placement", ru: "Расположение", tr: "Yerleşim" })}>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {placements.map((p) => {
+                  const on = p.id === placement.id;
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => choosePlacement(p)}
+                      className={`flex items-center justify-between gap-3 border px-3.5 py-3 text-left transition ${
+                        on ? "border-bone bg-bone text-ink" : "border-white/15 hover:border-white/40"
+                      }`}
+                    >
+                      <span className="text-[13px] font-semibold leading-snug">{L(PLACEMENT_LABEL[p.id] || { az: p.label, en: p.label, ru: p.label, tr: p.label })}</span>
+                      {p.extraPrice > 0 && <span className="shrink-0 text-[12px] font-bold">+{formatPrice(p.extraPrice)}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </Step>
+
+            <Step n={5} title={L({ az: "Qeyd", en: "Note", ru: "Комментарий", tr: "Not" })} aside={<span className="text-[12px] text-bone-faint">{L({ az: "istəyə görə", en: "optional", ru: "необязательно", tr: "isteğe bağlı" })}</span>}>
+              <textarea
+                rows={3}
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder={L({
+                  az: "Məs: sinədən 5 sm aşağı, eni təxminən 25 sm",
+                  en: "E.g. 5 cm below the collar, about 25 cm wide",
+                  ru: "Напр.: на 5 см ниже воротника, ширина около 25 см",
+                  tr: "Örn: yakadan 5 cm aşağı, yaklaşık 25 cm genişlik",
+                })}
+                className="w-full resize-none border border-white/15 bg-transparent p-3.5 text-[14px] text-bone placeholder:text-bone-faint focus:border-bone focus:outline-none"
+              />
+            </Step>
+
+            {/* summary (desktop) */}
+            <div className="hidden border-t border-white/10 pt-7 lg:block">
+              <div className="flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-bone-faint">
+                    {garment.name} · {L(color.label)} · {size}
+                  </p>
+                  <p className="mt-1 text-3xl font-black tabular-nums">{formatPrice(price)}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={addToBag}
+                className={`mt-5 flex h-14 w-full items-center justify-center gap-2 rounded-full text-[12px] font-extrabold uppercase tracking-[0.16em] transition ${
+                  added ? "bg-emerald-500 text-ink" : "bg-bone text-ink hover:bg-white"
+                }`}
+              >
+                {added ? <Check size={16} /> : null}
+                {added ? L({ az: "Səbətə əlavə olundu", en: "Added to bag", ru: "Добавлено", tr: "Sepete eklendi" }) : L({ az: "Səbətə at", en: "Add to bag", ru: "В корзину", tr: "Sepete ekle" })}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* sticky buy bar (phones and tablets) */}
+      <div className="hw-buybar fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-ink/95 px-4 py-3 backdrop-blur-md lg:hidden">
+        <div className="mx-auto flex max-w-[1600px] items-center gap-4">
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[11px] text-bone-dim">{garment.name}</p>
+            <p className="text-lg font-black tabular-nums">{formatPrice(price)}</p>
+          </div>
+          <button
+            type="button"
+            onClick={addToBag}
+            className={`h-12 shrink-0 rounded-full px-6 text-[12px] font-extrabold uppercase tracking-[0.14em] ${added ? "bg-emerald-500 text-ink" : "bg-bone text-ink"}`}
+          >
+            {added ? L({ az: "Əlavə olundu", en: "Added", ru: "Добавлено", tr: "Eklendi" }) : L({ az: "Səbətə at", en: "Add to bag", ru: "В корзину", tr: "Sepete ekle" })}
+          </button>
         </div>
       </div>
     </div>

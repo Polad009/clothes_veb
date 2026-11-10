@@ -1134,1187 +1134,489 @@ export default function CheckoutPage() {
     processOrder("card");
   };
 
+  // ── view ───────────────────────────────────────────────────────────────────
+  const L = (p: { az: string; en: string; ru: string; tr: string }) => (p as Record<string, string>)[langKey] || p.az;
+  const money = (v: number) => (currency === "USD" ? `$${v.toFixed(2)}` : `${v.toFixed(2)} ₼`);
+  const [summaryOpen, setSummaryOpen] = useState(false);
+  const [cartSettled, setCartSettled] = useState(false);
+  useEffect(() => {
+    const id = setTimeout(() => setCartSettled(true), 400);
+    return () => clearTimeout(id);
+  }, []);
+
+  const inputCls = (field?: string) =>
+    `w-full border bg-transparent px-3.5 py-3 text-[14px] text-bone placeholder:text-bone-faint transition focus:outline-none ${
+      field && fieldErrors[field] ? "border-sale focus:border-sale" : "border-white/20 focus:border-bone"
+    }`;
+  const labelCls = "mb-1.5 block text-[11px] font-bold uppercase tracking-[0.14em] text-bone-dim";
+  const FieldError = ({ field }: { field: string }) =>
+    fieldErrors[field] ? <p className="mt-1.5 text-[12px] font-semibold text-sale">{fieldErrors[field]}</p> : null;
+  const sectionTitle = (n: number, text: string) => (
+    <h2 className="mb-5 text-[13px] font-extrabold uppercase tracking-[0.16em]">
+      <span className="mr-2 text-bone-faint">{String(n).padStart(2, "0")}</span>
+      {text}
+    </h2>
+  );
+  const choice = (on: boolean) =>
+    `flex w-full items-center gap-3 border px-4 py-3.5 text-left transition ${on ? "border-bone bg-white/[0.04]" : "border-white/15 hover:border-white/40"}`;
+  const radio = (on: boolean) => (
+    <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${on ? "border-bone" : "border-white/30"}`}>
+      {on && <span className="h-2 w-2 rounded-full bg-bone" />}
+    </span>
+  );
+
+  if (cartSettled && items.length === 0 && !isProcessing) {
+    return (
+      <div className="flex min-h-[70vh] w-full flex-col items-center justify-center bg-ink px-4 text-center font-grotesk text-bone">
+        <h1 className="text-4xl font-black uppercase tracking-tight [font-stretch:112%] sm:text-6xl">
+          {L({ az: "Səbət boşdur", en: "Your bag is empty", ru: "Корзина пуста", tr: "Sepetiniz boş" })}
+        </h1>
+        <Link href="/collections" className="mt-8 rounded-full bg-bone px-7 py-3.5 text-[12px] font-extrabold uppercase tracking-[0.16em] text-ink hover:bg-white">
+          {L({ az: "Məhsullara bax", en: "Browse products", ru: "Смотреть товары", tr: "Ürünlere göz at" })}
+        </Link>
+      </div>
+    );
+  }
+
+  const summary = (
+    <div className="space-y-5">
+      <ul className="max-h-[340px] space-y-4 overflow-y-auto pr-1">
+        {items.map((item) => (
+          <li key={item.id} className="flex items-center gap-3">
+            <div className="relative h-20 w-16 shrink-0 bg-tile">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={item.customDesignPreview || item.image} alt={item.name} className="h-full w-full object-contain p-1.5 mix-blend-multiply" />
+              <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-bone px-1 text-[10px] font-bold text-ink">{item.quantity}</span>
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="line-clamp-2 text-[13px] font-semibold leading-snug">{item.name}</p>
+              <p className="mt-0.5 text-[12px] text-bone-dim">{[item.size, item.color].filter(Boolean).join(" · ")}</p>
+            </div>
+            <span className="shrink-0 text-[13px] font-semibold tabular-nums">{money(getProductPrice(item) * item.quantity)}</span>
+          </li>
+        ))}
+      </ul>
+
+      <form noValidate onSubmit={applyPromo} className="flex gap-2 border-t border-white/10 pt-5">
+        <input
+          type="text"
+          value={promoCode}
+          disabled={promoApplied || isCheckingPromo}
+          onChange={(e) => {
+            setPromoCode(e.target.value);
+            if (promoError) setPromoError(null);
+          }}
+          placeholder={L({ az: "Promokod", en: "Promo code", ru: "Промокод", tr: "Promosyon kodu" })}
+          className={`min-w-0 flex-1 border bg-transparent px-3.5 py-3 text-[13px] uppercase text-bone placeholder:normal-case placeholder:text-bone-faint focus:outline-none ${
+            promoError ? "border-sale" : promoApplied ? "border-emerald-400/60" : "border-white/20 focus:border-bone"
+          }`}
+        />
+        {promoApplied ? (
+          <button type="button" onClick={removePromo} className="border border-white/20 px-4 text-[11px] font-bold uppercase tracking-[0.14em] hover:border-bone">
+            {L({ az: "Sil", en: "Remove", ru: "Убрать", tr: "Kaldır" })}
+          </button>
+        ) : (
+          <button type="submit" disabled={isCheckingPromo} className="bg-bone px-4 text-[11px] font-extrabold uppercase tracking-[0.14em] text-ink disabled:opacity-50">
+            {isCheckingPromo ? "…" : L({ az: "Tətbiq et", en: "Apply", ru: "Применить", tr: "Uygula" })}
+          </button>
+        )}
+      </form>
+      {promoError && <p className="-mt-3 text-[12px] font-semibold text-sale">{promoError}</p>}
+      {promoApplied && promoSuccessMsg && <p className="-mt-3 text-[12px] font-semibold text-emerald-400">{promoSuccessMsg}</p>}
+
+      <dl className="space-y-2.5 border-t border-white/10 pt-5 text-[14px]">
+        <div className="flex justify-between">
+          <dt className="text-bone-dim">{L({ az: "Ara cəm", en: "Subtotal", ru: "Подытог", tr: "Ara toplam" })}</dt>
+          <dd className="tabular-nums">{money(effectiveSubtotal)}</dd>
+        </div>
+        {discountAmount > 0 && (
+          <div className="flex justify-between text-emerald-400">
+            <dt>
+              {L({ az: "Endirim", en: "Discount", ru: "Скидка", tr: "İndirim" })}
+              {appliedPromoCode ? ` (${appliedPromoCode})` : ""}
+            </dt>
+            <dd className="tabular-nums">−{money(discountAmount)}</dd>
+          </div>
+        )}
+        <div className="flex justify-between gap-4">
+          <dt className="text-bone-dim">
+            {L({ az: "Çatdırılma", en: "Shipping", ru: "Доставка", tr: "Kargo" })}
+            <span className="block text-[12px] text-bone-faint">{activeShippingOption?.name}</span>
+          </dt>
+          <dd className="text-right tabular-nums">{shippingCost === 0 ? L({ az: "Pulsuz", en: "Free", ru: "Бесплатно", tr: "Ücretsiz" }) : money(shippingCost)}</dd>
+        </div>
+        <div className="flex items-baseline justify-between border-t border-white/10 pt-4">
+          <dt className="text-[12px] font-extrabold uppercase tracking-[0.16em]">{L({ az: "Yekun", en: "Total", ru: "Итого", tr: "Toplam" })}</dt>
+          <dd className="text-2xl font-black tabular-nums">{money(finalTotal)}</dd>
+        </div>
+      </dl>
+
+      <a
+        href={support.link("Salam! Sifarişi rəsmiləşdirməkdə kömək edə bilərsiniz?")}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block border-t border-white/10 pt-5 text-[13px] text-bone-dim hover:text-bone"
+      >
+        {L({ az: "Sualınız var? WhatsApp-da yazın →", en: "Questions? Message us on WhatsApp →", ru: "Есть вопросы? Напишите в WhatsApp →", tr: "Sorunuz mu var? WhatsApp'tan yazın →" })}
+      </a>
+    </div>
+  );
+
   return (
-    <div className="w-full min-h-screen bg-[#FAF7F2] text-[#111827] pt-8 pb-24">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* Left Column: Checkout & Payment Form */}
-          <div className="lg:col-span-7 space-y-6">
-            {/* Test Mode Banner */}
-            {isTestMode && (
-              <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-950 text-xs flex items-center justify-between gap-3 shadow-2xs">
-                <div className="flex items-center gap-2.5">
-                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping shrink-0" />
-                  <span className="font-bold uppercase tracking-wider text-[10px] text-amber-900 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-300">
-                    TEST MODE
-                  </span>
-                  <span className="text-[11px] text-amber-800 font-medium">
-                    Real ödəniş çəkilmir. Test rejimində təhlükəsiz sınaq sifarişi edə bilərsiniz.
-                  </span>
+    <div className="min-h-screen w-full bg-ink font-grotesk text-bone">
+      {/* phones: order summary as a collapsible bar */}
+      <div className="border-b border-white/10 lg:hidden">
+        <button type="button" onClick={() => setSummaryOpen(!summaryOpen)} className="flex w-full items-center justify-between px-4 py-4">
+          <span className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.14em]">
+            {summaryOpen ? L({ az: "Xülasəni gizlət", en: "Hide summary", ru: "Скрыть", tr: "Özeti gizle" }) : L({ az: "Sifariş xülasəsi", en: "Order summary", ru: "Сводка заказа", tr: "Sipariş özeti" })}
+            <ChevronDown size={15} className={`transition ${summaryOpen ? "rotate-180" : ""}`} />
+          </span>
+          <span className="text-lg font-black tabular-nums">{money(finalTotal)}</span>
+        </button>
+        {summaryOpen && <div className="px-4 pb-6">{summary}</div>}
+      </div>
+
+      <div className="mx-auto grid max-w-[1240px] gap-12 px-4 pb-24 pt-8 sm:px-6 lg:grid-cols-12 lg:px-10">
+        <form noValidate onSubmit={handleCardSubmit} className="lg:col-span-7">
+          <h1 className="text-[11vw] font-black uppercase leading-[0.9] tracking-[-0.02em] [font-stretch:112%] sm:text-6xl">
+            {L({ az: "Sifariş", en: "Checkout", ru: "Оформление", tr: "Ödeme" })}
+          </h1>
+
+          {isTestMode && (
+            <p className="mt-5 border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-[13px] text-amber-200">
+              {cT.testBanner}
+            </p>
+          )}
+
+          {errorMsg && (
+            <div className="mt-5 flex items-start justify-between gap-3 border border-sale/50 bg-sale/10 px-4 py-3 text-[13px]">
+              <div>
+                <p className="font-bold text-sale">{cT.checkInfo}</p>
+                <p className="mt-0.5 text-bone-dim">{errorMsg}</p>
+              </div>
+              <button type="button" onClick={() => setErrorMsg(null)} className="text-bone-faint hover:text-bone" aria-label="×">
+                <X size={15} />
+              </button>
+            </div>
+          )}
+
+          {/* account */}
+          <div className="mt-8 flex flex-col gap-3 border border-white/15 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+            {user ? (
+              <p className="text-[13px] text-bone-dim">
+                {L({ az: "Hesab:", en: "Signed in as", ru: "Вы вошли как", tr: "Giriş yapan:" })} <span className="font-semibold text-bone">{user.email}</span>
+              </p>
+            ) : (
+              <>
+                <p className="text-[13px] leading-relaxed text-bone-dim">
+                  {L({
+                    az: "Sifarişi və izləmə kodunu itirməmək üçün əvvəlcə hesaba daxil olun və ya qeydiyyatdan keçin.",
+                    en: "Sign in or create an account first, so your order and tracking code are saved.",
+                    ru: "Сначала войдите или зарегистрируйтесь, чтобы заказ и трек-код сохранились.",
+                    tr: "Siparişiniz ve takip kodunuz kaybolmasın diye önce giriş yapın veya kayıt olun.",
+                  })}
+                </p>
+                <button type="button" onClick={openAuthModal} className="shrink-0 rounded-full bg-bone px-5 py-2.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-ink hover:bg-white">
+                  {t.auth.signIn}
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* 1. address */}
+          <section className="mt-10">
+            {sectionTitle(1, L({ az: "Çatdırılma ünvanı", en: "Shipping address", ru: "Адрес доставки", tr: "Teslimat adresi" }))}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <label htmlFor="field-country" className={labelCls}>{cT.countryLabel}</label>
+                <div className="relative">
+                  <select
+                    id="field-country"
+                    value={selectedCountryCode}
+                    onChange={(e) => handleCountryChange(e.target.value)}
+                    className={`${inputCls()} appearance-none pr-10`}
+                  >
+                    {getAllCountries().map((c) => (
+                      <option key={c.code} value={c.code}>
+                        {c.flag} {c.name}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown size={15} className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-bone-dim" />
                 </div>
               </div>
-            )}
 
-            {/* Express 1-Click Payment Row */}
-            <div className="bg-white border border-stone-200/90 rounded-3xl p-6 space-y-4 shadow-xs">
-              <span className="text-xs font-semibold uppercase tracking-wider text-stone-600 block text-center">
-                {t.checkout.paymentMethod}
-              </span>
-
-              <div className="grid grid-cols-2 gap-3">
-                {/* Official Native Apple Pay Button */}
-                <button
-                  type="button"
-                  onClick={() => handleNativePayment("apple_pay")}
-                  className="py-3 px-4 rounded-full bg-stone-900 hover:bg-black text-white font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-xs active:scale-98 cursor-pointer"
-                >
-                  <ApplePayLogo className="h-5 w-auto" variant="dark" />
-                </button>
-
-                {/* Official Native Google Pay Button */}
-                <button
-                  type="button"
-                  onClick={() => handleNativePayment("google_pay")}
-                  style={{ backgroundColor: "#EDEAE3" }}
-                  className="py-3 px-4 rounded-full border border-transparent hover:opacity-90 text-ink font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 active:scale-98 shadow-xs cursor-pointer"
-                >
-                  <GooglePayLogo className="h-5 w-auto" />
-                </button>
+              <div className="sm:col-span-2">
+                <label htmlFor="field-fullName" className={labelCls}>{t.checkout.fullName} *</label>
+                <input id="field-fullName" autoComplete="name" value={fullName} onChange={(e) => handleFieldChange("fullName", e.target.value, setFullName)} className={inputCls("fullName")} />
+                <FieldError field="fullName" />
+              </div>
+              <div>
+                <label htmlFor="field-phone" className={labelCls}>{t.checkout.phone} *</label>
+                <input id="field-phone" type="tel" autoComplete="tel" value={phone} onChange={(e) => handleFieldChange("phone", e.target.value, setPhone)} className={inputCls("phone")} />
+                <FieldError field="phone" />
+              </div>
+              <div>
+                <label htmlFor="field-email" className={labelCls}>{t.checkout.email} *</label>
+                <input
+                  id="field-email"
+                  type="email"
+                  autoComplete="email"
+                  value={user?.email || email}
+                  disabled={Boolean(user?.email)}
+                  onChange={(e) => handleFieldChange("email", e.target.value, setEmail)}
+                  className={`${inputCls("email")} disabled:text-bone-dim`}
+                />
+                <FieldError field="email" />
               </div>
 
-              {/* Wallet Debug Notification Container */}
-              {walletDebugMsg && (
-                <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200 text-amber-950 text-[11px] space-y-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-1.5 font-semibold text-stone-900">
-                      <AlertCircle size={14} className="text-amber-600 shrink-0" />
-                      <span>{walletDebugMsg.text}</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setWalletDebugMsg(null)}
-                      className="text-stone-400 hover:text-stone-700 p-0.5"
-                    >
-                      <X size={13} />
-                    </button>
+              {isDomestic ? (
+                <div className="sm:col-span-2">
+                  <span className={labelCls}>{t.checkout.city} *</span>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { key: "Bakı", label: "Bakı", sub: t.checkout.free, id: "domestic_baku_sumgayit" },
+                      { key: "Sumqayıt", label: "Sumqayıt", sub: t.checkout.free, id: "domestic_baku_sumgayit" },
+                      { key: "", label: cT.regionsLabel, sub: "", id: "domestic_region" },
+                    ].map((o) => {
+                      const on = o.key ? city === o.key : city !== "Bakı" && city !== "Sumqayıt";
+                      return (
+                        <button
+                          key={o.label}
+                          type="button"
+                          onClick={() => {
+                            if (o.key) setCity(o.key);
+                            else if (city === "Bakı" || city === "Sumqayıt") setCity("");
+                            setSelectedShippingMethodId(o.id);
+                            clearFieldError("city");
+                          }}
+                          className={`border px-2 py-2.5 text-center text-[13px] font-semibold transition ${on ? "border-bone bg-bone text-ink" : "border-white/20 hover:border-bone"}`}
+                        >
+                          {o.label}
+                          {o.sub && <span className={`block text-[11px] font-normal ${on ? "text-ink/70" : "text-bone-faint"}`}>{o.sub}</span>}
+                        </button>
+                      );
+                    })}
                   </div>
-                  {isTestMode && (
-                    <div className="pt-1.5 flex items-center justify-between border-t border-amber-200/60">
-                      <span className="text-stone-600 text-[10.5px]">{cT.testFlowPrompt}</span>
-                      <button
-                        type="button"
-                        disabled={isProcessing}
-                        onClick={() => processOrder(walletDebugMsg.method || "apple_pay")}
-                        className="py-1 px-3.5 rounded-xl bg-stone-900 hover:bg-black text-white text-[10.5px] font-bold uppercase tracking-wider transition cursor-pointer disabled:opacity-50"
-                      >
-                        {isProcessing ? "..." : cT.confirmTestOrder}
-                      </button>
+                  {city !== "Bakı" && city !== "Sumqayıt" && (
+                    <>
+                      <input id="field-city" value={city} placeholder={cT.regionsPlaceholder} onChange={(e) => handleFieldChange("city", e.target.value, setCity)} className={`${inputCls("city")} mt-2`} />
+                      <FieldError field="city" />
+                    </>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <label htmlFor="field-city" className={labelCls}>{t.checkout.city} *</label>
+                    <input id="field-city" autoComplete="address-level2" value={city} onChange={(e) => handleFieldChange("city", e.target.value, setCity)} className={inputCls("city")} />
+                    <FieldError field="city" />
+                  </div>
+                  <div>
+                    <label htmlFor="field-postalCode" className={labelCls}>{cT.postalCode} *</label>
+                    <input id="field-postalCode" autoComplete="postal-code" value={postalCode} onChange={(e) => handleFieldChange("postalCode", e.target.value, setPostalCode)} className={inputCls("postalCode")} />
+                    <FieldError field="postalCode" />
+                  </div>
+                  {currentCountry?.requiresState && (
+                    <div className="sm:col-span-2">
+                      <label htmlFor="field-stateOrRegion" className={labelCls}>{cT.stateOrRegion} *</label>
+                      <input id="field-stateOrRegion" autoComplete="address-level1" value={stateOrRegion} onChange={(e) => handleFieldChange("stateOrRegion", e.target.value, setStateOrRegion)} className={inputCls("stateOrRegion")} />
+                      <FieldError field="stateOrRegion" />
                     </div>
                   )}
+                </>
+              )}
+
+              <div className="sm:col-span-2">
+                <label htmlFor="field-address" className={labelCls}>{cT.addressLine1 || t.checkout.address} *</label>
+                <input id="field-address" autoComplete="address-line1" value={address} placeholder={cT.addressPlaceholder} onChange={(e) => handleFieldChange("address", e.target.value, setAddress)} className={inputCls("address")} />
+                <FieldError field="address" />
+              </div>
+              <div className="sm:col-span-2">
+                <label htmlFor="field-addressLine2" className={labelCls}>{cT.addressLine2}</label>
+                <input id="field-addressLine2" autoComplete="address-line2" value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} className={inputCls()} />
+              </div>
+            </div>
+            {!isDomestic && <p className="mt-4 text-[12px] leading-relaxed text-bone-faint">{cT.dduNotice}</p>}
+          </section>
+
+          {/* 2. shipping */}
+          <section className="mt-12">
+            {sectionTitle(2, L({ az: "Çatdırılma üsulu", en: "Shipping method", ru: "Способ доставки", tr: "Kargo yöntemi" }))}
+            <div className="space-y-2">
+              {shippingOptions.map((opt) => {
+                const on = activeShippingOption?.id === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedShippingMethodId(opt.id);
+                      if (isDomestic) {
+                        if (opt.id === "domestic_baku_sumgayit" && city !== "Bakı" && city !== "Sumqayıt") setCity("Bakı");
+                        else if (opt.id === "domestic_region" && (city === "Bakı" || city === "Sumqayıt")) setCity("");
+                      }
+                    }}
+                    className={choice(on)}
+                  >
+                    {radio(on)}
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[14px] font-semibold">{opt.name}</span>
+                      <span className="block text-[12px] text-bone-dim">{[opt.carrier, opt.estimatedDays].filter(Boolean).join(" · ")}</span>
+                    </span>
+                    <span className="shrink-0 text-[14px] font-semibold tabular-nums">{opt.price === 0 ? t.checkout.free : money(opt.price)}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* 3. payment */}
+          <section className="mt-12">
+            {sectionTitle(3, L({ az: "Ödəniş", en: "Payment", ru: "Оплата", tr: "Ödeme" }))}
+            <div className="space-y-2">
+              <button type="button" onClick={() => setPaymentMethod("card")} className={choice(paymentMethod === "card")}>
+                {radio(paymentMethod === "card")}
+                <span className="flex-1 text-[14px] font-semibold">{L({ az: "Bank kartı", en: "Card", ru: "Банковская карта", tr: "Banka kartı" })}</span>
+                <span className="flex items-center gap-1.5">
+                  <VisaLogo className="h-4 w-auto" />
+                  <MastercardLogo className="h-4 w-auto" />
+                </span>
+              </button>
+              {paymentMethod === "card" && (
+                <div className="grid gap-4 border border-t-0 border-white/15 px-4 pb-5 pt-4 sm:grid-cols-2">
+                  {isTestMode && <p className="text-[12px] leading-relaxed text-sky-300 sm:col-span-2">{cT.cardTestNotice}</p>}
+                  <div className="sm:col-span-2">
+                    <label htmlFor="field-cardName" className={labelCls}>{cT.cardName}</label>
+                    <input id="field-cardName" autoComplete="cc-name" value={cardName} onChange={(e) => setCardName(e.target.value.toUpperCase())} className={inputCls()} />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label htmlFor="field-cardNumber" className={labelCls}>{cT.cardNumber}</label>
+                    <input
+                      id="field-cardNumber"
+                      inputMode="numeric"
+                      autoComplete="cc-number"
+                      maxLength={19}
+                      placeholder="0000 0000 0000 0000"
+                      value={cardNumber}
+                      onChange={(e) => handleFieldChange("cardNumber", e.target.value.replace(/\D/g, "").replace(/(\d{4})/g, "$1 ").trim(), setCardNumber)}
+                      className={`${inputCls("cardNumber")} font-mono tracking-wider`}
+                    />
+                    <FieldError field="cardNumber" />
+                  </div>
+                  <div>
+                    <label htmlFor="field-cardExpiry" className={labelCls}>{cT.cardExpiry}</label>
+                    <input
+                      id="field-cardExpiry"
+                      inputMode="numeric"
+                      autoComplete="cc-exp"
+                      maxLength={5}
+                      placeholder="MM/YY"
+                      value={cardExpiry}
+                      onChange={(e) => {
+                        const d = e.target.value.replace(/\D/g, "").slice(0, 4);
+                        handleFieldChange("cardExpiry", d.length > 2 ? `${d.slice(0, 2)}/${d.slice(2)}` : d, setCardExpiry);
+                      }}
+                      className={`${inputCls("cardExpiry")} font-mono`}
+                    />
+                    <FieldError field="cardExpiry" />
+                  </div>
+                  <div>
+                    <label htmlFor="field-cardCvc" className={labelCls}>{cT.cardCvc}</label>
+                    <input
+                      id="field-cardCvc"
+                      inputMode="numeric"
+                      autoComplete="cc-csc"
+                      maxLength={4}
+                      placeholder="•••"
+                      value={cardCvc}
+                      onChange={(e) => handleFieldChange("cardCvc", e.target.value.replace(/\D/g, ""), setCardCvc)}
+                      className={`${inputCls("cardCvc")} font-mono`}
+                    />
+                    <FieldError field="cardCvc" />
+                  </div>
+                  <p className="text-[12px] text-bone-faint sm:col-span-2">
+                    {L({ az: "Kart məlumatlarınız saytda saxlanılmır.", en: "Card details are not stored on this site.", ru: "Данные карты не хранятся на сайте.", tr: "Kart bilgileri sitede saklanmaz." })}
+                  </p>
                 </div>
               )}
 
-              <div className="flex items-center gap-3 pt-2">
-                <div className="h-px bg-stone-200 flex-1" />
-                <span className="text-[11px] font-medium text-stone-400 uppercase tracking-widest">
-                  VƏ YA KARTLA ÖDƏ
-                </span>
-                <div className="h-px bg-stone-200 flex-1" />
-              </div>
+              <button type="button" onClick={() => setPaymentMethod("apple_pay")} className={choice(paymentMethod === "apple_pay")}>
+                {radio(paymentMethod === "apple_pay")}
+                <span className="flex-1 text-[14px] font-semibold">Apple Pay</span>
+                <span className="rounded bg-bone px-1.5 py-0.5"><ApplePayLogo className="h-4 w-auto" variant="light" /></span>
+              </button>
+              <button type="button" onClick={() => setPaymentMethod("google_pay")} className={choice(paymentMethod === "google_pay")}>
+                {radio(paymentMethod === "google_pay")}
+                <span className="flex-1 text-[14px] font-semibold">Google Pay</span>
+                <span className="rounded bg-bone px-1.5 py-0.5"><GooglePayLogo className="h-4 w-auto" /></span>
+              </button>
             </div>
 
-            {/* Animated Luxury Error Alert */}
-            <AnimatePresence>
-              {errorMsg && (
-                <motion.div
-                  initial={{ opacity: 0, y: -8, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -8, scale: 0.98 }}
-                  transition={{ duration: 0.25 }}
-                  className="p-4 rounded-2xl bg-gradient-to-r from-rose-50 to-amber-50 border border-rose-200 text-rose-900 text-xs flex items-center justify-between gap-3 shadow-xs"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center shrink-0">
-                      <AlertCircle size={16} className="text-rose-600" />
-                    </div>
-                    <div>
-                      <div className="font-semibold text-rose-950">{cT.checkInfo}</div>
-                      <div className="text-rose-700 text-[11px] mt-0.5">{errorMsg}</div>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setErrorMsg(null)}
-                    className="text-rose-400 hover:text-rose-700 p-1 rounded-lg transition"
-                  >
+            {walletDebugMsg && (
+              <div className="mt-3 border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-[13px]">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-amber-200">{walletDebugMsg.text}</p>
+                  <button type="button" onClick={() => setWalletDebugMsg(null)} className="text-bone-faint hover:text-bone" aria-label="×">
                     <X size={14} />
                   </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Customer Authentication Gate (Item 24: Mandatory Customer Account for Tracking) */}
-            {!user ? (
-              <div className="bg-amber-50/80 border border-amber-200/90 rounded-3xl p-5 sm:p-6 space-y-3 shadow-2xs text-stone-900">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="flex items-start sm:items-center gap-3.5">
-                    <div className="w-11 h-11 rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center shrink-0 border border-amber-200">
-                      <Lock size={20} />
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-eb-garamond text-lg font-semibold text-stone-900">
-                          {language === "az" ? "Müştəri Hesabı Tələb Olunur" : language === "tr" ? "Müşteri Hesabı Gereklidir" : language === "ru" ? "Требуется аккаунт клиента" : "Customer Account Required"}
-                        </h3>
-                      </div>
-                      <p className="text-xs text-stone-600 leading-relaxed max-w-xl">
-                        {language === "az"
-                          ? "Sifarişinizin və kuryer izləmə kodunuzun heç vaxt itməməsi üçün sifarişdən əvvəl hesabınıza daxil olun və ya pulsuz qeydiyyatdan keçin."
-                          : language === "tr"
-                          ? "Siparişinizin ve kargo takip kodunuzun kaybolmaması için lütfen sipariş vermeden önce giriş yapın veya kayıt olun."
-                          : language === "ru"
-                          ? "Чтобы ваш трек-код и данные заказа никогда не потерялись, пожалуйста, войдите в аккаунт или зарегистрируйтесь перед оформлением."
-                          : "To ensure your order tracking codes are never lost, please sign in or register an account before placing your order."}
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={openAuthModal}
-                    className="self-start sm:self-center shrink-0 py-2.5 px-5 rounded-full bg-stone-900 hover:bg-black text-white text-xs font-bold uppercase tracking-wider transition shadow-xs active:scale-98 cursor-pointer flex items-center gap-2"
-                  >
-                    <User size={14} />
-                    <span>{t.auth.signIn} / {t.auth.signUp || "Qeydiyyat"}</span>
-                  </button>
                 </div>
-              </div>
-            ) : (
-              <div className="bg-emerald-50/70 border border-emerald-200/90 rounded-3xl p-4 sm:p-5 flex items-center justify-between shadow-2xs">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs">
-                    {(profile?.full_name || user.email || 'H')[0].toUpperCase()}
-                  </div>
-                  <div>
-                    <div className="text-xs font-bold text-stone-900 flex items-center gap-2">
-                      <span>{profile?.full_name || user.email}</span>
-                      <span className="text-[9px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-200">
-                        {language === "az" ? "Daxil olundu" : "Signed In"}
-                      </span>
-                    </div>
-                    <div className="text-[11px] text-stone-500 font-mono">{user.email}</div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Customer Information Form - noValidate to avoid ugly browser tooltips */}
-            <form noValidate onSubmit={handleCardSubmit} className="space-y-6">
-              <div className="bg-white border border-stone-200/90 rounded-3xl p-6 space-y-5 shadow-xs">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-eb-garamond text-xl font-normal text-stone-900 flex items-center gap-2">
-                    <Truck size={18} className="text-stone-700" />
-                    <span>1. {t.checkout.contactInfo}</span>
-                  </h3>
-                  <span className="text-[11px] font-semibold text-stone-600 bg-stone-100 px-2.5 py-1 rounded-full border border-stone-200 flex items-center gap-1.5">
-                    <span>{currentCountry.flag}</span>
-                    <span>{currentCountry.name}</span>
-                  </span>
-                </div>
-
-                {/* Country Selector Dropdown */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-stone-700 uppercase flex items-center gap-1.5">
-                      <Globe size={13} className="text-stone-500" />
-                      <span>{cT.countryLabel || "Ölkə"} *</span>
-                    </label>
-                    <span className="text-[10px] font-semibold text-stone-500">
-                      {isDomestic ? "Azərbaycan daxili" : "Beynəlxalq çatdırılma"}
-                    </span>
-                  </div>
-                  <div className="relative">
-                    <select
-                      id="field-country"
-                      value={selectedCountryCode}
-                      onChange={(e) => handleCountryChange(e.target.value)}
-                      className="w-full appearance-none bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 text-xs text-stone-900 focus:outline-none focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900 transition font-medium pr-10 cursor-pointer"
-                    >
-                      {getAllCountries().map((c) => (
-                        <option key={c.code} value={c.code}>
-                          {c.flag} {c.name} ({c.dialCode}) — {c.localName}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-stone-500">
-                      <ChevronDown size={14} />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <motion.div
-                    animate={shakingField === "fullName" ? { x: [-8, 8, -6, 6, -3, 3, 0] } : { x: 0 }}
-                    transition={{ duration: 0.45, ease: "easeInOut" }}
-                    className="space-y-1.5"
-                  >
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-semibold text-stone-700 uppercase">{t.checkout.fullName} *</label>
-                      {fieldErrors.fullName && (
-                        <span className="text-[10px] text-rose-500 font-medium">{cT.reqField}</span>
-                      )}
-                    </div>
-                    <input
-                      id="field-fullName"
-                      type="text"
-                      placeholder="John Doe"
-                      value={fullName}
-                      onChange={(e) => handleFieldChange("fullName", e.target.value, setFullName)}
-                      className={`w-full rounded-xl px-3.5 py-2.5 text-xs text-stone-900 placeholder-stone-400 transition-all duration-200 focus:outline-none ${
-                        fieldErrors.fullName
-                          ? "bg-rose-50/40 border border-rose-400 ring-2 ring-rose-200/60 focus:border-rose-500 focus:ring-rose-300"
-                          : "bg-stone-50 border border-stone-200 focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900"
-                      }`}
-                    />
-                    <AnimatePresence>
-                      {fieldErrors.fullName && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -4, scale: 0.96 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: -4, scale: 0.96 }}
-                          transition={{ duration: 0.2 }}
-                          className="flex items-center gap-1.5 text-[11px] font-medium text-rose-600 bg-rose-50/90 border border-rose-200 rounded-lg px-2.5 py-1.5 shadow-xs"
-                        >
-                          <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping shrink-0" />
-                          <AlertCircle size={13} className="shrink-0 text-rose-600" />
-                          <span>{fieldErrors.fullName}</span>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-
-                  <motion.div
-                    animate={shakingField === "phone" ? { x: [-8, 8, -6, 6, -3, 3, 0] } : { x: 0 }}
-                    transition={{ duration: 0.45, ease: "easeInOut" }}
-                    className="space-y-1.5"
-                  >
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-semibold text-stone-700 uppercase">{t.checkout.phone} *</label>
-                      {fieldErrors.phone && (
-                        <span className="text-[10px] text-rose-500 font-medium">{cT.reqField}</span>
-                      )}
-                    </div>
-                    <input
-                      id="field-phone"
-                      type="tel"
-                      placeholder={`${currentCountry.dialCode} 50 123 45 67`}
-                      value={phone}
-                      onChange={(e) => handleFieldChange("phone", e.target.value, setPhone)}
-                      className={`w-full rounded-xl px-3.5 py-2.5 text-xs text-stone-900 placeholder-stone-400 transition-all duration-200 focus:outline-none ${
-                        fieldErrors.phone
-                          ? "bg-rose-50/40 border border-rose-400 ring-2 ring-rose-200/60 focus:border-rose-500 focus:ring-rose-300"
-                          : "bg-stone-50 border border-stone-200 focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900"
-                      }`}
-                    />
-                    <AnimatePresence>
-                      {fieldErrors.phone && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -4, scale: 0.96 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: -4, scale: 0.96 }}
-                          transition={{ duration: 0.2 }}
-                          className="flex items-center gap-1.5 text-[11px] font-medium text-rose-600 bg-rose-50/90 border border-rose-200 rounded-lg px-2.5 py-1.5 shadow-xs"
-                        >
-                          <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping shrink-0" />
-                          <AlertCircle size={13} className="shrink-0 text-rose-600" />
-                          <span>{fieldErrors.phone}</span>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4">
-                  <motion.div
-                    animate={shakingField === "email" ? { x: [-8, 8, -6, 6, -3, 3, 0] } : { x: 0 }}
-                    transition={{ duration: 0.45, ease: "easeInOut" }}
-                    className="space-y-1.5"
-                  >
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-semibold text-stone-700 uppercase">{t.checkout.email} *</label>
-                      {user?.email && (
-                        <span className="text-[10px] text-emerald-700 font-bold">✓ {language === "az" ? "Təsdiqlənib" : "Verified"}</span>
-                      )}
-                    </div>
-                    <input
-                      id="field-email"
-                      type="email"
-                      placeholder="ad@example.com"
-                      value={user?.email || email}
-                      readOnly={Boolean(user?.email)}
-                      onChange={(e) => handleFieldChange("email", e.target.value, setEmail)}
-                      className={`w-full rounded-xl px-3.5 py-2.5 text-xs text-stone-900 placeholder-stone-400 transition-all duration-200 focus:outline-none ${
-                        user?.email
-                          ? "bg-stone-100 border border-stone-200 cursor-not-allowed text-stone-600 font-mono"
-                          : fieldErrors.email
-                          ? "bg-rose-50/40 border border-rose-400 ring-2 ring-rose-200/60 focus:border-rose-500 focus:ring-rose-300"
-                          : "bg-stone-50 border border-stone-200 focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900"
-                      }`}
-                    />
-                    <AnimatePresence>
-                      {fieldErrors.email && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -4, scale: 0.96 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: -4, scale: 0.96 }}
-                          transition={{ duration: 0.2 }}
-                          className="flex items-center gap-1.5 text-[11px] font-medium text-rose-600 bg-rose-50/90 border border-rose-200 rounded-lg px-2.5 py-1.5 shadow-xs"
-                        >
-                          <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping shrink-0" />
-                          <AlertCircle size={13} className="shrink-0 text-rose-600" />
-                          <span>{fieldErrors.email}</span>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                </div>
-
-                {/* Domestic Azerbaijan Fields */}
-                {isDomestic ? (
-                  <div className="space-y-4">
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-semibold text-stone-700 uppercase">{t.checkout.city} *</label>
-                        <span className="text-[10px] font-semibold text-emerald-700">
-                          {isFreeZone ? `✓ ${t.checkout.free}` : cT.regions5}
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-3 gap-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setCity("Bakı");
-                            setSelectedShippingMethodId("domestic_baku_sumgayit");
-                            clearFieldError("city");
-                          }}
-                          className={`py-2 px-2.5 rounded-xl border text-xs font-semibold transition cursor-pointer text-center ${
-                            city === "Bakı"
-                              ? "bg-stone-900 text-white border-stone-900 shadow-xs"
-                              : "bg-stone-50 text-stone-700 border-stone-200 hover:border-stone-400"
-                          }`}
-                        >
-                          Bakı <span className="block text-[9.5px] opacity-80 font-normal">{t.checkout.free}</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setCity("Sumqayıt");
-                            setSelectedShippingMethodId("domestic_baku_sumgayit");
-                            clearFieldError("city");
-                          }}
-                          className={`py-2 px-2.5 rounded-xl border text-xs font-semibold transition cursor-pointer text-center ${
-                            city === "Sumqayıt"
-                              ? "bg-stone-900 text-white border-stone-900 shadow-xs"
-                              : "bg-stone-50 text-stone-700 border-stone-200 hover:border-stone-400"
-                          }`}
-                        >
-                          Sumqayıt <span className="block text-[9.5px] opacity-80 font-normal">{t.checkout.free}</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (city === "Bakı" || city === "Sumqayıt") setCity("");
-                            setSelectedShippingMethodId("domestic_region");
-                          }}
-                          className={`py-2 px-2.5 rounded-xl border text-xs font-semibold transition cursor-pointer text-center ${
-                            city !== "Bakı" && city !== "Sumqayıt"
-                              ? "bg-stone-900 text-white border-stone-900 shadow-xs"
-                              : "bg-stone-50 text-stone-700 border-stone-200 hover:border-stone-400"
-                          }`}
-                        >
-                          {t.collections.all} <span className="block text-[9.5px] opacity-80 font-normal">{cT.regionsLabel}</span>
-                        </button>
-                      </div>
-
-                      {city !== "Bakı" && city !== "Sumqayıt" && (
-                        <input
-                          id="field-city"
-                          type="text"
-                          placeholder={cT.regionsPlaceholder}
-                          value={city}
-                          onChange={(e) => handleFieldChange("city", e.target.value, setCity)}
-                          className="w-full mt-2 bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2 text-xs text-stone-900 placeholder-stone-400 focus:outline-none focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900 transition"
-                        />
-                      )}
-                    </div>
-
-                    <motion.div
-                      animate={shakingField === "address" ? { x: [-8, 8, -6, 6, -3, 3, 0] } : { x: 0 }}
-                      transition={{ duration: 0.45, ease: "easeInOut" }}
-                      className="space-y-1.5"
-                    >
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-semibold text-stone-700 uppercase">{t.checkout.address} *</label>
-                        {fieldErrors.address && (
-                          <span className="text-[10px] text-rose-500 font-medium">{cT.reqField}</span>
-                        )}
-                      </div>
-                      <input
-                        id="field-address"
-                        type="text"
-                        placeholder={cT.addressPlaceholder}
-                        value={address}
-                        onChange={(e) => handleFieldChange("address", e.target.value, setAddress)}
-                        className={`w-full rounded-xl px-3.5 py-2.5 text-xs text-stone-900 placeholder-stone-400 transition-all duration-200 focus:outline-none ${
-                          fieldErrors.address
-                            ? "bg-rose-50/40 border border-rose-400 ring-2 ring-rose-200/60 focus:border-rose-500 focus:ring-rose-300"
-                            : "bg-stone-50 border border-stone-200 focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900"
-                        }`}
-                      />
-                      <AnimatePresence>
-                        {fieldErrors.address && (
-                          <motion.div
-                            initial={{ opacity: 0, y: -4, scale: 0.96 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: -4, scale: 0.96 }}
-                            transition={{ duration: 0.2 }}
-                            className="flex items-center gap-1.5 text-[11px] font-medium text-rose-600 bg-rose-50/90 border border-rose-200 rounded-lg px-2.5 py-1.5 shadow-xs"
-                          >
-                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping shrink-0" />
-                            <AlertCircle size={13} className="shrink-0 text-rose-600" />
-                            <span>{fieldErrors.address}</span>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </motion.div>
-                  </div>
-                ) : (
-                  /* International Address Fields */
-                  <div className="space-y-4">
-                    {/* Address Line 1 */}
-                    <motion.div
-                      animate={shakingField === "address" ? { x: [-8, 8, -6, 6, -3, 3, 0] } : { x: 0 }}
-                      transition={{ duration: 0.45, ease: "easeInOut" }}
-                      className="space-y-1.5"
-                    >
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-semibold text-stone-700 uppercase">
-                          {cT.addressLine1 || "Ünvan (Küçə, bina, ev)"} *
-                        </label>
-                        {fieldErrors.address && (
-                          <span className="text-[10px] text-rose-500 font-medium">{cT.reqField}</span>
-                        )}
-                      </div>
-                      <input
-                        id="field-address"
-                        type="text"
-                        placeholder="e.g. 742 Evergreen Terrace"
-                        value={address}
-                        onChange={(e) => handleFieldChange("address", e.target.value, setAddress)}
-                        className={`w-full rounded-xl px-3.5 py-2.5 text-xs text-stone-900 placeholder-stone-400 transition-all duration-200 focus:outline-none ${
-                          fieldErrors.address
-                            ? "bg-rose-50/40 border border-rose-400 ring-2 ring-rose-200/60 focus:border-rose-500 focus:ring-rose-300"
-                            : "bg-stone-50 border border-stone-200 focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900"
-                        }`}
-                      />
-                      <AnimatePresence>
-                        {fieldErrors.address && (
-                          <motion.div
-                            initial={{ opacity: 0, y: -4, scale: 0.96 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: -4, scale: 0.96 }}
-                            transition={{ duration: 0.2 }}
-                            className="flex items-center gap-1.5 text-[11px] font-medium text-rose-600 bg-rose-50/90 border border-rose-200 rounded-lg px-2.5 py-1.5 shadow-xs"
-                          >
-                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping shrink-0" />
-                            <AlertCircle size={13} className="shrink-0 text-rose-600" />
-                            <span>{fieldErrors.address}</span>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </motion.div>
-
-                    {/* Address Line 2 (Optional) */}
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-stone-700 uppercase">
-                        {cT.addressLine2 || "Mənzil, blok, mərtəbə (istəyə bağlı)"}
-                      </label>
-                      <input
-                        id="field-addressLine2"
-                        type="text"
-                        placeholder="Apt 4B, Suite 200, Floor 3"
-                        value={addressLine2}
-                        onChange={(e) => setAddressLine2(e.target.value)}
-                        className="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 text-xs text-stone-900 placeholder-stone-400 focus:outline-none focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900 transition"
-                      />
-                    </div>
-
-                    {/* City & State/Province Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {/* City */}
-                      <motion.div
-                        animate={shakingField === "city" ? { x: [-8, 8, -6, 6, -3, 3, 0] } : { x: 0 }}
-                        transition={{ duration: 0.45, ease: "easeInOut" }}
-                        className="space-y-1.5"
-                      >
-                        <div className="flex items-center justify-between">
-                          <label className="text-xs font-semibold text-stone-700 uppercase">
-                            {t.checkout.city} *
-                          </label>
-                          {fieldErrors.city && (
-                            <span className="text-[10px] text-rose-500 font-medium">{cT.reqField}</span>
-                          )}
-                        </div>
-                        <input
-                          id="field-city"
-                          type="text"
-                          placeholder="e.g. New York, London, Istanbul"
-                          value={city}
-                          onChange={(e) => handleFieldChange("city", e.target.value, setCity)}
-                          className={`w-full rounded-xl px-3.5 py-2.5 text-xs text-stone-900 placeholder-stone-400 transition-all duration-200 focus:outline-none ${
-                            fieldErrors.city
-                              ? "bg-rose-50/40 border border-rose-400 ring-2 ring-rose-200/60 focus:border-rose-500 focus:ring-rose-300"
-                              : "bg-stone-50 border border-stone-200 focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900"
-                          }`}
-                        />
-                        <AnimatePresence>
-                          {fieldErrors.city && (
-                            <motion.div
-                              initial={{ opacity: 0, y: -4, scale: 0.96 }}
-                              animate={{ opacity: 1, y: 0, scale: 1 }}
-                              exit={{ opacity: 0, y: -4, scale: 0.96 }}
-                              transition={{ duration: 0.2 }}
-                              className="flex items-center gap-1.5 text-[11px] font-medium text-rose-600 bg-rose-50/90 border border-rose-200 rounded-lg px-2.5 py-1.5 shadow-xs"
-                            >
-                              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping shrink-0" />
-                              <AlertCircle size={13} className="shrink-0 text-rose-600" />
-                              <span>{fieldErrors.city}</span>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </motion.div>
-
-                      {/* State / Province / Region */}
-                      <motion.div
-                        animate={shakingField === "stateOrRegion" ? { x: [-8, 8, -6, 6, -3, 3, 0] } : { x: 0 }}
-                        transition={{ duration: 0.45, ease: "easeInOut" }}
-                        className="space-y-1.5"
-                      >
-                        <div className="flex items-center justify-between">
-                          <label className="text-xs font-semibold text-stone-700 uppercase">
-                            {cT.stateOrRegion || "Ştat / Vilayət / Region"} {currentCountry.requiresState ? "*" : ""}
-                          </label>
-                          {fieldErrors.stateOrRegion && (
-                            <span className="text-[10px] text-rose-500 font-medium">{cT.reqField}</span>
-                          )}
-                        </div>
-                        <input
-                          id="field-stateOrRegion"
-                          type="text"
-                          placeholder={currentCountry.statePlaceholder || "e.g. California, Ontario, Bavaria"}
-                          value={stateOrRegion}
-                          onChange={(e) => handleFieldChange("stateOrRegion", e.target.value, setStateOrRegion)}
-                          className={`w-full rounded-xl px-3.5 py-2.5 text-xs text-stone-900 placeholder-stone-400 transition-all duration-200 focus:outline-none ${
-                            fieldErrors.stateOrRegion
-                              ? "bg-rose-50/40 border border-rose-400 ring-2 ring-rose-200/60 focus:border-rose-500 focus:ring-rose-300"
-                              : "bg-stone-50 border border-stone-200 focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900"
-                          }`}
-                        />
-                        <AnimatePresence>
-                          {fieldErrors.stateOrRegion && (
-                            <motion.div
-                              initial={{ opacity: 0, y: -4, scale: 0.96 }}
-                              animate={{ opacity: 1, y: 0, scale: 1 }}
-                              exit={{ opacity: 0, y: -4, scale: 0.96 }}
-                              transition={{ duration: 0.2 }}
-                              className="flex items-center gap-1.5 text-[11px] font-medium text-rose-600 bg-rose-50/90 border border-rose-200 rounded-lg px-2.5 py-1.5 shadow-xs"
-                            >
-                              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping shrink-0" />
-                              <AlertCircle size={13} className="shrink-0 text-rose-600" />
-                              <span>{fieldErrors.stateOrRegion}</span>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </motion.div>
-                    </div>
-
-                    {/* Postal / ZIP Code */}
-                    <motion.div
-                      animate={shakingField === "postalCode" ? { x: [-8, 8, -6, 6, -3, 3, 0] } : { x: 0 }}
-                      transition={{ duration: 0.45, ease: "easeInOut" }}
-                      className="space-y-1.5"
-                    >
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-semibold text-stone-700 uppercase">
-                          {cT.postalCode || "Poçt indeksi / ZIP"} *
-                        </label>
-                        {fieldErrors.postalCode && (
-                          <span className="text-[10px] text-rose-500 font-medium">{cT.reqField}</span>
-                        )}
-                      </div>
-                      <input
-                        id="field-postalCode"
-                        type="text"
-                        placeholder={currentCountry.postalCodePlaceholder || "e.g. 10001, SW1A 1AA, 34000"}
-                        value={postalCode}
-                        onChange={(e) => handleFieldChange("postalCode", e.target.value, setPostalCode)}
-                        className={`w-full rounded-xl px-3.5 py-2.5 text-xs text-stone-900 placeholder-stone-400 transition-all duration-200 focus:outline-none ${
-                          fieldErrors.postalCode
-                            ? "bg-rose-50/40 border border-rose-400 ring-2 ring-rose-200/60 focus:border-rose-500 focus:ring-rose-300"
-                            : "bg-stone-50 border border-stone-200 focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900"
-                        }`}
-                      />
-                      <AnimatePresence>
-                        {fieldErrors.postalCode && (
-                          <motion.div
-                            initial={{ opacity: 0, y: -4, scale: 0.96 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: -4, scale: 0.96 }}
-                            transition={{ duration: 0.2 }}
-                            className="flex items-center gap-1.5 text-[11px] font-medium text-rose-600 bg-rose-50/90 border border-rose-200 rounded-lg px-2.5 py-1.5 shadow-xs"
-                          >
-                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping shrink-0" />
-                            <AlertCircle size={13} className="shrink-0 text-rose-600" />
-                            <span>{fieldErrors.postalCode}</span>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </motion.div>
-
-                    {/* DDU Notice */}
-                    <div className="p-3 bg-stone-100/70 border border-stone-200/80 rounded-xl text-[11px] text-stone-600 flex items-start gap-2.5">
-                      <Plane size={15} className="text-stone-500 shrink-0 mt-0.5" />
-                      <span>{cT.dduNotice}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Dynamic Shipping Method Selector */}
-              <div className="bg-white border border-stone-200/90 rounded-3xl p-6 space-y-4 shadow-xs">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-eb-garamond text-xl font-normal text-stone-900 flex items-center gap-2">
-                    <Truck size={18} className="text-stone-700" />
-                    <span>{cT.shippingMethodsTitle || "Çatdırılma Xidməti"}</span>
-                  </h3>
-                  <span className="text-[11px] text-stone-500 font-medium">
-                    {currentCountry.flag} {currentCountry.name}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {shippingOptions.map((opt) => {
-                    const isSelected = activeShippingOption?.id === opt.id;
-                    const isFree = opt.price === 0;
-
-                    return (
-                      <div
-                        key={opt.id}
-                        onClick={() => {
-                          setSelectedShippingMethodId(opt.id);
-                          if (isDomestic) {
-                            if (opt.id === "domestic_baku_sumgayit" && city !== "Bakı" && city !== "Sumqayıt") {
-                              setCity("Bakı");
-                            } else if (opt.id === "domestic_region" && (city === "Bakı" || city === "Sumqayıt")) {
-                              setCity("");
-                            }
-                          }
-                        }}
-                        className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-3 ${
-                          isSelected
-                            ? "border-stone-900 bg-stone-50 ring-1 ring-stone-900/10 shadow-xs"
-                            : "border-stone-200 bg-white hover:border-stone-300"
-                        }`}
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <div className="text-[10px] font-bold uppercase tracking-wider text-stone-500 flex items-center gap-1.5">
-                              {opt.id.includes("express") ? (
-                                <span className="text-amber-600 font-extrabold flex items-center gap-1">
-                                  ⚡ {opt.carrier}
-                                </span>
-                              ) : (
-                                <span>{opt.carrier}</span>
-                              )}
-                            </div>
-                            <div className="text-xs font-bold text-stone-900 mt-0.5">
-                              {opt.name}
-                            </div>
-                            <div className="text-[11px] text-stone-500 flex items-center gap-1 mt-1">
-                              <Truck size={12} className="shrink-0 text-stone-400" />
-                              <span>{opt.estimatedDays}</span>
-                            </div>
-                          </div>
-                          <span className="w-4 h-4 rounded-full border-2 border-stone-300 flex items-center justify-center shrink-0 mt-0.5">
-                            {isSelected && <span className="w-2 h-2 rounded-full bg-stone-900" />}
-                          </span>
-                        </div>
-
-                        <div className="pt-2 border-t border-stone-100 flex items-baseline justify-between">
-                          <span className="text-[10.5px] text-stone-500 line-clamp-1">
-                            {opt.description ? opt.description : "Sürətli çatdırılma"}
-                          </span>
-                          <div className="text-right shrink-0 ml-2">
-                            {opt.originalPrice && opt.originalPrice > opt.price && (
-                              <span className="text-[10.5px] text-stone-400 line-through mr-1.5">
-                                {currency === "USD" ? `$${opt.originalPrice.toFixed(2)}` : `${opt.originalPrice.toFixed(2)} ₼`}
-                              </span>
-                            )}
-                            <span className={`text-xs font-bold ${isFree ? "text-emerald-700 uppercase" : "text-stone-900"}`}>
-                              {isFree ? "PULSUZ" : (currency === "USD" ? `$${opt.price.toFixed(2)}` : `${opt.price.toFixed(2)} ₼`)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Payment Method Selector */}
-              <div className="bg-white border border-stone-200/90 rounded-3xl p-6 space-y-4 shadow-xs">
-                <h3 className="font-eb-garamond text-xl font-normal text-stone-900 flex items-center gap-2">
-                  <Lock size={18} className="text-stone-700" />
-                  <span>2. {t.checkout.paymentMethod}</span>
-                </h3>
-
-                <div className="space-y-2.5">
-                  {/* Option 1: Card */}
-                  <label
-                    onClick={() => setPaymentMethod("card")}
-                    className={`p-4 rounded-2xl border flex items-center justify-between cursor-pointer transition-all ${
-                      paymentMethod === "card"
-                        ? "border-stone-900 bg-stone-50 text-stone-900 ring-1 ring-stone-900/10 shadow-xs"
-                        : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:text-stone-900"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <CreditCard size={20} className={paymentMethod === "card" ? "text-stone-900" : "text-stone-400"} />
-                      <div>
-                        <div className="text-xs font-bold text-stone-900 flex items-center gap-2">
-                          <span>{t.checkout.creditCard}</span>
-                          <VisaLogo className="h-3 w-auto" />
-                          <MastercardLogo className="h-3 w-auto" />
-                        </div>
-                        <div className="text-[11px] text-stone-500">{t.checkout.secureCheckout}</div>
-                      </div>
-                    </div>
-                    <span className="w-4 h-4 rounded-full border-2 border-stone-300 flex items-center justify-center">
-                      {paymentMethod === "card" && <span className="w-2 h-2 rounded-full bg-stone-900" />}
-                    </span>
-                  </label>
-
-                  {/* Option 2: Apple Pay */}
-                  <label
-                    onClick={() => setPaymentMethod("apple_pay")}
-                    className={`p-4 rounded-2xl border flex items-center justify-between cursor-pointer transition-all ${
-                      paymentMethod === "apple_pay"
-                        ? "border-stone-900 bg-stone-50 text-stone-900 ring-1 ring-stone-900/10 shadow-xs"
-                        : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:text-stone-900"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <ApplePayLogo className="h-5 w-auto" variant="dark" />
-                      <div>
-                        <div className="text-xs font-bold text-stone-900">Apple Pay</div>
-                        <div className="text-[11px] text-stone-500">
-                          {language === "az" ? "Apple Wallet ilə ödəniş" : "Pay with Apple Wallet"}
-                        </div>
-                      </div>
-                    </div>
-                    <span className="w-4 h-4 rounded-full border-2 border-stone-300 flex items-center justify-center">
-                      {paymentMethod === "apple_pay" && <span className="w-2 h-2 rounded-full bg-stone-900" />}
-                    </span>
-                  </label>
-
-                  {/* Option 3: Google Pay */}
-                  <label
-                    onClick={() => setPaymentMethod("google_pay")}
-                    className={`p-4 rounded-2xl border flex items-center justify-between cursor-pointer transition-all ${
-                      paymentMethod === "google_pay"
-                        ? "border-stone-900 bg-stone-50 text-stone-900 ring-1 ring-stone-900/10 shadow-xs"
-                        : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:text-stone-900"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <GooglePayLogo className="h-4 w-auto" />
-                      <div>
-                        <div className="text-xs font-bold text-stone-900">Google Pay</div>
-                        <div className="text-[11px] text-stone-500">
-                          {language === "az" ? "Google hesabınızdakı kartla ödəniş" : "Pay with the card in your Google account"}
-                        </div>
-                      </div>
-                    </div>
-                    <span className="w-4 h-4 rounded-full border-2 border-stone-300 flex items-center justify-center">
-                      {paymentMethod === "google_pay" && <span className="w-2 h-2 rounded-full bg-stone-900" />}
-                    </span>
-                  </label>
-
-                  {/* Secure Online Payment Guarantee Notice */}
-                  <div className="pt-2 flex items-center gap-2.5 text-[11px] text-stone-600 bg-stone-50 border border-stone-200/80 rounded-2xl p-3">
-                    <ShieldCheck size={16} className="text-emerald-700 shrink-0" />
-                    <span>{cT.secureOnlineOnly}</span>
-                  </div>
-
-                  {/* Card Form when selected */}
-                  {paymentMethod === "card" && (
-                    <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-3 animate-fadeIn">
-                      {isTestMode && (
-                        <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-[11px] flex items-center gap-2">
-                          <AlertCircle size={15} className="text-blue-600 shrink-0" />
-                          <span>{cT.cardTestNotice}</span>
-                        </div>
-                      )}
-                      <div className="space-y-1">
-                        <label className="text-[11px] font-semibold text-stone-700 uppercase">{cT.cardName}</label>
-                        <input
-                          type="text"
-                          placeholder="ELSHAN MAMMADOV"
-                          value={cardName}
-                          onChange={(e) => setCardName(e.target.value.toUpperCase())}
-                          className="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-xs text-stone-900 placeholder-stone-400 focus:outline-none focus:border-stone-900 font-mono"
-                        />
-                      </div>
-
-                      <motion.div
-                        animate={shakingField === "cardNumber" ? { x: [-8, 8, -6, 6, -3, 3, 0] } : { x: 0 }}
-                        transition={{ duration: 0.45, ease: "easeInOut" }}
-                        className="space-y-1"
-                      >
-                        <label className="text-[11px] font-semibold text-stone-700 uppercase">{cT.cardNumber}</label>
-                        <input
-                          id="field-cardNumber"
-                          type="text"
-                          maxLength={19}
-                          placeholder="4127 •••• •••• 9821"
-                          value={cardNumber}
-                          onChange={(e) => {
-                            const val = e.target.value.replace(/\D/g, "").replace(/(\d{4})/g, "$1 ").trim();
-                            handleFieldChange("cardNumber", val, setCardNumber);
-                          }}
-                          className={`w-full rounded-xl px-3 py-2 text-xs text-stone-900 placeholder-stone-400 font-mono transition-all duration-200 focus:outline-none ${
-                            fieldErrors.cardNumber
-                              ? "bg-rose-50/40 border border-rose-400 ring-2 ring-rose-200/60 focus:border-rose-500"
-                              : "bg-white border border-stone-200 focus:border-stone-900"
-                          }`}
-                        />
-                        <AnimatePresence>
-                          {fieldErrors.cardNumber && (
-                            <motion.div
-                              initial={{ opacity: 0, y: -4, scale: 0.96 }}
-                              animate={{ opacity: 1, y: 0, scale: 1 }}
-                              exit={{ opacity: 0, y: -4, scale: 0.96 }}
-                              transition={{ duration: 0.2 }}
-                              className="flex items-center gap-1.5 text-[11px] font-medium text-rose-600 bg-rose-50/90 border border-rose-200 rounded-lg px-2.5 py-1.5 shadow-xs"
-                            >
-                              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping shrink-0" />
-                              <AlertCircle size={13} className="shrink-0 text-rose-600" />
-                              <span>{fieldErrors.cardNumber}</span>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </motion.div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <motion.div
-                          animate={shakingField === "cardExpiry" ? { x: [-8, 8, -6, 6, -3, 3, 0] } : { x: 0 }}
-                          transition={{ duration: 0.45, ease: "easeInOut" }}
-                          className="space-y-1"
-                        >
-                          <label className="text-[11px] font-semibold text-stone-700 uppercase">{cT.cardExpiry}</label>
-                          <input
-                            id="field-cardExpiry"
-                            type="text"
-                            maxLength={5}
-                            placeholder="12/28"
-                            value={cardExpiry}
-                            onChange={(e) => handleFieldChange("cardExpiry", e.target.value, setCardExpiry)}
-                            className={`w-full rounded-xl px-3 py-2 text-xs text-stone-900 placeholder-stone-400 font-mono transition-all duration-200 focus:outline-none ${
-                              fieldErrors.cardExpiry
-                                ? "bg-rose-50/40 border border-rose-400 ring-2 ring-rose-200/60 focus:border-rose-500"
-                                : "bg-white border border-stone-200 focus:border-stone-900"
-                            }`}
-                          />
-                          <AnimatePresence>
-                            {fieldErrors.cardExpiry && (
-                              <motion.div
-                                initial={{ opacity: 0, y: -4, scale: 0.96 }}
-                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                exit={{ opacity: 0, y: -4, scale: 0.96 }}
-                                transition={{ duration: 0.2 }}
-                                className="flex items-center gap-1 text-[10px] font-medium text-rose-600 bg-rose-50/90 border border-rose-200 rounded-lg px-2 py-1 shadow-xs"
-                              >
-                                <AlertCircle size={12} className="shrink-0 text-rose-600" />
-                                <span>{fieldErrors.cardExpiry}</span>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </motion.div>
-
-                        <motion.div
-                          animate={shakingField === "cardCvc" ? { x: [-8, 8, -6, 6, -3, 3, 0] } : { x: 0 }}
-                          transition={{ duration: 0.45, ease: "easeInOut" }}
-                          className="space-y-1"
-                        >
-                          <label className="text-[11px] font-semibold text-stone-700 uppercase">{cT.cardCvc}</label>
-                          <input
-                            id="field-cardCvc"
-                            type="password"
-                            maxLength={4}
-                            placeholder="•••"
-                            value={cardCvc}
-                            onChange={(e) => handleFieldChange("cardCvc", e.target.value, setCardCvc)}
-                            className={`w-full rounded-xl px-3 py-2 text-xs text-stone-900 placeholder-stone-400 font-mono transition-all duration-200 focus:outline-none ${
-                              fieldErrors.cardCvc
-                                ? "bg-rose-50/40 border border-rose-400 ring-2 ring-rose-200/60 focus:border-rose-500"
-                                : "bg-white border border-stone-200 focus:border-stone-900"
-                            }`}
-                          />
-                          <AnimatePresence>
-                            {fieldErrors.cardCvc && (
-                              <motion.div
-                                initial={{ opacity: 0, y: -4, scale: 0.96 }}
-                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                exit={{ opacity: 0, y: -4, scale: 0.96 }}
-                                transition={{ duration: 0.2 }}
-                                className="flex items-center gap-1 text-[10px] font-medium text-rose-600 bg-rose-50/90 border border-rose-200 rounded-lg px-2 py-1 shadow-xs"
-                              >
-                                <AlertCircle size={12} className="shrink-0 text-rose-600" />
-                                <span>{fieldErrors.cardCvc}</span>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </motion.div>
-                      </div>
-
-                      <div className="pt-1 flex items-center gap-2 text-[10px] text-stone-500 font-medium bg-stone-50 border border-stone-200/60 rounded-xl p-2.5">
-                        <ShieldCheck size={14} className="text-emerald-600 shrink-0" />
-                        <span>
-                          {language === "en"
-                            ? "Card details are not stored on this site."
-                            : language === "ru"
-                            ? "Данные карты не хранятся на сайте."
-                            : language === "tr"
-                            ? "Kart bilgileri sitede saklanmaz."
-                            : "Kart məlumatlarınız saytda saxlanılmır."}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Dynamic Action Button according to chosen payment method */}
-              <button
-                type="submit"
-                disabled={isProcessing}
-                className={`w-full py-4 rounded-full font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-md active:scale-98 disabled:opacity-50 cursor-pointer ${
-                  paymentMethod === "apple_pay"
-                    ? "bg-black hover:bg-stone-900 text-white"
-                    : paymentMethod === "google_pay"
-                    ? "bg-white hover:bg-stone-50 text-stone-900 border border-stone-300 shadow-sm"
-                    : "bg-stone-900 hover:bg-black text-white"
-                }`}
-              >
-                {isProcessing ? (
-                  <span>...</span>
-                ) : paymentMethod === "apple_pay" ? (
-                  <>
-                    <ApplePayLogo className="h-5 w-auto" variant="dark" />
-                    <span className="font-semibold tracking-normal lowercase first-letter:uppercase">ilə ödə — {currency === "USD" ? `$${finalTotal.toFixed(2)}` : `${finalTotal.toFixed(2)} ₼`}</span>
-                  </>
-                ) : paymentMethod === "google_pay" ? (
-                  <>
-                    <GooglePayLogo className="h-5 w-auto" />
-                    <span className="font-semibold tracking-normal lowercase first-letter:uppercase">ilə ödə — {currency === "USD" ? `$${finalTotal.toFixed(2)}` : `${finalTotal.toFixed(2)} ₼`}</span>
-                  </>
-                ) : (
-                  <>
-                    <Lock size={15} />
-                    <span>{t.checkout.confirmOrder} — {currency === "USD" ? `$${finalTotal.toFixed(2)}` : `${finalTotal.toFixed(2)} ₼`}</span>
-                  </>
-                )}
-              </button>
-            </form>
-          </div>
-
-          {/* Right Column: Order Summary & Promo Code */}
-          <div className="lg:col-span-5 space-y-6">
-            <div className="bg-white border border-stone-200/90 rounded-3xl p-6 space-y-4 shadow-xs">
-              <h3 className="font-eb-garamond text-xl font-normal text-stone-900 pb-3 border-b border-stone-100">
-                {t.checkout.orderSummary} ({items.length})
-              </h3>
-
-              {/* Cart Items list */}
-              <div className="max-h-[300px] overflow-y-auto space-y-3 pr-1">
-                {items.map((item) => (
-                  <div key={item.id} className="flex gap-3 items-center">
-                    <div className="w-14 h-16 rounded-xl bg-stone-50 border border-stone-200 p-1 flex items-center justify-center shrink-0">
-                      <img
-                        src={item.customDesignPreview || item.image}
-                        alt={item.name}
-                        className="max-h-full max-w-full object-contain"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-xs font-semibold text-stone-900 truncate">{item.name}</div>
-                      <div className="text-[11px] text-stone-500">
-                        {item.size} • {item.color} • {item.quantity} {language === "az" ? "ədəd" : language === "ru" ? "шт." : language === "tr" ? "adet" : "pcs"}
-                      </div>
-                      {item.type === "custom" && (
-                        <span className="text-[9px] font-bold uppercase text-stone-800">
-                          {t.nav.studio}
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-xs font-bold text-stone-900">
-                      {currency === "USD" ? `$${(getProductPrice(item) * item.quantity).toFixed(2)}` : `${(getProductPrice(item) * item.quantity).toFixed(2)} ₼`}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Promo Code Form */}
-              <div className="pt-3 border-t border-stone-100">
-                <form noValidate onSubmit={applyPromo} className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder={language === "az" ? "Promokod daxil edin" : language === "ru" ? "Введите промокод" : language === "tr" ? "Promosyon kodu" : "Enter promo code"}
-                    value={promoCode}
-                    disabled={promoApplied || isCheckingPromo}
-                    onChange={(e) => {
-                      setPromoCode(e.target.value);
-                      if (promoError) setPromoError(null);
-                    }}
-                    className={`bg-stone-50 border rounded-xl px-3 py-2 text-xs text-stone-900 placeholder-stone-400 uppercase flex-1 focus:outline-none transition ${
-                      promoError
-                        ? "border-rose-400 focus:border-rose-500 bg-rose-50/40"
-                        : promoApplied
-                        ? "border-emerald-300 bg-emerald-50/30 font-bold"
-                        : "border-stone-200 focus:border-stone-900"
-                    }`}
-                  />
-                  {promoApplied ? (
+                {isTestMode && (
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-amber-400/20 pt-3">
+                    <span className="text-[12px] text-bone-dim">{cT.testFlowPrompt}</span>
                     <button
                       type="button"
-                      onClick={removePromo}
-                      className="px-3.5 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold text-xs transition cursor-pointer"
+                      disabled={isProcessing}
+                      onClick={() => processOrder(walletDebugMsg.method || "apple_pay")}
+                      className="rounded-full bg-bone px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.14em] text-ink disabled:opacity-50"
                     >
-                      {language === "az" ? "Ləğv et" : language === "ru" ? "Отмена" : language === "tr" ? "İptal" : "Cancel"}
+                      {isProcessing ? "…" : cT.confirmTestOrder}
                     </button>
-                  ) : (
-                    <button
-                      type="submit"
-                      disabled={isCheckingPromo}
-                      className="px-4 py-2 rounded-xl bg-stone-900 hover:bg-black text-white font-semibold text-xs uppercase transition disabled:opacity-50 cursor-pointer"
-                    >
-                      {isCheckingPromo ? "..." : (language === "az" ? "Tətbiq Et" : language === "ru" ? "Применить" : language === "tr" ? "Uygula" : "Apply")}
-                    </button>
-                  )}
-                </form>
-
-                {/* Inline Error Message directly below input */}
-                {promoError && (
-                  <span className="text-[11px] text-rose-600 font-medium mt-1.5 flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
-                    <span>{promoError}</span>
-                  </span>
-                )}
-
-                {/* Inline Success Message directly below input */}
-                {promoApplied && promoSuccessMsg && (
-                  <span className="text-[11px] text-emerald-700 font-bold mt-1.5 flex items-center gap-1.5">
-                    <span>{promoSuccessMsg}</span>
-                  </span>
-                )}
-              </div>
-
-              {/* Calculations */}
-              <div className="pt-3 border-t border-stone-100 text-xs text-stone-600 space-y-2">
-                <div className="flex justify-between">
-                  <span>{t.checkout.itemsTotal}:</span>
-                  <span className="font-bold text-stone-900">
-                    {currency === "USD" ? `$${effectiveSubtotal.toFixed(2)}` : `${effectiveSubtotal.toFixed(2)} ₼`}
-                  </span>
-                </div>
-                {discountAmount > 0 && (
-                  <div className="flex justify-between text-emerald-700">
-                    <span>
-                      {language === "az" ? "Endirim" : language === "ru" ? "Скидка" : language === "tr" ? "İndirim" : "Discount"} {appliedPromoCode ? `(${appliedPromoCode})` : ""}:
-                    </span>
-                    <span className="font-bold">
-                      -{currency === "USD" ? `$${discountAmount.toFixed(2)}` : `${discountAmount.toFixed(2)} ₼`}
-                    </span>
                   </div>
                 )}
-                <div className="flex justify-between items-start">
-                  <div>
-                    <span className="block">{t.checkout.delivery}:</span>
-                    <span className="text-[10px] text-stone-500 font-medium block">
-                      {activeShippingOption?.name}
-                    </span>
-                  </div>
-                  <span className="font-bold text-stone-900 text-right">
-                    {shippingCost === 0 ? (
-                      <span className="text-emerald-700">
-                        {t.checkout.free}
-                      </span>
-                    ) : (
-                      currency === "USD" ? `$${shippingCost.toFixed(2)}` : `${shippingCost.toFixed(2)} ₼`
-                    )}
-                  </span>
-                </div>
-                <div className="flex justify-between text-base font-normal text-stone-900 pt-2 border-t border-stone-100">
-                  <span>{t.checkout.grandTotal}:</span>
-                  <span className="font-eb-garamond text-2xl font-normal text-stone-900">
-                    {currency === "USD" ? `$${finalTotal.toFixed(2)}` : `${finalTotal.toFixed(2)} ₼`}
-                  </span>
-                </div>
               </div>
-            </div>
+            )}
+          </section>
 
-            {/* Delivery & Guarantee Box */}
-            <div className="p-4 rounded-2xl bg-white border border-stone-200/80 text-xs text-stone-600 space-y-2.5 shadow-xs">
-              <div className="flex items-center gap-2 text-stone-900 font-semibold">
-                <Truck size={17} className="text-emerald-700" />
-                <span>{cT.freeDeliveryTitle}</span>
-              </div>
-              <p className="text-[11px] leading-relaxed text-stone-500">
-                {cT.freeDeliveryDesc}
-              </p>
-              <div className="pt-2 border-t border-stone-100 flex items-center gap-2 text-stone-900 font-semibold">
-                <ShieldCheck size={16} className="text-stone-800" />
-                <span>{cT.guaranteeTitle}</span>
-              </div>
-              <p className="text-[11px] leading-relaxed text-stone-500">
-                {cT.guaranteeDesc}
-              </p>
-            </div>
+          <button
+            type="submit"
+            disabled={isProcessing}
+            className="mt-10 flex h-14 w-full items-center justify-center gap-2 rounded-full bg-bone text-[12px] font-extrabold uppercase tracking-[0.16em] text-ink transition hover:bg-white disabled:opacity-60"
+          >
+            {isProcessing ? (
+              <span className="h-5 w-5 animate-spin rounded-full border-2 border-ink/20 border-t-ink" />
+            ) : paymentMethod === "apple_pay" ? (
+              <>
+                <ApplePayLogo className="h-5 w-auto" variant="light" /> · {money(finalTotal)}
+              </>
+            ) : paymentMethod === "google_pay" ? (
+              <>
+                <GooglePayLogo className="h-5 w-auto" /> · {money(finalTotal)}
+              </>
+            ) : (
+              <>
+                {L({ az: "Sifarişi təsdiqlə", en: "Place order", ru: "Оформить заказ", tr: "Siparişi onayla" })} · {money(finalTotal)}
+              </>
+            )}
+          </button>
+          <p className="mt-4 text-center text-[12px] text-bone-faint">
+            {L({ az: "Sifariş verməklə ", en: "By placing the order you accept the ", ru: "Оформляя заказ, вы принимаете ", tr: "Sipariş vererek " })}
+            <Link href="/terms" className="underline underline-offset-4 hover:text-bone">
+              {L({ az: "istifadə şərtlərini", en: "terms of service", ru: "условия", tr: "kullanım şartlarını" })}
+            </Link>
+            {L({ az: " qəbul edirsiniz.", en: ".", ru: ".", tr: " kabul edersiniz." })}
+          </p>
+        </form>
 
-            {/* WhatsApp Assistance card */}
-            <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/90 text-xs text-emerald-950 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-bold flex items-center gap-1.5 text-emerald-900">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                  {cT.helpTitle}
-                </span>
-                <span className="text-[10px] text-emerald-700 font-bold uppercase tracking-wider">{cT.helpLive}</span>
-              </div>
-              <p className="text-[11px] text-emerald-800/90 leading-relaxed">
-                {cT.helpDesc}
-              </p>
-              <a
-                href={support.link("Salam! Sifarişi rəsmiləşdirməkdə kömək edə bilərsiniz?")}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-2xs"
-              >
-                <span>💬 WhatsApp: {support.phone}</span>
-              </a>
-            </div>
+        {/* summary (desktop) */}
+        <aside className="hidden lg:col-span-5 lg:block">
+          <div className="sticky top-24 border border-white/10 bg-ink-850 p-6">
+            <h2 className="mb-5 text-[13px] font-extrabold uppercase tracking-[0.16em]">
+              {L({ az: "Sifariş xülasəsi", en: "Order summary", ru: "Сводка заказа", tr: "Sipariş özeti" })} ({items.length})
+            </h2>
+            {summary}
           </div>
-        </div>
+        </aside>
       </div>
     </div>
   );
