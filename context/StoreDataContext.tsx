@@ -59,6 +59,8 @@ export function normalizeProduct(p: any): Product {
     inStock: p.inStock !== undefined ? p.inStock : true,
     sizes: p.sizes && p.sizes.length > 0 ? p.sizes : ["S", "M", "L", "XL"],
     colors: finalColors,
+    trackStock: Boolean(p.trackStock),
+    stock: p.stock && typeof p.stock === "object" ? p.stock : {},
   };
 }
 

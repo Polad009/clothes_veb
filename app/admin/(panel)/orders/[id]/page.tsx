@@ -43,6 +43,12 @@ export default async function OrderDetailPage({ params }: { params: { id: string
         <h1 className="font-sans text-2xl font-semibold tracking-tight">{order.id}</h1>
         {order.isTest && <Badge tone="violet">Test sifarişi</Badge>}
         <span className="text-sm text-stone-500">{formatDate(order.date)}</span>
+        <Link
+          href={`/admin/orders/${encodeURIComponent(order.id)}/receipt`}
+          className="ml-auto inline-flex h-9 items-center rounded-lg border border-stone-300 bg-white px-3 text-[13px] font-medium text-stone-800 hover:bg-stone-50"
+        >
+          Qəbzi çap et
+        </Link>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">

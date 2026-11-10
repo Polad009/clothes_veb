@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { db, isUuid, unwrap } from './client';
+import { stockKey } from '@/lib/stock';
 
 const DEFAULT_IMAGE = '/images/hero/black-tee.jpg';
 const DEFAULT_SIZES = ['S', 'M', 'L', 'XL'];
@@ -26,7 +27,10 @@ export interface CatalogProduct {
   composition: string;
   care: string;
   isNew: boolean;
+  /** Can be bought now: switched on in the admin and, when tracked, units left. */
   inStock: boolean;
+  /** The admin's "on sale" switch, regardless of stock. */
+  onSale: boolean;
   description: string;
   image: string;
   images: string[];
@@ -38,6 +42,10 @@ export interface CatalogProduct {
   sizes: string[];
   features: any[];
   printLayers: any[];
+  /** When false the product sells without limit and `stock` is empty. */
+  trackStock: boolean;
+  /** Units per colour/size, keyed by stockKey(color, size). */
+  stock: Record<string, number>;
 }
 
 function num(value: unknown): number | undefined {
@@ -51,6 +59,19 @@ export function rowToProduct(r: any): CatalogProduct {
   const colors = Array.isArray(r.colors) ? r.colors : [];
   const rowImages = Array.isArray(r.images) ? r.images : [];
   const image = extra.image || colors[0]?.image || rowImages[0] || DEFAULT_IMAGE;
+  const sizes: string[] = Array.isArray(r.sizes) && r.sizes.length > 0 ? r.sizes : DEFAULT_SIZES;
+  const trackStock = Boolean(r.track_stock);
+  const stock: Record<string, number> = {};
+  if (trackStock) {
+    // Every colour/size on sale gets an entry; a missing row means none left.
+    for (const c of colors.length > 0 ? colors : [{ name: '' }]) {
+      for (const s of sizes) stock[stockKey(c.name || '', s)] = 0;
+    }
+    for (const row of Array.isArray(r.product_stock) ? r.product_stock : []) {
+      stock[stockKey(row.color, row.size)] = Math.max(0, Number(row.quantity) || 0);
+    }
+  }
+  const anyLeft = !trackStock || Object.values(stock).some((q) => q > 0);
 
   return {
     id: r.id,
@@ -72,7 +93,8 @@ export function rowToProduct(r: any): CatalogProduct {
     composition: r.composition || '',
     care: r.care || '',
     isNew: Boolean(r.is_new),
-    inStock: r.in_stock !== false,
+    inStock: r.in_stock !== false && anyLeft,
+    onSale: r.in_stock !== false,
     description: r.long_description || '',
     image,
     images: rowImages.length > 0 ? rowImages : [image],
@@ -81,9 +103,11 @@ export function rowToProduct(r: any): CatalogProduct {
     rightShoulderImage: extra.rightShoulderImage || undefined,
     gallery: Array.isArray(extra.gallery) ? extra.gallery : undefined,
     colors,
-    sizes: Array.isArray(r.sizes) && r.sizes.length > 0 ? r.sizes : DEFAULT_SIZES,
+    sizes,
     features: Array.isArray(r.features) ? r.features : [],
     printLayers: Array.isArray(extra.printLayers) ? extra.printLayers : [],
+    trackStock,
+    stock,
   };
 }
 
@@ -103,7 +127,7 @@ export async function listProducts(client: SupabaseClient = db()): Promise<Catal
   const rows = unwrap(
     await client
       .from('products')
-      .select('*')
+      .select('*, product_stock(*)')
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: true }),
     'Məhsullar oxunmadı'
@@ -115,7 +139,7 @@ async function findProductRow(idOrSlug: string): Promise<any | null> {
   if (!idOrSlug) return null;
   const column = isUuid(idOrSlug) ? 'id' : 'slug';
   const row = unwrap(
-    await db().from('products').select('*').eq(column, idOrSlug).maybeSingle(),
+    await db().from('products').select('*, product_stock(*)').eq(column, idOrSlug).maybeSingle(),
     'Məhsul axtarılmadı'
   );
   return row || null;
@@ -184,6 +208,7 @@ export async function saveProduct(input: any): Promise<CatalogProduct> {
   list('features', 'features');
 
   if (input.inStock !== undefined) row.in_stock = Boolean(input.inStock);
+  if (input.trackStock !== undefined) row.track_stock = Boolean(input.trackStock);
   if (input.isNew !== undefined) row.is_new = Boolean(input.isNew);
   if (num(input.rating) !== undefined) row.rating = num(input.rating);
   if (num(input.reviewCount) !== undefined) row.review_count = Math.round(num(input.reviewCount)!);
@@ -206,11 +231,9 @@ export async function saveProduct(input: any): Promise<CatalogProduct> {
   row.extra = extra;
 
   if (existing) {
-    const saved = unwrap(
-      await db().from('products').update(row).eq('id', existing.id).select('*').single(),
-      'Məhsul yenilənmədi'
-    );
-    return rowToProduct(saved);
+    unwrap(await db().from('products').update(row).eq('id', existing.id), 'Məhsul yenilənmədi');
+    await writeStock(existing.id, input.stock);
+    return (await findProduct(existing.id))!;
   }
 
   row.slug = await uniqueSlug(slugify(name));
@@ -219,10 +242,36 @@ export async function saveProduct(input: any): Promise<CatalogProduct> {
   if (!row.ref_code) row.ref_code = row.slug;
 
   const saved = unwrap(
-    await db().from('products').insert(row).select('*').single(),
+    await db().from('products').insert(row).select('id').single(),
     'Məhsul əlavə olunmadı'
-  );
-  return rowToProduct(saved);
+  ) as { id: string };
+  await writeStock(saved.id, input.stock);
+  return (await findProduct(saved.id))!;
+}
+
+/**
+ * Replaces the stored counts with the ones the admin entered, if any were sent.
+ * Only the stock editor sends `stock`; other saves (e.g. the "on sale" switch) leave counts alone.
+ */
+async function writeStock(productId: string, stock: unknown): Promise<void> {
+  if (!stock || typeof stock !== 'object' || Array.isArray(stock)) return;
+  const rows = Object.entries(stock as Record<string, unknown>)
+    .map(([key, value]) => {
+      const cut = key.lastIndexOf('|');
+      return {
+        product_id: productId,
+        color: cut >= 0 ? key.slice(0, cut) : '',
+        size: cut >= 0 ? key.slice(cut + 1) : key,
+        quantity: Math.min(100000, Math.max(0, Math.floor(Number(value) || 0))),
+        updated_at: new Date().toISOString(),
+      };
+    })
+    .filter((r) => r.size);
+
+  unwrap(await db().from('product_stock').delete().eq('product_id', productId), 'Stok yenilənmədi');
+  if (rows.length > 0) {
+    unwrap(await db().from('product_stock').insert(rows), 'Stok yenilənmədi');
+  }
 }
 
 export async function deleteProduct(idOrSlug: string): Promise<boolean> {

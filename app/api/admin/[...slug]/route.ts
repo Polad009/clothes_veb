@@ -18,6 +18,7 @@ import {
   deleteTestOrders,
   listOrders,
   listPodOrders,
+  OutOfStockError,
   updateOrder,
   updatePodOrderStatus,
 } from '@/lib/db/orders';
@@ -51,6 +52,7 @@ function unauthorized() {
 }
 
 function failure(error: any) {
+  if (error instanceof OutOfStockError) return json({ success: false, error: error.message }, 409);
   console.error('[AdminAPI]', error);
   return json({ success: false, error: error?.message || 'Server xətası' }, 500);
 }

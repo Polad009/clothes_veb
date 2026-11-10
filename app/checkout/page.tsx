@@ -1,6 +1,6 @@
 "use client";
 
-import { useSupport } from "@/context/StoreDataContext";
+import { useStoreData, useSupport } from "@/context/StoreDataContext";
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -333,6 +333,7 @@ const CHECKOUT_I18N = {
 
 export default function CheckoutPage() {
   const support = useSupport();
+  const { settings: storeSettings } = useStoreData();
   const router = useRouter();
   const { items, totalPrice, clearCart } = useCart();
   const { formatPrice, getProductPrice, currency, isAzerbaijan, detectedCountry } = useCurrency();
@@ -473,7 +474,8 @@ export default function CheckoutPage() {
   const shippingOptions: ShippingOption[] = calculateShippingOptions(
     selectedCountryCode,
     effectiveSubtotal,
-    currency || "AZN"
+    currency || "AZN",
+    storeSettings?.shipping
   );
 
   const activeShippingOption: ShippingOption =

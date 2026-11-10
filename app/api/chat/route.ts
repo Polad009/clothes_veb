@@ -4,7 +4,8 @@ import { isAdminAuthenticated } from '@/lib/adminAuth';
 
 export const dynamic = 'force-dynamic';
 
-const BUCKET = 'product-images';
+// Private bucket: chat transcripts are readable by the server only.
+const BUCKET = 'private-data';
 const CHAT_PREFIX = 'livechat';
 
 export interface ChatMessage {

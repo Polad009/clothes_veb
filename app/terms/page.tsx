@@ -1,3 +1,5 @@
+import { getStoreSnapshot } from "@/lib/storeSnapshot";
+import { LegalText } from "@/components/LegalText";
 import React from "react";
 import Link from "next/link";
 import { Metadata } from "next";
@@ -11,7 +13,10 @@ export const metadata: Metadata = {
   },
 };
 
-export default function TermsPage() {
+export default async function TermsPage() {
+  const custom = String((await getStoreSnapshot()).content?.policies?.terms || "").trim();
+  if (custom) return <LegalText title="İstifadə Şərtləri" text={custom} />;
+
   return (
     <div className="min-h-screen bg-[#090707] text-stone-200 pt-28 pb-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">

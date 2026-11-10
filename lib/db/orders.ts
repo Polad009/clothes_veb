@@ -3,6 +3,40 @@ import type { StoreOrder, PodOrder } from './types';
 
 const ORDER_SELECT = '*, order_items(*)';
 
+/** Thrown when an order asks for more units of a colour/size than are left. */
+export class OutOfStockError extends Error {
+  constructor(public item: string, public color: string, public size: string, public available: number) {
+    super(
+      available > 0
+        ? `"${item}" (${[color, size].filter(Boolean).join(' / ')}) üçün stokda yalnız ${available} ədəd qalıb.`
+        : `"${item}" (${[color, size].filter(Boolean).join(' / ')}) stokda qalmayıb.`
+    );
+    this.name = 'OutOfStockError';
+  }
+}
+
+function toStockError(message: string): OutOfStockError | null {
+  const m = /OUT_OF_STOCK:(.*)\|(.*)\|(.*)\|(\d+)/.exec(message || '');
+  return m ? new OutOfStockError(m[1], m[2], m[3], Number(m[4])) : null;
+}
+
+async function reserveStock(orderUuid: string): Promise<void> {
+  const { error } = await db().rpc('reserve_order_stock', { p_order_id: orderUuid });
+  if (error) throw toStockError(error.message) || new Error(`Stok yoxlanılmadı: ${error.message}`);
+}
+
+async function releaseStock(orderUuid: string): Promise<void> {
+  const { error } = await db().rpc('release_order_stock', { p_order_id: orderUuid });
+  if (error) throw new Error(`Stok geri qaytarılmadı: ${error.message}`);
+}
+
+/** An order keeps its units out of stock unless it is cancelled or its payment failed. */
+function holdsStock(row: { order_status?: string | null; payment_status?: string | null }): boolean {
+  const cancelled = String(row.order_status || '').toLowerCase().includes('ləğv');
+  const failed = String(row.payment_status || '').toLowerCase() === 'failed';
+  return !cancelled && !failed;
+}
+
 function money(value: unknown): number {
   const n = Number(value);
   return Number.isFinite(n) ? n : 0;
@@ -197,6 +231,15 @@ export async function createOrder(order: Omit<StoreOrder, 'id' | 'trackingCode' 
     saved.order_items = itemsRes.data;
   }
 
+  // Take the units out of stock; if anything ran out, the order is not placed.
+  try {
+    await reserveStock(saved.id);
+  } catch (stockError) {
+    await db().from('order_items').delete().eq('order_id', saved.id);
+    await db().from('orders').delete().eq('id', saved.id);
+    throw stockError;
+  }
+
   return rowToOrder(saved);
 }
 
@@ -212,10 +255,19 @@ export async function updateOrder(
   if (patch.paymentStatus) update.payment_status = patch.paymentStatus;
   if (patch.providerPaymentId) update.provider_payment_id = patch.providerPaymentId;
 
+  const heldBefore = holdsStock(row);
+  const holdsAfter = holdsStock({
+    order_status: update.order_status ?? row.order_status,
+    payment_status: update.payment_status ?? row.payment_status,
+  });
+  // Reopening a cancelled order needs its units back first; fails if they are gone.
+  if (!heldBefore && holdsAfter) await reserveStock(row.id);
+
   const saved = unwrap(
     await db().from('orders').update(update).eq('id', row.id).select(ORDER_SELECT).single(),
     'Sifariş yenilənmədi'
   );
+  if (heldBefore && !holdsAfter) await releaseStock(row.id);
   return rowToOrder(saved);
 }
 
@@ -223,6 +275,9 @@ async function deleteOrderRows(rows: any[]): Promise<number> {
   if (rows.length === 0) return 0;
   const ids = rows.map((r) => r.id);
   const numbers = rows.map((r) => r.order_number).filter(Boolean);
+
+  // Deleted orders give their units back
+  for (const id of ids) await releaseStock(id);
 
   unwrap(await db().from('order_items').delete().in('order_id', ids), 'Sifariş məhsulları silinmədi');
   if (numbers.length > 0) {

@@ -8,10 +8,12 @@ import {
   deleteTestOrders,
   findRecentDuplicate,
   listOrders,
+  OutOfStockError,
   updateOrder,
 } from '@/lib/db/orders';
 import { listProducts, resolveUnitPrice } from '@/lib/db/products';
-import { checkPromo, incrementPromoUses } from '@/lib/db/site';
+import { checkPromo, getSettings, incrementPromoUses } from '@/lib/db/site';
+import { customPrintPrice } from '@/lib/studio/catalog';
 import { notifyNewOrder } from '@/lib/notifications/orderNotifier';
 import { isAdminAuthenticated } from '@/lib/adminAuth';
 import { sendOrderConfirmation, sendOrderStatusUpdate } from '@/lib/email/emailService';
@@ -78,7 +80,14 @@ export async function POST(req: NextRequest) {
       let unitPrice: number;
 
       if (clientItem.isCustom) {
-        unitPrice = Math.max(0, Number(clientItem.price) || 0);
+        const studioPrice = customPrintPrice(clientItem.productId, clientItem.customData?.placementKey);
+        if (studioPrice === null) {
+          return NextResponse.json(
+            { error: 'Fərdi çap məhsulu tanınmadı. Zəhmət olmasa dizaynı studiyada yenidən səbətə əlavə edin.' },
+            { status: 409 }
+          );
+        }
+        unitPrice = resolveUnitPrice({ price: studioPrice }, orderCurrency, clientItem.price);
       } else {
         const product = catalogue.find((p) => p.id === clientItem.productId || p.slug === clientItem.productId);
         if (!product) {
@@ -141,7 +150,8 @@ export async function POST(req: NextRequest) {
       serverSubtotal,
       shippingCurrency,
       targetOptionId,
-      claimedShippingRate !== undefined ? claimedShippingRate : -1
+      claimedShippingRate !== undefined ? claimedShippingRate : -1,
+      ((await getSettings()) as any).shipping
     );
 
     // Reject tampered shipping rates
@@ -336,6 +346,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, order, paymentResponse });
   } catch (error: any) {
+    if (error instanceof OutOfStockError) {
+      return NextResponse.json({ error: error.message, outOfStock: true }, { status: 409 });
+    }
     console.error('Order creation error:', error);
     return NextResponse.json({ error: error.message || 'Server xətası' }, { status: 500 });
   }

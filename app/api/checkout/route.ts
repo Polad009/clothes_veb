@@ -6,7 +6,8 @@ import { checkRateLimit } from "@/lib/rateLimiter";
 import { validateShippingRate, isDomesticDestination } from "@/lib/shipping";
 import { getCountryByCode } from "@/lib/countries";
 import { listProducts, resolveUnitPrice } from "@/lib/db/products";
-import { checkPromo, incrementPromoUses } from "@/lib/db/site";
+import { checkPromo, getSettings, incrementPromoUses } from "@/lib/db/site";
+import { customPrintPrice } from "@/lib/studio/catalog";
 
 export async function POST(req: NextRequest) {
   try {
@@ -117,7 +118,14 @@ export async function POST(req: NextRequest) {
       let unitPrice: number;
 
       if (isCustom) {
-        unitPrice = Math.max(0, Number(clientItem.price) || 0);
+        const studioPrice = customPrintPrice(clientItemId, (clientItem as any).customData?.placementKey);
+        if (studioPrice === null) {
+          return NextResponse.json(
+            { success: false, message: "Fərdi çap məhsulu tanınmadı. Zəhmət olmasa dizaynı studiyada yenidən səbətə əlavə edin." },
+            { status: 409 }
+          );
+        }
+        unitPrice = resolveUnitPrice({ price: studioPrice }, orderCurrency, clientItem.price);
       } else {
         const product = catalogue.find((p) => p.id === clientItemId || p.slug === clientItemId);
         if (!product) {
@@ -146,7 +154,8 @@ export async function POST(req: NextRequest) {
       subtotal,
       orderCurrency,
       targetOptionId,
-      claimedShippingRate !== undefined ? claimedShippingRate : -1
+      claimedShippingRate !== undefined ? claimedShippingRate : -1,
+      ((await getSettings()) as any).shipping
     );
 
     // Reject tampered shipping rates

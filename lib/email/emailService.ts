@@ -10,6 +10,11 @@ import { supabaseServer } from "@/lib/supabaseServer";
 const resendApiKey = process.env.RESEND_API_KEY;
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
+/** True when real e-mails can be sent (a Resend API key is configured). */
+export function isEmailConfigured(): boolean {
+  return Boolean(resend);
+}
+
 const SENDER_EMAIL = process.env.EMAIL_FROM || "HORVVALLE <orders@horvvalle.com>";
 
 /**
@@ -106,23 +111,18 @@ export async function sendBroadcastCampaign({
 }): Promise<{ total: number; sent: number; failed: number }> {
   const html = generateCampaignHtml({ headline, message, promoCode, ctaLink });
 
-  // Fetch recipients from Supabase profiles
+  // Recipients are the registered accounts (e-mail lives on the auth user, not the profile)
   let recipients: string[] = [];
 
   if (supabaseServer) {
     try {
-      const { data, error } = await supabaseServer
-        .from("profiles")
-        .select("email")
-        .not("email", "is", null);
-
-      if (!error && data) {
-        recipients = data
-          .map((row) => row.email)
-          .filter((em): em is string => Boolean(em && em.includes("@")));
-      }
+      const { data, error } = await supabaseServer.auth.admin.listUsers({ page: 1, perPage: 1000 });
+      if (error) throw error;
+      recipients = data.users
+        .map((user) => user.email)
+        .filter((em): em is string => Boolean(em && em.includes("@")));
     } catch (err) {
-      console.error("[EmailService] Error fetching customer profiles for broadcast:", err);
+      console.error("[EmailService] Error fetching customers for broadcast:", err);
     }
   }
 
@@ -134,8 +134,7 @@ export async function sendBroadcastCampaign({
   }
 
   if (!resend) {
-    console.log(`[EmailService:SIMULATED] Broadcast "${subject}" to ${recipients.length} customers.`);
-    return { total: recipients.length, sent: recipients.length, failed: 0 };
+    throw new Error("E-poçt xidməti qoşulmayıb (RESEND_API_KEY yoxdur), heç bir e-poçt göndərilmədi.");
   }
 
   let sent = 0;

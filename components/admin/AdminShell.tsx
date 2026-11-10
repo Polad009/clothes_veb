@@ -12,7 +12,9 @@ import {
   Users,
   MessageCircle,
   FileText,
-  Wrench,
+  Mail,
+  BarChart3,
+  Settings,
   ExternalLink,
   LogOut,
   Menu,
@@ -30,6 +32,7 @@ const NAV: Array<{ heading: string; items: Array<{ href: string; label: string; 
       { href: "/admin/pod", label: "Fərdi çap", icon: Palette, badgeKey: "pod" },
       { href: "/admin/products", label: "Məhsullar", icon: Shirt },
       { href: "/admin/promos", label: "Promokodlar", icon: TicketPercent },
+      { href: "/admin/reports", label: "Hesabatlar", icon: BarChart3 },
     ],
   },
   {
@@ -37,13 +40,14 @@ const NAV: Array<{ heading: string; items: Array<{ href: string; label: string; 
     items: [
       { href: "/admin/customers", label: "Müştərilər", icon: Users },
       { href: "/admin/live-chat", label: "Canlı çat", icon: MessageCircle },
+      { href: "/admin/campaigns", label: "E-poçt kampaniyası", icon: Mail },
     ],
   },
   {
     heading: "Sayt",
     items: [
       { href: "/admin/content", label: "Sayt kontenti", icon: FileText },
-      { href: "/admin/legacy", label: "Köhnə panel", icon: Wrench },
+      { href: "/admin/settings", label: "Tənzimləmələr", icon: Settings },
     ],
   },
 ];
@@ -121,12 +125,12 @@ export function AdminShell({ counts, children }: { counts: { orders: number; pod
 
   return (
     <ToastProvider>
-      <div className="min-h-dvh bg-stone-50 text-stone-900">
+      <div className="min-h-dvh bg-stone-50 text-stone-900 print:bg-white">
         {/* Desktop sidebar */}
-        <div className="fixed inset-y-0 left-0 z-30 hidden w-60 lg:block">{sidebar}</div>
+        <div className="fixed inset-y-0 left-0 z-30 hidden w-60 lg:block print:!hidden">{sidebar}</div>
 
         {/* Mobile top bar + drawer */}
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-stone-200 bg-white px-4 lg:hidden">
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-stone-200 bg-white px-4 lg:hidden print:hidden">
           <button type="button" onClick={() => setMenuOpen(true)} aria-label="Menyunu aç" className="rounded-md p-1.5 text-stone-700 hover:bg-stone-100">
             <Menu className="h-5 w-5" />
           </button>
@@ -139,7 +143,7 @@ export function AdminShell({ counts, children }: { counts: { orders: number; pod
           </div>
         )}
 
-        <div className="lg:pl-60">{children}</div>
+        <div className="lg:pl-60 print:!pl-0">{children}</div>
       </div>
     </ToastProvider>
   );

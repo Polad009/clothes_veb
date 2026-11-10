@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useParams, notFound } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Product } from "@/data/products";
+import { availableQty, LOW_STOCK } from "@/lib/stock";
 import { useStoreData, normalizeProduct, useSupport } from "@/context/StoreDataContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useLanguage } from "@/context/LanguageContext";
@@ -136,6 +137,17 @@ export default function ProductDetailPage() {
   const [activeAccordion, setActiveAccordion] = useState<string | null>("details");
 
   const activeColor = product.colors[selectedColorIndex] || product.colors[0];
+  const sizeLeft = (size: string) => availableQty(product, activeColor?.name || "", size);
+  const selectedLeft = sizeLeft(selectedSize);
+  const selectedSoldOut = selectedLeft === 0;
+
+  // When the chosen size is gone in this colour, move to the first size that is still available
+  useEffect(() => {
+    if (sizeLeft(selectedSize) !== 0) return;
+    const next = product.sizes.find((s) => sizeLeft(s) !== 0);
+    if (next && next !== selectedSize) setSelectedSize(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product.id, activeColor?.name, product.stock]);
   const hasDistinctHover = Boolean(
     activeColor?.hoverImage &&
     typeof activeColor.hoverImage === "string" &&
@@ -199,6 +211,7 @@ export default function ProductDetailPage() {
   };
 
   const handleAddToCart = () => {
+    if (selectedSoldOut) return;
     addItem({
       id: `${product.id}_${activeColor.name}_${selectedSize}`,
       productId: product.id,
@@ -209,8 +222,8 @@ export default function ProductDetailPage() {
       color: activeColor.name,
       image: activeColor.image,
       type: "ready",
-      stockQuantity: 99,
-    }, quantity);
+      stockQuantity: selectedLeft === null ? 99 : Math.min(99, selectedLeft),
+    }, selectedLeft === null ? quantity : Math.min(quantity, selectedLeft));
 
     setIsAdded(true);
     setTimeout(() => {
@@ -465,20 +478,33 @@ export default function ProductDetailPage() {
               </div>
 
               <div className="flex items-center gap-2 flex-wrap">
-                {product.sizes.map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`py-2.5 px-4 rounded-xl text-xs font-semibold uppercase transition-all cursor-pointer ${
-                      selectedSize === size
-                        ? "bg-stone-900 text-white shadow-sm scale-105"
-                        : "bg-white border border-stone-200 text-stone-700 hover:border-stone-400 hover:text-stone-900"
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
+                {product.sizes.map((size) => {
+                  const soldOut = sizeLeft(size) === 0;
+                  return (
+                    <button
+                      key={size}
+                      onClick={() => !soldOut && setSelectedSize(size)}
+                      disabled={soldOut}
+                      aria-label={soldOut ? `${size} — bitib` : size}
+                      className={`py-2.5 px-4 rounded-xl text-xs font-semibold uppercase transition-all ${
+                        soldOut
+                          ? "bg-stone-50 border border-stone-200 text-stone-300 line-through cursor-not-allowed"
+                          : selectedSize === size
+                          ? "bg-stone-900 text-white shadow-sm scale-105 cursor-pointer"
+                          : "bg-white border border-stone-200 text-stone-700 hover:border-stone-400 hover:text-stone-900 cursor-pointer"
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  );
+                })}
               </div>
+              {selectedLeft !== null && selectedLeft > 0 && selectedLeft <= LOW_STOCK && (
+                <p className="text-xs font-medium text-amber-700">Bu ölçüdən son {selectedLeft} ədəd qalıb.</p>
+              )}
+              {selectedSoldOut && (
+                <p className="text-xs font-medium text-red-600">Bu rəngdə bütün ölçülər bitib.</p>
+              )}
             </motion.div>
 
             {/* Action Buttons: Add to Bag & Apple Pay */}
@@ -490,7 +516,8 @@ export default function ProductDetailPage() {
             >
 <button
                 onClick={handleAddToCart}
-                className={`w-full py-4 rounded-full font-semibold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-98 cursor-pointer ${
+                disabled={selectedSoldOut}
+                className={`w-full py-4 disabled:opacity-50 disabled:cursor-not-allowed rounded-full font-semibold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-98 cursor-pointer ${
                   isAdded
                     ? "bg-emerald-600 text-white"
                     : "bg-stone-900 hover:bg-black text-white"

@@ -2,11 +2,11 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 // ─── Lightweight WebCrypto HMAC-SHA256 for Edge Middleware ──────────────────
-const ADMIN_JWT_SECRET =
-  process.env.ADMIN_JWT_SECRET || 'horvvalle_super_secure_admin_secret_key_2026_98124';
+// No built-in fallback: without ADMIN_JWT_SECRET no admin session can be valid.
+const ADMIN_JWT_SECRET = (process.env.ADMIN_JWT_SECRET || '').trim();
 
 async function verifyTokenAtEdge(token: string | undefined | null): Promise<boolean> {
-  if (!token || typeof token !== 'string') return false;
+  if (!ADMIN_JWT_SECRET || !token || typeof token !== 'string') return false;
   const parts = token.split('.');
   if (parts.length !== 3) return false;
 
@@ -108,8 +108,8 @@ export async function middleware(request: NextRequest) {
   if (isAdminPage || isAdminHtml) {
     // Check for the secret access key in query string
     const accessKey = request.nextUrl.searchParams.get('access')?.trim();
-    const expectedKey = (process.env.ADMIN_ACCESS_KEY || 'horvvalle_portal_2026_xQ9mK').trim();
-    const hasValidAccessKey = Boolean(accessKey && accessKey === expectedKey);
+    const expectedKey = (process.env.ADMIN_ACCESS_KEY || '').trim();
+    const hasValidAccessKey = Boolean(expectedKey && accessKey && accessKey === expectedKey);
 
     const isLoginPage = pathname === '/admin/login';
     const hasSession = await verifyTokenAtEdge(request.cookies.get('horvvalle_admin_token')?.value);

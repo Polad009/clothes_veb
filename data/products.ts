@@ -28,6 +28,9 @@ export interface Product {
   inStock: boolean;
   sizes: string[];
   colors: ProductColor[];
+  /** When true, `stock` holds units per colour/size (see lib/stock.ts). */
+  trackStock?: boolean;
+  stock?: Record<string, number>;
   image?: string;
   hoverImage?: string;
   gallery?: string[];

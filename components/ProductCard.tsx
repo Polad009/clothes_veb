@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Heart, Plus, Check, Sparkles } from "lucide-react";
 import { Product } from "@/data/products";
+import { availableQty } from "@/lib/stock";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useCart } from "@/context/CartContext";
 import { useLanguage } from "@/context/LanguageContext";
@@ -58,6 +59,8 @@ export const ProductCard = React.memo(function ProductCard({
   const handleQuickAdd = (size: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    const left = availableQty(product, activeColor.name, size);
+    if (left === 0) return;
 
     addItem({
       id: `${product.id}_${activeColor.name}_${size}`,
@@ -69,7 +72,7 @@ export const ProductCard = React.memo(function ProductCard({
       color: activeColor.name,
       image: activeColor.image,
       type: "ready",
-      stockQuantity: 99,
+      stockQuantity: left === null ? 99 : Math.min(99, left),
     });
 
     setAddedSize(size);
@@ -243,12 +246,15 @@ export const ProductCard = React.memo(function ProductCard({
               <div className="flex items-center justify-center gap-1.5 flex-wrap">
                 {product.sizes.map((size) => {
                   const isAdded = addedSize === size;
+                  const soldOut = availableQty(product, activeColor.name, size) === 0;
                   return (
                     <button
                       key={size}
                       type="button"
                       onClick={(e) => handleQuickAdd(size, e)}
-                      className={
+                      disabled={soldOut}
+                      aria-label={soldOut ? `${size} — bitib` : `${size} ölçüsünü səbətə at`}
+                      className={(soldOut ? "line-through opacity-35 cursor-not-allowed pointer-events-none " : "") +
                         isDark
                           ? `px-2.5 py-1 text-xs font-bold rounded-full transition-all border cursor-pointer ${
                               isAdded

@@ -31,7 +31,9 @@ export function ProductsTable({ products }: { products: CatalogProduct[] }) {
     setBusy(p.id);
     setStock((s) => ({ ...s, [p.id]: next }));
     try {
-      await adminFetch("/api/admin/products", { body: { ...p, inStock: next } });
+      // Only the switch changes; stock counts are left as they are
+      const { stock: _counts, ...rest } = p;
+      await adminFetch("/api/admin/products", { body: { ...rest, inStock: next } });
       toast.success(next ? `"${p.name}" satışa qaytarıldı.` : `"${p.name}" stokda yoxdur kimi işarələndi.`);
       router.refresh();
     } catch (e: any) {
@@ -90,7 +92,10 @@ export function ProductsTable({ products }: { products: CatalogProduct[] }) {
               </thead>
               <tbody className="divide-y divide-stone-100">
                 {visible.map((p) => {
-                  const inStock = stock[p.id] ?? p.inStock;
+                  const onSale = stock[p.id] ?? p.onSale;
+                  const counts = Object.values(p.stock);
+                  const units = counts.reduce((a, b) => a + b, 0);
+                  const soldOut = counts.filter((q) => q <= 0).length;
                   return (
                     <tr key={p.id} className="hover:bg-stone-50">
                       <td className="px-5 py-3">
@@ -116,9 +121,18 @@ export function ProductsTable({ products }: { products: CatalogProduct[] }) {
                       </td>
                       <td className="px-3 py-3">
                         <div className="flex items-center gap-2">
-                          <Toggle checked={inStock} disabled={busy === p.id} onChange={(next) => toggleStock(p, next)} label={`${p.name}: satışda`} />
-                          {!inStock && <Badge tone="red">Stokda yoxdur</Badge>}
+                          <Toggle checked={onSale} disabled={busy === p.id} onChange={(next) => toggleStock(p, next)} label={`${p.name}: satışda`} />
+                          {!onSale ? (
+                            <Badge tone="neutral">Satışdan çıxarılıb</Badge>
+                          ) : p.trackStock && units === 0 ? (
+                            <Badge tone="red">Stok bitib</Badge>
+                          ) : null}
                         </div>
+                        {p.trackStock && (
+                          <p className="mt-1 text-xs text-stone-500">
+                            {units} ədəd{soldOut > 0 && units > 0 ? ` · ${soldOut} variant bitib` : ""}
+                          </p>
+                        )}
                       </td>
                       <td className="px-5 py-3 text-right">
                         <a href={`/products/${p.slug}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-stone-500 hover:text-stone-900">

@@ -8,7 +8,6 @@ const config: Config = {
     "./context/**/*.{js,ts,jsx,tsx,mdx}",
     "./data/**/*.{js,ts,jsx,tsx,mdx}",
     "./lib/**/*.{js,ts,jsx,tsx,mdx}",
-    "./admin-portal/**/*.{js,ts,jsx,tsx,html}",
   ],
   theme: {
     extend: {

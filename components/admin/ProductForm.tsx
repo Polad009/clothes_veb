@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ImagePlus, Loader2, Plus, Trash2, X } from "lucide-react";
 import type { CatalogProduct } from "@/lib/db/products";
+import { stockKey } from "@/lib/stock";
 import { adminFetch, CATEGORIES, GENDERS } from "@/lib/adminClient";
 import { cn } from "@/lib/utils";
 import { Button, Card, ConfirmButton, Field, Input, Select, Textarea, Toggle, useToast } from "@/components/admin/ui";
@@ -133,12 +134,22 @@ export function ProductForm({ product }: { product: CatalogProduct | null }) {
   const [fit, setFit] = useState(product?.fit || "");
   const [composition, setComposition] = useState(product?.composition || "");
   const [care, setCare] = useState(product?.care || "");
-  const [inStock, setInStock] = useState(product?.inStock ?? true);
+  const [inStock, setInStock] = useState(product?.onSale ?? true);
   const [sizes, setSizes] = useState<string[]>(product?.sizes?.length ? product.sizes : ["S", "M", "L", "XL"]);
   const [customSize, setCustomSize] = useState("");
   const [colors, setColors] = useState<ColorDraft[]>(
     product?.colors?.length ? product.colors.map(toDraft) : [{ key: newKey(), name: "", hex: "#111111", image: "", hoverImage: "", extra: [] }]
   );
+  const [trackStock, setTrackStock] = useState(product?.trackStock ?? false);
+  // Counts keyed by colour draft key + size, so renaming a colour keeps its numbers
+  const [stockDraft, setStockDraft] = useState<Record<string, string>>(() => {
+    const out: Record<string, string> = {};
+    if (!product?.trackStock) return out;
+    for (const c of colors) {
+      for (const s of product.sizes) out[`${c.key}|${s}`] = String(product.stock[stockKey(c.name, s)] ?? 0);
+    }
+    return out;
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
@@ -164,6 +175,8 @@ export function ProductForm({ product }: { product: CatalogProduct | null }) {
     if (internationalPrice.trim() && !(Number(internationalPrice.replace(",", ".")) > 0)) next.internationalPrice = "Düzgün rəqəm yazın.";
     if (sizes.length === 0) next.sizes = "Ən azı bir ölçü seçin.";
     if (colors.some((c) => !c.image)) next.colors = "Hər rəngin ön şəkli olmalıdır.";
+    const names = colors.map((c, i) => c.name.trim() || `Rəng ${i + 1}`);
+    if (trackStock && new Set(names).size !== names.length) next.stock = "Stok izlənəndə rəng adları təkrarlanmamalıdır.";
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -185,6 +198,12 @@ export function ProductForm({ product }: { product: CatalogProduct | null }) {
       }));
       const first = formatted[0];
       const num = (v: string) => (v.trim() ? Number(v.replace(",", ".")) : null);
+      const stock: Record<string, number> = {};
+      if (trackStock) {
+        colors.forEach((c, i) => {
+          for (const s of sizes) stock[stockKey(formatted[i].name, s)] = Number(stockDraft[`${c.key}|${s}`] || 0);
+        });
+      }
 
       await adminFetch("/api/admin/products", {
         body: {
@@ -202,6 +221,8 @@ export function ProductForm({ product }: { product: CatalogProduct | null }) {
           composition: composition.trim(),
           care: care.trim(),
           inStock,
+          trackStock,
+          ...(trackStock ? { stock } : {}),
           sizes,
           colors: formatted,
           images: [first.image],
@@ -373,6 +394,60 @@ export function ProductForm({ product }: { product: CatalogProduct | null }) {
               <Button onClick={addCustomSize}>Əlavə et</Button>
             </div>
             {errors.sizes && <p className="mt-2 text-xs text-red-600">{errors.sizes}</p>}
+          </div>
+        </Card>
+
+        <Card title="Stok">
+          <div className="space-y-4 p-5">
+            <div className="flex items-center justify-between gap-4 rounded-lg border border-stone-200 px-4 py-3">
+              <div>
+                <p className="text-sm font-medium text-stone-900">Stoku izlə</p>
+                <p className="text-xs text-stone-500">
+                  Açıq olanda hər rəng və ölçü üzrə qalıq sayılır: sifarişdə azalır, ləğv və ya silinəndə geri qayıdır, bitən ölçü saytda seçilmir.
+                </p>
+              </div>
+              <Toggle checked={trackStock} onChange={setTrackStock} label="Stoku izlə" />
+            </div>
+
+            {trackStock && (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-xs text-stone-500">
+                      <th className="py-2 pr-3 font-medium">Rəng</th>
+                      {sizes.map((s) => (
+                        <th key={s} className="px-1 py-2 text-center font-medium">{s}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {colors.map((c, i) => (
+                      <tr key={c.key} className="border-t border-stone-100">
+                        <td className="py-2 pr-3">
+                          <span className="inline-flex items-center gap-2 whitespace-nowrap">
+                            <span className="h-3.5 w-3.5 rounded-full border border-stone-300" style={{ background: c.hex }} />
+                            {c.name.trim() || `Rəng ${i + 1}`}
+                          </span>
+                        </td>
+                        {sizes.map((s) => (
+                          <td key={s} className="px-1 py-2">
+                            <Input
+                              inputMode="numeric"
+                              aria-label={`${c.name || `Rəng ${i + 1}`}, ${s}: stok`}
+                              value={stockDraft[`${c.key}|${s}`] ?? ""}
+                              placeholder="0"
+                              onChange={(e) => setStockDraft({ ...stockDraft, [`${c.key}|${s}`]: e.target.value.replace(/\D/g, "") })}
+                              className="h-9 w-16 px-2 text-center tabular-nums"
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            {errors.stock && <p className="text-xs text-red-600">{errors.stock}</p>}
           </div>
         </Card>
 

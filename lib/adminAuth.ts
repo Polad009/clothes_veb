@@ -1,9 +1,8 @@
 import crypto from 'crypto';
 import { NextRequest } from 'next/server';
 
-const SECRET = process.env.ADMIN_JWT_SECRET || 'horvvalle_super_secure_admin_secret_key_2026_98124';
-const ADMIN_USER = (process.env.ADMIN_USERNAME || 'admin').trim().toLowerCase();
-const ADMIN_PASS = (process.env.ADMIN_PASSWORD || '').trim();
+// Secrets come from the environment only; there is deliberately no built-in fallback.
+const SECRET = (process.env.ADMIN_JWT_SECRET || '').trim();
 
 // In-memory rate limiting map: ip -> { count, lockedUntil }
 const loginAttempts = new Map<string, { count: number; lockedUntil: number }>();
@@ -66,8 +65,8 @@ export function verifyAdminCredentials(user: string, pass: string): boolean {
   }
 
   // Exactly check configured password from env
-  const expectedPass = (process.env.ADMIN_PASSWORD || 'horvvallle2006@2026').trim();
-  if (!expectedPass) {
+  const expectedPass = (process.env.ADMIN_PASSWORD || '').trim();
+  if (!expectedPass || !SECRET) {
     return false;
   }
 
@@ -78,6 +77,7 @@ export function verifyAdminCredentials(user: string, pass: string): boolean {
 }
 
 export function createAdminToken(username: string): string {
+  if (!SECRET) throw new Error('ADMIN_JWT_SECRET konfiqurasiya olunmayıb.');
   const header = base64UrlEncode(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
   const payload = base64UrlEncode(
     JSON.stringify({
@@ -95,7 +95,7 @@ export function createAdminToken(username: string): string {
 }
 
 export function verifyAdminToken(token: string | null | undefined): boolean {
-  if (!token || typeof token !== 'string') return false;
+  if (!SECRET || !token || typeof token !== 'string') return false;
 
   const parts = token.split('.');
   if (parts.length !== 3) return false;

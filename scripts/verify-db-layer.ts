@@ -12,6 +12,7 @@ import {
   findRecentDuplicate,
   listOrders,
   listPodOrders,
+  OutOfStockError,
   searchOrders,
   updateOrder,
   updatePodOrderStatus,
@@ -136,6 +137,72 @@ async function main() {
   }
   check('order, items and pod job are gone',
     (await listOrders()).length === ordersBefore && !(await findOrder(order.id)) && !(await listPodOrders()).some((p) => p.orderId === order.id));
+
+  console.log('stock');
+  const tracked = await saveProduct({
+    name: 'ZZ Stok Sınağı',
+    price: 10,
+    category: 'koynek',
+    inStock: false, // never visible to shoppers while the test runs
+    trackStock: true,
+    colors: [{ name: 'Qara', hex: '#000000', image: '/x.png' }],
+    sizes: ['M', 'L'],
+    stock: { 'Qara|M': 2, 'Qara|L': 0 },
+  });
+  const stockOf = async () => (await findProduct(tracked.id))!.stock;
+  const stockOrder = (qty: number) =>
+    createOrder({
+      customer: { fullName: 'Stok Sınaq', phone: '+994 50 000 00 02', email: 'verify-stock@example.com', address: 'x', city: 'Bakı', country: 'Azərbaycan' },
+      items: [{ productId: tracked.id, name: tracked.name, size: 'M', color: 'Qara', price: 10, quantity: qty }],
+      paymentMethod: 'Bank Kartı (Visa/Mastercard)',
+      paymentStatus: 'pending_payment',
+      orderStatus: 'Yeni Sifariş',
+      subtotal: 10 * qty,
+      shipping: 0,
+      discount: 0,
+      total: 10 * qty,
+      isTest: true,
+      currency: 'AZN',
+    });
+  const placed: string[] = [];
+  try {
+    check('stock: counts stored per colour/size', JSON.stringify(await stockOf()) === JSON.stringify({ 'Qara|M': 2, 'Qara|L': 0 }), await stockOf());
+
+    const first = await stockOrder(2);
+    placed.push(first.id);
+    check('stock: order takes the units', (await stockOf())['Qara|M'] === 0);
+
+    let blocked: unknown = null;
+    try {
+      placed.push((await stockOrder(1)).id);
+    } catch (e) {
+      blocked = e;
+    }
+    check('stock: over-selling is refused', blocked instanceof OutOfStockError && (blocked as OutOfStockError).available === 0, String(blocked));
+    check('stock: refused order is not stored', (await searchOrders({ email: 'verify-stock@example.com' })).length === 1);
+    check('stock: product shows as sold out', (await findProduct(tracked.id))!.inStock === false);
+
+    await updateOrder(first.id, { orderStatus: 'Ləğv edildi' });
+    check('stock: cancelling gives units back', (await stockOf())['Qara|M'] === 2);
+    await updateOrder(first.id, { orderStatus: 'Ləğv edildi' });
+    check('stock: cancelling twice does not double them', (await stockOf())['Qara|M'] === 2);
+    await updateOrder(first.id, { orderStatus: 'Təsdiqləndi' });
+    check('stock: reopening takes them again', (await stockOf())['Qara|M'] === 0);
+    await updateOrder(first.id, { paymentStatus: 'failed' });
+    check('stock: failed payment gives units back', (await stockOf())['Qara|M'] === 2);
+    await updateOrder(first.id, { paymentStatus: 'paid' });
+    check('stock: paid again takes them again', (await stockOf())['Qara|M'] === 0);
+
+    await deleteOrder(first.id);
+    placed.splice(placed.indexOf(first.id), 1);
+    check('stock: deleting the order gives units back', (await stockOf())['Qara|M'] === 2);
+
+    const untracked = await saveProduct({ id: tracked.id, name: tracked.name, price: 10, trackStock: false });
+    check('stock: switched off = unlimited', untracked.trackStock === false && Object.keys(untracked.stock).length === 0);
+  } finally {
+    for (const id of placed) await deleteOrder(id).catch(() => {});
+    await deleteProduct(tracked.id);
+  }
 
   console.log('promo codes');
   const promosBefore = await listPromos();

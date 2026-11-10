@@ -51,6 +51,14 @@ export function OrdersTable({ orders, initialStatus }: { orders: OrderRow[]; ini
     });
   }, [orders, query, status, kind]);
 
+  // A barcode scanner types the order number and presses Enter.
+  const openExact = () => {
+    const code = query.trim().toUpperCase();
+    const hit = orders.find((o) => o.id.toUpperCase() === code || o.trackingCode.toUpperCase() === code);
+    if (hit) router.push(`/admin/orders/${encodeURIComponent(hit.id)}`);
+    else if (visible.length === 1) router.push(`/admin/orders/${encodeURIComponent(visible[0].id)}`);
+  };
+
   const clearTests = async () => {
     try {
       const res = await adminFetch<{ count: number }>("/api/admin/orders/clear-test", { method: "DELETE" });
@@ -77,7 +85,14 @@ export function OrdersTable({ orders, initialStatus }: { orders: OrderRow[]; ini
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Sifariş nömrəsi, ad, telefon və ya e-poçt"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  openExact();
+                }
+              }}
+              autoFocus
+              placeholder="Sifariş nömrəsi, ad, telefon, e-poçt — və ya barkodu skan edin"
               aria-label="Sifarişlərdə axtar"
               className="pl-9"
             />

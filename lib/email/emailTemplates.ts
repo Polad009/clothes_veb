@@ -1,3 +1,5 @@
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.horwalle.com").replace(/\/$/, "");
+
 export function getEmailBaseWrapper(contentHtml: string): string {
   return `
 <!DOCTYPE html>
@@ -32,7 +34,7 @@ export function getEmailBaseWrapper(contentHtml: string): string {
     </div>
     <div class="footer">
       <p style="margin: 0 0 6px 0;"><strong>HORVVALLE Baku</strong> — Nizami küç. 44, Bakı, Azərbaycan</p>
-      <p style="margin: 0;">Müştəri xidməti: +994 10 328 31 52 · <a href="https://horvvalle.com" style="color: #111011; text-decoration: underline;">horvvalle.com</a></p>
+      <p style="margin: 0;">Müştəri xidməti: +994 10 328 31 52 · <a href="${SITE_URL}" style="color: #111011; text-decoration: underline;">horwalle.com</a></p>
     </div>
   </div>
 </body>
@@ -43,7 +45,7 @@ export function getEmailBaseWrapper(contentHtml: string): string {
 export function generateOrderConfirmationHtml(order: any): string {
   const cust = order.customer || {};
   const items = order.items || [];
-  const trackingUrl = `https://horvvalle.com/track?orderId=${encodeURIComponent(order.id)}`;
+  const trackingUrl = `${SITE_URL}/track?orderId=${encodeURIComponent(order.id)}`;
 
   const destinationParts = [
     cust.address,
@@ -160,7 +162,7 @@ export function generateOrderConfirmationHtml(order: any): string {
 
 export function generateStatusUpdateHtml(order: any, newStatus: string): string {
   const cust = order.customer || {};
-  const trackingUrl = `https://horvvalle.com/track?orderId=${encodeURIComponent(order.id)}`;
+  const trackingUrl = `${SITE_URL}/track?orderId=${encodeURIComponent(order.id)}`;
 
   let statusDescription = "Sifarişinizin cari mərhələsi yeniləndi.";
   if (newStatus.includes("Təsdiq")) {
@@ -202,7 +204,7 @@ export function generateCampaignHtml({
   headline,
   message,
   promoCode,
-  ctaLink = "https://horvvalle.com/collections",
+  ctaLink = `${SITE_URL}/collections`,
 }: {
   headline: string;
   message: string;

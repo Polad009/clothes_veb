@@ -17,74 +17,52 @@ export interface ShippingOption {
   description?: string;
 }
 
-export interface ShippingTier {
-  id: string;
-  name: string;
-  carrier: string;
-  estimatedDays: string;
-  baseRateAZN: number;
-  baseRateUSD: number;
-  freeThresholdAZN?: number;
-  freeThresholdUSD?: number;
-  discountedRateAZN?: number;
-  discountedRateUSD?: number;
-  discountThresholdAZN?: number;
-  discountThresholdUSD?: number;
-  isDomestic: boolean;
-}
-
 export interface ShippingCalculationParams {
   countryCode: string;
   subtotal: number;
   currency: ShippingCurrency;
+  rates?: unknown;
 }
 
-export const SHIPPING_TIERS: Record<string, ShippingTier> = {
-  domestic_baku_sumgayit: {
-    id: 'domestic_baku_sumgayit',
-    name: 'Bakı & Sumqayıt Kuryer',
-    carrier: 'HORVVALLE Express Courier',
-    estimatedDays: '1-2 iş günü',
-    baseRateAZN: 0,
-    baseRateUSD: 0,
-    freeThresholdAZN: 0,
-    freeThresholdUSD: 0,
-    isDomestic: true,
-  },
-  domestic_region: {
-    id: 'domestic_region',
-    name: 'Rayonlar / Azərpoçt',
-    carrier: 'Azərpoçt / Regional Express',
-    estimatedDays: '2-4 iş günü',
-    baseRateAZN: 5,
-    baseRateUSD: 3,
-    freeThresholdAZN: 60,
-    freeThresholdUSD: 35,
-    isDomestic: true,
-  },
-  intl_standard: {
-    id: 'intl_standard',
-    name: 'Standard International Tracked Priority Post',
-    carrier: 'Tracked Priority Post',
-    estimatedDays: '7-14 business days',
-    baseRateAZN: 25,
-    baseRateUSD: 15,
-    isDomestic: false,
-  },
-  intl_express: {
-    id: 'intl_express',
-    name: 'DHL Express Worldwide / FedEx Priority',
-    carrier: 'DHL Express / FedEx Priority',
-    estimatedDays: '2-5 business days',
-    baseRateAZN: 60,
-    baseRateUSD: 35,
-    discountThresholdAZN: 340,
-    discountThresholdUSD: 200,
-    discountedRateAZN: 35,
-    discountedRateUSD: 20,
-    isDomestic: false,
-  },
+/** Rates the shop owner can change in the admin panel (Settings, Shipping). */
+export interface ShippingRates {
+  regionAZN: number;
+  regionUSD: number;
+  /** Regional delivery is free from this subtotal. 0 = always free. */
+  regionFreeFromAZN: number;
+  regionFreeFromUSD: number;
+  intlStandardAZN: number;
+  intlStandardUSD: number;
+  intlExpressAZN: number;
+  intlExpressUSD: number;
+}
+
+export const DEFAULT_SHIPPING_RATES: ShippingRates = {
+  regionAZN: 5,
+  regionUSD: 3,
+  regionFreeFromAZN: 60,
+  regionFreeFromUSD: 35,
+  intlStandardAZN: 25,
+  intlStandardUSD: 15,
+  intlExpressAZN: 60,
+  intlExpressUSD: 35,
 };
+
+/** Stored settings layered over the defaults; anything that is not a sane number is ignored. */
+export function resolveShippingRates(raw?: unknown): ShippingRates {
+  const rates: ShippingRates = { ...DEFAULT_SHIPPING_RATES };
+  if (raw && typeof raw === 'object') {
+    const source = raw as Record<string, unknown>;
+    for (const key of Object.keys(DEFAULT_SHIPPING_RATES) as Array<keyof ShippingRates>) {
+      const given = source[key];
+      const value = Number(given);
+      if (given !== '' && given != null && Number.isFinite(value) && value >= 0 && value <= 10000) {
+        rates[key] = Math.round(value * 100) / 100;
+      }
+    }
+  }
+  return rates;
+}
 
 /**
  * Determine whether a country code or name represents domestic Azerbaijan delivery
@@ -107,16 +85,19 @@ export function isDomesticDestination(countryCode: string): boolean {
 export function calculateShippingOptions(
   countryCodeOrParams: string | ShippingCalculationParams,
   subtotalParam?: number,
-  currencyParam?: ShippingCurrency
+  currencyParam?: ShippingCurrency,
+  ratesParam?: unknown
 ): ShippingOption[] {
   let countryCode: string;
   let subtotal: number;
   let currency: ShippingCurrency;
+  let rawRates: unknown = ratesParam;
 
   if (typeof countryCodeOrParams === 'object' && countryCodeOrParams !== null) {
     countryCode = countryCodeOrParams.countryCode;
     subtotal = countryCodeOrParams.subtotal;
     currency = countryCodeOrParams.currency;
+    rawRates = countryCodeOrParams.rates ?? ratesParam;
   } else {
     countryCode = countryCodeOrParams as string;
     subtotal = subtotalParam ?? 0;
@@ -126,11 +107,17 @@ export function calculateShippingOptions(
   const safeSubtotal = Math.max(0, Number(subtotal) || 0);
   const safeCurrency: ShippingCurrency = currency === 'USD' ? 'USD' : 'AZN';
   const isDomestic = isDomesticDestination(countryCode);
+  const rates = resolveShippingRates(rawRates);
 
   if (isDomestic) {
-    const isFreeRegion =
-      safeCurrency === 'USD' ? safeSubtotal >= 35 : safeSubtotal >= 60;
-    const regionRate = isFreeRegion ? 0 : safeCurrency === 'USD' ? 3 : 5;
+    const regionBase = safeCurrency === 'USD' ? rates.regionUSD : rates.regionAZN;
+    const regionFreeFrom = safeCurrency === 'USD' ? rates.regionFreeFromUSD : rates.regionFreeFromAZN;
+    const isFreeRegion = regionBase === 0 || safeSubtotal >= regionFreeFrom;
+    const regionRate = isFreeRegion ? 0 : regionBase;
+    const regionFreeNote =
+      regionBase === 0 || regionFreeFrom === 0
+        ? 'pulsuz'
+        : `${regionFreeFrom} ${safeCurrency === 'USD' ? '$' : '₼'}-dən yuxarı pulsuz`;
 
     return [
       {
@@ -151,18 +138,18 @@ export function calculateShippingOptions(
         price: regionRate,
         isFree: isFreeRegion,
         currency: safeCurrency,
-        originalPrice: isFreeRegion ? (safeCurrency === 'USD' ? 3 : 5) : undefined,
-        description: 'Azərbaycanın bütün bölgələrinə və rayonlarına çatdırılma (60 ₼-dən yuxarı pulsuz)',
+        originalPrice: isFreeRegion && regionBase > 0 ? regionBase : undefined,
+        description: `Azərbaycanın bütün bölgələrinə və rayonlarına çatdırılma (${regionFreeNote})`,
       },
     ];
   }
 
   // International Destinations (Always paid, never free)
   if (safeCurrency === 'USD') {
-    const standardCost = 15;
+    const standardCost = rates.intlStandardUSD;
 
-    const isExpressDiscounted = safeSubtotal >= 200;
-    const expressCost = isExpressDiscounted ? 20 : 35;
+    const isExpressDiscounted = safeSubtotal >= 200 && rates.intlExpressUSD > 20;
+    const expressCost = isExpressDiscounted ? 20 : rates.intlExpressUSD;
 
     return [
       {
@@ -173,7 +160,7 @@ export function calculateShippingOptions(
         price: standardCost,
         isFree: false,
         currency: 'USD',
-        description: 'Tracked international priority airmail ($15 flat rate)',
+        description: `Tracked international priority airmail ($${standardCost} flat rate)`,
       },
       {
         id: 'intl_express',
@@ -183,17 +170,17 @@ export function calculateShippingOptions(
         price: expressCost,
         isFree: false,
         currency: 'USD',
-        originalPrice: isExpressDiscounted ? 35 : undefined,
+        originalPrice: isExpressDiscounted ? rates.intlExpressUSD : undefined,
         description: 'Premium express air courier delivery (Discounted to $20 on orders >= $200 USD)',
       },
     ];
   }
 
   // International in AZN (Always paid, never free)
-  const standardCostAZN = 25;
+  const standardCostAZN = rates.intlStandardAZN;
 
-  const isExpressDiscountedAZN = safeSubtotal >= 340;
-  const expressCostAZN = isExpressDiscountedAZN ? 35 : 60;
+  const isExpressDiscountedAZN = safeSubtotal >= 340 && rates.intlExpressAZN > 35;
+  const expressCostAZN = isExpressDiscountedAZN ? 35 : rates.intlExpressAZN;
 
   return [
     {
@@ -204,7 +191,7 @@ export function calculateShippingOptions(
       price: standardCostAZN,
       isFree: false,
       currency: 'AZN',
-      description: 'Beynəlxalq standart poçt çatdırılması (25 ₼ sabit tarif)',
+      description: `Beynəlxalq standart poçt çatdırılması (${standardCostAZN} ₼ sabit tarif)`,
     },
     {
       id: 'intl_express',
@@ -214,7 +201,7 @@ export function calculateShippingOptions(
       price: expressCostAZN,
       isFree: false,
       currency: 'AZN',
-      originalPrice: isExpressDiscountedAZN ? 60 : undefined,
+      originalPrice: isExpressDiscountedAZN ? rates.intlExpressAZN : undefined,
       description: 'Sürətli DHL Express beynəlxalq çatdırılma (340 ₼-dən yuxarı endirimlə 35 ₼)',
     },
   ];
@@ -227,9 +214,10 @@ export function getShippingOptionById(
   countryCode: string,
   subtotal: number,
   currency: 'AZN' | 'USD',
-  optionId: string
+  optionId: string,
+  rates?: unknown
 ): ShippingOption | null {
-  const options = calculateShippingOptions(countryCode, subtotal, currency);
+  const options = calculateShippingOptions(countryCode, subtotal, currency, rates);
   if (!optionId || typeof optionId !== 'string') return null;
 
   const normalizedId = optionId.trim().toLowerCase();
@@ -287,10 +275,11 @@ export function validateShippingRate(
   subtotal: number,
   currency: 'AZN' | 'USD',
   optionId: string,
-  claimedRate: number
+  claimedRate: number,
+  rates?: unknown
 ): { valid: boolean; expectedRate: number; option: ShippingOption } {
-  const options = calculateShippingOptions(countryCode, subtotal, currency);
-  let matchedOption = getShippingOptionById(countryCode, subtotal, currency, optionId);
+  const options = calculateShippingOptions(countryCode, subtotal, currency, rates);
+  let matchedOption = getShippingOptionById(countryCode, subtotal, currency, optionId, rates);
 
   if (!matchedOption) {
     const fallback = options[0];
