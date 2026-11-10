@@ -42,7 +42,7 @@ export async function sendNewOrderAlert(order: any): Promise<boolean> {
     const { error } = await resend.emails.send({
       from: SENDER_EMAIL,
       to: [to],
-      subject: `Yeni sifariş ${order.id} — ${Number(order.total || 0).toFixed(2)} ${order.currency === "USD" ? "$" : "₼"}${order.isTest ? " (test)" : ""}`,
+      subject: `Yeni sifariş ${order.id} — ${Number(order.total || 0).toFixed(2)} ${order.currency === "USD" ? "$" : "₼"}`,
       html: generateNewOrderAlertHtml(order, await contact()),
       ...(order?.customer?.email ? { replyTo: order.customer.email } : {}),
     });

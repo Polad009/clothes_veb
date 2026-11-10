@@ -280,7 +280,7 @@ export function generateNewOrderAlertHtml(order: any, contact: EmailContact = {}
 
   const content = `
     <h2 style="font-size: 22px; margin: 0 0 6px 0; font-weight: 600; color: #111011;">Yeni sifariş: ${esc(order.id)}</h2>
-    <p style="font-size: 13px; color: #5C5247; margin: 0 0 20px 0;">${bakuDate(order.date)} · <strong>${price(order.total)}</strong>${order.isTest ? ' · <span class="badge">TEST ÖDƏNİŞ</span>' : ""}</p>
+    <p style="font-size: 13px; color: #5C5247; margin: 0 0 20px 0;">${bakuDate(order.date)} · <strong>${price(order.total)}</strong></p>
 
     <div style="background-color: #FAF7F2; padding: 16px 20px; border-radius: 16px; border: 1px solid #EBE4DA; font-size: 13px; line-height: 1.7;">
       <strong>${esc(cust.fullName || "Müştəri")}</strong><br>
