@@ -42,7 +42,7 @@ import {
 import { playPurchaseSuccessSound } from "@/lib/soundEffects";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
-import { CloudflareTurnstile } from "@/components/CloudflareTurnstile";
+import { CountrySelect } from "@/components/store/CountrySelect";
 
 const CHECKOUT_I18N = {
   az: {
@@ -1329,21 +1329,7 @@ export default function CheckoutPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <label htmlFor="field-country" className={labelCls}>{cT.countryLabel}</label>
-                <div className="relative">
-                  <select
-                    id="field-country"
-                    value={selectedCountryCode}
-                    onChange={(e) => handleCountryChange(e.target.value)}
-                    className={`${inputCls()} appearance-none pr-10`}
-                  >
-                    {getAllCountries().map((c) => (
-                      <option key={c.code} value={c.code}>
-                        {c.flag} {c.name}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown size={15} className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-bone-dim" />
-                </div>
+                <CountrySelect id="field-country" value={selectedCountryCode} onChange={handleCountryChange} placeholder={cT.countryLabel} />
               </div>
 
               <div className="sm:col-span-2">

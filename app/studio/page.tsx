@@ -5,74 +5,73 @@ import { Check, ImagePlus, Minus, Move, Plus, RotateCcw, X } from "lucide-react"
 import { useCart } from "@/context/CartContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useLanguage } from "@/context/LanguageContext";
-import { GARMENTS, PLACEMENTS, type GarmentOption, type PlacementOption } from "@/lib/studio/catalog";
+import {
+  EXTRA_SPOT_PRICE,
+  STUDIO_COLORS,
+  STUDIO_PRODUCTS,
+  printTypes,
+  studioPrice,
+  type ExtraSpot,
+  type GroupKey,
+  type PrintType,
+  type StudioProduct,
+  type StudioSide,
+} from "@/lib/studio/catalog";
+import { PRINT_AREAS, mockupDataUrl, mockupSvg, type Area } from "@/lib/studio/mockups";
 import { tr, type Phrase } from "@/components/store/i18n";
 
-type Side = "front" | "back" | "left" | "right";
-type Transform = { posX: number; posY: number; scale: number; rotation: number };
+type Transform = { posX: number; posY: number; scale: number };
+const ZERO: Transform = { posX: 0, posY: 0, scale: 1 };
+const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
 
-const COLORS: Array<{ key: string; name: string; label: Phrase; hex: string }> = [
-  { key: "white", name: "Ağ", label: { az: "Ağ", en: "White", ru: "Белый", tr: "Beyaz" }, hex: "#FFFFFF" },
-  { key: "black", name: "Qara", label: { az: "Qara", en: "Black", ru: "Чёрный", tr: "Siyah" }, hex: "#18181B" },
-  { key: "sand", name: "Qum Beji", label: { az: "Qum beji", en: "Sand", ru: "Песочный", tr: "Kum bej" }, hex: "#D7CEC7" },
-  { key: "sky-blue", name: "Açıq Mavi", label: { az: "Açıq mavi", en: "Sky blue", ru: "Голубой", tr: "Açık mavi" }, hex: "#93C5FD" },
-  { key: "darkblue", name: "Tünd Göy", label: { az: "Tünd göy", en: "Navy", ru: "Тёмно-синий", tr: "Lacivert" }, hex: "#1E293B" },
-  { key: "green", name: "Zeytun Yaşılı", label: { az: "Zeytun yaşılı", en: "Olive", ru: "Оливковый", tr: "Zeytin yeşili" }, hex: "#3F4F38" },
-  { key: "red", name: "Qırmızı", label: { az: "Qırmızı", en: "Red", ru: "Красный", tr: "Kırmızı" }, hex: "#A32C2C" },
-];
-const SIZES = ["S", "M", "L", "XL", "2XL", "3XL"];
-
-const SIDE_LABEL: Record<Side, Phrase> = {
+const GROUPS: Record<GroupKey, Phrase> = {
+  tshirt: { az: "Futbolka", en: "T-shirts", ru: "Футболки", tr: "Tişört" },
+  polo: { az: "Polo", en: "Polo", ru: "Поло", tr: "Polo" },
+  sweatshirt: { az: "Sviter", en: "Sweatshirts", ru: "Свитшоты", tr: "Sweatshirt" },
+  hoodie: { az: "Hudi", en: "Hoodies", ru: "Худи", tr: "Hoodie" },
+  halfzip: { az: "Yarımzamok", en: "Half-zip", ru: "Полузамок", tr: "Yarım fermuar" },
+  track: { az: "Balonka", en: "Track jacket", ru: "Олимпийка", tr: "Eşofman üstü" },
+  pants: { az: "Şalvar", en: "Pants", ru: "Брюки", tr: "Pantolon" },
+  cap: { az: "Kepka", en: "Caps", ru: "Кепки", tr: "Şapka" },
+  apron: { az: "Önlük", en: "Aprons", ru: "Фартуки", tr: "Önlük" },
+  bag: { az: "Çanta", en: "Bags", ru: "Сумки", tr: "Çanta" },
+  mug: { az: "Fincan", en: "Mugs", ru: "Кружки", tr: "Kupa" },
+  puzzle: { az: "Puzzle", en: "Puzzles", ru: "Пазлы", tr: "Yapboz" },
+  underwear: { az: "Alt paltarı", en: "Underwear", ru: "Бельё", tr: "İç giyim" },
+};
+const COLOR_LABEL: Record<string, Phrase> = {
+  white: { az: "Ağ", en: "White", ru: "Белый", tr: "Beyaz" },
+  black: { az: "Qara", en: "Black", ru: "Чёрный", tr: "Siyah" },
+  grey: { az: "Boz", en: "Grey", ru: "Серый", tr: "Gri" },
+  sand: { az: "Qum beji", en: "Sand", ru: "Песочный", tr: "Kum" },
+  beige: { az: "Bej", en: "Beige", ru: "Бежевый", tr: "Bej" },
+  skyblue: { az: "Açıq mavi", en: "Sky blue", ru: "Голубой", tr: "Açık mavi" },
+  navy: { az: "Tünd göy", en: "Navy", ru: "Тёмно-синий", tr: "Lacivert" },
+  olive: { az: "Zeytun", en: "Olive", ru: "Оливковый", tr: "Zeytin" },
+  red: { az: "Qırmızı", en: "Red", ru: "Красный", tr: "Kırmızı" },
+  gold: { az: "Qızılı", en: "Gold", ru: "Золотой", tr: "Altın" },
+};
+const TYPE_LABEL: Record<PrintType, { title: Phrase; hint: Phrase }> = {
+  small: { title: { az: "Kiçik loqo", en: "Small logo", ru: "Маленький логотип", tr: "Küçük logo" }, hint: { az: "10 sm-ə qədər", en: "up to 10 cm", ru: "до 10 см", tr: "10 cm'e kadar" } },
+  one: { title: { az: "Bir tərəf", en: "One side", ru: "Одна сторона", tr: "Tek taraf" }, hint: { az: "Ön və ya arxa, böyük", en: "Front or back, large", ru: "Перед или спина, крупно", tr: "Ön veya arka, büyük" } },
+  two: { title: { az: "İki tərəf", en: "Both sides", ru: "Две стороны", tr: "İki taraf" }, hint: { az: "Ön və arxa", en: "Front and back", ru: "Перед и спина", tr: "Ön ve arka" } },
+};
+const EXTRA_LABEL: Record<ExtraSpot, Phrase> = {
+  sleeveLeft: { az: "Sol qol", en: "Left sleeve", ru: "Левый рукав", tr: "Sol kol" },
+  sleeveRight: { az: "Sağ qol", en: "Right sleeve", ru: "Правый рукав", tr: "Sağ kol" },
+  neck: { az: "Boyun arxası", en: "Back of neck", ru: "Под воротником", tr: "Ense" },
+  side: { az: "Yan tərəf", en: "Side", ru: "Сбоку", tr: "Yan" },
+  leg: { az: "Ayaq (aşağı)", en: "Lower leg", ru: "Штанина внизу", tr: "Paça" },
+  pocket: { az: "Cib", en: "Pocket", ru: "Карман", tr: "Cep" },
+};
+const SIDE_LABEL: Record<StudioSide, Phrase> = {
   front: { az: "Ön", en: "Front", ru: "Перед", tr: "Ön" },
   back: { az: "Arxa", en: "Back", ru: "Спина", tr: "Arka" },
-  left: { az: "Sol qol", en: "Left sleeve", ru: "Левый рукав", tr: "Sol kol" },
-  right: { az: "Sağ qol", en: "Right sleeve", ru: "Правый рукав", tr: "Sağ kol" },
 };
+const AZ_LABEL = { small: "Kiçik loqo", one: "Bir tərəf", two: "İki tərəf" } as const;
+const AZ_EXTRA: Record<ExtraSpot, string> = { sleeveLeft: "Sol qol", sleeveRight: "Sağ qol", neck: "Boyun arxası", side: "Yan tərəf", leg: "Ayaq", pocket: "Cib" };
 
-const PLACEMENT_LABEL: Record<string, Phrase> = {
-  "front-center": { az: "Sinə — böyük", en: "Chest — large", ru: "Грудь — крупно", tr: "Göğüs — büyük" },
-  "front-left": { az: "Sol sinə — kiçik loqo", en: "Left chest — small logo", ru: "Левая грудь — логотип", tr: "Sol göğüs — küçük logo" },
-  "back-center": { az: "Kürək — böyük", en: "Back — large", ru: "Спина — крупно", tr: "Sırt — büyük" },
-  "back-neck": { az: "Boyun altı — kiçik", en: "Below the collar — small", ru: "Под воротником — мелко", tr: "Yaka altı — küçük" },
-  "sleeve-left": { az: "Sol qol", en: "Left sleeve", ru: "Левый рукав", tr: "Sol kol" },
-  "sleeve-right": { az: "Sağ qol", en: "Right sleeve", ru: "Правый рукав", tr: "Sağ kol" },
-  "both-sides": { az: "Ön və arxa", en: "Front and back", ru: "Перед и спина", tr: "Ön ve arka" },
-};
-
-const GROUP_LABEL: Record<string, Phrase> = {
-  tshirt: { az: "Futbolka", en: "T-shirt", ru: "Футболка", tr: "Tişört" },
-  oversize: { az: "Oversize futbolka", en: "Oversized tee", ru: "Оверсайз", tr: "Oversize tişört" },
-  polo: { az: "Polo", en: "Polo", ru: "Поло", tr: "Polo" },
-  "polo-long": { az: "Polo", en: "Polo", ru: "Поло", tr: "Polo" },
-  sweatshirt: { az: "Sviter", en: "Sweatshirt", ru: "Свитшот", tr: "Sweatshirt" },
-  hoodie: { az: "Hudi", en: "Hoodie", ru: "Худи", tr: "Hoodie" },
-  yarimzamok: { az: "Yarımzamok", en: "Half-zip", ru: "Полузамок", tr: "Yarım fermuar" },
-  balonka: { az: "Balonka", en: "Track jacket", ru: "Олимпийка", tr: "Eşofman üstü" },
-  salvar: { az: "Şalvar", en: "Pants", ru: "Брюки", tr: "Pantolon" },
-  kepka: { az: "Kepka", en: "Cap", ru: "Кепка", tr: "Şapka" },
-};
-
-/** Garment mockup on disk. Only t-shirts have sleeve views. */
-function mockupUrl(category: string, colorKey: string, side: Side): string {
-  let cat = category;
-  if (cat === "polo-long") cat = "polo";
-  if (cat === "balonka") cat = "hoodie";
-  if (side === "left" || side === "right") return `/images/studio/tshirt/${colorKey}-${side}-shirt.png`;
-  const noun = cat === "tshirt" ? "shirt" : cat;
-  return `/images/studio/${cat}/${colorKey}-${side}-${noun}.png`;
-}
-
-/** Where the design sits on the garment before the customer moves it (percent of the stage). */
-function baseBox(side: Side, placementId: string) {
-  if (side === "left") return { top: 48, left: 54, width: 25, maxHeight: 30 };
-  if (side === "right") return { top: 48, left: 46, width: 25, maxHeight: 30 };
-  if (side === "back") return placementId === "back-neck" ? { top: 25, left: 50, width: 20, maxHeight: 16 } : { top: 48, left: 50, width: 40, maxHeight: 44 };
-  if (placementId === "front-left") return { top: 36, left: 60, width: 18, maxHeight: 18 };
-  return { top: 48, left: 50, width: 38, maxHeight: 44 };
-}
-
-const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
-const ZERO: Transform = { posX: 0, posY: 0, scale: 1, rotation: 0 };
+const pct = (a: Area): React.CSSProperties => ({ left: `${a.cx / 4}%`, top: `${a.cy / 4}%`, width: `${a.w / 4}%`, height: `${a.h / 4}%` });
 
 function Step({ n, title, aside, children }: { n: number; title: string; aside?: React.ReactNode; children: React.ReactNode }) {
   return (
@@ -95,53 +94,72 @@ export default function StudioPage() {
   const { language } = useLanguage();
   const L = (p: Phrase) => tr(language, p);
 
-  const fileRef = useRef<HTMLInputElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const uploadSide = useRef<StudioSide>("front");
 
-  const [garment, setGarment] = useState<GarmentOption>(GARMENTS[0]);
-  const [color, setColor] = useState(COLORS[0]);
+  const [product, setProduct] = useState<StudioProduct>(STUDIO_PRODUCTS[0]);
+  const [colorKey, setColorKey] = useState(STUDIO_PRODUCTS[0].colors[0]);
   const [size, setSize] = useState("L");
-  const [placement, setPlacement] = useState<PlacementOption>(PLACEMENTS[0]);
-  const [side, setSide] = useState<Side>("front");
-  const [image, setImage] = useState<string | null>(null);
-  const [fileName, setFileName] = useState<string | null>(null);
+  const [type, setType] = useState<PrintType>("one");
+  const [printSide, setPrintSide] = useState<StudioSide>("front");
+  const [view, setView] = useState<StudioSide>("front");
+  const [extras, setExtras] = useState<ExtraSpot[]>([]);
+  const [images, setImages] = useState<Partial<Record<StudioSide, { src: string; name: string }>>>({});
+  const [transforms, setTransforms] = useState<Record<StudioSide, Transform>>({ front: ZERO, back: ZERO });
   const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [added, setAdded] = useState(false);
-  const [transforms, setTransforms] = useState<Record<Side, Transform>>({ front: ZERO, back: ZERO, left: ZERO, right: ZERO });
-  const t = transforms[side];
-  const setT = (patch: Partial<Transform>) => setTransforms((all) => ({ ...all, [side]: { ...all[side], ...patch } }));
 
-  const hasSleeves = garment.category === "tshirt";
-  const sides: Side[] = hasSleeves ? ["front", "back", "left", "right"] : ["front", "back"];
-  const placements = useMemo(
-    () => PLACEMENTS.filter((p) => hasSleeves || (p.side !== "left" && p.side !== "right")),
-    [hasSleeves]
-  );
+  const hex = STUDIO_COLORS[colorKey] || "#F4F3EF";
+  const types = printTypes(product);
+  const areas = PRINT_AREAS[product.shape];
+  const price = studioPrice(product, type, extras) ?? 0;
+  const sidesUsed: StudioSide[] = type === "two" ? ["front", "back"] : [printSide];
+  const svg = useMemo(() => mockupSvg(product.shape, hex, view, "stage"), [product.shape, hex, view]);
   const groups = useMemo(() => {
-    const map = new Map<string, GarmentOption[]>();
-    for (const g of GARMENTS) {
-      const key = g.category === "polo-long" ? "polo" : g.category;
-      map.set(key, [...(map.get(key) || []), g]);
-    }
+    const map = new Map<GroupKey, StudioProduct[]>();
+    for (const p of STUDIO_PRODUCTS) map.set(p.group, [...(map.get(p.group) || []), p]);
     return Array.from(map.entries());
   }, []);
 
-  const price = garment.basePrice + placement.extraPrice;
-  const mockup = mockupUrl(garment.category, color.key, side);
+  // the design shown on a side: its own upload, or the front design for the back of a two-sided print
+  const imageFor = (s: StudioSide) => images[s]?.src || (type === "two" && s === "back" ? images.front?.src : undefined);
+  const mainArea = (s: StudioSide): Area | undefined => (type === "small" ? areas[s].small || areas[s].large : areas[s].large || areas[s].small);
+  const viewHasMain = sidesUsed.includes(view);
+  const t = transforms[view];
+  const setT = (patch: Partial<Transform>) => setTransforms((all) => ({ ...all, [view]: { ...all[view], ...patch } }));
 
-  const chooseGarment = (g: GarmentOption) => {
-    setGarment(g);
-    if (g.category !== "tshirt") {
-      if (side === "left" || side === "right") setSide("front");
-      if (placement.side === "left" || placement.side === "right") setPlacement(PLACEMENTS[0]);
+  const chooseProduct = (p: StudioProduct) => {
+    setProduct(p);
+    if (!p.colors.includes(colorKey)) setColorKey(p.colors[0]);
+    if (!p.sizes.includes(size)) setSize(p.sizes.includes("L") ? "L" : p.sizes[0]);
+    const pt = printTypes(p);
+    if (!pt.includes(type)) setType(pt.includes("one") ? "one" : pt[0]);
+    if (!p.hasBack) {
+      setPrintSide("front");
+      setView("front");
     }
+    setExtras((list) => list.filter((e) => p.extras.includes(e)));
   };
-  const choosePlacement = (p: PlacementOption) => {
-    setPlacement(p);
-    setSide(p.side);
+  const chooseType = (tp: PrintType) => {
+    setType(tp);
+    if (tp !== "two") setView(printSide);
+  };
+  const chooseSide = (s: StudioSide) => {
+    setPrintSide(s);
+    setView(s);
+  };
+  const toggleExtra = (e: ExtraSpot) => {
+    setExtras((list) => (list.includes(e) ? list.filter((x) => x !== e) : [...list, e]));
+    const spot = areas.extras[e];
+    if (spot) setView(spot.side);
   };
 
+  const pickFile = (s: StudioSide) => {
+    uploadSide.current = s;
+    fileRef.current?.click();
+  };
   const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
@@ -151,11 +169,12 @@ export default function StudioPage() {
       setError(L({ az: "Fayl 30 MB-dan böyük olmamalıdır.", en: "The file must be smaller than 30 MB.", ru: "Файл должен быть меньше 30 МБ.", tr: "Dosya 30 MB'den küçük olmalı." }));
       return;
     }
+    const s = uploadSide.current;
     const reader = new FileReader();
     reader.onload = () => {
       if (typeof reader.result === "string") {
-        setImage(reader.result);
-        setFileName(file.name);
+        setImages((all) => ({ ...all, [s]: { src: reader.result as string, name: file.name } }));
+        setView(s);
       }
     };
     reader.readAsDataURL(file);
@@ -174,12 +193,11 @@ export default function StudioPage() {
     if (!d || !rect) return;
     if (d.mode === "move") {
       setT({
-        posX: clamp(Math.round(d.posX + ((e.clientX - d.x) / rect.width) * 100), -35, 35),
-        posY: clamp(Math.round(d.posY + ((e.clientY - d.y) / rect.height) * 100), -35, 35),
+        posX: clamp(Math.round(d.posX + ((e.clientX - d.x) / rect.width) * 100), -25, 25),
+        posY: clamp(Math.round(d.posY + ((e.clientY - d.y) / rect.height) * 100), -25, 25),
       });
     } else {
-      const delta = (e.clientX - d.x + (e.clientY - d.y)) / (rect.width * 0.45);
-      setT({ scale: clamp(Number((d.scale + delta).toFixed(2)), 0.4, 1.8) });
+      setT({ scale: clamp(Number((d.scale + (e.clientX - d.x + (e.clientY - d.y)) / (rect.width * 0.4)).toFixed(2)), 0.3, 1.6) });
     }
   };
   const endDrag = (e: React.PointerEvent) => {
@@ -189,42 +207,43 @@ export default function StudioPage() {
     drag.current = null;
   };
 
-  const box = baseBox(side, placement.id);
-  const overlay: React.CSSProperties = {
-    top: `${box.top + t.posY}%`,
-    left: `${box.left + t.posX}%`,
-    width: `${box.width}%`,
-    maxHeight: `${box.maxHeight}%`,
-    transform: `translate(-50%, -50%) scale(${t.scale}) rotate(${t.rotation}deg)`,
-    touchAction: "none",
-  };
+  const placementLabel = [type === "two" ? AZ_LABEL.two : `${AZ_LABEL[type]} (${printSide === "front" ? "ön" : "arxa"})`, ...extras.map((e) => AZ_EXTRA[e])].join(" + ");
 
   const addToBag = () => {
-    if (!image) {
+    const missing = sidesUsed.filter((s) => !imageFor(s));
+    if (missing.length) {
       setError(L({ az: "Əvvəlcə dizayn faylını yükləyin.", en: "Upload your design file first.", ru: "Сначала загрузите файл дизайна.", tr: "Önce tasarım dosyanızı yükleyin." }));
       document.getElementById("studio-upload")?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
+    const front = imageFor("front");
+    const back = imageFor("back");
+    const mainSide = sidesUsed[0];
     addItem({
-      id: `pod_${Date.now()}_${garment.id}_${size}`,
-      productId: garment.id,
-      name: `Öz dizayn: ${garment.name}`,
+      id: `pod_${Date.now()}_${product.id}_${size}`,
+      productId: product.id,
+      name: `Öz dizayn: ${product.name}`,
       price,
       size,
-      color: color.name,
-      image: mockup,
+      color: COLOR_LABEL[colorKey]?.az || colorKey,
+      image: mockupDataUrl(product.shape, hex, mainSide),
       type: "custom",
-      customDesignPreview: image,
+      customDesignPreview: imageFor(mainSide),
       customData: {
-        garmentType: garment.name,
-        garmentColor: color.name,
+        garmentType: product.name,
+        garmentColor: COLOR_LABEL[colorKey]?.az || colorKey,
         size,
-        placement: placement.label,
-        placementKey: placement.id,
+        printType: type,
+        printSide: type === "two" ? "both" : printSide,
+        extras,
+        placement: placementLabel,
+        placementKey: type,
         customerNote: note.trim(),
-        transform: t,
-        uploadedImage: image,
-        previewImage: mockup,
+        transform: transforms[mainSide],
+        uploadedImage: imageFor(mainSide),
+        frontDesign: sidesUsed.includes("front") ? { image: front, transform: transforms.front } : {},
+        backDesign: sidesUsed.includes("back") ? { image: back, transform: transforms.back } : {},
+        previewImage: mockupDataUrl(product.shape, hex, mainSide),
         price,
       },
       stockQuantity: 99,
@@ -236,7 +255,52 @@ export default function StudioPage() {
     }, 400);
   };
 
+  const viewImage = viewHasMain ? imageFor(view) : undefined;
+  const area = viewHasMain ? mainArea(view) : undefined;
   const iconBtn = "flex h-9 w-9 items-center justify-center border border-white/15 text-bone transition hover:border-bone";
+  const chip = (on: boolean) => `border px-3.5 py-3 text-left transition ${on ? "border-bone bg-bone text-ink" : "border-white/15 hover:border-white/40"}`;
+
+  const uploadSlot = (s: StudioSide, label?: string) => {
+    const img = images[s];
+    return (
+      <div key={s}>
+        {label && <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-bone-dim">{label}</p>}
+        {img ? (
+          <div className="flex items-center gap-3 border border-white/15 p-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={img.src} alt="" className="h-14 w-14 shrink-0 bg-tile object-contain p-1" />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[13px] font-semibold">{img.name}</p>
+              <button type="button" onClick={() => pickFile(s)} className="mt-1 text-[11px] font-bold uppercase tracking-[0.14em] text-bone-dim hover:text-bone">
+                {L({ az: "Dəyiş", en: "Replace", ru: "Заменить", tr: "Değiştir" })}
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setImages((all) => ({ ...all, [s]: undefined }));
+                setTransforms((all) => ({ ...all, [s]: ZERO }));
+              }}
+              className="p-2 text-bone-faint hover:text-bone"
+              aria-label={L({ az: "Sil", en: "Remove", ru: "Удалить", tr: "Kaldır" })}
+            >
+              <X size={16} />
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => pickFile(s)}
+            className="flex w-full flex-col items-center justify-center gap-2 border border-dashed border-white/25 px-4 py-8 text-center transition hover:border-bone"
+          >
+            <ImagePlus size={22} strokeWidth={1.6} />
+            <span className="text-[13px] font-semibold">{L({ az: "Faylı seç", en: "Choose a file", ru: "Выбрать файл", tr: "Dosya seç" })}</span>
+            <span className="text-[12px] text-bone-faint">PNG, JPG, WEBP, SVG · max 30 MB</span>
+          </button>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen w-full bg-ink font-grotesk text-bone">
@@ -246,10 +310,10 @@ export default function StudioPage() {
         </h1>
         <p className="mt-4 max-w-xl text-[14px] leading-relaxed text-bone-dim">
           {L({
-            az: "Geyimi seç, şəklini və ya loqonu yüklə, yerini göstər. Hazırlamadan əvvəl rəngi və ölçünü sənin üçün yoxlayırıq.",
-            en: "Pick a garment, upload your image or logo and place it. We check colour and size for you before production.",
-            ru: "Выбери вещь, загрузи изображение или логотип и размести его. Перед производством мы проверим цвет и размер.",
-            tr: "Giysiyi seç, görselini veya logonu yükle ve yerleştir. Üretimden önce renk ve boyutu senin için kontrol ederiz.",
+            az: "Məhsulu seç, şəklini və ya loqonu yüklə, yerini göstər. Hazırlamadan əvvəl rəngi və ölçünü sənin üçün yoxlayırıq.",
+            en: "Pick a product, upload your image or logo and place it. We check colour and size for you before production.",
+            ru: "Выбери изделие, загрузи изображение или логотип и размести его. Перед производством мы проверим цвет и размер.",
+            tr: "Ürünü seç, görselini veya logonu yükle ve yerleştir. Üretimden önce renk ve boyutu senin için kontrol ederiz.",
           })}
         </p>
 
@@ -257,107 +321,117 @@ export default function StudioPage() {
           {/* preview */}
           <div className="lg:col-span-7">
             <div className="lg:sticky lg:top-24">
-              <div className="mb-3 flex flex-wrap gap-2">
-                {sides.map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => setSide(s)}
-                    className={`border px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] transition ${
-                      side === s ? "border-bone bg-bone text-ink" : "border-white/20 hover:border-bone"
-                    }`}
-                  >
-                    {L(SIDE_LABEL[s])}
-                  </button>
-                ))}
-              </div>
+              {product.hasBack && (
+                <div className="mb-3 flex gap-2">
+                  {(["front", "back"] as StudioSide[]).map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setView(s)}
+                      className={`border px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] transition ${view === s ? "border-bone bg-bone text-ink" : "border-white/20 hover:border-bone"}`}
+                    >
+                      {L(SIDE_LABEL[s])}
+                    </button>
+                  ))}
+                </div>
+              )}
 
               <div
                 ref={stageRef}
-                onWheel={(e) => image && setT({ scale: clamp(Number((t.scale + (e.deltaY < 0 ? 0.05 : -0.05)).toFixed(2)), 0.4, 1.8) })}
+                onWheel={(e) => viewImage && setT({ scale: clamp(Number((t.scale + (e.deltaY < 0 ? 0.05 : -0.05)).toFixed(2)), 0.3, 1.6) })}
                 className="relative aspect-square w-full select-none overflow-hidden bg-tile"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={mockup}
-                  alt={garment.name}
-                  className="pointer-events-none h-full w-full object-contain p-[6%] mix-blend-multiply"
-                  onError={(e) => {
-                    e.currentTarget.src = `/images/studio/tshirt/${color.key}-front-shirt.png`;
-                  }}
-                />
-                {image ? (
-                  <div
-                    onPointerDown={startDrag("move")}
-                    onPointerMove={moveDrag}
-                    onPointerUp={endDrag}
-                    style={overlay}
-                    className="absolute z-10 flex cursor-grab items-center justify-center active:cursor-grabbing"
-                  >
-                    <div className="relative flex h-full w-full items-center justify-center border border-dashed border-ink/50 p-1">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={image} alt="" draggable={false} className="pointer-events-none max-h-full max-w-full object-contain" />
-                      <div
-                        onPointerDown={startDrag("resize")}
-                        onPointerMove={moveDrag}
-                        onPointerUp={endDrag}
-                        className="absolute -bottom-3 -right-3 flex h-6 w-6 cursor-nwse-resize items-center justify-center rounded-full bg-ink text-bone"
-                        title={L({ az: "Dartıb ölçünü dəyiş", en: "Drag to resize", ru: "Потяни, чтобы изменить размер", tr: "Boyutlandırmak için sürükle" })}
-                      >
-                        <Plus size={12} />
-                      </div>
+                <div className="pointer-events-none absolute inset-[4%]" dangerouslySetInnerHTML={{ __html: svg }} />
+                <div className="absolute inset-[4%]">
+                  {area && (
+                    <div
+                      className={`absolute flex items-center justify-center ${viewImage ? "" : "border border-dashed border-ink/40"}`}
+                      style={{ ...pct(area), transform: "translate(-50%, -50%)" }}
+                    >
+                      {viewImage ? (
+                        <div
+                          onPointerDown={startDrag("move")}
+                          onPointerMove={moveDrag}
+                          onPointerUp={endDrag}
+                          className="relative flex h-full w-full cursor-grab items-center justify-center active:cursor-grabbing"
+                          style={{ transform: `translate(${t.posX}%, ${t.posY}%) scale(${t.scale})`, touchAction: "none" }}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={viewImage} alt="" draggable={false} className="pointer-events-none max-h-full max-w-full object-contain" />
+                          <span className="pointer-events-none absolute inset-0 border border-dashed border-ink/50" />
+                          <div
+                            onPointerDown={startDrag("resize")}
+                            onPointerMove={moveDrag}
+                            onPointerUp={endDrag}
+                            className="absolute -bottom-3 -right-3 flex h-6 w-6 cursor-nwse-resize items-center justify-center rounded-full bg-ink text-bone"
+                            title={L({ az: "Dartıb ölçünü dəyiş", en: "Drag to resize", ru: "Потяни, чтобы изменить размер", tr: "Boyutlandırmak için sürükle" })}
+                          >
+                            <Plus size={12} />
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="bg-ink px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-bone">
+                          {L({ az: "Dizayn yeri", en: "Design area", ru: "Зона дизайна", tr: "Tasarım alanı" })}
+                        </span>
+                      )}
                     </div>
-                  </div>
-                ) : (
-                  <div style={overlay} className="pointer-events-none absolute flex items-center justify-center border border-dashed border-ink/40">
-                    <span className="bg-ink px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-bone">
-                      {L({ az: "Dizayn yeri", en: "Design area", ru: "Зона дизайна", tr: "Tasarım alanı" })}
-                    </span>
-                  </div>
-                )}
+                  )}
+                  {extras.map((e) => {
+                    const spot = areas.extras[e];
+                    if (!spot || spot.side !== view) return null;
+                    const src = imageFor("front") || imageFor("back");
+                    return (
+                      <div key={e} className="absolute flex items-center justify-center border border-dashed border-ink/40" style={{ ...pct(spot.area), transform: "translate(-50%, -50%)" }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        {src ? <img src={src} alt="" className="max-h-full max-w-full object-contain" /> : <span className="text-[8px] font-bold text-ink/60">+</span>}
+                      </div>
+                    );
+                  })}
+                </div>
                 <span className="absolute bottom-3 left-3 bg-ink px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-bone">
-                  {L(color.label)} · {size}
+                  {L(COLOR_LABEL[colorKey] || { az: colorKey, en: colorKey, ru: colorKey, tr: colorKey })} · {size}
                 </span>
               </div>
 
-              {image && (
+              {viewImage && (
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   <span className="mr-1 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-bone-dim">
                     <Move size={13} /> {L({ az: "Ölçü", en: "Size", ru: "Размер", tr: "Boyut" })}
                   </span>
-                  <button type="button" className={iconBtn} onClick={() => setT({ scale: clamp(Number((t.scale - 0.1).toFixed(2)), 0.4, 1.8) })} aria-label="−">
+                  <button type="button" className={iconBtn} onClick={() => setT({ scale: clamp(Number((t.scale - 0.1).toFixed(2)), 0.3, 1.6) })} aria-label="−">
                     <Minus size={14} />
                   </button>
                   <span className="w-12 text-center text-[12px] font-bold tabular-nums">{Math.round(t.scale * 100)}%</span>
-                  <button type="button" className={iconBtn} onClick={() => setT({ scale: clamp(Number((t.scale + 0.1).toFixed(2)), 0.4, 1.8) })} aria-label="+">
+                  <button type="button" className={iconBtn} onClick={() => setT({ scale: clamp(Number((t.scale + 0.1).toFixed(2)), 0.3, 1.6) })} aria-label="+">
                     <Plus size={14} />
                   </button>
                   <span className="mx-1 h-5 w-px bg-white/15" />
                   {[
-                    { k: "←", p: { posX: clamp(t.posX - 4, -35, 35) } },
-                    { k: "↑", p: { posY: clamp(t.posY - 4, -35, 35) } },
-                    { k: "↓", p: { posY: clamp(t.posY + 4, -35, 35) } },
-                    { k: "→", p: { posX: clamp(t.posX + 4, -35, 35) } },
+                    { k: "←", p: { posX: clamp(t.posX - 4, -25, 25) } },
+                    { k: "↑", p: { posY: clamp(t.posY - 4, -25, 25) } },
+                    { k: "↓", p: { posY: clamp(t.posY + 4, -25, 25) } },
+                    { k: "→", p: { posX: clamp(t.posX + 4, -25, 25) } },
                   ].map((b) => (
                     <button key={b.k} type="button" className={`${iconBtn} text-sm`} onClick={() => setT(b.p)} aria-label={b.k}>
                       {b.k}
                     </button>
                   ))}
-                  <button
-                    type="button"
-                    onClick={() => setT(ZERO)}
-                    className="ml-auto flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-bone-dim hover:text-bone"
-                  >
+                  <button type="button" onClick={() => setT(ZERO)} className="ml-auto flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-bone-dim hover:text-bone">
                     <RotateCcw size={13} /> {L({ az: "Sıfırla", en: "Reset", ru: "Сбросить", tr: "Sıfırla" })}
                   </button>
                 </div>
               )}
+              {!viewHasMain && product.hasBack && (
+                <p className="mt-3 text-[12px] text-bone-dim">
+                  {L({ az: "Bu tərəfdə əsas dizayn yoxdur.", en: "No main design on this side.", ru: "На этой стороне нет основного дизайна.", tr: "Bu tarafta ana tasarım yok." })}
+                </p>
+              )}
               <p className="mt-3 text-[12px] text-bone-faint">
                 {L({
-                  az: "Şəkli geyimin üzərində sürüşdürə, küncündən dartıb ölçüsünü dəyişə bilərsiniz. Önbaxış təxminidir.",
-                  en: "Drag the design on the garment and pull its corner to resize. The preview is approximate.",
+                  az: "Şəkli məhsulun üzərində sürüşdürə, küncündən dartıb ölçüsünü dəyişə bilərsiniz. Önbaxış təxminidir.",
+                  en: "Drag the design and pull its corner to resize. The preview is approximate.",
                   ru: "Перетаскивайте дизайн и тяните за угол, чтобы изменить размер. Превью приблизительное.",
-                  tr: "Tasarımı giysi üzerinde sürükleyin, köşesinden çekerek boyutlandırın. Önizleme yaklaşıktır.",
+                  tr: "Tasarımı sürükleyin, köşesinden çekerek boyutlandırın. Önizleme yaklaşıktır.",
                 })}
               </p>
             </div>
@@ -365,25 +439,23 @@ export default function StudioPage() {
 
           {/* configurator */}
           <div className="lg:col-span-5">
-            <Step n={1} title={L({ az: "Geyim", en: "Garment", ru: "Изделие", tr: "Giysi" })} aside={<span className="text-[12px] text-bone-dim">{garment.name}</span>}>
+            <Step n={1} title={L({ az: "Məhsul", en: "Product", ru: "Изделие", tr: "Ürün" })} aside={<span className="text-right text-[12px] text-bone-dim">{product.name}</span>}>
               <div className="space-y-5">
-                {groups.map(([cat, list]) => (
-                  <div key={cat}>
-                    <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-bone-faint">{L(GROUP_LABEL[cat] || { az: cat, en: cat, ru: cat, tr: cat })}</p>
+                {groups.map(([g, list]) => (
+                  <div key={g}>
+                    <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-bone-faint">{L(GROUPS[g])}</p>
                     <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                      {list.map((g) => {
-                        const on = g.id === garment.id;
+                      {list.map((p) => {
+                        const on = p.id === product.id;
+                        const from = studioPrice(p, printTypes(p)[0]) ?? 0;
                         return (
-                          <button
-                            key={g.id}
-                            type="button"
-                            onClick={() => chooseGarment(g)}
-                            className={`flex items-center justify-between gap-3 border px-3.5 py-3 text-left transition ${
-                              on ? "border-bone bg-bone text-ink" : "border-white/15 hover:border-white/40"
-                            }`}
-                          >
-                            <span className="text-[13px] font-semibold leading-snug">{g.name}</span>
-                            <span className={`shrink-0 text-[13px] font-bold tabular-nums ${on ? "text-ink" : "text-bone-dim"}`}>{formatPrice(g.basePrice)}</span>
+                          <button key={p.id} type="button" onClick={() => chooseProduct(p)} className={`${chip(on)} flex items-center justify-between gap-3`}>
+                            <span className="text-[13px] font-semibold leading-snug">{p.name}</span>
+                            <span className={`shrink-0 text-[12px] font-bold tabular-nums ${on ? "text-ink/70" : "text-bone-dim"}`}>
+                              {L({ az: "", en: "from ", ru: "от ", tr: "" })}
+                              {formatPrice(from)}
+                              {language === "az" ? "-dan" : language === "tr" ? "'den" : ""}
+                            </span>
                           </button>
                         );
                       })}
@@ -393,96 +465,104 @@ export default function StudioPage() {
               </div>
             </Step>
 
-            <Step n={2} title={L({ az: "Rəng və ölçü", en: "Colour & size", ru: "Цвет и размер", tr: "Renk ve beden" })} aside={<span className="text-[12px] text-bone-dim">{L(color.label)}</span>}>
+            <Step n={2} title={L({ az: "Rəng və ölçü", en: "Colour & size", ru: "Цвет и размер", tr: "Renk ve beden" })} aside={<span className="text-[12px] text-bone-dim">{L(COLOR_LABEL[colorKey] || { az: colorKey, en: colorKey, ru: colorKey, tr: colorKey })}</span>}>
               <div className="flex flex-wrap gap-2">
-                {COLORS.map((c) => (
+                {product.colors.map((c) => (
                   <button
-                    key={c.key}
+                    key={c}
                     type="button"
-                    onClick={() => setColor(c)}
-                    title={L(c.label)}
-                    aria-label={L(c.label)}
-                    className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition ${c.key === color.key ? "border-bone" : "border-transparent hover:border-white/40"}`}
+                    onClick={() => setColorKey(c)}
+                    title={L(COLOR_LABEL[c])}
+                    aria-label={L(COLOR_LABEL[c])}
+                    className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition ${c === colorKey ? "border-bone" : "border-transparent hover:border-white/40"}`}
                   >
-                    <span className="flex h-7 w-7 items-center justify-center rounded-full border border-white/20" style={{ backgroundColor: c.hex }}>
-                      {c.key === color.key && <Check size={13} className={c.key === "white" || c.key === "sand" || c.key === "sky-blue" ? "text-ink" : "text-white"} />}
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full border border-white/20" style={{ backgroundColor: STUDIO_COLORS[c] }}>
+                      {c === colorKey && <Check size={13} className={["white", "sand", "beige", "skyblue", "gold", "grey"].includes(c) ? "text-ink" : "text-white"} />}
                     </span>
                   </button>
                 ))}
               </div>
-              <div className="mt-5 grid grid-cols-6 gap-2">
-                {SIZES.map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => setSize(s)}
-                    className={`h-11 border text-[12px] font-bold transition ${s === size ? "border-bone bg-bone text-ink" : "border-white/20 hover:border-bone"}`}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            </Step>
-
-            <Step n={3} title={L({ az: "Dizayn faylı", en: "Design file", ru: "Файл дизайна", tr: "Tasarım dosyası" })}>
-              <div id="studio-upload">
-                {image ? (
-                  <div className="flex items-center gap-3 border border-white/15 p-3">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={image} alt="" className="h-14 w-14 shrink-0 bg-tile object-contain p-1" />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-[13px] font-semibold">{fileName}</p>
-                      <button type="button" onClick={() => fileRef.current?.click()} className="mt-1 text-[11px] font-bold uppercase tracking-[0.14em] text-bone-dim hover:text-bone">
-                        {L({ az: "Dəyiş", en: "Replace", ru: "Заменить", tr: "Değiştir" })}
-                      </button>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setImage(null);
-                        setFileName(null);
-                        setTransforms({ front: ZERO, back: ZERO, left: ZERO, right: ZERO });
-                      }}
-                      className="p-2 text-bone-faint hover:text-bone"
-                      aria-label={L({ az: "Sil", en: "Remove", ru: "Удалить", tr: "Kaldır" })}
-                    >
-                      <X size={16} />
+              {product.sizes.length > 1 ? (
+                <div className="mt-5 grid grid-cols-4 gap-2 sm:grid-cols-7">
+                  {product.sizes.map((s) => (
+                    <button key={s} type="button" onClick={() => setSize(s)} className={`h-11 border text-[12px] font-bold transition ${s === size ? "border-bone bg-bone text-ink" : "border-white/20 hover:border-bone"}`}>
+                      {s}
                     </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => fileRef.current?.click()}
-                    className="flex w-full flex-col items-center justify-center gap-2 border border-dashed border-white/25 px-4 py-10 text-center transition hover:border-bone"
-                  >
-                    <ImagePlus size={22} strokeWidth={1.6} />
-                    <span className="text-[13px] font-semibold">{L({ az: "Faylı seç", en: "Choose a file", ru: "Выбрать файл", tr: "Dosya seç" })}</span>
-                    <span className="text-[12px] text-bone-faint">PNG, JPG, WEBP, SVG, PDF · max 30 MB</span>
-                  </button>
-                )}
-                <input ref={fileRef} type="file" accept="image/*,.pdf,.svg,.ai" className="hidden" onChange={onFile} />
-                {error && <p className="mt-3 text-[13px] font-semibold text-sale">{error}</p>}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-4 text-[12px] text-bone-dim">
+                  {L({ az: "Ölçü", en: "Size", ru: "Размер", tr: "Beden" })}: {product.sizes[0]}
+                </p>
+              )}
             </Step>
 
-            <Step n={4} title={L({ az: "Yeri", en: "Placement", ru: "Расположение", tr: "Yerleşim" })}>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {placements.map((p) => {
-                  const on = p.id === placement.id;
+            <Step n={3} title={L({ az: "Çap", en: "Print", ru: "Печать", tr: "Baskı" })}>
+              <div className={`grid gap-2 ${types.length === 3 ? "grid-cols-3" : types.length === 2 ? "grid-cols-2" : "grid-cols-1"}`}>
+                {types.map((tp) => {
+                  const on = tp === type;
                   return (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onClick={() => choosePlacement(p)}
-                      className={`flex items-center justify-between gap-3 border px-3.5 py-3 text-left transition ${
-                        on ? "border-bone bg-bone text-ink" : "border-white/15 hover:border-white/40"
-                      }`}
-                    >
-                      <span className="text-[13px] font-semibold leading-snug">{L(PLACEMENT_LABEL[p.id] || { az: p.label, en: p.label, ru: p.label, tr: p.label })}</span>
-                      {p.extraPrice > 0 && <span className="shrink-0 text-[12px] font-bold">+{formatPrice(p.extraPrice)}</span>}
+                    <button key={tp} type="button" onClick={() => chooseType(tp)} className={chip(on)}>
+                      <span className="block text-[13px] font-bold">{L(TYPE_LABEL[tp].title)}</span>
+                      <span className={`block text-[11px] ${on ? "text-ink/70" : "text-bone-faint"}`}>{L(TYPE_LABEL[tp].hint)}</span>
+                      <span className="mt-1.5 block text-[13px] font-bold tabular-nums">{formatPrice(studioPrice(product, tp) ?? 0)}</span>
                     </button>
                   );
                 })}
+              </div>
+
+              {type !== "two" && product.hasBack && (
+                <div className="mt-4 flex gap-2">
+                  {(["front", "back"] as StudioSide[]).map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => chooseSide(s)}
+                      className={`flex-1 border py-2.5 text-[12px] font-bold uppercase tracking-[0.14em] transition ${printSide === s ? "border-bone bg-bone text-ink" : "border-white/20 hover:border-bone"}`}
+                    >
+                      {L(SIDE_LABEL[s])}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {product.extras.length > 0 && (
+                <div className="mt-5">
+                  <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-bone-faint">
+                    {L({ az: "Əlavə yer", en: "Extra spot", ru: "Дополнительно", tr: "Ek alan" })} · +{formatPrice(EXTRA_SPOT_PRICE)}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {product.extras.map((e) => {
+                      const on = extras.includes(e);
+                      return (
+                        <button
+                          key={e}
+                          type="button"
+                          onClick={() => toggleExtra(e)}
+                          className={`flex items-center gap-2 border px-3.5 py-2.5 text-[12px] font-bold transition ${on ? "border-bone bg-bone text-ink" : "border-white/20 hover:border-bone"}`}
+                        >
+                          <span className={`flex h-4 w-4 items-center justify-center border ${on ? "border-ink" : "border-white/40"}`}>{on && <Check size={11} />}</span>
+                          {L(EXTRA_LABEL[e])}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </Step>
+
+            <Step n={4} title={L({ az: "Dizayn faylı", en: "Design file", ru: "Файл дизайна", tr: "Tasarım dosyası" })}>
+              <div id="studio-upload" className="space-y-4">
+                {type === "two" ? (
+                  <>
+                    {uploadSlot("front", L({ az: "Ön tərəf", en: "Front", ru: "Перед", tr: "Ön" }))}
+                    {uploadSlot("back", L({ az: "Arxa tərəf (boş qalsa ön dizayn işlənir)", en: "Back (uses the front design if empty)", ru: "Спина (если пусто — как спереди)", tr: "Arka (boşsa ön tasarım kullanılır)" }))}
+                  </>
+                ) : (
+                  uploadSlot(printSide)
+                )}
+                <input ref={fileRef} type="file" accept="image/*,.svg" className="hidden" onChange={onFile} />
+                {error && <p className="text-[13px] font-semibold text-sale">{error}</p>}
               </div>
             </Step>
 
@@ -492,7 +572,7 @@ export default function StudioPage() {
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder={L({
-                  az: "Məs: sinədən 5 sm aşağı, eni təxminən 25 sm",
+                  az: "Məs: yaxadan 5 sm aşağı, eni təxminən 25 sm",
                   en: "E.g. 5 cm below the collar, about 25 cm wide",
                   ru: "Напр.: на 5 см ниже воротника, ширина около 25 см",
                   tr: "Örn: yakadan 5 cm aşağı, yaklaşık 25 cm genişlik",
@@ -501,24 +581,18 @@ export default function StudioPage() {
               />
             </Step>
 
-            {/* summary (desktop) */}
             <div className="hidden border-t border-white/10 pt-7 lg:block">
-              <div className="flex items-end justify-between gap-4">
-                <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-bone-faint">
-                    {garment.name} · {L(color.label)} · {size}
-                  </p>
-                  <p className="mt-1 text-3xl font-black tabular-nums">{formatPrice(price)}</p>
-                </div>
-              </div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-bone-faint">
+                {product.name} · {L(TYPE_LABEL[type].title)}
+                {extras.length ? ` + ${extras.length}` : ""}
+              </p>
+              <p className="mt-1 text-3xl font-black tabular-nums">{formatPrice(price)}</p>
               <button
                 type="button"
                 onClick={addToBag}
-                className={`mt-5 flex h-14 w-full items-center justify-center gap-2 rounded-full text-[12px] font-extrabold uppercase tracking-[0.16em] transition ${
-                  added ? "bg-emerald-500 text-ink" : "bg-bone text-ink hover:bg-white"
-                }`}
+                className={`mt-5 flex h-14 w-full items-center justify-center gap-2 rounded-full text-[12px] font-extrabold uppercase tracking-[0.16em] transition ${added ? "bg-emerald-500 text-ink" : "bg-bone text-ink hover:bg-white"}`}
               >
-                {added ? <Check size={16} /> : null}
+                {added && <Check size={16} />}
                 {added ? L({ az: "Səbətə əlavə olundu", en: "Added to bag", ru: "Добавлено", tr: "Sepete eklendi" }) : L({ az: "Səbətə at", en: "Add to bag", ru: "В корзину", tr: "Sepete ekle" })}
               </button>
             </div>
@@ -526,18 +600,15 @@ export default function StudioPage() {
         </div>
       </div>
 
-      {/* sticky buy bar (phones and tablets) */}
       <div className="hw-buybar fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-ink/95 px-4 py-3 backdrop-blur-md lg:hidden">
         <div className="mx-auto flex max-w-[1600px] items-center gap-4">
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[11px] text-bone-dim">{garment.name}</p>
+            <p className="truncate text-[11px] text-bone-dim">
+              {product.name} · {L(TYPE_LABEL[type].title)}
+            </p>
             <p className="text-lg font-black tabular-nums">{formatPrice(price)}</p>
           </div>
-          <button
-            type="button"
-            onClick={addToBag}
-            className={`h-12 shrink-0 rounded-full px-6 text-[12px] font-extrabold uppercase tracking-[0.14em] ${added ? "bg-emerald-500 text-ink" : "bg-bone text-ink"}`}
-          >
+          <button type="button" onClick={addToBag} className={`h-12 shrink-0 rounded-full px-6 text-[12px] font-extrabold uppercase tracking-[0.14em] ${added ? "bg-emerald-500 text-ink" : "bg-bone text-ink"}`}>
             {added ? L({ az: "Əlavə olundu", en: "Added", ru: "Добавлено", tr: "Eklendi" }) : L({ az: "Səbətə at", en: "Add to bag", ru: "В корзину", tr: "Sepete ekle" })}
           </button>
         </div>

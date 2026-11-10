@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
       let unitPrice: number;
 
       if (clientItem.isCustom) {
-        const studioPrice = customPrintPrice(clientItem.productId, clientItem.customData?.placementKey);
+        const studioPrice = customPrintPrice(clientItem.productId, clientItem.customData);
         if (studioPrice === null) {
           return NextResponse.json(
             { error: 'Öz dizaynlı məhsul tanınmadı. Zəhmət olmasa dizaynı studiyada yenidən səbətə əlavə edin.' },
