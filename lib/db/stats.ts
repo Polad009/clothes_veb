@@ -154,3 +154,37 @@ export async function listCustomers(): Promise<Customer[]> {
     })
     .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
 }
+
+export interface AdminPulse {
+  orders: number;
+  pod: number;
+  chat: number;
+  latestOrder: { id: string; name: string; total: number; currency: string; at: string; isTest: boolean } | null;
+}
+
+/** Light status check the admin panel polls to notice new orders, print jobs and chats. */
+export async function getPulse(): Promise<AdminPulse> {
+  const [counts, latest] = await Promise.all([
+    countOpenWork(),
+    db()
+      .from('orders')
+      .select('order_number, id, customer_name, total_amount, currency, created_at, is_test')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .then((res) => unwrap(res, 'Sifariş oxunmadı')),
+  ]);
+  const o = latest?.[0];
+  return {
+    ...counts,
+    latestOrder: o
+      ? {
+          id: o.order_number || String(o.id),
+          name: o.customer_name || 'Müştəri',
+          total: Number(o.total_amount) || 0,
+          currency: o.currency || 'AZN',
+          at: o.created_at,
+          isTest: Boolean(o.is_test),
+        }
+      : null,
+  };
+}

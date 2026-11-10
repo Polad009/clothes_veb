@@ -4,10 +4,25 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { adminFetch, ORDER_STATUSES, paymentLabel } from "@/lib/adminClient";
 import { Button, Card, ConfirmButton, Field, Select, useToast } from "@/components/admin/ui";
+import { statusMessage, waDigits } from "@/lib/customerMessage";
 
 const PAYMENT_STATUSES = ["pending_payment", "paid", "test_paid", "failed", "refunded"];
 
-export function OrderActions({ id, orderStatus, paymentStatus }: { id: string; orderStatus: string; paymentStatus: string }) {
+export function OrderActions({
+  id,
+  orderStatus,
+  paymentStatus,
+  customerName,
+  customerPhone,
+  trackingCode,
+}: {
+  id: string;
+  orderStatus: string;
+  paymentStatus: string;
+  customerName: string;
+  customerPhone: string;
+  trackingCode?: string;
+}) {
   const router = useRouter();
   const toast = useToast();
   const [status, setStatus] = useState(orderStatus);
@@ -68,6 +83,17 @@ export function OrderActions({ id, orderStatus, paymentStatus }: { id: string; o
         <Button variant="primary" className="w-full" disabled={!dirty} loading={saving} onClick={save}>
           Yadda saxla
         </Button>
+        {waDigits(customerPhone).length >= 10 && (
+          <a
+            href={`https://wa.me/${waDigits(customerPhone)}?text=${encodeURIComponent(statusMessage({ name: customerName, orderId: id, status, trackingCode }))}`}
+            target="_blank"
+            rel="noreferrer"
+            className="flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-emerald-300 bg-emerald-50 text-sm font-medium text-emerald-800 hover:bg-emerald-100"
+          >
+            Müştəriyə WhatsApp ilə yaz
+          </a>
+        )}
+        <p className="-mt-2 text-xs text-stone-500">Seçilmiş statusa uyğun hazır mesaj və izləmə linki ilə açılır; göndərməzdən əvvəl dəyişə bilərsiniz.</p>
         <div className="border-t border-stone-200 pt-4">
           <ConfirmButton onConfirm={remove}>Sifarişi sil</ConfirmButton>
         </div>

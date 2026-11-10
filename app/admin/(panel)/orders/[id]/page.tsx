@@ -112,7 +112,14 @@ export default async function OrderDetailPage({ params }: { params: { id: string
         </div>
 
         <div className="space-y-6">
-          <OrderActions id={order.id} orderStatus={order.orderStatus} paymentStatus={order.paymentStatus} />
+          <OrderActions
+            id={order.id}
+            orderStatus={order.orderStatus}
+            paymentStatus={order.paymentStatus}
+            customerName={c.fullName}
+            customerPhone={c.phone}
+            trackingCode={order.trackingCode}
+          />
 
           <Card title="Müştəri">
             <div className="space-y-3 px-5 py-4 text-sm">

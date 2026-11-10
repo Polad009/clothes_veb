@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -19,10 +19,12 @@ import {
   ExternalLink,
   LogOut,
   Menu,
+  Bell,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ToastProvider } from "@/components/admin/ui";
+import { AdminPulse, type Counts } from "@/components/admin/AdminPulse";
 
 const NAV: Array<{ heading: string; items: Array<{ href: string; label: string; icon: React.ElementType; badgeKey?: "orders" | "pod" | "chat" }> }> = [
   {
@@ -58,11 +60,26 @@ function isActive(pathname: string, href: string) {
   return href === "/admin" ? pathname === "/admin" : pathname === href || pathname.startsWith(href + "/");
 }
 
-export function AdminShell({ counts, children }: { counts: { orders: number; pod: number; chat: number }; children: React.ReactNode }) {
+export function AdminShell({ counts: initialCounts, children }: { counts: Counts; children: React.ReactNode }) {
   const pathname = usePathname() || "/admin";
   const [menuOpen, setMenuOpen] = useState(false);
+  const [counts, setCounts] = useState<Counts>(initialCounts);
+  const [canNotify, setCanNotify] = useState(false);
 
   useEffect(() => setMenuOpen(false), [pathname]);
+  useEffect(() => setCounts(initialCounts), [initialCounts]);
+  useEffect(() => {
+    setCanNotify(typeof Notification !== "undefined" && Notification.permission === "default");
+  }, []);
+  const onCounts = useCallback((c: Counts) => setCounts(c), []);
+
+  const enableNotifications = async () => {
+    try {
+      await Notification.requestPermission();
+    } finally {
+      setCanNotify(false);
+    }
+  };
 
   const logout = async () => {
     await fetch("/api/admin/logout", { method: "POST" }).catch(() => {});
@@ -113,6 +130,12 @@ export function AdminShell({ counts, children }: { counts: { orders: number; pod
       </div>
 
       <div className="space-y-0.5 border-t border-white/10 p-3">
+        {canNotify && (
+          <button type="button" onClick={enableNotifications} className="flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left text-sm text-[#E6C280] hover:bg-white/5">
+            <Bell className="h-[18px] w-[18px]" aria-hidden />
+            Sifariş bildirişlərini aç
+          </button>
+        )}
         <a href="/" target="_blank" rel="noreferrer" className="flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm hover:bg-white/5 hover:text-white">
           <ExternalLink className="h-[18px] w-[18px] text-stone-500" aria-hidden />
           Sayta bax
@@ -127,6 +150,7 @@ export function AdminShell({ counts, children }: { counts: { orders: number; pod
 
   return (
     <ToastProvider>
+      <AdminPulse onCounts={onCounts} />
       <div className="min-h-dvh bg-stone-50 text-stone-900 print:bg-white">
         {/* Desktop sidebar */}
         <div className="fixed inset-y-0 left-0 z-30 hidden w-60 lg:block print:!hidden">{sidebar}</div>
