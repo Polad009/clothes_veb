@@ -1,5 +1,6 @@
 "use client";
 
+import { useSupport } from "@/context/StoreDataContext";
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -331,6 +332,7 @@ const CHECKOUT_I18N = {
 };
 
 export default function CheckoutPage() {
+  const support = useSupport();
   const router = useRouter();
   const { items, totalPrice, clearCart } = useCart();
   const { formatPrice, getProductPrice, currency, isAzerbaijan, detectedCountry } = useCurrency();
@@ -2303,12 +2305,12 @@ export default function CheckoutPage() {
                 {cT.helpDesc}
               </p>
               <a
-                href="https://wa.me/994103283152?text=Salam!%20Sifarişi%20rəsmiləşdirməkdə%20kömək%20edə%20bilərsiniz?"
+                href={support.link("Salam! Sifarişi rəsmiləşdirməkdə kömək edə bilərsiniz?")}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-2xs"
               >
-                <span>💬 WhatsApp: +994 10 328 31 52</span>
+                <span>💬 WhatsApp: {support.phone}</span>
               </a>
             </div>
           </div>

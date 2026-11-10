@@ -1,5 +1,6 @@
 "use client";
 
+import { useSupport } from "@/context/StoreDataContext";
 import React, { useState } from "react";
 import Link from "next/link";
 import { Check, ShieldCheck, Truck, RotateCcw, Award } from "lucide-react";
@@ -8,6 +9,7 @@ import Logo from "@/components/Logo";
 import { useLanguage } from "@/context/LanguageContext";
 
 export function Footer() {
+  const support = useSupport();
   const { t, language } = useLanguage();
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
@@ -121,14 +123,14 @@ export function Footer() {
             {/* Direct Support & WhatsApp */}
             <div className="pt-2 flex flex-wrap items-center gap-3">
               <a
-                href="https://wa.me/994103283152"
+                href={support.link()}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-white/5 hover:bg-emerald-950/40 border border-white/10 hover:border-emerald-500/40 text-stone-300 hover:text-white transition group"
               >
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span className="text-[11px]">
-                  WhatsApp Dəstək: <strong className="text-emerald-400 font-mono tracking-wider">+994 10 328 31 52</strong>
+                  WhatsApp Dəstək: <strong className="text-emerald-400 font-mono tracking-wider">{support.phone}</strong>
                 </span>
               </a>
 

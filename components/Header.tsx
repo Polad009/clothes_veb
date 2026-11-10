@@ -20,7 +20,7 @@ import { useCurrency } from "@/context/CurrencyContext";
 import { HeaderQuickSearch } from "@/components/HeaderQuickSearch";
 import { UnifiedLocaleDropdown } from "@/components/UnifiedLocaleDropdown";
 import { useLanguage } from "@/context/LanguageContext";
-import { MOCK_PRODUCTS, Product } from "@/data/products";
+import { Product } from "@/data/products";
 import { useStoreData } from "@/context/StoreDataContext";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import Logo from "@/components/Logo";
@@ -415,7 +415,7 @@ export function Header({ className = "" }: HeaderProps) {
                         <span>
                           Nəticələr (
                           {
-                            (products.length > 0 ? products : MOCK_PRODUCTS).filter(
+                            products.filter(
                               (p) =>
                                 p.name.toLowerCase().includes(mobileSearchQuery.trim().toLowerCase()) ||
                                 p.category.toLowerCase().includes(mobileSearchQuery.trim().toLowerCase()) ||
@@ -440,7 +440,7 @@ export function Header({ className = "" }: HeaderProps) {
 
                       {(() => {
                         const q = mobileSearchQuery.trim().toLowerCase();
-                        const matches = (products.length > 0 ? products : MOCK_PRODUCTS).filter(
+                        const matches = products.filter(
                           (p) =>
                             p.name.toLowerCase().includes(q) ||
                             p.category.toLowerCase().includes(q) ||

@@ -100,13 +100,16 @@ export const metadata: Metadata = {
 };
 
 import { StoreShell } from "@/components/StoreShell";
+import { getStoreSnapshot } from "@/lib/storeSnapshot";
 import { Analytics } from "@/components/Analytics";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const initialStore = await getStoreSnapshot();
+
   return (
     <html lang="az">
       <head>
@@ -179,7 +182,7 @@ export default function RootLayout({
         <LanguageProvider>
           <CurrencyProvider>
             <CartProvider>
-              <StoreDataProvider>
+              <StoreDataProvider initial={initialStore}>
                 <TryOnProvider>
                   <AuthProvider>
                     <StoreShell>

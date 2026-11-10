@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { deleteProduct, listProducts, saveProduct } from '@/lib/db/products';
 import { isAdminAuthenticated } from '@/lib/adminAuth';
+import { refreshStore } from '@/lib/storeSnapshot';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -67,6 +68,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Məhsulun adı və qiyməti tələb olunur.' }, { status: 400 });
     }
     const product = await saveProduct(body);
+    refreshStore();
     return NextResponse.json({ success: true, product });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
@@ -84,6 +86,7 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'Məhsul ID-si tələb olunur.' }, { status: 400 });
     }
     await deleteProduct(id);
+    refreshStore();
     return NextResponse.json({ success: true, message: 'Məhsul silindi.' });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

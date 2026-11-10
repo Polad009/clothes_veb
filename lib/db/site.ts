@@ -1,4 +1,6 @@
 import defaults from '@/data/storeData.json';
+import { DEFAULT_WHATSAPP } from '@/lib/contact';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { db, unwrap } from './client';
 import type { StoreContent, StorePromoCode, StoreSettings } from './types';
 
@@ -6,9 +8,9 @@ import type { StoreContent, StorePromoCode, StoreSettings } from './types';
 
 type SiteKey = 'content' | 'settings';
 
-async function readDoc(key: SiteKey): Promise<Record<string, any>> {
+async function readDoc(key: SiteKey, client: SupabaseClient = db()): Promise<Record<string, any>> {
   const row = unwrap(
-    await db().from('site_settings').select('value').eq('key', key).maybeSingle(),
+    await client.from('site_settings').select('value').eq('key', key).maybeSingle(),
     'Sayt tənzimləmələri oxunmadı'
   );
   return (row?.value as Record<string, any>) || {};
@@ -39,16 +41,16 @@ function mergeContent(base: Record<string, any>, patch: Record<string, any>): Re
 }
 
 /** Stored content layered over the built-in defaults, with live categories. */
-export async function getContent(): Promise<StoreContent> {
-  const [stored, categories] = await Promise.all([readDoc('content'), listCategories()]);
+export async function getContent(client: SupabaseClient = db()): Promise<StoreContent> {
+  const [stored, categories] = await Promise.all([readDoc('content', client), listCategories(client)]);
   const content = mergeContent(defaults.content as Record<string, any>, stored);
   content.categories = categories;
   return content as StoreContent;
 }
 
-export async function getSettings(): Promise<StoreSettings> {
-  const stored = await readDoc('settings');
-  return { ...(defaults.settings as StoreSettings), ...stored };
+export async function getSettings(client: SupabaseClient = db()): Promise<StoreSettings> {
+  const stored = await readDoc('settings', client);
+  return { whatsappNumber: DEFAULT_WHATSAPP, ...(defaults.settings as StoreSettings), ...stored } as StoreSettings;
 }
 
 export async function saveContent(patch: Record<string, any>): Promise<StoreContent> {
@@ -86,9 +88,9 @@ function rowToCategory(r: any): StoreCategory {
   };
 }
 
-export async function listCategories(): Promise<StoreCategory[]> {
+export async function listCategories(client: SupabaseClient = db()): Promise<StoreCategory[]> {
   const rows = unwrap(
-    await db()
+    await client
       .from('categories')
       .select('*')
       .order('sort_order', { ascending: true })

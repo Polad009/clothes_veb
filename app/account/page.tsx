@@ -1,5 +1,6 @@
 "use client";
 
+import { useSupport } from "@/context/StoreDataContext";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -19,6 +20,7 @@ import {
 } from "lucide-react";
 
 export default function AccountPage() {
+  const support = useSupport();
   const router = useRouter();
   const { user, session, profile, signOut, isLoading, openAuthModal } = useAuth();
   const { t, language } = useLanguage();
@@ -269,7 +271,7 @@ export default function AccountPage() {
                 24/7 Dəstək Xidməti
               </p>
               <a
-                href="https://wa.me/994103283152"
+                href={support.link()}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center w-full py-2.5 rounded-full bg-[#E6C280] text-black font-bold text-xs uppercase tracking-wider hover:bg-[#d4b06d] transition"

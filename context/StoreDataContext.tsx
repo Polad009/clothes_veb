@@ -1,8 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { Product, MOCK_PRODUCTS } from "@/data/products";
-import storeDataDefault from "@/data/storeData.json";
+import { Product } from "@/data/products";
+import { whatsappLink, whatsappNumber } from "@/lib/contact";
 
 export function normalizeProduct(p: any): Product {
   const colors = (p.colors || []).map((c: any) => {
@@ -71,30 +71,27 @@ interface StoreDataContextType {
 }
 
 const StoreDataContext = createContext<StoreDataContextType>({
-  products: MOCK_PRODUCTS,
-  content: storeDataDefault.content,
-  settings: storeDataDefault.settings,
+  products: [],
+  content: {},
+  settings: {},
   isLoading: false,
   refresh: async () => {},
 });
 
-export function StoreDataProvider({ children }: { children: React.ReactNode }) {
-  const [products, setProducts] = useState<Product[]>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const cached = localStorage.getItem("hv_live_products_cache");
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            return parsed.map(normalizeProduct);
-          }
-        }
-      } catch (e) {}
-    }
-    return MOCK_PRODUCTS;
-  });
-  const [content, setContent] = useState<any>(storeDataDefault.content);
-  const [settings, setSettings] = useState<any>(storeDataDefault.settings);
+export interface StoreInitialData {
+  products: any[];
+  content: any;
+  settings: any;
+}
+
+/**
+ * `initial` is rendered on the server from the database, so the first paint
+ * already shows live products and content. The provider then keeps it fresh.
+ */
+export function StoreDataProvider({ initial, children }: { initial: StoreInitialData; children: React.ReactNode }) {
+  const [products, setProducts] = useState<Product[]>(() => (initial.products || []).map(normalizeProduct));
+  const [content, setContent] = useState<any>(initial.content || {});
+  const [settings, setSettings] = useState<any>(initial.settings || {});
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const fetchLiveStoreData = useCallback(async () => {
@@ -110,11 +107,7 @@ export function StoreDataProvider({ children }: { children: React.ReactNode }) {
       if (!res.ok) return;
       const data = await res.json();
       if (data && Array.isArray(data.products)) {
-        const normalized = data.products.map(normalizeProduct);
-        setProducts(normalized);
-        try {
-          localStorage.setItem("hv_live_products_cache", JSON.stringify(normalized));
-        } catch (e) {}
+        setProducts(data.products.map(normalizeProduct));
       }
       if (data.content) setContent(data.content);
       if (data.settings) setSettings(data.settings);
@@ -134,7 +127,7 @@ export function StoreDataProvider({ children }: { children: React.ReactNode }) {
       if (document.visibilityState === "visible") fetchLiveStoreData();
     };
     const onStorage = (e: StorageEvent) => {
-      if (e.key === "hv_store_updated" || e.key === "hv_last_sync" || e.key === "hv_live_products_cache") {
+      if (e.key === "hv_store_updated" || e.key === "hv_last_sync") {
         fetchLiveStoreData();
       }
     };
@@ -199,4 +192,11 @@ export function StoreDataProvider({ children }: { children: React.ReactNode }) {
 
 export function useStoreData() {
   return useContext(StoreDataContext);
+}
+
+/** Support contact details from the admin settings. */
+export function useSupport() {
+  const { settings } = useContext(StoreDataContext);
+  const phone = whatsappNumber(settings);
+  return { phone, link: (text?: string) => whatsappLink(phone, text) };
 }

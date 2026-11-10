@@ -1,8 +1,11 @@
+import { whatsappLink, whatsappNumber } from "@/lib/contact";
+import { getStoreSnapshot } from "@/lib/storeSnapshot";
 import React from "react";
 import Link from "next/link";
 import { ArrowLeft, Compass, Sparkles } from "lucide-react";
 
-export default function NotFound() {
+export default async function NotFound() {
+  const supportLink = whatsappLink(whatsappNumber((await getStoreSnapshot()).settings));
   return (
     <div className="min-h-screen bg-[#090707] text-white flex items-center justify-center px-4 sm:px-6 relative overflow-hidden">
       {/* Background radial glow */}
@@ -51,7 +54,7 @@ export default function NotFound() {
         <div className="mt-12 text-xs text-stone-300">
           Kömək lazımdır?{" "}
           <a
-            href="https://wa.me/994103283152"
+            href={supportLink}
             target="_blank"
             rel="noopener noreferrer"
             className="text-[#E6C280] underline underline-offset-4 hover:text-white transition"

@@ -9,6 +9,7 @@ import {
 } from '@/lib/adminAuth';
 import { sendOrderStatusUpdate, sendBroadcastCampaign } from '@/lib/email/emailService';
 import { handleAdminUpload } from '@/lib/adminUpload';
+import { refreshStore } from '@/lib/storeSnapshot';
 import { db } from '@/lib/db/client';
 import { deleteProduct, listProducts, saveProduct } from '@/lib/db/products';
 import {
@@ -168,6 +169,7 @@ export async function POST(req: NextRequest, { params }: RouteContext) {
 
     if (route === 'products') {
       const product = await saveProduct(body);
+      refreshStore();
       return json({ success: true, product });
     }
 
@@ -178,6 +180,7 @@ export async function POST(req: NextRequest, { params }: RouteContext) {
     if (route === 'content') {
       const settings = body.settings ? await saveSettings(body.settings) : await getSettings();
       const content = body.content ? await saveContent(body.content) : await getContent();
+      refreshStore();
       return json({ success: true, settings, content });
     }
 
@@ -193,6 +196,7 @@ export async function POST(req: NextRequest, { params }: RouteContext) {
 
     if (route === 'categories') {
       const category = await saveCategory(body);
+      refreshStore();
       return json({ success: true, category, categories: await listCategories() });
     }
 
@@ -255,6 +259,7 @@ export async function DELETE(req: NextRequest, { params }: RouteContext) {
 
     if (route === 'products' && id) {
       await deleteProduct(id);
+      refreshStore();
       return json({ success: true });
     }
 
@@ -275,6 +280,7 @@ export async function DELETE(req: NextRequest, { params }: RouteContext) {
 
     if (route === 'categories' && id) {
       await deleteCategory(id);
+      refreshStore();
       return json({ success: true });
     }
 

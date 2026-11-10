@@ -1,5 +1,6 @@
 "use client";
 
+import { useSupport } from "@/context/StoreDataContext";
 import React, { useState } from "react";
 import { ChevronDown, HelpCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -90,6 +91,7 @@ const FAQ_ITEMS: FAQItem[] = [
 ];
 
 export function FAQSection() {
+  const support = useSupport();
   const [openId, setOpenId] = useState<string | null>("delivery");
   const { language } = useLanguage();
 
@@ -200,7 +202,7 @@ export function FAQSection() {
             ? "Başka bir sorunuz mu var? "
             : "Cavabını tapmadığınız başqa sualınız var? "}
           <a
-            href="https://wa.me/994103283152"
+            href={support.link()}
             target="_blank"
             rel="noopener noreferrer"
             className="text-[#E6C280] font-semibold underline underline-offset-4 hover:text-white transition"

@@ -3,6 +3,7 @@
 import React, { memo } from "react";
 import { usePathname } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
+import { useStoreData } from "@/context/StoreDataContext";
 
 interface TickerProps {
   className?: string;
@@ -10,15 +11,22 @@ interface TickerProps {
 
 export const Ticker = memo(function Ticker({ className = "" }: TickerProps) {
   const pathname = usePathname();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const { content } = useStoreData();
   const isHome = pathname === "/";
 
-  const announcementsList = [
+  const translated = [
     t.announcements?.freeShipping || "BAKI VƏ SUMQAYIT ƏRAZİSİNƏ ÇATDIRILMA PULSUZDUR",
     t.announcements?.customStudio || "FƏRDİ ÇAP STUDİYASI — ÖZ DİZAYNINI KÖYNƏYƏ ÇAP ET",
     t.announcements?.cottonLinen || "100% PREMİUM DARANMIŞ PAMBIQ VƏ TƏBİİ KƏTAN KOLLEKSİYASI",
     t.announcements?.guaranteedReturns || "14 GÜN ƏRZİNDƏ ASAN VƏ ZƏMANƏTLİ QAYTARILMA",
   ];
+
+  // The admin panel manages the Azerbaijani announcements; other languages use the built-in translations.
+  const managed: string[] = Array.isArray(content?.announcements)
+    ? content.announcements.filter((a: unknown): a is string => typeof a === "string" && a.trim().length > 0)
+    : [];
+  const announcementsList = language === "az" && managed.length > 0 ? managed : translated;
 
   return (
     <div

@@ -5,8 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { useParams, notFound } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { MOCK_PRODUCTS, Product } from "@/data/products";
-import { useStoreData, normalizeProduct } from "@/context/StoreDataContext";
+import { Product } from "@/data/products";
+import { useStoreData, normalizeProduct, useSupport } from "@/context/StoreDataContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { translateColor, translateBadge } from "@/lib/translations";
@@ -45,6 +45,7 @@ function getGenderLabel(gender: string | undefined, lang: string): string {
 
 
 export default function ProductDetailPage() {
+  const support = useSupport();
   const params = useParams();
   const slug = params?.slug as string;
   const { formatPrice, formatProductPrice } = useCurrency();
@@ -74,8 +75,7 @@ export default function ProductDetailPage() {
 
   const product =
     directProduct ||
-    products.find((p) => p.slug === slug || p.id === slug) ||
-    MOCK_PRODUCTS.find((p) => p.slug === slug || p.id === slug);
+    products.find((p) => p.slug === slug || p.id === slug);
 
   useEffect(() => {
     let isCancelled = false;
@@ -223,7 +223,7 @@ export default function ProductDetailPage() {
     openCart();
   };
 
-  const recommended = (products.length > 0 ? products : MOCK_PRODUCTS).filter((p) => p.id !== product.id).slice(0, 4);
+  const recommended = products.filter((p) => p.id !== product.id).slice(0, 4);
 
   return (
     <div className="w-full min-h-screen bg-[#FAF7F2] text-[#111827] pt-8 pb-24">
@@ -519,15 +519,15 @@ export default function ProductDetailPage() {
 
               {/* WhatsApp Direct Order / Consultation Button */}
               <a
-                href={`https://wa.me/994103283152?text=${encodeURIComponent(
+                href={support.link(
                   `Salam! HORWALLE-də "${product.name}" (${selectedSize}, ${activeColor?.name || ""}) haqqında məlumat almaq və ya sifariş etmək istəyirəm.`
-                )}`}
+                )}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full py-3 rounded-full bg-emerald-50 hover:bg-emerald-100/90 text-emerald-800 border border-emerald-300/80 font-bold text-xs transition-all flex items-center justify-center gap-2 active:scale-98 shadow-2xs cursor-pointer"
               >
                 <MessageCircle size={15} className="text-emerald-600 fill-emerald-600" />
-                <span>WhatsApp Dəstək (+994 10 328 31 52)</span>
+                <span>WhatsApp Dəstək ({support.phone})</span>
               </a>
             </motion.div>
 

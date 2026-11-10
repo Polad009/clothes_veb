@@ -31,5 +31,18 @@ export const supabaseServer: SupabaseClient | null = (supabaseUrl && supabaseKey
     })
   : null;
 
-
-
+/**
+ * Read-only client for storefront pages. Its requests go through Next's data
+ * cache under the given tag, so pages can be prerendered and are refreshed the
+ * moment the tag is revalidated (see lib/storeSnapshot.ts).
+ */
+export function createCachedReadClient(tag: string, revalidateSeconds: number): SupabaseClient | null {
+  if (!supabaseUrl || !supabaseKey) return null;
+  return createClient(supabaseUrl, supabaseKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: {
+      fetch: (url, options) =>
+        fetch(url, { ...options, next: { revalidate: revalidateSeconds, tags: [tag] } } as RequestInit),
+    },
+  });
+}

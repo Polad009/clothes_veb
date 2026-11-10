@@ -1,5 +1,6 @@
 "use client";
 
+import { useSupport } from "@/context/StoreDataContext";
 import React, { useState, useEffect, useRef } from "react";
 import {
   MessageCircle,
@@ -159,6 +160,7 @@ const CHAT_I18N = {
 };
 
 export function FloatingWhatsApp() {
+  const support = useSupport();
   const { user, profile } = useAuth();
   const { language } = useLanguage();
   const t = CHAT_I18N[language as keyof typeof CHAT_I18N] || CHAT_I18N.az;
@@ -184,10 +186,8 @@ export function FloatingWhatsApp() {
   const hasInitializedSoundRef = useRef<boolean>(false);
   const typingTimeoutRef = useRef<any>(null);
 
-  const phoneNumber = "+994 10 328 31 52";
-  const whatsappUrl =
-    "https://wa.me/994103283152?text=" +
-    encodeURIComponent("Salam! Horwalle atelyesinə yazıram. Məhsul və ya sifarişlə bağlı kömək edə bilərsiniz?");
+  const phoneNumber = support.phone;
+  const whatsappUrl = support.link("Salam! Horwalle atelyesinə yazıram. Məhsul və ya sifarişlə bağlı kömək edə bilərsiniz?");
 
   // Initialize unique customer session ID & onboarding check
   useEffect(() => {

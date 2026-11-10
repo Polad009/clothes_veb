@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, X, Palette, ArrowRight } from "lucide-react";
-import { MOCK_PRODUCTS, Product } from "@/data/products";
+import { Product } from "@/data/products";
 import { useStoreData } from "@/context/StoreDataContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useLanguage } from "@/context/LanguageContext";
@@ -134,7 +134,7 @@ export function HeaderQuickSearch({ isLightMode, onOpenChange }: HeaderQuickSear
   const trimmed = query.trim().toLowerCase();
   const matchingProducts: Product[] = useMemo(() => {
     if (!trimmed) return [];
-    const source = products.length > 0 ? products : MOCK_PRODUCTS;
+    const source = products;
     return source.filter(
       (p) =>
         p.name.toLowerCase().includes(trimmed) ||

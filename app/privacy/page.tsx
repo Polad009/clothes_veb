@@ -1,3 +1,5 @@
+import { whatsappLink, whatsappNumber } from "@/lib/contact";
+import { getStoreSnapshot } from "@/lib/storeSnapshot";
 import React from "react";
 import Link from "next/link";
 import { Metadata } from "next";
@@ -11,7 +13,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const supportLink = whatsappLink(whatsappNumber((await getStoreSnapshot()).settings));
   return (
     <div className="min-h-screen bg-[#090707] text-stone-200 pt-28 pb-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
@@ -104,7 +107,7 @@ export default function PrivacyPage() {
               <p className="text-stone-400 text-xs sm:text-sm">Məlumatlarınızın silinməsi və ya dəqiqləşdirilməsi üçün birbaşa bizimlə əlaqə saxlayın.</p>
             </div>
             <a
-              href="https://wa.me/994103283152"
+              href={supportLink}
               target="_blank"
               rel="noopener noreferrer"
               className="px-5 py-2.5 rounded-xl bg-[#E6C280] text-black font-semibold text-xs uppercase tracking-wider hover:bg-white transition-colors shrink-0"

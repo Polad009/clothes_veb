@@ -1,11 +1,13 @@
 "use client";
 
+import { useSupport } from "@/context/StoreDataContext";
 import React, { Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { AlertTriangle, ArrowLeft, RefreshCw, MessageCircle } from "lucide-react";
 
 function CheckoutFailedContent() {
+  const support = useSupport();
   const searchParams = useSearchParams();
   const orderId = searchParams.get("order") || searchParams.get("orderId");
   const reason = searchParams.get("reason") || "Ödəniş provayderi tərəfindən əməliyyat təsdiqlənmədi.";
@@ -44,7 +46,7 @@ function CheckoutFailedContent() {
           <span>Yenidən Cəhd Et</span>
         </Link>
         <a
-          href="https://wa.me/994103283152?text=Salam!%20Sifari%C5%9Fin%20%C3%B6d%C9%99ni%C5%9Find%C9%99%20problem%20ba%C5%9F%20verdi"
+          href={support.link("Salam! Sifarişin ödənişində problem baş verdi")}
           target="_blank"
           rel="noopener noreferrer"
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-white border border-stone-300 text-stone-800 font-semibold text-xs uppercase tracking-wider hover:bg-stone-50 transition active:scale-98"

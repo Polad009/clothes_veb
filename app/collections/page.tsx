@@ -38,7 +38,6 @@ import React, { Suspense, useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { MOCK_PRODUCTS } from "@/data/products";
 import { useStoreData } from "@/context/StoreDataContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { ProductCard } from "@/components/ProductCard";

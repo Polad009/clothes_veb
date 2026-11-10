@@ -6,11 +6,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Palette, ShieldCheck, Truck, RotateCcw, Award, CheckCircle2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { MOCK_PRODUCTS } from "@/data/products";
 import { ProductCard } from "@/components/ProductCard";
 import { Hero } from "@/components/Hero";
 import { FAQSection } from "@/components/FAQSection";
-import storeData from "@/data/storeData.json";
 
 const UnwovenLoom = dynamic(
   () => import("@/components/UnwovenLoom").then((mod) => mod.UnwovenLoom),
@@ -32,10 +30,10 @@ export default function Home() {
   const { formatPrice } = useCurrency();
   const { products, content } = useStoreData();
   const [activeCategory, setActiveCategory] = useState<"all" | "koynek" | "hudi" | "salvar" | "aksesuar">("all");
-  const hero = content?.hero || storeData.content?.hero || {};
-  const podBanner = content?.podBanner || (storeData.content as any)?.podBanner || {};
-  const promoBanner = content?.promoBanner || storeData.content?.promoBanner;
-  const campaignSecondary = content?.campaignSecondary || storeData.content?.campaignSecondary;
+  const hero = content?.hero || {};
+  const podBanner = content?.podBanner || {};
+  const promoBanner = content?.promoBanner;
+  const campaignSecondary = content?.campaignSecondary;
   const [badgeIndex, setBadgeIndex] = useState(0);
 
   const [introRevealed, setIntroRevealed] = useState(true);

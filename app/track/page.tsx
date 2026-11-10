@@ -1,5 +1,6 @@
 "use client";
 
+import { useSupport } from "@/context/StoreDataContext";
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -71,6 +72,7 @@ interface OrderTrackingData {
 }
 
 function OrderTrackerContent() {
+  const support = useSupport();
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") || searchParams.get("orderId") || "";
 
@@ -376,9 +378,9 @@ function OrderTrackerContent() {
   const currentStep = order?.statusMeta?.step || 1;
   const isCancelled = order?.statusMeta?.isCancelled || false;
 
-  const whatsappHelpUrl = `https://wa.me/994103283152?text=${encodeURIComponent(
+  const whatsappHelpUrl = support.link(
     "Salam! HORWALLE-dən sifariş vermişdim amma izləmə kodunu xatırlamıram. Adım və telefon nömrəmlə sifarişimin statusunu öyrənməyə kömək edə bilərsiniz?"
-  )}`;
+  );
 
   return (
     <div className="w-full min-h-screen bg-[#FAF7F2] text-stone-900 pt-8 pb-24">
@@ -897,13 +899,13 @@ function OrderTrackerContent() {
             <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-stone-500">
               <div>Sifarişinizlə bağlı hər hansı sualınız var? Bizimlə dərhal əlaqə saxlayın.</div>
               <a
-                href="https://wa.me/994103283152"
+                href={support.link()}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition shadow-2xs"
               >
                 <Phone size={13} />
-                <span>WhatsApp Dəstək (+994 10 328 31 52)</span>
+                <span>WhatsApp Dəstək ({support.phone})</span>
               </a>
             </div>
 

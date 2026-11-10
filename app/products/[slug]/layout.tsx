@@ -1,48 +1,41 @@
 import { Metadata } from "next";
-import storeData from "@/data/storeData.json";
+import { getStoreSnapshot } from "@/lib/storeSnapshot";
 
 interface Props {
   params: { slug: string };
   children: React.ReactNode;
 }
 
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.horwalle.com").replace(/\/$/, "");
+
+/** Search-engine and link-preview metadata, read from the live catalogue. */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const products = (storeData as any).products || [];
-  const product = products.find((p: any) => p.slug === params.slug);
+  const slug = decodeURIComponent(params.slug);
+  const canonicalUrl = `${SITE_URL}/products/${params.slug}`;
+  const { products } = await getStoreSnapshot();
+  const product = products.find((p) => p.slug === slug || p.id === slug);
 
   if (!product) {
     return {
-      title: "Məhsul | Horwalle Atelier",
+      title: "Məhsul",
       description: "Horwalle Atelier eksklüziv kolleksiyası.",
-      alternates: {
-        canonical: `https://horvvalle.com/products/${params.slug}`,
-      },
+      alternates: { canonical: canonicalUrl },
     };
   }
 
-  const title = `${product.name} | Horwalle Atelier`;
-  const description =
-    product.description ||
-    `${product.name} — 100% premium keyfiyyət və fərdi dərzilik kəsimi ilə Horwalle Atelier-də.`;
-  const canonicalUrl = `https://horvvalle.com/products/${params.slug}`;
-
-  // Find primary image
-  let imageUrl = product.image;
-  if (!imageUrl && product.colors && product.colors.length > 0) {
-    imageUrl = product.colors[0].image;
-  }
-  const fullImageUrl = imageUrl
-    ? imageUrl.startsWith("http")
-      ? imageUrl
-      : `https://horvvalle.com${imageUrl}`
-    : "https://horvvalle.com/images/salvar-and-shortik-showcase.webp";
+  const title = product.name;
+  const summary = product.description.replace(/\s+/g, " ").trim();
+  const description = summary
+    ? summary.length > 160
+      ? `${summary.slice(0, 157).trimEnd()}…`
+      : summary
+    : `${product.name} — 100% premium keyfiyyət və fərdi dərzilik kəsimi ilə Horwalle Atelier-də.`;
+  const imageUrl = product.image.startsWith("http") ? product.image : `${SITE_URL}${product.image}`;
 
   return {
     title,
     description,
-    alternates: {
-      canonical: canonicalUrl,
-    },
+    alternates: { canonical: canonicalUrl },
     openGraph: {
       type: "website",
       locale: "az_AZ",
@@ -50,20 +43,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       siteName: "Horwalle Atelier",
-      images: [
-        {
-          url: fullImageUrl,
-          width: 1200,
-          height: 630,
-          alt: product.name,
-        },
-      ],
+      images: [{ url: imageUrl, alt: product.name }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [fullImageUrl],
+      images: [imageUrl],
     },
   };
 }
@@ -71,4 +57,3 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default function ProductLayout({ children }: Props) {
   return <>{children}</>;
 }
-

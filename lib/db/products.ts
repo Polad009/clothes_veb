@@ -1,3 +1,4 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { db, isUuid, unwrap } from './client';
 
 const DEFAULT_IMAGE = '/images/hero/black-tee.jpg';
@@ -98,9 +99,9 @@ export function slugify(input: string): string {
   return slug || 'mehsul';
 }
 
-export async function listProducts(): Promise<CatalogProduct[]> {
+export async function listProducts(client: SupabaseClient = db()): Promise<CatalogProduct[]> {
   const rows = unwrap(
-    await db()
+    await client
       .from('products')
       .select('*')
       .order('sort_order', { ascending: true })

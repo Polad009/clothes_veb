@@ -1,8 +1,9 @@
 import { MetadataRoute } from "next";
-import { MOCK_PRODUCTS } from "@/data/products";
+import { getStoreSnapshot } from "@/lib/storeSnapshot";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.horwalle.com";
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const baseUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.horwalle.com").replace(/\/$/, "");
+  const { products } = await getStoreSnapshot();
 
   // Base static routes
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -74,8 +75,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // Dynamic product routes
-  const productRoutes: MetadataRoute.Sitemap = MOCK_PRODUCTS.map((p) => ({
+  // Product routes from the live catalogue
+  const productRoutes: MetadataRoute.Sitemap = products.map((p) => ({
     url: `${baseUrl}/products/${p.slug}`,
     lastModified: new Date(),
     changeFrequency: "weekly",
