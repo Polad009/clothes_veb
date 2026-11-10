@@ -14,6 +14,8 @@ export interface Category {
   desc?: string;
   descriptions?: Partial<Record<Lang, string>>;
   image?: string;
+  /** Large photo for this category's banner on the home page. */
+  banner?: string;
   /** Hidden categories stay on their products but disappear from the site's menus. */
   active: boolean;
   /** Shown in the header menu. */

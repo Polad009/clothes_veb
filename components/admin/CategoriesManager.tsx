@@ -6,6 +6,8 @@ import { ArrowDown, ArrowUp, ImagePlus, Loader2, Plus } from "lucide-react";
 import { adminFetch } from "@/lib/adminClient";
 import { type Category, CATEGORY_ID_RE, LANG_LABEL, LANGS, type Lang } from "@/lib/categories";
 import { Badge, Button, Card, ConfirmButton, EmptyState, Field, Input, Modal, PageHeader, Textarea, Toggle, useToast } from "@/components/admin/ui";
+import { ImageField } from "@/components/admin/ImageField";
+import { DEFAULT_PHOTOS } from "@/components/store/photos";
 
 interface Draft {
   create: boolean;
@@ -13,6 +15,7 @@ interface Draft {
   titles: Record<Lang, string>;
   descriptions: Record<Lang, string>;
   image: string;
+  banner: string;
   active: boolean;
   showInMenu: boolean;
 }
@@ -40,7 +43,7 @@ function toDraft(c: Category): Draft {
     titles[l] = c.titles?.[l] || "";
     descriptions[l] = c.descriptions?.[l] || "";
   }
-  return { create: false, id: c.id, titles, descriptions, image: c.image || "", active: c.active !== false, showInMenu: c.showInMenu !== false };
+  return { create: false, id: c.id, titles, descriptions, image: c.image || "", banner: c.banner || "", active: c.active !== false, showInMenu: c.showInMenu !== false };
 }
 
 export function CategoriesManager({ categories, counts }: { categories: Category[]; counts: Record<string, number> }) {
@@ -134,6 +137,7 @@ export function CategoriesManager({ categories, counts }: { categories: Category
           titles: { en: draft.titles.en, ru: draft.titles.ru, tr: draft.titles.tr },
           descriptions: { en: draft.descriptions.en, ru: draft.descriptions.ru, tr: draft.descriptions.tr },
           image: draft.image,
+          banner: draft.banner,
           active: draft.active,
           showInMenu: draft.showInMenu,
         },
@@ -158,7 +162,7 @@ export function CategoriesManager({ categories, counts }: { categories: Category
             variant="primary"
             onClick={() => {
               setLang("az");
-              setDraft({ create: true, id: "", titles: empty(), descriptions: empty(), image: "", active: true, showInMenu: true });
+              setDraft({ create: true, id: "", titles: empty(), descriptions: empty(), image: "", banner: "", active: true, showInMenu: true });
             }}
           >
             <Plus className="h-4 w-4" /> Yeni kateqoriya
@@ -278,7 +282,7 @@ export function CategoriesManager({ categories, counts }: { categories: Category
             </Field>
 
             <div>
-              <span className="mb-1.5 block text-[13px] font-medium text-stone-700">Şəkil (istəyə görə)</span>
+              <span className="mb-1.5 block text-[13px] font-medium text-stone-700">Kiçik şəkil (menyu və axtarış üçün, istəyə görə)</span>
               <div className="flex items-center gap-3">
                 <button
                   type="button"
@@ -297,6 +301,15 @@ export function CategoriesManager({ categories, counts }: { categories: Category
               </div>
               <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={upload} />
             </div>
+
+            <ImageField
+              wide
+              label="Ana səhifə banner fotosu (sağ tərəfdə böyük)"
+              hint="Bu kateqoriyanın ana səhifədəki bannerində görünür. Tünd fonlu, insanlı foto ən yaxşısıdır. Boş = standart foto."
+              value={draft.banner}
+              onChange={(url) => setDraft({ ...draft, banner: url })}
+              fallback={DEFAULT_PHOTOS[draft.id] || DEFAULT_PHOTOS.hero}
+            />
 
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="flex items-center justify-between rounded-lg border border-stone-200 px-4 py-3">

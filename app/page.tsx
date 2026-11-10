@@ -4,51 +4,92 @@ import React, { useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
-import type { Product } from "@/data/products";
 import { useLanguage } from "@/context/LanguageContext";
 import { useCategories, useStoreData } from "@/context/StoreDataContext";
 import { categoryDescription, categoryTitle, type Category } from "@/lib/categories";
 import { ProductTile } from "@/components/store/ProductTile";
 import { T, contentText, tr } from "@/components/store/i18n";
-import { useCutouts } from "@/components/store/useCutout";
+import { DEFAULT_PHOTOS } from "@/components/store/photos";
 
 const pill =
   "inline-flex items-center gap-2 rounded-full bg-bone px-7 py-3.5 text-[12px] font-extrabold uppercase tracking-[0.16em] text-ink transition hover:bg-white active:scale-[0.98] [font-stretch:108%]";
 
-function frontImage(p?: Product) {
-  return p?.colors?.[0]?.image || p?.image || "";
-}
-function Hero({ featured, art }: { featured?: Product; art?: string }) {
-  const { language } = useLanguage();
-  const { content } = useStoreData();
-  const tag = contentText(content, language, "hero", "tag", { az: "Yeni kolleksiya", en: "New collection", ru: "Новая коллекция", tr: "Yeni koleksiyon" });
-
+/** Text on the left, a large photo filling the right side (full-bleed on phones). */
+function EditorialBlock({
+  photo,
+  alt,
+  kicker,
+  title,
+  body,
+  href,
+  cta,
+  full = false,
+  priority = false,
+}: {
+  photo: string;
+  alt: string;
+  kicker: string;
+  title: string;
+  body?: string;
+  href: string;
+  cta: string;
+  full?: boolean;
+  priority?: boolean;
+}) {
   return (
-    <section className="relative flex h-[100svh] min-h-[620px] w-full items-end overflow-hidden bg-ink">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_45%,#2b2b2b_0%,#0f0f0f_55%,#0a0a0a_100%)]" />
-      {/* giant wordmark behind the garment */}
-      <div className="pointer-events-none absolute inset-x-0 top-[18%] select-none text-center font-grotesk text-[23vw] font-black uppercase leading-none tracking-[-0.04em] text-white/[0.04] [font-stretch:125%] sm:top-[12%]">
-        Horwalle
+    <section className={`group relative w-full overflow-hidden border-b border-white/10 bg-ink ${full ? "h-[100svh] min-h-[640px]" : "h-[82svh] min-h-[520px]"}`}>
+      <div className="absolute inset-0 sm:left-auto sm:w-[62%]">
+        <Image
+          src={photo}
+          alt={alt}
+          fill
+          priority={priority}
+          sizes="(max-width: 640px) 100vw, 62vw"
+          className="object-cover object-center transition duration-[1200ms] ease-out group-hover:scale-[1.03]"
+        />
+        {/* blend the photo into the black: left edge on desktop, bottom on phones */}
+        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/50 to-transparent sm:bg-gradient-to-r sm:from-ink sm:via-ink/20 sm:to-transparent" />
       </div>
-      {art && (
-        <div className="hw-rise absolute inset-x-0 bottom-[14%] top-[12%] sm:bottom-[6%] sm:top-[10%]">
-          <Image src={art} alt={featured?.name || "Horwalle"} fill priority sizes="100vw" className="object-contain drop-shadow-[0_40px_60px_rgba(0,0,0,0.6)]" />
-        </div>
-      )}
-      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-ink via-ink/60 to-transparent" />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-[1600px] flex-col gap-6 px-4 pb-10 font-grotesk text-bone sm:px-6 sm:pb-14 lg:px-10">
-        <div>
-          <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-bone-dim [font-stretch:110%]">{tag}</p>
-          <h1 lang="en" className="mt-2 max-w-4xl text-[8.5vw] font-black uppercase leading-[0.9] tracking-[-0.02em] [font-stretch:112%] sm:text-6xl lg:text-7xl">
-            {featured?.name?.replace(/^HOR(W|VV)ALLE\s+/i, "") || "Horwalle"}
-          </h1>
+      <div className={`relative z-10 mx-auto flex h-full max-w-[1600px] items-end px-4 font-grotesk text-bone sm:items-center sm:px-6 lg:px-10 ${full ? "pb-12 sm:pb-0" : "pb-10 sm:pb-0"}`}>
+        <div className="max-w-xl sm:max-w-[46%]">
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-bone-dim [font-stretch:110%]">{kicker}</p>
+          {full ? (
+            <h1 className="mt-3 text-[13vw] font-black uppercase leading-[0.86] tracking-[-0.02em] [font-stretch:115%] sm:text-6xl lg:text-8xl">{title}</h1>
+          ) : (
+            <h2 className="mt-3 text-[15vw] font-black uppercase leading-[0.86] tracking-[-0.02em] [font-stretch:118%] sm:text-6xl lg:text-8xl">{title}</h2>
+          )}
+          {body && <p className="mt-5 max-w-md text-[14px] leading-relaxed text-bone-dim sm:text-[15px]">{body}</p>}
+          <Link href={href} className={`${pill} mt-8`}>
+            {cta}
+          </Link>
         </div>
-        <Link href={featured ? `/products/${featured.slug}` : "/collections"} className={`${pill} self-start`}>
-          {tr(language, T.shopNow)}
-        </Link>
       </div>
     </section>
+  );
+}
+
+function Hero() {
+  const { language } = useLanguage();
+  const { content } = useStoreData();
+  const hero = content?.hero || {};
+  return (
+    <EditorialBlock
+      full
+      priority
+      photo={hero.photo || DEFAULT_PHOTOS.hero}
+      alt="Horwalle"
+      kicker={contentText(content, language, "hero", "tag", { az: "Yeni kolleksiya", en: "New collection", ru: "Новая коллекция", tr: "Yeni koleksiyon" })}
+      title={contentText(content, language, "hero", "title", { az: "Yeni sezon", en: "New season", ru: "Новый сезон", tr: "Yeni sezon" })}
+      body={contentText(content, language, "hero", "text", {
+        az: "Qalın pambıq, dəqiq kəsim, gündəlik geyim. Bakı və Sumqayıtda 1–2 günə çatdırılma.",
+        en: "Heavy cotton, precise cuts, everyday wear. 1–2 day delivery in Baku and Sumgayit.",
+        ru: "Плотный хлопок, точный крой, на каждый день. Доставка по Баку и Сумгаиту за 1–2 дня.",
+        tr: "Kalın pamuk, net kesim, günlük giyim. Bakü ve Sumgayıt'a 1–2 günde teslimat.",
+      })}
+      href={hero.link || "/collections"}
+      cta={tr(language, T.shopNow)}
+    />
   );
 }
 
@@ -66,49 +107,20 @@ function ShippingStrip() {
   );
 }
 
-/** Full-width banner per category, with that category's garments laid out side by side. */
-function CategoryBanner({ category, items, index, pics }: { category: Category; items: Product[]; index: number; pics: string[] }) {
+/** One editorial banner per category: text left, the category's photo large on the right. */
+function CategoryBanner({ category, index }: { category: Category; index: number }) {
   const { language } = useLanguage();
-  const flip = index % 2 === 1;
-  const desc = categoryDescription(category, language);
-
+  const photo = (category as any).banner || DEFAULT_PHOTOS[category.id] || DEFAULT_PHOTOS.hero;
   return (
-    <section className="group relative h-[78svh] min-h-[480px] w-full overflow-hidden border-b border-white/10 bg-ink-850">
-      <div
-        className={`absolute inset-0 ${
-          flip ? "bg-[radial-gradient(ellipse_at_30%_50%,#262626_0%,#101010_65%)]" : "bg-[radial-gradient(ellipse_at_70%_50%,#262626_0%,#101010_65%)]"
-        }`}
-      />
-      <div className={`absolute inset-y-[8%] flex items-center justify-center ${flip ? "left-0 right-0 sm:right-[30%]" : "left-0 right-0 sm:left-[30%]"}`}>
-        {pics.map((src, i) => (
-          <div
-            key={src + i}
-            className="relative h-full w-1/3 min-w-[38%] transition duration-700 ease-out group-hover:scale-[1.03]"
-            style={{ marginLeft: i === 0 ? 0 : "-9%", zIndex: pics.length - Math.abs(i - 1), transform: `translateY(${i === 1 ? "-3%" : "3%"})` }}
-          >
-            <Image src={src} alt="" fill sizes="(max-width: 640px) 50vw, 30vw" className="object-contain drop-shadow-[0_30px_40px_rgba(0,0,0,0.55)]" />
-          </div>
-        ))}
-      </div>
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent sm:bg-gradient-to-r sm:from-black/70 sm:via-transparent" />
-
-      <div className="relative z-10 mx-auto flex h-full max-w-[1600px] items-end px-4 pb-10 font-grotesk text-bone sm:px-6 sm:pb-14 lg:px-10">
-        <div className="flex w-full flex-col gap-6">
-          <div className="max-w-xl">
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-bone-dim [font-stretch:110%]">
-              {tr(language, T.collection)} · {String(index + 1).padStart(2, "0")}
-            </p>
-            <h2 className="mt-2 text-6xl font-black uppercase leading-[0.86] tracking-[-0.02em] [font-stretch:118%] sm:text-8xl">
-              {categoryTitle(category, language)}
-            </h2>
-            {desc && <p className="mt-4 max-w-md text-[14px] leading-relaxed text-bone-dim">{desc}</p>}
-          </div>
-          <Link href={`/collections?category=${encodeURIComponent(category.id)}`} className={`${pill} self-start`}>
-            {tr(language, T.shopNow)}
-          </Link>
-        </div>
-      </div>
-    </section>
+    <EditorialBlock
+      photo={photo}
+      alt={categoryTitle(category, language)}
+      kicker={`${tr(language, T.collection)} · ${String(index + 1).padStart(2, "0")}`}
+      title={categoryTitle(category, language)}
+      body={categoryDescription(category, language) || undefined}
+      href={`/collections?category=${encodeURIComponent(category.id)}`}
+      cta={tr(language, T.shopNow)}
+    />
   );
 }
 
@@ -146,7 +158,7 @@ function StudioBanner({ art }: { art?: string }) {
         </div>
         <div className="relative mx-auto aspect-square w-full max-w-lg">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,#dcd8cf_0%,#edeae3_70%)]" />
-          {art && <Image src={art} alt="" fill sizes="(max-width: 768px) 90vw, 40vw" className="object-contain p-6" />}
+          {art && <Image src={art} alt="" fill sizes="(max-width: 768px) 90vw, 40vw" className="object-cover mix-blend-multiply" />}
           <div className="absolute left-1/2 top-[30%] flex h-[34%] w-[30%] -translate-x-1/2 items-center justify-center border-2 border-dashed border-bone/80 bg-black/10 backdrop-blur-[1px]">
             <span className="text-center text-[11px] font-extrabold uppercase tracking-[0.16em] text-bone">
               {tr(language, { az: "Sənin dizaynın", en: "Your design", ru: "Твой дизайн", tr: "Senin tasarımın" })}
@@ -160,34 +172,22 @@ function StudioBanner({ art }: { art?: string }) {
 
 export default function Home() {
   const { language } = useLanguage();
-  const { products } = useStoreData();
+  const { products, content } = useStoreData();
   const categories = useCategories();
 
   const available = useMemo(() => products.filter((p) => p.inStock !== false), [products]);
-  const images = useMemo(() => Array.from(new Set(available.map(frontImage).filter(Boolean))), [available]);
-  const cutouts = useCutouts(images);
-  const isCut = (p: Product) => Boolean(cutouts?.includes(frontImage(p)));
-  const featured = available.find(isCut) || available[0];
   const banners = useMemo(
-    () =>
-      categories
-        .map((c) => {
-          const items = available.filter((p) => p.category === c.id);
-          return { category: c, items, pics: items.filter(isCut).slice(0, 3).map(frontImage) };
-        })
-        .filter((b) => b.items.length > 0),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [categories, available, cutouts]
+    () => categories.filter((c) => available.some((p) => p.category === c.id)),
+    [categories, available]
   );
-  const studioTee = available.find((p) => p.category === "koynek" && isCut(p)) || available.find(isCut);
 
   return (
     <div className="flex w-full flex-col bg-ink text-bone">
-      <Hero featured={featured} art={featured && isCut(featured) ? frontImage(featured) : undefined} />
+      <Hero />
       <ShippingStrip />
 
-      {banners.map((b, i) => (
-        <CategoryBanner key={b.category.id} category={b.category} items={b.items} pics={b.pics} index={i} />
+      {banners.map((c, i) => (
+        <CategoryBanner key={c.id} category={c} index={i} />
       ))}
 
       {available.length > 0 && (
@@ -208,7 +208,7 @@ export default function Home() {
         </section>
       )}
 
-      <StudioBanner art={studioTee ? frontImage(studioTee) : undefined} />
+      <StudioBanner art={(content?.podBanner?.photo as string) || DEFAULT_PHOTOS.studio} />
     </div>
   );
 }

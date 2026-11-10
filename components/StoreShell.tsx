@@ -18,19 +18,26 @@ export function StoreShell({ children }: { children: React.ReactNode }) {
     return <main className="m-0 flex min-h-screen w-full flex-col bg-[#F8F9FA] p-0">{children}</main>;
   }
 
+  // Pages built for the old light design get the dark colour mapping from globals.css (.hw-dark)
+  const p = pathname || "/";
+  const redesigned = p === "/" || p.startsWith("/collections") || p.startsWith("/products/");
+
   return (
     <>
       <Suspense fallback={<div className="h-[100px] w-full bg-ink" />}>
         <StoreHeader />
       </Suspense>
-      <main id="main-content" className="flex flex-grow flex-col focus:outline-none">
+      <main id="main-content" className={`flex flex-grow flex-col focus:outline-none ${redesigned ? "" : "hw-dark"}`}>
         {children}
       </main>
       <StoreFooter />
       <CartPanel />
-      <FloatingWhatsApp />
-      <AuthModal />
-      <CookieConsent />
+      {/* these overlays still use the old light classes: give them the dark mapping */}
+      <div className="hw-dark contents">
+        <FloatingWhatsApp />
+        <AuthModal />
+        <CookieConsent />
+      </div>
     </>
   );
 }

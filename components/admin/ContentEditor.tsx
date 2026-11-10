@@ -6,38 +6,34 @@ import { Plus, X } from "lucide-react";
 import { adminFetch } from "@/lib/adminClient";
 import { LANG_LABEL, LANGS, type Lang } from "@/lib/categories";
 import { cn } from "@/lib/utils";
+import { DEFAULT_PHOTOS } from "@/components/store/photos";
+import { ImageField } from "@/components/admin/ImageField";
 import { Button, Card, Field, Input, PageHeader, Textarea, useToast } from "@/components/admin/ui";
 
-type Banner = Record<string, string>;
-type SectionKey = "podBanner" | "promoBanner" | "campaignSecondary";
+type Texts = Record<string, string>;
+const HERO_TEXT = ["tag", "title", "text"] as const;
+const STUDIO_TEXT = ["tag", "title", "description", "ctaText"] as const;
 
-/** Texts in one language. Links and images are shared by all languages. */
+/** Texts in one language. Links and photos are shared by all languages. */
 interface LangTexts {
   announcements: string[];
-  hero: { tag?: string };
-  podBanner: Banner;
-  promoBanner: Banner;
-  campaignSecondary: Banner;
+  hero: Texts;
+  podBanner: Texts;
 }
 
-interface ContentDraft {
-  heroTag: string;
+export interface ContentDraft {
   announcements: string[];
   whatsappNumber: string;
-  podBanner: Banner;
-  promoBanner: Banner;
-  campaignSecondary: Banner;
+  hero: Texts; // tag, title, text, photo, link
+  podBanner: Texts; // tag, title, description, ctaText, ctaLink, photo
   i18n?: Partial<Record<Lang, Partial<LangTexts>>>;
 }
 
-const SECTIONS: Array<{ key: SectionKey; title: string; bodyField: "description" | "subtitle"; hasImage: boolean }> = [
-  { key: "podBanner", title: "Dizayn studiyası bloku", bodyField: "description", hasImage: true },
-  { key: "promoBanner", title: "Şalvar kolleksiyası bloku", bodyField: "subtitle", hasImage: false },
-  { key: "campaignSecondary", title: "Hudi kolleksiyası bloku", bodyField: "subtitle", hasImage: false },
-];
-const TEXT_FIELDS = ["tag", "title", "description", "subtitle", "ctaText"];
-
-const emptyTexts = (): LangTexts => ({ announcements: [], hero: {}, podBanner: {}, promoBanner: {}, campaignSecondary: {} });
+const emptyTexts = (): LangTexts => ({ announcements: [], hero: {}, podBanner: {} });
+const pick = (obj: Texts | undefined, keys: readonly string[]) =>
+  Object.fromEntries(keys.map((k) => [k, (obj?.[k] || "").trim()]).filter(([, v]) => v));
+const okLink = (v: string) => !v || /^(\/|https:\/\/)/.test(v);
+const okImage = (v: string) => !v || /^(\/|https:\/\/)/.test(v);
 
 export function ContentEditor({ initial }: { initial: ContentDraft }) {
   const router = useRouter();
@@ -54,31 +50,35 @@ export function ContentEditor({ initial }: { initial: ContentDraft }) {
   const isAz = lang === "az";
   const other = isAz ? null : i18n[lang as Exclude<Lang, "az">];
 
-  // Read/write helpers that target the language being edited
+  // read/write helpers for the language being edited
   const announcements = isAz ? draft.announcements : other!.announcements;
   const setAnnouncements = (list: string[]) =>
     isAz ? setDraft({ ...draft, announcements: list }) : setI18n({ ...i18n, [lang]: { ...other!, announcements: list } });
-  const heroTag = isAz ? draft.heroTag : other!.hero.tag || "";
-  const setHeroTag = (v: string) =>
-    isAz ? setDraft({ ...draft, heroTag: v }) : setI18n({ ...i18n, [lang]: { ...other!, hero: { ...other!.hero, tag: v } } });
-  const banner = (key: SectionKey): Banner => (isAz ? draft[key] : other![key]);
-  const setBanner = (key: SectionKey, field: string, value: string) =>
+  const text = (section: "hero" | "podBanner", field: string) => (isAz ? draft[section][field] : other![section]?.[field]) || "";
+  const setText = (section: "hero" | "podBanner", field: string, value: string) =>
     isAz
-      ? setDraft((d) => ({ ...d, [key]: { ...d[key], [field]: value } }))
-      : setI18n((all) => ({ ...all, [lang]: { ...all[lang as Exclude<Lang, "az">], [key]: { ...all[lang as Exclude<Lang, "az">][key], [field]: value } } }));
+      ? setDraft((d) => ({ ...d, [section]: { ...d[section], [field]: value } }))
+      : setI18n((all) => {
+          const cur = all[lang as Exclude<Lang, "az">];
+          return { ...all, [lang]: { ...cur, [section]: { ...(cur[section] || {}), [field]: value } } };
+        });
+  const azHint = (section: "hero" | "podBanner", field: string) => (isAz ? "" : draft[section]?.[field] || "");
+  const setShared = (section: "hero" | "podBanner", field: string, value: string) =>
+    setDraft((d) => ({ ...d, [section]: { ...d[section], [field]: value } }));
 
   const translatedCount = (l: Exclude<Lang, "az">) => {
     const t = i18n[l];
-    return t.announcements.filter(Boolean).length + (t.hero.tag ? 1 : 0) + SECTIONS.reduce((n, s) => n + TEXT_FIELDS.filter((f) => t[s.key]?.[f]).length, 0);
+    return t.announcements.filter(Boolean).length + Object.keys(pick(t.hero, HERO_TEXT)).length + Object.keys(pick(t.podBanner, STUDIO_TEXT)).length;
   };
 
   const save = async () => {
-    for (const s of SECTIONS) {
-      const link = (draft[s.key].ctaLink || "").trim();
-      if (link && !/^(\/|https:\/\/)/.test(link)) {
-        toast.error(`${s.title}: keçid "/" və ya "https://" ilə başlamalıdır.`);
-        return;
-      }
+    if (!okLink(draft.hero.link || "") || !okLink(draft.podBanner.ctaLink || "")) {
+      toast.error('Düymə keçidi "/" və ya "https://" ilə başlamalıdır.');
+      return;
+    }
+    if (!okImage(draft.hero.photo || "") || !okImage(draft.podBanner.photo || "")) {
+      toast.error('Şəkil ünvanı "/" və ya "https://" ilə başlamalıdır.');
+      return;
     }
     const phoneDigits = draft.whatsappNumber.replace(/\D/g, "");
     if (phoneDigits.length < 9 || phoneDigits.length > 15) {
@@ -86,21 +86,21 @@ export function ContentEditor({ initial }: { initial: ContentDraft }) {
       return;
     }
 
-    // Keep only filled-in translations
+    // keep only filled-in translations
     const cleanI18n: Record<string, Partial<LangTexts>> = {};
     for (const l of ["en", "ru", "tr"] as const) {
       const t = i18n[l];
       const entry: Partial<LangTexts> = {};
       const list = t.announcements.map((a) => a.trim()).filter(Boolean);
       if (list.length) entry.announcements = list;
-      if (t.hero.tag?.trim()) entry.hero = { tag: t.hero.tag.trim() };
-      for (const s of SECTIONS) {
-        const fields = Object.fromEntries(TEXT_FIELDS.map((f) => [f, (t[s.key]?.[f] || "").trim()]).filter(([, v]) => v));
-        if (Object.keys(fields).length) (entry as any)[s.key] = fields;
-      }
+      const hero = pick(t.hero, HERO_TEXT);
+      if (Object.keys(hero).length) entry.hero = hero;
+      const studio = pick(t.podBanner, STUDIO_TEXT);
+      if (Object.keys(studio).length) entry.podBanner = studio;
       if (Object.keys(entry).length) cleanI18n[l] = entry;
     }
 
+    const trimAll = (o: Texts) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, (v || "").trim()]));
     setSaving(true);
     try {
       await adminFetch("/api/admin/content", {
@@ -108,15 +108,13 @@ export function ContentEditor({ initial }: { initial: ContentDraft }) {
           settings: { whatsappNumber: draft.whatsappNumber.trim() },
           content: {
             announcements: draft.announcements.map((a) => a.trim()).filter(Boolean),
-            hero: { tag: draft.heroTag.trim() },
-            podBanner: draft.podBanner,
-            promoBanner: draft.promoBanner,
-            campaignSecondary: draft.campaignSecondary,
+            hero: trimAll(draft.hero),
+            podBanner: trimAll(draft.podBanner),
             i18n: cleanI18n,
           },
         },
       });
-      toast.success("Yadda saxlanıldı. Dəyişiklik saytda dərhal görünür.");
+      toast.success("Yadda saxlanıldı. Dəyişiklik saytda bir dəqiqə ərzində görünür.");
       router.refresh();
     } catch (e: any) {
       toast.error(e.message);
@@ -125,7 +123,7 @@ export function ContentEditor({ initial }: { initial: ContentDraft }) {
     }
   };
 
-  const placeholderFor = (key: SectionKey, field: string) => (isAz ? "" : draft[key]?.[field] || "");
+  const sharedNote = <p className="text-xs text-stone-500">Şəkil və keçid bütün dillər üçün eynidir; onları Azərbaycan bölməsində dəyişin.</p>;
 
   return (
     <>
@@ -175,11 +173,11 @@ export function ContentEditor({ initial }: { initial: ContentDraft }) {
           }
         >
           <div className="space-y-2 p-5">
-            <p className="text-xs text-stone-500">Saytın ən yuxarısında axan mətnlər. Siyahı boş qalsa, saytın standart elanları göstərilir.</p>
-            {announcements.map((text, i) => (
+            <p className="text-xs text-stone-500">Saytın ən yuxarısındakı zolaqda növbə ilə göstərilir. Siyahı boş qalsa, standart elan göstərilir.</p>
+            {announcements.map((a, i) => (
               <div key={i} className="flex gap-2">
-                <Input value={text} aria-label={`Elan ${i + 1}`} onChange={(e) => setAnnouncements(announcements.map((a, ai) => (ai === i ? e.target.value : a)))} />
-                <Button variant="ghost" aria-label={`Elan ${i + 1}-i sil`} onClick={() => setAnnouncements(announcements.filter((_, ai) => ai !== i))}>
+                <Input value={a} aria-label={`Elan ${i + 1}`} onChange={(e) => setAnnouncements(announcements.map((x, xi) => (xi === i ? e.target.value : x)))} />
+                <Button variant="ghost" aria-label={`Elan ${i + 1}-i sil`} onClick={() => setAnnouncements(announcements.filter((_, xi) => xi !== i))}>
                   <X className="h-4 w-4" />
                 </Button>
               </div>
@@ -187,47 +185,77 @@ export function ContentEditor({ initial }: { initial: ContentDraft }) {
           </div>
         </Card>
 
-        <Card title={`Ana səhifə: nişan zolağı · ${LANG_LABEL[lang]}`}>
-          <div className="p-5">
-            <Field label="Birinci nişan mətni" hint="Ana səhifədə böyük şəklin üstündə fırlanan nişanların birincisi.">
-              <Input value={heroTag} onChange={(e) => setHeroTag(e.target.value)} placeholder={isAz ? "" : draft.heroTag} />
+        <Card title={`Ana səhifə: əsas blok · ${LANG_LABEL[lang]}`}>
+          <div className="grid gap-4 p-5 sm:grid-cols-2">
+            <Field label="Kiçik başlıq" hint="Böyük başlığın üstündəki kiçik yazı.">
+              <Input value={text("hero", "tag")} onChange={(e) => setText("hero", "tag", e.target.value)} placeholder={azHint("hero", "tag")} />
             </Field>
+            <Field label="Böyük başlıq" hint="Qısa olsun: 1–3 söz. Boş = “Yeni sezon”.">
+              <Input value={text("hero", "title")} onChange={(e) => setText("hero", "title", e.target.value)} placeholder={azHint("hero", "title")} />
+            </Field>
+            <Field label="Mətn" className="sm:col-span-2">
+              <Textarea rows={2} value={text("hero", "text")} onChange={(e) => setText("hero", "text", e.target.value)} placeholder={azHint("hero", "text")} />
+            </Field>
+            {isAz ? (
+              <>
+                <Field label="“İndi al” düyməsinin keçidi" hint="Boş = bütün məhsullar (/collections).">
+                  <Input value={draft.hero.link || ""} onChange={(e) => setShared("hero", "link", e.target.value)} placeholder="/collections" />
+                </Field>
+                <div className="sm:col-span-2">
+                  <ImageField
+                    wide
+                    label="Böyük foto (sağ tərəfdə)"
+                    hint="Şaquli, tünd fonlu, insanlı foto ən yaxşı görünür. Boş = standart foto."
+                    value={draft.hero.photo || ""}
+                    onChange={(url) => setShared("hero", "photo", url)}
+                    fallback={DEFAULT_PHOTOS.hero}
+                  />
+                </div>
+              </>
+            ) : (
+              sharedNote
+            )}
           </div>
         </Card>
 
-        {SECTIONS.map((s) => {
-          const b = banner(s.key);
-          return (
-            <Card key={s.key} title={`${s.title} · ${LANG_LABEL[lang]}`}>
-              <div className="grid gap-4 p-5 sm:grid-cols-2">
-                <Field label="Kiçik başlıq">
-                  <Input value={b.tag || ""} onChange={(e) => setBanner(s.key, "tag", e.target.value)} placeholder={placeholderFor(s.key, "tag")} />
+        <Card title={`Ana səhifə: dizayn studiyası bloku · ${LANG_LABEL[lang]}`}>
+          <div className="grid gap-4 p-5 sm:grid-cols-2">
+            <Field label="Kiçik başlıq">
+              <Input value={text("podBanner", "tag")} onChange={(e) => setText("podBanner", "tag", e.target.value)} placeholder={azHint("podBanner", "tag")} />
+            </Field>
+            <Field label="Əsas başlıq">
+              <Input value={text("podBanner", "title")} onChange={(e) => setText("podBanner", "title", e.target.value)} placeholder={azHint("podBanner", "title")} />
+            </Field>
+            <Field label="Mətn" className="sm:col-span-2">
+              <Textarea rows={3} value={text("podBanner", "description")} onChange={(e) => setText("podBanner", "description", e.target.value)} placeholder={azHint("podBanner", "description")} />
+            </Field>
+            <Field label="Düymənin mətni">
+              <Input value={text("podBanner", "ctaText")} onChange={(e) => setText("podBanner", "ctaText", e.target.value)} placeholder={azHint("podBanner", "ctaText")} />
+            </Field>
+            {isAz ? (
+              <>
+                <Field label="Düymənin keçidi" hint="Boş = /studio">
+                  <Input value={draft.podBanner.ctaLink || ""} onChange={(e) => setShared("podBanner", "ctaLink", e.target.value)} placeholder="/studio" />
                 </Field>
-                <Field label="Əsas başlıq">
-                  <Input value={b.title || ""} onChange={(e) => setBanner(s.key, "title", e.target.value)} placeholder={placeholderFor(s.key, "title")} />
-                </Field>
-                <Field label="Mətn" className="sm:col-span-2">
-                  <Textarea rows={3} value={b[s.bodyField] || ""} onChange={(e) => setBanner(s.key, s.bodyField, e.target.value)} placeholder={placeholderFor(s.key, s.bodyField)} />
-                </Field>
-                <Field label="Düymənin mətni">
-                  <Input value={b.ctaText || ""} onChange={(e) => setBanner(s.key, "ctaText", e.target.value)} placeholder={placeholderFor(s.key, "ctaText")} />
-                </Field>
-                {isAz ? (
-                  <Field label="Düymənin keçidi" hint="Bütün dillər üçün eynidir. Məs: /collections?category=hudi">
-                    <Input value={b.ctaLink || ""} onChange={(e) => setBanner(s.key, "ctaLink", e.target.value)} />
-                  </Field>
-                ) : (
-                  <p className="self-end text-xs text-stone-500">Keçid və şəkil bütün dillər üçün eynidir; onları Azərbaycan bölməsində dəyişin.</p>
-                )}
-                {isAz && s.hasImage && (
-                  <Field label="Şəkil ünvanı (URL)" className="sm:col-span-2">
-                    <Input value={b.image || ""} onChange={(e) => setBanner(s.key, "image", e.target.value)} placeholder="https://…" />
-                  </Field>
-                )}
-              </div>
-            </Card>
-          );
-        })}
+                <div className="sm:col-span-2">
+                  <ImageField
+                    label="Foto"
+                    hint="Ağ fonda boş geyim fotosu ən yaxşı görünür."
+                    value={draft.podBanner.photo || ""}
+                    onChange={(url) => setShared("podBanner", "photo", url)}
+                    fallback={DEFAULT_PHOTOS.studio}
+                  />
+                </div>
+              </>
+            ) : (
+              sharedNote
+            )}
+          </div>
+        </Card>
+
+        <p className="text-xs text-stone-500">
+          Kateqoriya bannerlərinin (Köynək, Hudi, …) fotoları <a href="/admin/categories" className="underline">Kateqoriyalar</a> bölməsində dəyişdirilir.
+        </p>
       </div>
     </>
   );

@@ -117,7 +117,7 @@ function cleanLangMap(value: unknown, max: number): Record<string, string> | und
  * it is chosen once and cannot be changed afterwards.
  */
 export async function saveCategory(input: any): Promise<StoreCategory> {
-  const { id: rawId, create, title, desc, description, image, active, sortOrder, titles, descriptions, showInMenu } = input || {};
+  const { id: rawId, create, title, desc, description, image, active, sortOrder, titles, descriptions, showInMenu, banner } = input || {};
   const id = String(rawId || '').trim().toLowerCase();
   if (!/^[a-z0-9-]{2,40}$/.test(id)) throw new Error('Kateqoriya kodu 2–40 simvol olmalıdır: kiçik latın hərfləri, rəqəm, tire.');
 
@@ -136,6 +136,12 @@ export async function saveCategory(input: any): Promise<StoreCategory> {
   const d = cleanLangMap(descriptions, CATEGORY_TEXT_MAX);
   if (t) extra.titles = t;
   if (d) extra.descriptions = d;
+  if (banner !== undefined) {
+    const url = String(banner || '').trim().slice(0, 600);
+    if (url && !/^(\/|https:\/\/)/.test(url)) throw new Error('Banner şəklinin ünvanı "/" və ya "https://" ilə başlamalıdır.');
+    if (url) extra.banner = url;
+    else delete extra.banner;
+  }
   if (showInMenu !== undefined) extra.showInMenu = Boolean(showInMenu);
   else if (!existing) extra.showInMenu = true;
 
