@@ -3,7 +3,7 @@ import defaults from '@/data/storeData.json';
 import { createCachedReadClient } from '@/lib/supabaseServer';
 import type { CatalogProduct } from '@/lib/db/products';
 import { listCatalog } from '@/lib/db/catalog';
-import { getContent, getSettings } from '@/lib/db/site';
+import { getContent, getSettings, publicSettings } from '@/lib/db/site';
 
 export const STORE_TAG = 'store';
 
@@ -32,7 +32,7 @@ export async function getStoreSnapshot(): Promise<StoreSnapshot> {
       getContent(readClient),
       getSettings(readClient),
     ]);
-    return { products, content: content as Record<string, any>, settings: settings as Record<string, any> };
+    return { products, content: content as Record<string, any>, settings: publicSettings(settings as Record<string, any>) };
   } catch (error) {
     console.error('[StoreSnapshot] Could not load store data:', error);
     const { categories: _categories, ...content } = defaults.content as Record<string, any>;

@@ -108,7 +108,9 @@ export async function POST(req: NextRequest) {
 
     // 3. Server-side Recalculation: prices always come from the live catalogue (anti-tampering)
     const orderCurrency: "AZN" | "USD" = currency === "USD" ? "USD" : "AZN";
-    const catalogue = await listCatalog();
+    const [catalogue, storeSettings] = await Promise.all([listCatalog(), getSettings()]);
+    // studio prices set in Admin → Studio qiymətləri
+    const studioPrices = (storeSettings as any).studioPrices;
     let serverSubtotal = 0;
     const validatedItems: OrderItem[] = [];
 
@@ -119,7 +121,7 @@ export async function POST(req: NextRequest) {
       let unitPrice: number;
 
       if (isCustom) {
-        const studioPrice = customPrintPrice(clientItemId, (clientItem as any).customData);
+        const studioPrice = customPrintPrice(clientItemId, (clientItem as any).customData, studioPrices);
         if (studioPrice === null) {
           return NextResponse.json(
             { success: false, message: "Öz dizaynlı məhsul tanınmadı. Zəhmət olmasa dizaynı studiyada yenidən səbətə əlavə edin." },

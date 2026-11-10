@@ -151,6 +151,11 @@ function halfzip(p: Paint, id: string, back: boolean, full: boolean) {
     s += `<rect x="196" y="72" width="8" height="16" rx="2" fill="${p.line}"/>`;
     if (full) s += line("M138 250 L148 296", p.seam, 2) + line("M262 250 L252 296", p.seam, 2);
   }
+  if (full) {
+    const stripe = isLight(p.fill) ? darker(p.fill, 0.55) : lighter(p.fill, 0.75);
+    s += line("M140 74 Q104 112 92 176 L76 292", stripe, 3) + line("M146 74 Q112 114 100 178 L84 294", stripe, 3);
+    s += line("M260 74 Q296 112 308 176 L324 292", stripe, 3) + line("M254 74 Q288 114 300 178 L316 294", stripe, 3);
+  }
   if (!full) s += shapeEl("M118 326 Q200 332 282 326 L282 344 Q200 350 118 344 Z", p, p.rib);
   else s += shapeEl("M118 330 Q200 336 282 330 L282 344 Q200 350 118 344 Z", p, p.rib);
   s += shapeEl("M62 286 L93 293 L90 308 L60 300 Z", p, p.rib) + shapeEl("M338 286 L307 293 L310 308 L340 300 Z", p, p.rib);
@@ -273,6 +278,55 @@ function briefs(p: Paint, id: string, back: boolean) {
   return s;
 }
 
+function zipHoodie(p: Paint, id: string, back: boolean) {
+  if (back) return hoodie(p, id, true);
+  const body = LONG(false, 82);
+  let s = shapeEl("M146 82 C130 30 168 14 200 14 C232 14 270 30 254 82 Z", p, p.rib);
+  s += shapeEl(body, p) + shade(body, id);
+  s += shapeEl("M164 76 C162 36 238 36 236 76 Q200 98 164 76 Z", p, p.inside);
+  s += line("M186 88 L183 142", p.line, 2.4) + line("M214 88 L217 142", p.line, 2.4);
+  s += `<circle cx="183" cy="145" r="3" fill="${p.line}"/><circle cx="217" cy="145" r="3" fill="${p.line}"/>`;
+  // full zip and a split kangaroo pocket
+  s += line("M200 92 L200 344", p.inside, 3.2) + seam("M194 94 L194 330", p, 1) + seam("M206 94 L206 330", p, 1);
+  s += `<rect x="196" y="104" width="8" height="16" rx="2" fill="${p.line}"/>`;
+  s += line("M150 248 L134 312", p.seam, 1.8) + line("M250 248 L266 312", p.seam, 1.8);
+  s += line("M150 248 L194 248", p.seam, 1.4) + line("M206 248 L250 248", p.seam, 1.4);
+  s += shapeEl("M118 326 Q200 332 282 326 L282 344 Q200 350 118 344 Z", p, p.rib);
+  s += shapeEl("M62 286 L93 293 L90 308 L60 300 Z", p, p.rib) + shapeEl("M338 286 L307 293 L310 308 L340 300 Z", p, p.rib);
+  return s;
+}
+function jacket(p: Paint, id: string, back: boolean) {
+  const d = LONG(back, 70);
+  let s = shapeEl(d, p) + shade(d, id);
+  // thick ribbed collar
+  s += shapeEl(back ? "M156 50 Q200 42 244 50 L246 74 Q200 66 154 74 Z" : "M156 48 Q200 40 244 48 L240 74 Q220 64 200 92 Q180 64 160 74 Z", p, p.rib);
+  if (!back) {
+    s += line("M200 90 L200 344", p.inside, 3.2) + seam("M194 92 L194 330", p, 1) + seam("M206 92 L206 330", p, 1);
+    s += `<rect x="196" y="98" width="8" height="16" rx="2" fill="${p.line}"/>`;
+    s += line("M136 238 L150 290", p.seam, 2.2) + line("M264 238 L250 290", p.seam, 2.2);
+    s += line("M150 132 L182 132", p.seam, 1.6) + line("M218 132 L250 132", p.seam, 1.6);
+  } else {
+    s += seam("M120 120 Q200 132 280 120", p, 1);
+  }
+  s += shapeEl("M118 322 Q200 328 282 322 L282 344 Q200 350 118 344 Z", p, p.rib);
+  s += shapeEl("M62 284 L93 291 L90 308 L60 300 Z", p, p.rib) + shapeEl("M338 284 L307 291 L310 308 L340 300 Z", p, p.rib);
+  return s;
+}
+function shorts(p: Paint, id: string, back: boolean) {
+  const legs = "M126 104 L274 104 L294 300 L216 308 L200 196 L184 308 L106 300 Z";
+  let s = shapeEl(legs, p) + shade(legs, id);
+  s += shapeEl("M128 78 L272 78 L274 104 L126 104 Z", p, p.rib);
+  s += seam("M108 288 L184 296", p) + seam("M292 288 L216 296", p);
+  s += seam("M200 196 L200 104", p, 1.2);
+  if (back) {
+    s += shapeEl("M142 122 L186 122 L184 156 L144 156 Z", p, p.fill) + shapeEl("M214 122 L258 122 L256 156 L216 156 Z", p, p.fill);
+  } else {
+    s += line("M192 98 L188 138", p.line, 2) + line("M208 98 L212 138", p.line, 2);
+    s += line("M134 110 Q150 142 128 156", p.seam, 1.6) + line("M266 110 Q250 142 272 156", p.seam, 1.6);
+  }
+  return s;
+}
+
 const DRAW: Record<Shape, (p: Paint, id: string, back: boolean) => string> = {
   tee: (p, id, b) => tee(p, id, b),
   oversize: (p, id, b) => oversize(p, id, b),
@@ -280,6 +334,9 @@ const DRAW: Record<Shape, (p: Paint, id: string, back: boolean) => string> = {
   poloLong: (p, id, b) => polo(p, id, b, true),
   sweatshirt: (p, id, b) => sweatshirt(p, id, b),
   hoodie: (p, id, b) => hoodie(p, id, b),
+  zipHoodie: (p, id, b) => zipHoodie(p, id, b),
+  jacket: (p, id, b) => jacket(p, id, b),
+  shorts: (p, id, b) => shorts(p, id, b),
   halfzip: (p, id, b) => halfzip(p, id, b, false),
   trackJacket: (p, id, b) => halfzip(p, id, b, true),
   pants: (p, id, b) => pants(p, id, b),
@@ -335,6 +392,9 @@ export const PRINT_AREAS: Record<Shape, AreaSet> = {
   hoodie: { front: { large: { cx: 200, cy: 190, w: 110, h: 90 }, small: { cx: 236, cy: 120, w: 36, h: 36 } }, back: { large: { cx: 200, cy: 200, w: 130, h: 150 }, small: { cx: 200, cy: 108, w: 44, h: 24 } }, extras: TOP_EXTRAS(200, 92, 308, 104) },
   halfzip: { front: { large: { cx: 200, cy: 230, w: 110, h: 100 }, small: { cx: 240, cy: 118, w: 36, h: 36 } }, back: { large: { cx: 200, cy: 185, w: 130, h: 160 }, small: { cx: 200, cy: 92, w: 44, h: 26 } }, extras: TOP_EXTRAS(200, 92, 308, 88) },
   trackJacket: { front: { large: { cx: 244, cy: 170, w: 70, h: 90 }, small: { cx: 240, cy: 118, w: 36, h: 36 } }, back: { large: { cx: 200, cy: 185, w: 130, h: 160 }, small: { cx: 200, cy: 92, w: 44, h: 26 } }, extras: TOP_EXTRAS(200, 92, 308, 88) },
+  zipHoodie: { front: { large: { cx: 244, cy: 180, w: 64, h: 70 }, small: { cx: 240, cy: 124, w: 34, h: 34 } }, back: { large: { cx: 200, cy: 200, w: 130, h: 150 }, small: { cx: 200, cy: 108, w: 44, h: 24 } }, extras: TOP_EXTRAS(200, 92, 308, 104) },
+  jacket: { front: { large: { cx: 244, cy: 180, w: 66, h: 80 }, small: { cx: 236, cy: 152, w: 34, h: 30 } }, back: { large: { cx: 200, cy: 195, w: 130, h: 150 }, small: { cx: 200, cy: 96, w: 44, h: 24 } }, extras: TOP_EXTRAS(200, 92, 308, 92) },
+  shorts: { front: { large: { cx: 246, cy: 210, w: 58, h: 70 }, small: { cx: 244, cy: 150, w: 32, h: 32 } }, back: { large: { cx: 246, cy: 220, w: 58, h: 70 }, small: { cx: 164, cy: 140, w: 34, h: 26 } }, extras: { leg: { side: "front", area: { cx: 252, cy: 272, w: 30, h: 28 } } } },
   pants: { front: { large: { cx: 246, cy: 205, w: 58, h: 110 }, small: { cx: 244, cy: 110, w: 34, h: 34 } }, back: { large: { cx: 246, cy: 210, w: 58, h: 110 }, small: { cx: 163, cy: 100, w: 36, h: 28 } }, extras: { leg: { side: "front", area: { cx: 250, cy: 300, w: 34, h: 34 } } } },
   cap: { front: { large: { cx: 200, cy: 192, w: 120, h: 58 }, small: { cx: 200, cy: 192, w: 64, h: 36 } }, back: { large: { cx: 200, cy: 178, w: 96, h: 36 }, small: { cx: 200, cy: 180, w: 56, h: 24 } }, extras: { side: { side: "front", area: { cx: 136, cy: 208, w: 40, h: 26 } } } },
   apronShort: { front: { large: { cx: 200, cy: 200, w: 150, h: 70 }, small: { cx: 244, cy: 186, w: 40, h: 30 } }, back: {}, extras: { pocket: { side: "front", area: { cx: 200, cy: 237, w: 84, h: 40 } } } },

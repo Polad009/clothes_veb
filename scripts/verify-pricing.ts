@@ -12,8 +12,9 @@ function check(name: string, ok: boolean, detail?: unknown) {
 
 const tee = studioProduct('tshirt-regular-suprem')!;
 const cap = studioProduct('kepka-nazik')!;
+const admin = { markup: 12, extra: 2, items: { 'tshirt-regular-suprem': { small: 10, one: 13, two: null }, 'balonka': { active: false } } };
 
-check('catalogue is loaded', STUDIO_PRODUCTS.length >= 27);
+check('catalogue is the 20 studio products', STUDIO_PRODUCTS.length === 20);
 check('price list + markup: tee one side', customPrintPrice(tee.id, { printType: 'one' }) === 14 + STUDIO_MARKUP);
 check('price list + markup: tee both sides', customPrintPrice(tee.id, { printType: 'two' }) === 15 + STUDIO_MARKUP);
 check('price list + markup: tee small logo', customPrintPrice(tee.id, { printType: 'small' }) === 12 + STUDIO_MARKUP);
@@ -24,6 +25,13 @@ check('half price cap kept', customPrintPrice(cap.id, { printType: 'one' }) === 
 check('legacy placement key still priced', customPrintPrice(tee.id, 'both-sides') === 15 + STUDIO_MARKUP);
 check('unknown product rejected', customPrintPrice('free-stuff', { printType: 'one' }) === null);
 check('missing product rejected', customPrintPrice(undefined, undefined) === null);
+
+check('admin price + admin markup', customPrintPrice(tee.id, { printType: 'one' }, admin) === 13 + 12);
+check('admin extra spot price', customPrintPrice(tee.id, { printType: 'one', extras: ['neck'] }, admin) === 13 + 12 + 2);
+check('admin removed a print type', customPrintPrice(tee.id, { printType: 'two' }, admin) === null);
+check('hidden product rejected', customPrintPrice('balonka', { printType: 'one' }, admin) === null);
+check('other products keep list prices', customPrintPrice('polo-uzunqol', { printType: 'two' }, admin) === 21 + 12);
+check('removed products are gone', customPrintPrice('fincan-sade', { printType: 'one' }) === null);
 
 const base = customPrintPrice(tee.id, { printType: 'two' })!;
 check('custom item: honest AZN price accepted', resolveUnitPrice({ price: base }, 'AZN', base) === base);

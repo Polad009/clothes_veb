@@ -5,11 +5,12 @@ import { Check, ImagePlus, Minus, Move, Plus, RotateCcw, X } from "lucide-react"
 import { useCart } from "@/context/CartContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { useStoreData } from "@/context/StoreDataContext";
 import {
-  EXTRA_SPOT_PRICE,
   STUDIO_COLORS,
   STUDIO_PRODUCTS,
   printTypes,
+  resolveStudio,
   studioPrice,
   type ExtraSpot,
   type GroupKey,
@@ -29,15 +30,12 @@ const GROUPS: Record<GroupKey, Phrase> = {
   polo: { az: "Polo", en: "Polo", ru: "Поло", tr: "Polo" },
   sweatshirt: { az: "Sviter", en: "Sweatshirts", ru: "Свитшоты", tr: "Sweatshirt" },
   hoodie: { az: "Hudi", en: "Hoodies", ru: "Худи", tr: "Hoodie" },
+  jacket: { az: "Gödəkcə", en: "Jackets", ru: "Куртки", tr: "Ceket" },
   halfzip: { az: "Yarımzamok", en: "Half-zip", ru: "Полузамок", tr: "Yarım fermuar" },
   track: { az: "Balonka", en: "Track jacket", ru: "Олимпийка", tr: "Eşofman üstü" },
   pants: { az: "Şalvar", en: "Pants", ru: "Брюки", tr: "Pantolon" },
+  shorts: { az: "Şortik", en: "Shorts", ru: "Шорты", tr: "Şort" },
   cap: { az: "Kepka", en: "Caps", ru: "Кепки", tr: "Şapka" },
-  apron: { az: "Önlük", en: "Aprons", ru: "Фартуки", tr: "Önlük" },
-  bag: { az: "Çanta", en: "Bags", ru: "Сумки", tr: "Çanta" },
-  mug: { az: "Fincan", en: "Mugs", ru: "Кружки", tr: "Kupa" },
-  puzzle: { az: "Puzzle", en: "Puzzles", ru: "Пазлы", tr: "Yapboz" },
-  underwear: { az: "Alt paltarı", en: "Underwear", ru: "Бельё", tr: "İç giyim" },
 };
 const COLOR_LABEL: Record<string, Phrase> = {
   white: { az: "Ağ", en: "White", ru: "Белый", tr: "Beyaz" },
@@ -93,13 +91,17 @@ export default function StudioPage() {
   const { formatPrice } = useCurrency();
   const { language } = useLanguage();
   const L = (p: Phrase) => tr(language, p);
+  const { settings } = useStoreData();
+  // prices and the product list come from Admin → Studio qiymətləri (defaults from the price list)
+  const studio = useMemo(() => resolveStudio((settings as any)?.studioPrices), [settings]);
 
   const stageRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const uploadSide = useRef<StudioSide>("front");
 
-  const [product, setProduct] = useState<StudioProduct>(STUDIO_PRODUCTS[0]);
-  const [colorKey, setColorKey] = useState(STUDIO_PRODUCTS[0].colors[0]);
+  const [pickedId, setPickedId] = useState<string>(studio.products[0]?.id || STUDIO_PRODUCTS[0].id);
+  const product: StudioProduct = studio.products.find((p) => p.id === pickedId) || studio.products[0] || STUDIO_PRODUCTS[0];
+  const [colorKey, setColorKey] = useState(product.colors[0]);
   const [size, setSize] = useState("L");
   const [type, setType] = useState<PrintType>("one");
   const [printSide, setPrintSide] = useState<StudioSide>("front");
@@ -114,14 +116,14 @@ export default function StudioPage() {
   const hex = STUDIO_COLORS[colorKey] || "#F4F3EF";
   const types = printTypes(product);
   const areas = PRINT_AREAS[product.shape];
-  const price = studioPrice(product, type, extras) ?? 0;
+  const price = studioPrice(product, types.includes(type) ? type : types[0], extras, studio) ?? 0;
   const sidesUsed: StudioSide[] = type === "two" ? ["front", "back"] : [printSide];
   const svg = useMemo(() => mockupSvg(product.shape, hex, view, "stage"), [product.shape, hex, view]);
   const groups = useMemo(() => {
     const map = new Map<GroupKey, StudioProduct[]>();
-    for (const p of STUDIO_PRODUCTS) map.set(p.group, [...(map.get(p.group) || []), p]);
+    for (const p of studio.products) map.set(p.group, [...(map.get(p.group) || []), p]);
     return Array.from(map.entries());
-  }, []);
+  }, [studio]);
 
   // the design shown on a side: its own upload, or the front design for the back of a two-sided print
   const imageFor = (s: StudioSide) => images[s]?.src || (type === "two" && s === "back" ? images.front?.src : undefined);
@@ -131,7 +133,7 @@ export default function StudioPage() {
   const setT = (patch: Partial<Transform>) => setTransforms((all) => ({ ...all, [view]: { ...all[view], ...patch } }));
 
   const chooseProduct = (p: StudioProduct) => {
-    setProduct(p);
+    setPickedId(p.id);
     if (!p.colors.includes(colorKey)) setColorKey(p.colors[0]);
     if (!p.sizes.includes(size)) setSize(p.sizes.includes("L") ? "L" : p.sizes[0]);
     const pt = printTypes(p);
@@ -447,7 +449,7 @@ export default function StudioPage() {
                     <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                       {list.map((p) => {
                         const on = p.id === product.id;
-                        const from = studioPrice(p, printTypes(p)[0]) ?? 0;
+                        const from = studioPrice(p, printTypes(p)[0], [], studio) ?? 0;
                         return (
                           <button key={p.id} type="button" onClick={() => chooseProduct(p)} className={`${chip(on)} flex items-center justify-between gap-3`}>
                             <span className="text-[13px] font-semibold leading-snug">{p.name}</span>
@@ -505,7 +507,7 @@ export default function StudioPage() {
                     <button key={tp} type="button" onClick={() => chooseType(tp)} className={chip(on)}>
                       <span className="block text-[13px] font-bold">{L(TYPE_LABEL[tp].title)}</span>
                       <span className={`block text-[11px] ${on ? "text-ink/70" : "text-bone-faint"}`}>{L(TYPE_LABEL[tp].hint)}</span>
-                      <span className="mt-1.5 block text-[13px] font-bold tabular-nums">{formatPrice(studioPrice(product, tp) ?? 0)}</span>
+                      <span className="mt-1.5 block text-[13px] font-bold tabular-nums">{formatPrice(studioPrice(product, tp, [], studio) ?? 0)}</span>
                     </button>
                   );
                 })}
@@ -529,7 +531,7 @@ export default function StudioPage() {
               {product.extras.length > 0 && (
                 <div className="mt-5">
                   <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-bone-faint">
-                    {L({ az: "Əlavə yer", en: "Extra spot", ru: "Дополнительно", tr: "Ek alan" })} · +{formatPrice(EXTRA_SPOT_PRICE)}
+                    {L({ az: "Əlavə yer", en: "Extra spot", ru: "Дополнительно", tr: "Ek alan" })} · +{formatPrice(studio.extra)}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {product.extras.map((e) => {

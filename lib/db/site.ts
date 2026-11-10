@@ -53,6 +53,15 @@ export async function getSettings(client: SupabaseClient = db()): Promise<StoreS
   return { whatsappNumber: DEFAULT_WHATSAPP, ...(defaults.settings as StoreSettings), ...stored } as StoreSettings;
 }
 
+/** Settings that only the admin and the server may see (never sent to the storefront). */
+const PRIVATE_SETTINGS = ['orderNotifyEmail'];
+
+export function publicSettings(settings: Record<string, any>): Record<string, any> {
+  const out = { ...settings };
+  for (const key of PRIVATE_SETTINGS) delete out[key];
+  return out;
+}
+
 export async function saveContent(patch: Record<string, any>): Promise<StoreContent> {
   const stored = await readDoc('content');
   await writeDoc('content', mergeContent(stored, patch || {}));

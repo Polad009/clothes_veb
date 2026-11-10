@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { listCatalog } from '@/lib/db/catalog';
-import { getContent, getSettings } from '@/lib/db/site';
+import { getContent, getSettings, publicSettings } from '@/lib/db/site';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -23,7 +23,7 @@ export async function GET() {
     const [products, content, settings] = await Promise.all([listCatalog(), getContent(), getSettings()]);
 
     return NextResponse.json(
-      { version: 'v2026.11.09.db', products, content, settings },
+      { version: 'v2026.11.09.db', products, content, settings: publicSettings(settings as any) },
       { headers: NO_STORE_HEADERS }
     );
   } catch (error: any) {
