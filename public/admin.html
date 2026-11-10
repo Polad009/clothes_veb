@@ -2578,14 +2578,8 @@
     // AUTHENTICATION LOGIC (Server-side Verified Token)
     // ----------------------------------------------------
     async function checkAuth() {
-      const token = getAdminToken();
-      if (!token) {
-        document.getElementById('loginScreen').classList.remove('hidden');
-        document.getElementById('mainApp').classList.add('hidden');
-        if (window.lucide) lucide.createIcons();
-        return;
-      }
-
+      // The session lives in an httpOnly cookie set by the new admin login,
+      // so the server is asked directly instead of looking for a stored token.
       try {
         const res = await fetch('/api/admin/verify');
         const data = await res.json();

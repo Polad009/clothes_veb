@@ -163,10 +163,10 @@ export default function AdminLiveChat() {
   };
 
   return (
-    <div className="flex h-screen bg-[#FAF7F2]">
+    <div className="flex h-[calc(100dvh-3.5rem)] lg:h-dvh bg-white">
       {/* Sidebar thread list */}
       <aside className="w-64 border-r border-stone-300 overflow-y-auto">
-        <h2 className="p-4 text-lg font-semibold">Müştəri Söhbətləri</h2>
+        <h2 className="p-4 font-sans text-lg font-semibold">Müştəri Söhbətləri</h2>
         {threads.map(renderThreadItem)}
       </aside>
 

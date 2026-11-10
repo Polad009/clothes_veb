@@ -111,14 +111,30 @@ export async function middleware(request: NextRequest) {
     const expectedKey = (process.env.ADMIN_ACCESS_KEY || 'horvvalle_portal_2026_xQ9mK').trim();
     const hasValidAccessKey = Boolean(accessKey && accessKey === expectedKey);
 
-    if (hasValidAccessKey) {
-      // Authorized via secret access key → allow access to the admin page/html
-      const response = NextResponse.next();
+    const isLoginPage = pathname === '/admin/login';
+    const hasSession = await verifyTokenAtEdge(request.cookies.get('horvvalle_admin_token')?.value);
+
+    if (hasSession) {
+      // Signed-in admin: every admin page is reachable without the key in the URL
+      const response = isLoginPage
+        ? NextResponse.redirect(new URL('/admin', request.url))
+        : NextResponse.next();
       applySecurityHeaders(response);
+      response.headers.set('X-Robots-Tag', 'noindex, nofollow');
       return response;
     }
 
-    // No valid access key in URL → return generic 404 (always hide /admin unless secret access key is in URL)
+    if (hasValidAccessKey) {
+      // Knows the secret link but is not signed in yet → the login page (and only it)
+      const response = isLoginPage || isAdminHtml
+        ? NextResponse.next()
+        : NextResponse.redirect(new URL(`/admin/login?access=${encodeURIComponent(expectedKey)}`, request.url));
+      applySecurityHeaders(response);
+      response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+      return response;
+    }
+
+    // Neither a session nor the secret link → generic 404, the admin area stays invisible
     return new NextResponse(GENERIC_404_HTML, {
       status: 404,
       headers: {
