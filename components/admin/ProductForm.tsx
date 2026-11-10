@@ -140,6 +140,10 @@ export function ProductForm({ product, categories }: { product: CatalogProduct |
   const [colors, setColors] = useState<ColorDraft[]>(
     product?.colors?.length ? product.colors.map(toDraft) : [{ key: newKey(), name: "", hex: "#111111", image: "", hoverImage: "", extra: [] }]
   );
+  const [translations, setTranslations] = useState<Record<"en" | "ru" | "tr", { name?: string; description?: string }>>(
+    () => ({ en: {}, ru: {}, tr: {}, ...(product?.translations || {}) }) as any
+  );
+  const [trLang, setTrLang] = useState<"en" | "ru" | "tr">("en");
   const [trackStock, setTrackStock] = useState(product?.trackStock ?? false);
   // Counts keyed by colour draft key + size, so renaming a colour keeps its numbers
   const [stockDraft, setStockDraft] = useState<Record<string, string>>(() => {
@@ -222,6 +226,7 @@ export function ProductForm({ product, categories }: { product: CatalogProduct |
           care: care.trim(),
           inStock,
           trackStock,
+          translations,
           ...(trackStock ? { stock } : {}),
           sizes,
           colors: formatted,
@@ -281,6 +286,41 @@ export function ProductForm({ product, categories }: { product: CatalogProduct |
                   <option key={g.value} value={g.value}>{g.label}</option>
                 ))}
               </Select>
+            </Field>
+          </div>
+        </Card>
+
+        <Card title="Tərcümələr">
+          <div className="space-y-4 p-5">
+            <p className="text-xs text-stone-500">Sayt ingilis, rus və ya türk dilində açılanda bu mətnlər göstərilir. Boş qalsa Azərbaycan dilindəki mətn görünür.</p>
+            <div className="flex gap-1" role="tablist" aria-label="Dil">
+              {(["en", "ru", "tr"] as const).map((l) => (
+                <button
+                  key={l}
+                  type="button"
+                  role="tab"
+                  aria-selected={trLang === l}
+                  onClick={() => setTrLang(l)}
+                  className={cn("rounded-md px-2.5 py-1 text-xs font-medium", trLang === l ? "bg-stone-900 text-white" : "text-stone-600 hover:bg-stone-100")}
+                >
+                  {l === "en" ? "English" : l === "ru" ? "Русский" : "Türkçe"}
+                  {translations[l]?.name ? " ✓" : ""}
+                </button>
+              ))}
+            </div>
+            <Field label="Ad">
+              <Input
+                value={translations[trLang]?.name || ""}
+                onChange={(e) => setTranslations({ ...translations, [trLang]: { ...translations[trLang], name: e.target.value } })}
+                placeholder={name}
+              />
+            </Field>
+            <Field label="Təsvir">
+              <Textarea
+                rows={5}
+                value={translations[trLang]?.description || ""}
+                onChange={(e) => setTranslations({ ...translations, [trLang]: { ...translations[trLang], description: e.target.value } })}
+              />
             </Field>
           </div>
         </Card>

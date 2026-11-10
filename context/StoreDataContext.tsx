@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { Product } from "@/data/products";
 import { whatsappLink, whatsappNumber } from "@/lib/contact";
 import { type Category, visibleCategories } from "@/lib/categories";
+import { useLanguage } from "@/context/LanguageContext";
 
 export function normalizeProduct(p: any): Product {
   const colors = (p.colors || []).map((c: any) => {
@@ -63,6 +64,7 @@ export function normalizeProduct(p: any): Product {
     trackStock: Boolean(p.trackStock),
     stock: p.stock && typeof p.stock === "object" ? p.stock : {},
     campaign: p.campaign || undefined,
+    translations: p.translations || undefined,
   };
 }
 
@@ -187,8 +189,18 @@ export function StoreDataProvider({ initial, children }: { initial: StoreInitial
     };
   }, [fetchLiveStoreData]);
 
+  // Product names and descriptions in the visitor's language, when the admin has translated them
+  const { language } = useLanguage();
+  const localizedProducts = useMemo(() => {
+    if (language === "az") return products;
+    return products.map((p) => {
+      const t = p.translations?.[language as "en" | "ru" | "tr"];
+      return t ? { ...p, name: t.name || p.name, description: t.description || p.description } : p;
+    });
+  }, [products, language]);
+
   return (
-    <StoreDataContext.Provider value={{ products, content, settings, isLoading, refresh: fetchLiveStoreData }}>
+    <StoreDataContext.Provider value={{ products: localizedProducts, content, settings, isLoading, refresh: fetchLiveStoreData }}>
       {children}
     </StoreDataContext.Provider>
   );

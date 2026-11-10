@@ -47,6 +47,8 @@ export interface CatalogProduct {
   trackStock: boolean;
   /** Units per colour/size, keyed by stockKey(color, size). */
   stock: Record<string, number>;
+  /** Name and description in other languages; Azerbaijani is the main field. */
+  translations?: Partial<Record<'en' | 'ru' | 'tr', { name?: string; description?: string }>>;
   /** Set on storefront copies while a discount runs (see lib/db/catalog.ts). */
   campaign?: AppliedCampaign;
 }
@@ -111,6 +113,7 @@ export function rowToProduct(r: any): CatalogProduct {
     printLayers: Array.isArray(extra.printLayers) ? extra.printLayers : [],
     trackStock,
     stock,
+    translations: extra.translations && typeof extra.translations === 'object' ? extra.translations : undefined,
   };
 }
 
@@ -231,6 +234,16 @@ export async function saveProduct(input: any): Promise<CatalogProduct> {
   }
   if (Array.isArray(input.gallery)) extra.gallery = input.gallery;
   if (Array.isArray(input.printLayers)) extra.printLayers = input.printLayers;
+  if (input.translations && typeof input.translations === 'object') {
+    const t: Record<string, { name?: string; description?: string }> = {};
+    for (const lang of ['en', 'ru', 'tr']) {
+      const src = (input.translations as any)[lang] || {};
+      const name = String(src.name || '').replace(/[<>]/g, '').trim().slice(0, 160);
+      const description = String(src.description || '').replace(/[<>]/g, '').trim().slice(0, 5000);
+      if (name || description) t[lang] = { ...(name && { name }), ...(description && { description }) };
+    }
+    extra.translations = t;
+  }
   row.extra = extra;
 
   if (existing) {

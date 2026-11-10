@@ -22,11 +22,12 @@ export const Ticker = memo(function Ticker({ className = "" }: TickerProps) {
     t.announcements?.guaranteedReturns || "14 GÜN ƏRZİNDƏ ASAN VƏ ZƏMANƏTLİ QAYTARILMA",
   ];
 
-  // The admin panel manages the Azerbaijani announcements; other languages use the built-in translations.
-  const managed: string[] = Array.isArray(content?.announcements)
-    ? content.announcements.filter((a: unknown): a is string => typeof a === "string" && a.trim().length > 0)
+  // Announcements come from the admin per language; a language without its own list uses the built-in texts.
+  const source = language === "az" ? content?.announcements : content?.i18n?.[language]?.announcements;
+  const managed: string[] = Array.isArray(source)
+    ? source.filter((a: unknown): a is string => typeof a === "string" && a.trim().length > 0)
     : [];
-  const announcementsList = language === "az" && managed.length > 0 ? managed : translated;
+  const announcementsList = managed.length > 0 ? managed : translated;
 
   return (
     <div

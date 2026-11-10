@@ -41,8 +41,13 @@ export default function Home() {
   const [introRevealed, setIntroRevealed] = useState(true);
 
   const { language } = useLanguage();
+  // Banner texts: Azerbaijani comes from the admin; other languages use the admin's
+  // translation when one is saved, otherwise the built-in text.
+  const i18n = ((content as any)?.i18n || {}) as Record<string, any>;
+  const bt = (section: string, field: string, builtIn: Record<string, string>, az: string) =>
+    language === "az" ? az : (i18n?.[language]?.[section]?.[field] || builtIn[language] || az);
   const badgeMessages = [
-    hero.tag || "HORVVALLE ATELIER · 2026 COUTURE · BAKI",
+    (language !== "az" && i18n?.[language]?.hero?.tag) || hero.tag || "HORVVALLE ATELIER · 2026 COUTURE · BAKI",
     language === "en" ? "100% PURE COMBED COTTON (220-380 GSM)" : language === "ru" ? "100% ЧИСТЫЙ ГРЕБЕННОЙ ХЛОПОК (220-380 GSM)" : language === "tr" ? "%100 SAF TARANMIŞ PAMUK (220-380 GSM)" : "100% XALİS DARANMIŞ PAMBIQ (220-380 GSM)",
     language === "en" ? "LIVE ATELIER DTG PRINT STUDIO — BAKU" : language === "ru" ? "ЖИВАЯ АТЕЛЬЕ DTG СТУДИЯ ПЕЧАТИ — БАКУ" : language === "tr" ? "CANLI ATÖLYE DTG BASKI STÜDYOSU — BAKÜ" : "CANLI ATELYE DTG ÇAP STUDİYASI — BAKI",
     language === "en" ? "FREE DELIVERY TO BAKU & SUMGAYIT" : language === "ru" ? "БЕСПЛАТНАЯ ДОСТАВКА В БАКУ И СУМГАИТ" : language === "tr" ? "BAKÜ VE SUMGAYIT'A ÜCRETSİZ TESLİMAT" : "BAKI VƏ SUMQAYIT ƏRAZİSİNƏ PULSUZ ÇATDIRILMA",
@@ -184,15 +189,15 @@ export default function Home() {
             <div className="lg:col-span-7 space-y-5">
               <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-stone-100 border border-stone-200 text-stone-800 text-xs font-medium uppercase tracking-wider">
                 <Palette size={14} className="text-stone-700" />
-                <span>{language === "en" ? "BESPOKE ATELIER PRINT STUDIO" : language === "ru" ? "ИНДИВИДУАЛЬНОЕ АТЕЛЬЕ ПЕЧАТИ" : language === "tr" ? "ÖZEL ATÖLYE BASKI STÜDYOSU" : (podBanner.tag && !podBanner.tag.includes("3D") ? podBanner.tag : "FƏRDİ ATELYE ÇAP STUDİYASI")}</span>
+                <span>{bt("podBanner", "tag", { en: "BESPOKE ATELIER PRINT STUDIO", ru: "ИНДИВИДУАЛЬНОЕ АТЕЛЬЕ ПЕЧАТИ", tr: "ÖZEL ATÖLYE BASKI STÜDYOSU" }, podBanner.tag && !podBanner.tag.includes("3D") ? podBanner.tag : "FƏRDİ ATELYE ÇAP STUDİYASI")}</span>
               </div>
 
               <h2 className="text-3xl sm:text-5xl font-normal uppercase tracking-tight text-stone-900 font-serif-luxury leading-[1.05]">
-                {language === "en" ? "CREATE YOUR OWN DESIGN WITH HORVVALLE QUALITY" : language === "ru" ? "СОЗДАЙТЕ СВОЙ ДИЗАЙН В КАЧЕСТВЕ HORVVALLE" : language === "tr" ? "KENDİ TASARIMINI HORVVALLE KALİTESİYLE YARAT" : (podBanner.title || "ÖZ DİZAYNINI HORVVALLE KEYFİYYƏTİ İLƏ YARAT")}
+                {bt("podBanner", "title", { en: "CREATE YOUR OWN DESIGN WITH HORVVALLE QUALITY", ru: "СОЗДАЙТЕ СВОЙ ДИЗАЙН В КАЧЕСТВЕ HORVVALLE", tr: "KENDİ TASARIMINI HORVVALLE KALİTESİYLE YARAT" }, podBanner?.title || "ÖZ DİZAYNINI HORVVALLE KEYFİYYƏTİ İLƏ YARAT")}
               </h2>
 
               <p className="text-sm sm:text-base text-stone-600 leading-relaxed max-w-xl">
-                {language === "en" ? "Send your favorite image, logo, or artwork — the Horvvalle atelier prints it on 100% premium cotton with vivid DTG technology and delivers to your doorstep." : language === "ru" ? "Отправьте любимое изображение или логотип — ателье Horvvalle напечатает его на 100% премиум-хлопке с помощью технологии DTG и доставит вам." : language === "tr" ? "Favori görselinizi, logonuzu veya özel çiziminizi gönderin — Horvvalle atölyesi %100 birinci sınıf pamuk üzerine canlı DTG teknolojisiyle basıp adresinize teslim etsin." : (podBanner.description || "Sevdiyiniz şəkli, loqonu və ya eksklüziv rəsmi göndərin — Horvvalle atelyesi 100% yüksək keyfiyyətli premium pambıq üzərində canlı DTG texnologiyası ilə çap edib ünvanınıza çatdırsın.")}
+                {bt("podBanner", "description", { en: "Send your favorite image, logo, or artwork — the Horvvalle atelier prints it on 100% premium cotton with vivid DTG technology and delivers to your doorstep.", ru: "Отправьте любимое изображение или логотип — ателье Horvvalle напечатает его на 100% премиум-хлопке с помощью технологии DTG и доставит вам.", tr: "Favori görselinizi, logonuzu veya özel çiziminizi gönderin — Horvvalle atölyesi %100 birinci sınıf pamuk üzerine canlı DTG teknolojisiyle basıp adresinize teslim etsin." }, podBanner?.description || "Sevdiyiniz şəkli, loqonu və ya eksklüziv rəsmi göndərin — Horvvalle atelyesi 100% yüksək keyfiyyətli premium pambıq üzərində canlı DTG texnologiyası ilə çap edib ünvanınıza çatdırsın.")}
               </p>
 
               <div className="grid grid-cols-3 gap-3 pt-2">
@@ -217,7 +222,7 @@ export default function Home() {
                   className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-stone-900 hover:bg-black text-white font-medium text-xs uppercase tracking-wider transition-all shadow-md active:scale-95"
                 >
                   <Palette size={16} className="text-stone-300" />
-                  <span>{language === "en" ? "Go to Design Studio" : language === "ru" ? "В студию дизайна" : language === "tr" ? "Tasarım Stüdyosuna Geç" : (podBanner.ctaText || "Dizayn Studiyasına Keç")}</span>
+                  <span>{bt("podBanner", "ctaText", { en: "Go to Design Studio", ru: "В студию дизайна", tr: "Tasarım Stüdyosuna Geç" }, podBanner?.ctaText || "Dizayn Studiyasına Keç")}</span>
                   <ArrowRight size={14} />
                 </Link>
               </div>
@@ -273,13 +278,13 @@ export default function Home() {
             <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-transparent flex flex-col justify-end p-6 sm:p-10 text-white z-10 pointer-events-none" />
             <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-10 text-white z-20">
               <span className="text-xs font-semibold text-[#E6C280] uppercase tracking-wider">
-                {language === "en" ? "HORVVALLE TAILORING" : language === "ru" ? "КРОЙ HORVVALLE" : language === "tr" ? "HORVVALLE KESİMLERİ" : (promoBanner?.tag || "HORVVALLE KƏSİMLƏRİ")}
+                {bt("promoBanner", "tag", { en: "HORVVALLE TAILORING", ru: "КРОЙ HORVVALLE", tr: "HORVVALLE KESİMLERİ" }, promoBanner?.tag || "HORVVALLE KƏSİMLƏRİ")}
               </span>
               <h3 className="text-2xl sm:text-3xl font-serif-luxury font-normal uppercase mt-1 leading-tight drop-shadow-sm">
-                {language === "en" ? "PERFECT PANTS FOR EVERY DAY" : language === "ru" ? "ИДЕАЛЬНЫЕ БРЮКИ НА КАЖДЫЙ ДЕНЬ" : language === "tr" ? "HER GÜN İÇİN İDEAL PANTOLONLAR" : (promoBanner?.title || "HƏR GÜN ÜÇÜN İDEAL ŞALVARLAR")}
+                {bt("promoBanner", "title", { en: "PERFECT PANTS FOR EVERY DAY", ru: "ИДЕАЛЬНЫЕ БРЮКИ НА КАЖДЫЙ ДЕНЬ", tr: "HER GÜN İÇİN İDEAL PANTOLONLAR" }, promoBanner?.title || "HƏR GÜN ÜÇÜN İDEAL ŞALVARLAR")}
               </h3>
               <p className="text-xs sm:text-sm text-stone-200 mt-1.5 max-w-sm line-clamp-2 leading-relaxed drop-shadow-xs">
-                {language === "en" ? "Classic chinos, comfortable linen, and straight-fit denim. Perfect for office or city strolls." : language === "ru" ? "Классические чиносы, удобный лен и прямой деним. Идеально для офиса и прогулок." : language === "tr" ? "Klasik chino, rahat keten ve düz kesim denim pantolonlar. Ofis veya şehir yürüyüşleri için ideal." : (promoBanner?.subtitle || "Klassik chino, rahat kətan və düz kəsim denim şalvarlar. İstər ofis, istərsə də şəhər gəzintisi üçün.")}
+                {bt("promoBanner", "subtitle", { en: "Classic chinos, comfortable linen, and straight-fit denim. Perfect for office or city strolls.", ru: "Классические чиносы, удобный лен и прямой деним. Идеально для офиса и прогулок.", tr: "Klasik chino, rahat keten ve düz kesim denim pantolonlar. Ofis veya şehir yürüyüşleri için ideal." }, promoBanner?.subtitle || "Klassik chino, rahat kətan və düz kəsim denim şalvarlar. İstər ofis, istərsə də şəhər gəzintisi üçün.")}
               </p>
               <div className="pt-4">
                 <Link
@@ -287,7 +292,7 @@ export default function Home() {
                   prefetch={true}
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white text-stone-900 font-semibold text-xs uppercase tracking-wider hover:bg-stone-100 transition shadow-sm active:scale-95 cursor-pointer"
                 >
-                  <span>{language === "en" ? "ALL PANTS" : language === "ru" ? "ВСЕ БРЮКИ" : language === "tr" ? "TÜM PANTOLONLAR" : (promoBanner?.ctaText || "BÜTÜN ŞALVARLAR")}</span>
+                  <span>{bt("promoBanner", "ctaText", { en: "ALL PANTS", ru: "ВСЕ БРЮКИ", tr: "TÜM PANTOLONLAR" }, promoBanner?.ctaText || "BÜTÜN ŞALVARLAR")}</span>
                   <ArrowRight size={14} />
                 </Link>
               </div>
@@ -307,13 +312,13 @@ export default function Home() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-6 sm:p-10 text-white z-10 pointer-events-none" />
             <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-10 text-white z-20">
               <span className="text-xs font-semibold text-[#E6C280] uppercase tracking-wider">
-                {language === "en" ? "HORVVALLE COUTURE" : language === "ru" ? "HORVVALLE COUTURE" : language === "tr" ? "HORVVALLE COUTURE" : (campaignSecondary?.tag || "HORVVALLE COUTURE")}
+                {bt("campaignSecondary", "tag", { en: "HORVVALLE COUTURE", ru: "HORVVALLE COUTURE", tr: "HORVVALLE COUTURE" }, campaignSecondary?.tag || "HORVVALLE COUTURE")}
               </span>
               <h3 className="text-2xl sm:text-3xl font-serif-luxury font-normal uppercase mt-1 leading-tight">
-                {language === "en" ? "WARM & COMFORTABLE OVERSIZED HOODIE COLLECTION" : language === "ru" ? "ТЕПЛАЯ И УДОБНАЯ КОЛЛЕКЦИЯ ОВЕРСАЙЗ ХУДИ" : language === "tr" ? "SICAK VE RAHAT OVERSIZED HUDİ KOLEKSİYONU" : (campaignSecondary?.title || "İSTİ VƏ RAHAT OVERSIZED HUDİ KOLLEKSİYASI")}
+                {bt("campaignSecondary", "title", { en: "WARM & COMFORTABLE OVERSIZED HOODIE COLLECTION", ru: "ТЕПЛАЯ И УДОБНАЯ КОЛЛЕКЦИЯ ОВЕРСАЙЗ ХУДИ", tr: "SICAK VE RAHAT OVERSIZED HUDİ KOLEKSİYONU" }, campaignSecondary?.title || "İSTİ VƏ RAHAT OVERSIZED HUDİ KOLLEKSİYASI")}
               </h3>
               <p className="text-xs sm:text-sm text-stone-200 mt-1.5 max-w-sm line-clamp-2 leading-relaxed">
-                {language === "en" ? "Thick 380 GSM cotton feel, warm lining, and vibrant DTF print quality. Ideal for streetwear style." : language === "ru" ? "Плотный хлопок 380 GSM, теплая подкладка и яркая печать DTF. Идеально для уличного стиля." : language === "tr" ? "Kalın 380 GSM pamuk dokusu, sıcak astar ve canlı DTF baskı kalitesi. Şehir stili için ideal." : (campaignSecondary?.subtitle || "Qalın 380 GSM pambıq toxunuşu, isti astar və canlı DTF çap keyfiyyəti. Şəhər stili üçün ideal.")}
+                {bt("campaignSecondary", "subtitle", { en: "Thick 380 GSM cotton feel, warm lining, and vibrant DTF print quality. Ideal for streetwear style.", ru: "Плотный хлопок 380 GSM, теплая подкладка и яркая печать DTF. Идеально для уличного стиля.", tr: "Kalın 380 GSM pamuk dokusu, sıcak astar ve canlı DTF baskı kalitesi. Şehir stili için ideal." }, campaignSecondary?.subtitle || "Qalın 380 GSM pambıq toxunuşu, isti astar və canlı DTF çap keyfiyyəti. Şəhər stili üçün ideal.")}
               </p>
               <div className="pt-4">
                 <Link
@@ -321,7 +326,7 @@ export default function Home() {
                   prefetch={true}
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white text-stone-900 font-semibold text-xs uppercase tracking-wider hover:bg-stone-100 transition shadow-sm active:scale-95"
                 >
-                  <span>{language === "en" ? "VIEW HOODIES" : language === "ru" ? "СМОТРЕТЬ ХУДИ" : language === "tr" ? "HUDİLERE BAK" : (campaignSecondary?.ctaText || "HUDİLƏRƏ BAX")}</span>
+                  <span>{bt("campaignSecondary", "ctaText", { en: "VIEW HOODIES", ru: "СМОТРЕТЬ ХУДИ", tr: "HUDİLERE BAK" }, campaignSecondary?.ctaText || "HUDİLƏRƏ BAX")}</span>
                   <ArrowRight size={14} />
                 </Link>
               </div>

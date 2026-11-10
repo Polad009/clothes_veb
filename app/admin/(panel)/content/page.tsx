@@ -18,6 +18,7 @@ export default async function ContentPage() {
           podBanner: content.podBanner || {},
           promoBanner: content.promoBanner || {},
           campaignSecondary: content.campaignSecondary || {},
+          i18n: content.i18n || {},
         }}
       />
     </AdminPage>
