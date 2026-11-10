@@ -100,22 +100,52 @@ export async function listCategories(client: SupabaseClient = db()): Promise<Sto
   return (rows || []).map(rowToCategory);
 }
 
+const CATEGORY_TEXT_MAX = 300;
+
+function cleanLangMap(value: unknown, max: number): Record<string, string> | undefined {
+  if (!value || typeof value !== 'object') return undefined;
+  const out: Record<string, string> = {};
+  for (const lang of ['en', 'ru', 'tr']) {
+    const v = (value as Record<string, unknown>)[lang];
+    if (typeof v === 'string' && v.trim()) out[lang] = v.replace(/[<>]/g, '').trim().slice(0, max);
+  }
+  return out;
+}
+
+/**
+ * Creates (`create: true`) or updates a category. The id is the link/product key:
+ * it is chosen once and cannot be changed afterwards.
+ */
 export async function saveCategory(input: any): Promise<StoreCategory> {
-  const { id: rawId, title, desc, description, image, active, sortOrder, ...extra } = input || {};
-  const id = String(rawId || '').trim() || `cat-${Date.now().toString(36)}`;
+  const { id: rawId, create, title, desc, description, image, active, sortOrder, titles, descriptions, showInMenu } = input || {};
+  const id = String(rawId || '').trim().toLowerCase();
+  if (!/^[a-z0-9-]{2,40}$/.test(id)) throw new Error('Kateqoriya kodu 2–40 simvol olmalıdır: kiçik latın hərfləri, rəqəm, tire.');
 
   const existing = unwrap(
     await db().from('categories').select('*').eq('id', id).maybeSingle(),
     'Kateqoriya axtarılmadı'
   );
+  if (create && existing) throw new Error(`"${id}" kodlu kateqoriya artıq var.`);
+  if (!create && !existing) throw new Error('Kateqoriya tapılmadı.');
+
+  const name = String(title ?? existing?.title ?? '').replace(/[<>]/g, '').trim().slice(0, 60);
+  if (!name) throw new Error('Kateqoriyanın adını yazın.');
+
+  const extra: Record<string, any> = { ...(existing?.extra || {}) };
+  const t = cleanLangMap(titles, 60);
+  const d = cleanLangMap(descriptions, CATEGORY_TEXT_MAX);
+  if (t) extra.titles = t;
+  if (d) extra.descriptions = d;
+  if (showInMenu !== undefined) extra.showInMenu = Boolean(showInMenu);
+  else if (!existing) extra.showInMenu = true;
 
   const row: Record<string, any> = {
     id,
-    title: String(title ?? existing?.title ?? ''),
-    description: String(desc ?? description ?? existing?.description ?? ''),
-    image: String(image ?? existing?.image ?? ''),
+    title: name,
+    description: String(desc ?? description ?? existing?.description ?? '').replace(/[<>]/g, '').trim().slice(0, CATEGORY_TEXT_MAX),
+    image: String(image ?? existing?.image ?? '').trim(),
     active: active !== undefined ? Boolean(active) : existing?.active ?? true,
-    extra: { ...(existing?.extra || {}), ...extra },
+    extra,
     updated_at: new Date().toISOString(),
   };
   if (sortOrder !== undefined && Number.isFinite(Number(sortOrder))) {
@@ -132,7 +162,26 @@ export async function saveCategory(input: any): Promise<StoreCategory> {
   return rowToCategory(saved);
 }
 
+/** Saves the order the admin arranged (first id = first in menus). */
+export async function reorderCategories(ids: string[]): Promise<void> {
+  for (let i = 0; i < ids.length; i++) {
+    unwrap(await db().from('categories').update({ sort_order: i + 1 }).eq('id', String(ids[i])), 'Sıra yadda saxlanılmadı');
+  }
+}
+
+export async function countProductsByCategory(): Promise<Record<string, number>> {
+  const rows = unwrap(await db().from('products').select('category'), 'Məhsullar oxunmadı');
+  const out: Record<string, number> = {};
+  for (const r of rows || []) out[r.category] = (out[r.category] || 0) + 1;
+  return out;
+}
+
+/** Refuses while products still belong to the category: they would vanish from every menu. */
 export async function deleteCategory(id: string): Promise<void> {
+  const counts = await countProductsByCategory();
+  if (counts[id]) {
+    throw new Error(`Bu kateqoriyada ${counts[id]} məhsul var. Əvvəlcə onları başqa kateqoriyaya keçirin və ya kateqoriyanı gizlədin.`);
+  }
   unwrap(await db().from('categories').delete().eq('id', id), 'Kateqoriya silinmədi');
 }
 

@@ -5,13 +5,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ExternalLink, Plus, Search } from "lucide-react";
 import type { CatalogProduct } from "@/lib/db/products";
-import { adminFetch, CATEGORIES, formatMoney, GENDERS } from "@/lib/adminClient";
+import { adminFetch, formatMoney, GENDERS } from "@/lib/adminClient";
 import { Badge, Button, Card, EmptyState, Input, PageHeader, Select, Toggle, useToast } from "@/components/admin/ui";
 
 const label = (list: Array<{ value: string; label: string }>, value: string) =>
   list.find((x) => x.value === value)?.label || value;
 
-export function ProductsTable({ products }: { products: CatalogProduct[] }) {
+export function ProductsTable({ products, categories }: { products: CatalogProduct[]; categories: Array<{ value: string; label: string }> }) {
   const router = useRouter();
   const toast = useToast();
   const [query, setQuery] = useState("");
@@ -66,7 +66,7 @@ export function ProductsTable({ products }: { products: CatalogProduct[] }) {
           </div>
           <Select value={category} onChange={(e) => setCategory(e.target.value)} aria-label="Kateqoriya üzrə süz" className="w-auto">
             <option value="all">Bütün kateqoriyalar</option>
-            {CATEGORIES.map((c) => (
+            {categories.map((c) => (
               <option key={c.value} value={c.value}>{c.label}</option>
             ))}
           </Select>
@@ -111,7 +111,7 @@ export function ProductsTable({ products }: { products: CatalogProduct[] }) {
                         </Link>
                       </td>
                       <td className="px-3 py-3 text-stone-700">
-                        {label(CATEGORIES, p.category)}
+                        {label(categories, p.category)}
                         <span className="block text-xs text-stone-500">{label(GENDERS, p.gender)}</span>
                       </td>
                       <td className="px-3 py-3 text-right tabular-nums">

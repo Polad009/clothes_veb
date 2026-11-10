@@ -23,13 +23,15 @@ const UnwovenLoom = dynamic(
 );
 import { useLanguage } from "@/context/LanguageContext";
 import { useCurrency } from "@/context/CurrencyContext";
-import { useStoreData } from "@/context/StoreDataContext";
+import { useCategories, useStoreData } from "@/context/StoreDataContext";
+import { categoryTitle } from "@/lib/categories";
 
 export default function Home() {
   const { t } = useLanguage();
   const { formatPrice } = useCurrency();
+  const categories = useCategories();
   const { products, content } = useStoreData();
-  const [activeCategory, setActiveCategory] = useState<"all" | "koynek" | "hudi" | "salvar" | "aksesuar">("all");
+  const [activeCategory, setActiveCategory] = useState<string>("all");
   const hero = content?.hero || {};
   const podBanner = content?.podBanner || {};
   const promoBanner = content?.promoBanner;
@@ -110,17 +112,17 @@ export default function Home() {
           <div className="flex items-center gap-1 sm:gap-1.5 p-1 sm:p-1.5 rounded-full bg-stone-100/90 border border-stone-200/80 shadow-2xs overflow-x-auto max-w-full">
             {[
               { id: "all", label: t.home.allModels || "Bütün Modellər" },
-              { id: "koynek", label: t.home.shirtsCategory || "T-Shirt & Köynək" },
-              { id: "hudi", label: t.home.hoodiesCategory || "Hudi & Sviter" },
-              { id: "salvar", label: t.home.pantsCategory || "Şalvar & Şortik" },
-              { id: "aksesuar", label: t.home.accessoriesCategory || "Aksesuarlar" },
+              // only categories that have something to show
+              ...categories
+                .filter((c) => products.some((p) => p.category === c.id))
+                .map((c) => ({ id: c.id, label: categoryTitle(c, language) })),
             ].map((tab) => {
               const isActive = activeCategory === tab.id;
               return (
                 <button
                   key={tab.id}
                   type="button"
-                  onClick={() => setActiveCategory(tab.id as any)}
+                  onClick={() => setActiveCategory(tab.id)}
                   className={`relative px-4 sm:px-5 py-2 rounded-full text-xs font-medium uppercase tracking-wider transition-colors shrink-0 cursor-pointer select-none active:scale-95 ${
                     isActive
                       ? "text-white font-semibold"

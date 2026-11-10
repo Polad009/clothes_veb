@@ -1,6 +1,7 @@
 "use client";
 
-import { useSupport } from "@/context/StoreDataContext";
+import { useCategories, useSupport } from "@/context/StoreDataContext";
+import { categoryTitle } from "@/lib/categories";
 import React, { useState } from "react";
 import Link from "next/link";
 import { Check, ShieldCheck, Truck, RotateCcw, Award } from "lucide-react";
@@ -10,6 +11,7 @@ import { useLanguage } from "@/context/LanguageContext";
 
 export function Footer() {
   const support = useSupport();
+  const categories = useCategories();
   const { t, language } = useLanguage();
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
@@ -82,7 +84,7 @@ export function Footer() {
 
       {/* Main Footer Links & Newsletter */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand info & Newsletter */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center">
@@ -183,85 +185,33 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Column 1: Köynəklər */}
+          {/* Column 1: Categories (from the admin panel) */}
           <div className="space-y-3">
             <p className="text-xs font-bold text-[#E6C280] uppercase tracking-wider">
-              {t.home.shirtsCategory}
+              {language === "en" ? "Shop" : language === "ru" ? "Каталог" : language === "tr" ? "Mağaza" : "Kolleksiya"}
             </p>
             <ul className="space-y-2 text-xs">
+              {categories.map((c) => (
+                <li key={c.id}>
+                  <Link href={`/collections?category=${encodeURIComponent(c.id)}`} className="text-stone-300 hover:text-white transition">
+                    {categoryTitle(c, language)}
+                  </Link>
+                </li>
+              ))}
               <li>
-                <Link href="/collections?category=koynek" className="text-stone-300 hover:text-white transition">
-                  Vintage Heavyweight T-Shirt
-                </Link>
-              </li>
-              <li>
-                <Link href="/collections?category=koynek" className="text-stone-300 hover:text-white transition">
-                  Klassik Oxford Köynək
-                </Link>
-              </li>
-              <li>
-                <Link href="/collections?category=koynek" className="text-stone-300 hover:text-white transition">
-                  Təbii Kətan Yay Köynəyi
-                </Link>
-              </li>
-              <li>
-                <Link href="/collections?category=koynek" className="text-stone-300 hover:text-white transition">
-                  Təməl Pambıq T-Shirt
+                <Link href="/collections" className="text-stone-300 hover:text-white transition">
+                  {t.nav.collection}
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Column 2: Şalvarlar */}
+          {/* Column 2: Studio & help */}
           <div className="space-y-3">
             <p className="text-xs font-bold text-[#E6C280] uppercase tracking-wider">
-              {t.home.pantsCategory}
+              {language === "en" ? "Help" : language === "ru" ? "Помощь" : language === "tr" ? "Yardım" : "Kömək"}
             </p>
             <ul className="space-y-2 text-xs">
-              <li>
-                <Link href="/collections?category=salvar" className="text-stone-300 hover:text-white transition">
-                  Slim Chino Şalvarlar
-                </Link>
-              </li>
-              <li>
-                <Link href="/collections?category=salvar" className="text-stone-300 hover:text-white transition">
-                  Düz Kəsim Cins Şalvarlar
-                </Link>
-              </li>
-              <li>
-                <Link href="/collections?category=salvar" className="text-stone-300 hover:text-white transition">
-                  Klassik Ofis Şalvarları
-                </Link>
-              </li>
-              <li>
-                <Link href="/collections?category=salvar" className="text-stone-300 hover:text-white transition">
-                  Gündəlik Kargo Şalvar
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Column 3: Hudi, Aksesuar & Studio */}
-          <div className="space-y-3">
-            <p className="text-xs font-bold text-[#E6C280] uppercase tracking-wider">
-              {t.home.hoodiesCategory} & {t.home.accessoriesCategory}
-            </p>
-            <ul className="space-y-2 text-xs">
-              <li>
-                <Link href="/collections?category=hudi" className="text-stone-300 hover:text-white transition">
-                  {language === "en" ? "Heavyweight Hoodie (3-Thread)" : language === "ru" ? "Плотное худи (3-нитка)" : language === "tr" ? "Kalın Hudi (3 İplik)" : "Hody qalın (3iplik)"}
-                </Link>
-              </li>
-              <li>
-                <Link href="/collections?category=aksesuar" className="text-stone-300 hover:text-white transition">
-                  {language === "en" ? "Heavyweight Snapback Cap" : language === "ru" ? "Плотная кепка" : language === "tr" ? "Kalın Şapka" : "Kepka - qalın"}
-                </Link>
-              </li>
-              <li>
-                <Link href="/collections?category=aksesuar" className="text-stone-300 hover:text-white transition">
-                  {language === "en" ? "Canvas Eco Tote Bag" : language === "ru" ? "Хлопковый эко-шоппер" : language === "tr" ? "Keten Eko Çanta" : "Kətan Eko Çanta"}
-                </Link>
-              </li>
               <li>
                 <Link href="/studio" className="text-[#E6C280] font-bold hover:text-white transition flex items-center gap-1">
                   <span>{t.nav.studio}</span>

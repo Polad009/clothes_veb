@@ -21,7 +21,8 @@ import { HeaderQuickSearch } from "@/components/HeaderQuickSearch";
 import { UnifiedLocaleDropdown } from "@/components/UnifiedLocaleDropdown";
 import { useLanguage } from "@/context/LanguageContext";
 import { Product } from "@/data/products";
-import { useStoreData } from "@/context/StoreDataContext";
+import { useCategories, useStoreData } from "@/context/StoreDataContext";
+import { categoryTitle } from "@/lib/categories";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import Logo from "@/components/Logo";
 
@@ -41,7 +42,8 @@ export function Header({ className = "" }: HeaderProps) {
   const { formatPrice, formatProductPrice } = useCurrency();
   const { user, profile, openAuthModal } = useAuth();
   const { products } = useStoreData();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const categories = useCategories();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchQuery, setMobileSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -127,13 +129,12 @@ export function Header({ className = "" }: HeaderProps) {
 
   useBodyScrollLock(mobileMenuOpen);
 
-  const navLinks = [
+  const navLinks: Array<{ label: string; href: string; categoryId?: string; genderId?: string }> = [
     { label: t.nav.men, href: "/collections?gender=men", genderId: "men" },
     { label: t.nav.women, href: "/collections?gender=women", genderId: "women" },
-    { label: t.nav.shirts, href: "/collections?category=koynek", categoryId: "koynek" },
-    { label: t.nav.hoodies, href: "/collections?category=hudi", categoryId: "hudi" },
-    { label: t.nav.pants, href: "/collections?category=salvar", categoryId: "salvar" },
-    { label: t.nav.accessories, href: "/collections?category=aksesuar", categoryId: "aksesuar" },
+    ...categories
+      .filter((c) => c.showInMenu !== false)
+      .map((c) => ({ label: categoryTitle(c, language), href: `/collections?category=${encodeURIComponent(c.id)}`, categoryId: c.id })),
     { label: t.nav.collection, href: "/collections", categoryId: "all" },
     { label: t.nav.track, href: "/track", categoryId: "track" },
   ];
@@ -144,9 +145,6 @@ export function Header({ className = "" }: HeaderProps) {
     }
     if (item.categoryId && item.categoryId !== "all") {
       if (pathname === "/collections" && currentCategory === item.categoryId && !currentGender) {
-        return true;
-      }
-      if (pathname === "/" && item.categoryId === "koynek") {
         return true;
       }
       return false;

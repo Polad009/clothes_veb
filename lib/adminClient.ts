@@ -51,12 +51,15 @@ export const POD_STATUSES: Array<{ value: string; label: string }> = [
   { value: 'Shipped', label: 'Göndərildi' },
 ];
 
-export const CATEGORIES: Array<{ value: string; label: string }> = [
-  { value: 'koynek', label: 'T-Shirt və köynək' },
-  { value: 'hudi', label: 'Hudi və sviter' },
-  { value: 'salvar', label: 'Şalvar və şortik' },
-  { value: 'aksesuar', label: 'Aksesuar' },
-];
+/** Category choices for admin selects; keeps an unknown current value selectable. */
+export function categoryOptions(
+  categories: Array<{ id: string; title: string }>,
+  current?: string
+): Array<{ value: string; label: string }> {
+  const options = categories.map((c) => ({ value: c.id, label: c.title || c.id }));
+  if (current && !options.some((o) => o.value === current)) options.push({ value: current, label: `${current} (siyahıda yoxdur)` });
+  return options;
+}
 
 export const GENDERS: Array<{ value: string; label: string }> = [
   { value: 'unisex', label: 'Uniseks' },

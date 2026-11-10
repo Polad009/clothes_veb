@@ -1,9 +1,10 @@
 import { MetadataRoute } from "next";
 import { getStoreSnapshot } from "@/lib/storeSnapshot";
+import { visibleCategories } from "@/lib/categories";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.horwalle.com").replace(/\/$/, "");
-  const { products } = await getStoreSnapshot();
+  const { products, content } = await getStoreSnapshot();
 
   // Base static routes
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -18,30 +19,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/collections?category=koynek`,
-      lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 0.85,
-    },
-    {
-      url: `${baseUrl}/collections?category=hudi`,
-      lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 0.85,
-    },
-    {
-      url: `${baseUrl}/collections?category=salvar`,
-      lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 0.85,
-    },
-    {
-      url: `${baseUrl}/collections?category=aksesuar`,
-      lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 0.85,
     },
     {
       url: `${baseUrl}/studio`,
@@ -75,6 +52,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
+  const categoryRoutes: MetadataRoute.Sitemap = visibleCategories(content?.categories as any).map((c) => ({
+    url: `${baseUrl}/collections?category=${encodeURIComponent(c.id)}`,
+    lastModified: new Date(),
+    changeFrequency: "daily",
+    priority: 0.85,
+  }));
+
   // Product routes from the live catalogue
   const productRoutes: MetadataRoute.Sitemap = products.map((p) => ({
     url: `${baseUrl}/products/${p.slug}`,
@@ -83,5 +67,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  return [...staticRoutes, ...productRoutes];
+  return [...staticRoutes, ...categoryRoutes, ...productRoutes];
 }

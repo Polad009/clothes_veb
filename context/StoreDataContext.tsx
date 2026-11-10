@@ -1,8 +1,9 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from "react";
 import { Product } from "@/data/products";
 import { whatsappLink, whatsappNumber } from "@/lib/contact";
+import { type Category, visibleCategories } from "@/lib/categories";
 
 export function normalizeProduct(p: any): Product {
   const colors = (p.colors || []).map((c: any) => {
@@ -201,4 +202,10 @@ export function useSupport() {
   const { settings } = useContext(StoreDataContext);
   const phone = whatsappNumber(settings);
   return { phone, link: (text?: string) => whatsappLink(phone, text) };
+}
+
+/** Categories shown on the site (admin-managed), in display order. */
+export function useCategories(): Category[] {
+  const { content } = useContext(StoreDataContext);
+  return useMemo(() => visibleCategories(content?.categories), [content?.categories]);
 }

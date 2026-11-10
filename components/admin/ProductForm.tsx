@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, ImagePlus, Loader2, Plus, Trash2, X } from "lucide-react";
 import type { CatalogProduct } from "@/lib/db/products";
 import { stockKey } from "@/lib/stock";
-import { adminFetch, CATEGORIES, GENDERS } from "@/lib/adminClient";
+import { adminFetch, categoryOptions, GENDERS } from "@/lib/adminClient";
 import { cn } from "@/lib/utils";
 import { Button, Card, ConfirmButton, Field, Input, Select, Textarea, Toggle, useToast } from "@/components/admin/ui";
 
@@ -117,14 +117,14 @@ function ImageSlot({
   );
 }
 
-export function ProductForm({ product }: { product: CatalogProduct | null }) {
+export function ProductForm({ product, categories }: { product: CatalogProduct | null; categories: Array<{ id: string; title: string }> }) {
   const router = useRouter();
   const toast = useToast();
   const isNew = !product;
 
   const [name, setName] = useState(product?.name || "");
   const [description, setDescription] = useState(product?.description || "");
-  const [category, setCategory] = useState(product?.category || "koynek");
+  const [category, setCategory] = useState(product?.category || categories[0]?.id || "koynek");
   const [gender, setGender] = useState(product?.gender || "unisex");
   const [price, setPrice] = useState(product ? String(product.price) : "");
   const [compareAtPrice, setCompareAtPrice] = useState(product?.compareAtPrice != null ? String(product.compareAtPrice) : "");
@@ -270,7 +270,7 @@ export function ProductForm({ product }: { product: CatalogProduct | null }) {
             </Field>
             <Field label="Kateqoriya">
               <Select value={category} onChange={(e) => setCategory(e.target.value)}>
-                {CATEGORIES.map((c) => (
+                {categoryOptions(categories, category).map((c) => (
                   <option key={c.value} value={c.value}>{c.label}</option>
                 ))}
               </Select>

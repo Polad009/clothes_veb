@@ -29,6 +29,7 @@ import {
   getSettings,
   listCategories,
   listPromos,
+  reorderCategories,
   saveCategory,
   saveContent,
   savePromo,
@@ -194,6 +195,12 @@ export async function POST(req: NextRequest, { params }: RouteContext) {
     if (route === 'promos') {
       const promo = await savePromo(body);
       return json({ success: true, promo });
+    }
+
+    if (route === 'categories' && subRoute === 'reorder') {
+      await reorderCategories(Array.isArray(body.ids) ? body.ids.map(String) : []);
+      refreshStore();
+      return json({ success: true, categories: await listCategories() });
     }
 
     if (route === 'categories') {

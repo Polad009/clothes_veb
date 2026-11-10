@@ -38,7 +38,8 @@ import React, { Suspense, useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { useStoreData } from "@/context/StoreDataContext";
+import { useCategories, useStoreData } from "@/context/StoreDataContext";
+import { categoryDescription, categoryTitle, splitForHeading } from "@/lib/categories";
 import { useLanguage } from "@/context/LanguageContext";
 import { ProductCard } from "@/components/ProductCard";
 import { CustomDropdown } from "@/components/ui/CustomDropdown";
@@ -122,13 +123,14 @@ function CollectionsContent() {
     { id: "unisex", label: t.collections?.unisex || (language === "az" ? "Unisex" : language === "ru" ? "Унисекс" : language === "tr" ? "Uniseks" : "Unisex") },
   ];
 
+  const siteCategories = useCategories();
   const categories = [
     { id: "all", label: t.collections?.allModels || "Bütün modellər" },
-    { id: "koynek", label: t.collections?.shirts || "T-Shirt & köynək" },
-    { id: "hudi", label: t.collections?.hoodies || "Hudi & sviter" },
-    { id: "salvar", label: t.collections?.pants || "Şalvar & şortik" },
-    { id: "aksesuar", label: t.collections?.accessories || "Aksesuarlar" },
+    ...siteCategories.map((c) => ({ id: c.id, label: categoryTitle(c, language) })),
   ];
+  const activeCategory = siteCategories.find((c) => c.id === selectedCategory);
+  const [headingLead, headingTail] = activeCategory ? splitForHeading(categoryTitle(activeCategory, language)) : ["", ""];
+  const activeDescription = activeCategory ? categoryDescription(activeCategory, language) : "";
 
   const sortOptions = [
     { id: "bestselling", label: t.collections?.sortBestselling || "Ən çox satılanlar" },
@@ -296,46 +298,11 @@ function CollectionsContent() {
                     <>Unisex <span className="italic text-stone-800">Collection</span></>
                   )
                 )
-              ) : selectedCategory === "hudi" ? (
-                language === "az" ? (
-                  <>Hudi və <span className="italic text-stone-800">sviterlər</span></>
-                ) : language === "ru" ? (
-                  <>Худи и <span className="italic text-stone-800">свитшоты</span></>
-                ) : language === "tr" ? (
-                  <>Hudi ve <span className="italic text-stone-800">sweatshirt</span></>
-                ) : (
-                  <>Hoodies & <span className="italic text-stone-800">Sweaters</span></>
-                )
-              ) : selectedCategory === "koynek" ? (
-                language === "az" ? (
-                  <>T-Shirt və <span className="italic text-stone-800">köynəklər</span></>
-                ) : language === "ru" ? (
-                  <>Футболки и <span className="italic text-stone-800">рубашки</span></>
-                ) : language === "tr" ? (
-                  <>T-Shirt ve <span className="italic text-stone-800">gömlekler</span></>
-                ) : (
-                  <>T-Shirts & <span className="italic text-stone-800">Shirts</span></>
-                )
-              ) : selectedCategory === "salvar" ? (
-                language === "az" ? (
-                  <>Şalvar və <span className="italic text-stone-800">şortiklər</span></>
-                ) : language === "ru" ? (
-                  <>Брюки и <span className="italic text-stone-800">шорты</span></>
-                ) : language === "tr" ? (
-                  <>Pantolon ve <span className="italic text-stone-800">şortlar</span></>
-                ) : (
-                  <>Pants & <span className="italic text-stone-800">Shorts</span></>
-                )
-              ) : selectedCategory === "aksesuar" ? (
-                language === "az" ? (
-                  <>Zərif <span className="italic text-stone-800">aksesuarlar</span></>
-                ) : language === "ru" ? (
-                  <>Изысканные <span className="italic text-stone-800">аксессуары</span></>
-                ) : language === "tr" ? (
-                  <>Zarif <span className="italic text-stone-800">aksesuarlar</span></>
-                ) : (
-                  <>Refined <span className="italic text-stone-800">Accessories</span></>
-                )
+              ) : activeCategory ? (
+                <>
+                  {headingLead && <>{headingLead} </>}
+                  <span className="italic text-stone-800">{headingTail}</span>
+                </>
               ) : (
                 language === "az" ? (
                   <>Bütün <span className="italic text-stone-800">modellər</span></>
@@ -357,14 +324,8 @@ function CollectionsContent() {
                 ? (language === "az" ? "Qadınlar üçün zərif və rahat atelye kəsimli modellər." : language === "ru" ? "Женская коллекция базовых и утонченных моделей с безупречной посадкой." : language === "tr" ? "Kadınlar için zarif ve konforlu atölye kesimli modeller." : "Refined women's wardrobe essentials with atelier tailoring.")
                 : selectedGender === "unisex" && selectedCategory === "all"
                 ? (language === "az" ? "Həm kişi, həm də qadınlar üçün universal oversize və rahat siluetlər." : language === "ru" ? "Универсальные оверсайз силуэты, подходящие каждому." : language === "tr" ? "Hem kadın hem erkek için konforlu uniseks silüetler." : "Universal oversize silhouettes designed for all genders.")
-                : selectedCategory === "hudi"
-                ? (language === "az" ? "3iplik qalın və isti hudilər, daranmış xalis pambıq və fərdi atelye kəsimi." : language === "ru" ? "Теплые и плотные худи 3-х нитка, гребенной хлопок и индивидуальный крой." : language === "tr" ? "Kalın ve sıcak tutan 3iplik polarlar, penye pamuk ve özel terzi kesimi." : "Heavyweight 3-thread fleece, combed pure cotton and bespoke atelier tailoring.")
-                : selectedCategory === "koynek"
-                ? (language === "az" ? "Oversize və regular t-shirt-lər, klassik Oxford köynəklər, 100% daranmış premium pambıq." : language === "ru" ? "Оверсайз и классические футболки, рубашки Оксфорд из 100% гребенного хлопка." : language === "tr" ? "Oversize ve regular t-shirtler, klasik Oxford gömlekler, %100 penye pamuk." : "Oversize and regular t-shirts, classic Oxford shirts in 100% premium combed cotton.")
-                : selectedCategory === "salvar"
-                ? (language === "az" ? "Dəqiq atelye kəsimi ilə chino, denim və taktiki kargo şalvarlar." : language === "ru" ? "Брюки чинос, деним и карго с безупречной посадкой по фигуре." : language === "tr" ? "Kusursuz kalıplı chino, denim ve kargo pantolonlar." : "Precision-tailored chino, denim, and cargo trousers.")
-                : selectedCategory === "aksesuar"
-                ? (language === "az" ? "Qalın kətan kepkalar, eko çantalar və fərdi aksesuarlar." : language === "ru" ? "Плотные кепки, эко-сумки и стильные аксессуары." : language === "tr" ? "Kalın keten kasketler, eko çantalar ve özel aksesuarlar." : "Heavy canvas caps, eco tote bags and bespoke accessories.")
+                : activeCategory && activeDescription
+                ? activeDescription
                 : (language === "az" ? "Premium köynəklər, 3iplik hudilər, şalvarlar və fərdi atelye kolleksiyası." : language === "ru" ? "Премиальные рубашки, плотные худи, брюки и коллекция ателье." : language === "tr" ? "Premium gömlekler, 3iplik polarlar, pantolonlar ve özel atölye koleksiyonu." : "Premium shirts, heavyweight hoodies, tailored trousers, and bespoke couture.")}
             </p>
           </motion.div>

@@ -7,7 +7,8 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, X, Palette, ArrowRight } from "lucide-react";
 import { Product } from "@/data/products";
-import { useStoreData } from "@/context/StoreDataContext";
+import { useCategories, useStoreData } from "@/context/StoreDataContext";
+import { categoryTitle } from "@/lib/categories";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -27,6 +28,7 @@ export function HeaderQuickSearch({ isLightMode, onOpenChange }: HeaderQuickSear
   const { products } = useStoreData();
   const { formatPrice, formatProductPrice } = useCurrency();
   const { t, language } = useLanguage();
+  const categories = useCategories();
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
@@ -351,12 +353,7 @@ export function HeaderQuickSearch({ isLightMode, onOpenChange }: HeaderQuickSear
                         {language === "en" ? "Browse Departments" : language === "ru" ? "Разделы каталога" : language === "tr" ? "Kategoriler" : "Kolleksiya Bölmələri"}
                       </span>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                        {[
-                          { id: "koynek", name: t.home.shirtsCategory || "Köynək", href: "/collections?category=koynek" },
-                          { id: "hudi", name: t.home.hoodiesCategory || "Hudi", href: "/collections?category=hudi" },
-                          { id: "salvar", name: t.home.pantsCategory || "Şalvar", href: "/collections?category=salvar" },
-                          { id: "aksesuar", name: t.home.accessoriesCategory || "Aksesuar", href: "/collections?category=aksesuar" },
-                        ].map((cat) => (
+                        {categories.map((c) => ({ id: c.id, name: categoryTitle(c, language), href: `/collections?category=${encodeURIComponent(c.id)}` })).map((cat) => (
                           <Link
                             key={cat.id}
                             href={cat.href}
