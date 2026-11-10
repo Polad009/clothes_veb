@@ -36,8 +36,8 @@ export function StoreShell({ children }: { children: React.ReactNode }) {
       {/* these overlays still use the old light classes: give them the dark mapping */}
       <div className="hw-dark contents">
         <AuthModal />
-        <CookieConsent />
       </div>
+      <CookieConsent />
     </>
   );
 }
