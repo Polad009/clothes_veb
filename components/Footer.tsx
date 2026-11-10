@@ -230,7 +230,7 @@ export function Footer() {
         {/* Bottom row: Payment methods & Copyright */}
         <div className="mt-12 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-white/50">
           <div className="flex items-center flex-wrap gap-x-4 gap-y-1">
-            <span>© {new Date().getFullYear()} HORVVALLE ATELIER. {t.footer.rights}</span>
+            <span>© {new Date().getFullYear()} HORVVALLE. {t.footer.rights}</span>
             <span className="hidden sm:inline text-white/20">•</span>
             <Link href="/privacy" className="hover:text-[#E6C280] transition underline-offset-4 hover:underline">
               {language === "en" ? "Privacy Policy" : language === "ru" ? "Политика конфиденциальности" : language === "tr" ? "Gizlilik Politikası" : "Məxfilik Siyasəti"}

@@ -47,7 +47,7 @@ export default async function OrderDetailPage({ params }: { params: { id: string
           href={`/admin/orders/${encodeURIComponent(order.id)}/receipt`}
           className="ml-auto inline-flex h-9 items-center rounded-lg border border-stone-300 bg-white px-3 text-[13px] font-medium text-stone-800 hover:bg-stone-50"
         >
-          Qəbzi çap et
+          Qəbzi printerə göndər
         </Link>
       </div>
 
@@ -66,7 +66,7 @@ export default async function OrderDetailPage({ params }: { params: { id: string
                     )}
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-stone-900">
-                        {item.name} {item.isCustom && <Badge tone="amber">Fərdi çap</Badge>}
+                        {item.name} {item.isCustom && <Badge tone="amber">Öz dizayn</Badge>}
                       </p>
                       <p className="mt-0.5 text-xs text-stone-500">
                         {[item.color, item.size && `Ölçü: ${item.size}`, custom?.placement].filter(Boolean).join(" · ")}

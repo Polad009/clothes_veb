@@ -7,8 +7,8 @@ import { Metadata } from "next";
 import { ShieldCheck, ArrowLeft, Lock, Eye, FileText, HelpCircle } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Məxfilik Siyasəti | Horwalle Atelier",
-  description: "Horwalle Atelier-də fərdi məlumatların qorunması, çərəzlər və məxfilik siyasəti.",
+  title: "Məxfilik Siyasəti | Horwalle",
+  description: "Horwalle-də fərdi məlumatların qorunması, çərəzlər və məxfilik siyasəti.",
   alternates: {
     canonical: "https://www.horwalle.com/privacy",
   },
@@ -41,7 +41,7 @@ export default async function PrivacyPage() {
             Məxfilik Siyasəti
           </h1>
           <p className="text-stone-400 text-sm sm:text-base leading-relaxed">
-            Son yenilənmə tarixi: <span className="text-[#E6C280]">Noyabr 2026</span>. Horwalle Atelier olaraq fərdi məlumatlarınızın toxunulmazlığına və məxfiliyinə ən yüksək səviyyədə zəmanət veririk.
+            Son yenilənmə tarixi: <span className="text-[#E6C280]">Noyabr 2026</span>. Horwalle olaraq fərdi məlumatlarınızın toxunulmazlığına və məxfiliyinə ən yüksək səviyyədə zəmanət veririk.
           </p>
         </div>
 
@@ -54,12 +54,12 @@ export default async function PrivacyPage() {
               <h2 className="text-xl font-serif font-bold">1. Hansı Məlumatları Toplayırıq?</h2>
             </div>
             <p className="mb-4 text-stone-400">
-              Sifarişlərinizi vaxtında hazırlamaq, atelye kəsimlərini dəqiq yerinə yetirmək və ünvana çatdırmaq üçün aşağıdakı məlumatları toplayırıq:
+              Sifarişlərinizi vaxtında hazırlamaq və ünvana çatdırmaq üçün aşağıdakı məlumatları toplayırıq:
             </p>
             <ul className="list-disc list-inside space-y-2 text-stone-300">
               <li><strong className="text-white">Şəxsi məlumatlar:</strong> Ad, soyad, əlaqə nömrəsi, çatdırılma ünvanı.</li>
-              <li><strong className="text-white">Fərdi atelye ölçüləri:</strong> Fərdi tikiliş sifariş etdikdə təqdim etdiyiniz boy, çəki və xüsusi bədən ölçüləri.</li>
-              <li><strong className="text-white">3D Studiya dizaynları:</strong> Köynək və digər geyimlərə çap üçün yüklədiyiniz fərdi loqo və qrafik təsvirlər.</li>
+              <li><strong className="text-white">Ölçü məlumatları:</strong> Düzgün ölçü seçmək üçün könüllü təqdim etdiyiniz boy və çəki.</li>
+              <li><strong className="text-white">3D Studiya dizaynları:</strong> Köynək və digər geyimlərə köçürmək üçün yüklədiyiniz fərdi loqo və qrafik təsvirlər.</li>
               <li><strong className="text-white">Texniki məlumatlar:</strong> Cihaz növü, IP ünvanı və saytdakı istifadə təcrübəsini yaxşılaşdıran anonim naviqasiya məlumatları.</li>
             </ul>
           </section>

@@ -92,7 +92,7 @@ const CHECKOUT_I18N = {
     codNoCustom: "Fərdi sifarişlərə şamil olunmur",
     freeDeliveryTitle: "Bakı və Sumqayıt Ərazisinə Pulsuz Çatdırılma",
     freeDeliveryDesc: "Bakı və Sumqayıt daxili bütün sifarişlər heç bir məbləğ məhdudiyyəti olmadan kuryerlə tam pulsuz çatdırılır.",
-    guaranteeTitle: "HORVVALLE Atelye Zəmanəti",
+    guaranteeTitle: "HORVVALLE Keyfiyyət Zəmanəti",
     guaranteeDesc: "Ölçü uyğun gəlmədikdə 14 gün ərzində asan dəyişmə və ya ödənişin tam geri qaytarılması təmin edilir.",
     helpTitle: "Sifarişdə kömək lazımdır?",
     helpLive: "Canlı Dəstək",
@@ -163,7 +163,7 @@ const CHECKOUT_I18N = {
     codNoCustom: "Not eligible for custom designs",
     freeDeliveryTitle: "Free Delivery to Baku & Sumgayit",
     freeDeliveryDesc: "All orders within Baku and Sumgayit are delivered completely free of charge by courier, with no minimum spend.",
-    guaranteeTitle: "HORVVALLE Atelier Guarantee",
+    guaranteeTitle: "HORVVALLE Quality Guarantee",
     guaranteeDesc: "Easy exchange or full refund within 14 days if the fit is not suitable.",
     helpTitle: "Need help with your order?",
     helpLive: "Live Support",
@@ -234,7 +234,7 @@ const CHECKOUT_I18N = {
     codNoCustom: "Недоступно для индивидуальных заказов",
     freeDeliveryTitle: "Бесплатная доставка по Баку и Сумгаиту",
     freeDeliveryDesc: "Все заказы по Баку и Сумгаиту доставляются курьером абсолютно бесплатно, без ограничений по сумме.",
-    guaranteeTitle: "Гарантия ателье HORVVALLE",
+    guaranteeTitle: "Гарантия качества HORVVALLE",
     guaranteeDesc: "Легкий обмен или полный возврат средств в течение 14 дней, если размер не подошел.",
     helpTitle: "Нужна помощь с заказом?",
     helpLive: "Живая поддержка",
@@ -305,7 +305,7 @@ const CHECKOUT_I18N = {
     codNoCustom: "Özel tasarım ürünler için geçerli değildir",
     freeDeliveryTitle: "Bakü ve Sumgayıt'a Ücretsiz Teslimat",
     freeDeliveryDesc: "Bakü ve Sumgayıt içindeki tüm siparişler herhangi bir tutar sınırı olmaksızın kurye ile tamamen ücretsiz teslim edilir.",
-    guaranteeTitle: "HORVVALLE Atölye Garantisi",
+    guaranteeTitle: "HORVVALLE Kalite Garantisi",
     guaranteeDesc: "Beden uymadığında 14 gün içinde kolay değişim veya tam iade sağlanır.",
     helpTitle: "Siparişte yardıma mı ihtiyacınız var?",
     helpLive: "Canlı Destek",
@@ -909,7 +909,7 @@ export default function CheckoutPage() {
           supportedNetworks: ["visa", "masterCard"],
           merchantCapabilities: ["supports3DS"],
           total: {
-            label: "HORVVALLE Atelier",
+            label: "HORVVALLE",
             amount: finalTotal.toFixed(2),
             type: "final",
           },
@@ -997,7 +997,7 @@ export default function CheckoutPage() {
             ],
             merchantInfo: {
               merchantId: "12345678901234567890",
-              merchantName: "HORVVALLE Atelier",
+              merchantName: "HORVVALLE",
             },
             transactionInfo: {
               totalPriceStatus: "FINAL",
@@ -1055,7 +1055,7 @@ export default function CheckoutPage() {
                   apiVersion: 2,
                   apiVersionMinor: 0,
                   merchantInfo: {
-                    merchantName: "HORVVALLE Atelier",
+                    merchantName: "HORVVALLE",
                   },
                   allowedPaymentMethods: [
                     {
@@ -1079,7 +1079,7 @@ export default function CheckoutPage() {
 
             const details = {
               total: {
-                label: "HORVVALLE Atelier",
+                label: "HORVVALLE",
                 amount: { currency: currency || "AZN", value: finalTotal.toFixed(2) },
               },
             };

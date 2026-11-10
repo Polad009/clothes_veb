@@ -17,7 +17,7 @@ export const Ticker = memo(function Ticker({ className = "" }: TickerProps) {
 
   const translated = [
     t.announcements?.freeShipping || "BAKI VƏ SUMQAYIT ƏRAZİSİNƏ ÇATDIRILMA PULSUZDUR",
-    t.announcements?.customStudio || "FƏRDİ ÇAP STUDİYASI — ÖZ DİZAYNINI KÖYNƏYƏ ÇAP ET",
+    t.announcements?.customStudio || "3D DİZAYN STUDİYASI — ÖZ DİZAYNINI KÖYNƏYƏ KÖÇÜR",
     t.announcements?.cottonLinen || "100% PREMİUM DARANMIŞ PAMBIQ VƏ TƏBİİ KƏTAN KOLLEKSİYASI",
     t.announcements?.guaranteedReturns || "14 GÜN ƏRZİNDƏ ASAN VƏ ZƏMANƏTLİ QAYTARILMA",
   ];

@@ -3,8 +3,8 @@ import Link from "next/link";
 import { ArrowLeft, ShieldCheck, FileText } from "lucide-react";
 
 export const metadata = {
-  title: "Üçüncü Tərəf Bildirişləri və Açıq Mənbə Lisenziyaları | Horwalle Atelier",
-  description: "Horwalle Atelier Studiyasında istifadə olunan açıq mənbəli qrafik emal və render kitabxanalarının lisenziya məlumatları.",
+  title: "Üçüncü Tərəf Bildirişləri və Açıq Mənbə Lisenziyaları | Horwalle",
+  description: "Horwalle Dizayn Studiyasında istifadə olunan açıq mənbəli qrafik emal və render kitabxanalarının lisenziya məlumatları.",
 };
 
 export default function ThirdPartyNoticesPage() {
@@ -31,7 +31,7 @@ export default function ThirdPartyNoticesPage() {
             Üçüncü Tərəf Bildirişləri
           </h1>
           <p className="text-sm text-stone-600 mt-2 max-w-2xl leading-relaxed">
-            Horwalle Atelier Fərdi Çap Studiyası heç bir ödənişli xarici API və ya qeyri-kommersiya məhdudiyyətli xidmət istifadə etmir.
+            Horwalle Dizayn Studiyası heç bir ödənişli xarici API və ya qeyri-kommersiya məhdudiyyətli xidmət istifadə etmir.
             Bütün rəqəmsal fon təmizləmə və canlı baxış funksiyaları 100% istifadəçinin brauzerində açıq mənbəli, kommersiya istifadəsinə icazə verən lisenziyalar əsasında işləyir.
           </p>
         </div>

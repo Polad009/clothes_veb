@@ -20,14 +20,14 @@ const SEARCH_I18N = {
     studioCta: "3D Studiyada Fərdi Dizayn Et",
     results: "Nəticələr",
     clickToOpen: "{sT.clickToOpen}",
-    catalogTitle: "HORVVALLE ATELIER KATALOQU",
+    catalogTitle: "HORVVALLE KATALOQU",
     escToClose: "Bağlamaq üçün ESC basın",
     tags: [
       { label: "Klassik Qəhvəyi Kətan", query: "Kətan" },
       { label: "3iplik Qalın Qara Hudi", query: "Hudi" },
       { label: "Xaki Kargo Şalvar", query: "Kargo" },
       { label: "Ağ Pambıq T-Shirt", query: "Ağ" },
-      { label: "3D Çap Studiyası", query: "3D", isStudio: true },
+      { label: "3D Dizayn Studiyası", query: "3D", isStudio: true },
     ],
   },
   en: {
@@ -40,7 +40,7 @@ const SEARCH_I18N = {
     studioCta: "Create Custom Design in 3D Studio",
     results: "Results",
     clickToOpen: "Click to view",
-    catalogTitle: "HORVVALLE ATELIER CATALOG",
+    catalogTitle: "HORVVALLE CATALOG",
     escToClose: "Press ESC to close",
     tags: [
       { label: "Classic Brown Linen", query: "Linen" },
@@ -60,7 +60,7 @@ const SEARCH_I18N = {
     studioCta: "Создать дизайн в 3D Студии",
     results: "Результаты",
     clickToOpen: "Нажмите для перехода",
-    catalogTitle: "КАТАЛОГ АТЕЛЬЕ HORVVALLE",
+    catalogTitle: "КАТАЛОГ HORVVALLE",
     escToClose: "Нажмите ESC для закрытия",
     tags: [
       { label: "Классический лен", query: "Лен" },
@@ -80,14 +80,14 @@ const SEARCH_I18N = {
     studioCta: "3D Stüdyoda Özel Tasarla",
     results: "Sonuçlar",
     clickToOpen: "Görüntülemek için tıklayın",
-    catalogTitle: "HORVVALLE ATÖLYE KATALOĞU",
+    catalogTitle: "HORVVALLE KATALOĞU",
     escToClose: "Kapatmak için ESC tuşuna basın",
     tags: [
       { label: "Klasik Kahverengi Keten", query: "Keten" },
       { label: "3 İplik Kalın Siyah Hudi", query: "Hudi" },
       { label: "Haki Kargo Pantolon", query: "Kargo" },
       { label: "Beyaz Pamuklu T-Shirt", query: "Beyaz" },
-      { label: "3D Baskı Stüdyosu", query: "3D", isStudio: true },
+      { label: "3D Tasarım Stüdyosu", query: "3D", isStudio: true },
     ],
   },
 };

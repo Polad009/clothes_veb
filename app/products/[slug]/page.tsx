@@ -597,7 +597,7 @@ export default function ProductDetailPage() {
               <div className="flex items-center gap-2">
                 <a
                   href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
-                    `${product.name} - Horvvalle Atelier: ${typeof window !== "undefined" ? window.location.href : ""}`
+                    `${product.name} - Horvvalle: ${typeof window !== "undefined" ? window.location.href : ""}`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -608,7 +608,7 @@ export default function ProductDetailPage() {
                 <a
                   href={`https://t.me/share/url?url=${encodeURIComponent(
                     typeof window !== "undefined" ? window.location.href : ""
-                  )}&text=${encodeURIComponent(product.name + " - Horvvalle Atelier")}`}
+                  )}&text=${encodeURIComponent(product.name + " - Horvvalle")}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 font-semibold text-[11px] transition-colors"

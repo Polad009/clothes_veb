@@ -136,7 +136,7 @@ export const PLACEMENTS: PlacementOption[] = [
   {
     id: "front-center",
     label: "Ön — Sinə (Mərkəz Böyük)",
-    sublabel: "A4 / A3 standart əsas çap",
+    sublabel: "A4 / A3 standart əsas dizayn",
     side: "front",
     extraPrice: 0,
   },
@@ -150,7 +150,7 @@ export const PLACEMENTS: PlacementOption[] = [
   {
     id: "back-center",
     label: "Arxa — Kürək (Böyük)",
-    sublabel: "Bütün kürəyi əhatə edən böyük çap",
+    sublabel: "Bütün kürəyi əhatə edən böyük dizayn",
     side: "back",
     extraPrice: 0,
   },
@@ -164,21 +164,21 @@ export const PLACEMENTS: PlacementOption[] = [
   {
     id: "sleeve-left",
     label: "Sol Qol",
-    sublabel: "Sol qol kənarında loqo və ya yazı çapı",
+    sublabel: "Sol qol kənarında loqo və ya yazı",
     side: "left",
     extraPrice: 0,
   },
   {
     id: "sleeve-right",
     label: "Sağ Qol",
-    sublabel: "Sağ qol kənarında loqo və ya yazı çapı",
+    sublabel: "Sağ qol kənarında loqo və ya yazı",
     side: "right",
     extraPrice: 0,
   },
   {
     id: "both-sides",
     label: "İkitərəfli (Həm Ön, Həm Arxa)",
-    sublabel: "Öndə loqo + Arxada böyük çap (+3 ₼)",
+    sublabel: "Öndə loqo + Arxada böyük dizayn (+3 ₼)",
     side: "front",
     extraPrice: 3,
   },

@@ -31,8 +31,8 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.horwalle.com"),
   title: {
-    default: "Horwalle (Horvvalle) — Lüks Geyim & Fərdi Atelye | Rəsmi Mağaza",
-    template: "%s | Horwalle Atelier",
+    default: "Horwalle (Horvvalle) — Premium Geyim | Rəsmi Mağaza",
+    template: "%s | Horwalle",
   },
   alternates: {
     canonical: "https://www.horwalle.com",
@@ -59,42 +59,42 @@ export const metadata: Metadata = {
     shortcut: [{ url: "/favicon.ico", type: "image/x-icon" }],
     apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
   },
-  description: "Horwalle (Horvvalle Atelier) — Sənin ölçün, sənin üslubun. Atelyedə hər geyim ölçünə görə tikilir, istədiyin dizayn isə canlı 3D çapla köynəyə köçürülür.",
+  description: "Horwalle (Horvvalle) — premium geyim mağazası. Köynəklər, hudilər, şalvarlar və aksesuarlar; istəsən öz dizaynını 3D studiyada geyimə köçür. Bakıda sürətli çatdırılma.",
   keywords: [
     "Horwalle",
     "www.horwalle.com",
-    "Horwalle atelye",
+    "Horwalle geyim",
     "Horvvalle",
-    "Horvvalle atelye",
+    "Horvvalle geyim",
     "Horwalle baku",
     "Lüks kişi köynəkləri",
     "3iplik premium hudi",
     "Chino şalvar",
     "Klassik geyim Bakı",
-    "3D fərdi çap studiyası",
+    "3D dizayn studiyası",
     "Online lüks geyim",
-    "Azərbaycan atelye"
+    "Azərbaycan geyim mağazası"
   ],
   openGraph: {
     type: "website",
     locale: "az_AZ",
     url: "https://www.horwalle.com",
-    siteName: "Horwalle Atelier",
-    title: "Horwalle (Horvvalle) — Lüks Geyim & Fərdi Atelye",
-    description: "Horwalle (Horvvalle Atelier) — Sənin ölçün, sənin üslubun. Atelyedə hər geyim ölçünə görə tikilir, istədiyin dizayn isə canlı 3D çapla köynəyə köçürülür.",
+    siteName: "Horwalle",
+    title: "Horwalle (Horvvalle) — Premium Geyim Mağazası",
+    description: "Horwalle (Horvvalle) — premium geyim mağazası. Köynəklər, hudilər, şalvarlar və aksesuarlar; istəsən öz dizaynını 3D studiyada geyimə köçür. Bakıda sürətli çatdırılma.",
     images: [
       {
         url: "https://www.horwalle.com/images/categories/salvar-and-shortik-showcase.webp",
         width: 1200,
         height: 630,
-        alt: "Horwalle Atelier Luxury Fashion",
+        alt: "Horwalle Premium Fashion",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Horwalle (Horvvalle) — Lüks Geyim & Fərdi Atelye",
-    description: "Horwalle (Horvvalle Atelier) — Sənin ölçün, sənin üslubun. Atelyedə hər geyim ölçünə görə tikilir, istədiyin dizayn isə canlı 3D çapla köynəyə köçürülür.",
+    title: "Horwalle (Horvvalle) — Premium Geyim Mağazası",
+    description: "Horwalle (Horvvalle) — premium geyim mağazası. Köynəklər, hudilər, şalvarlar və aksesuarlar; istəsən öz dizaynını 3D studiyada geyimə köçür. Bakıda sürətli çatdırılma.",
     images: ["https://www.horwalle.com/images/categories/salvar-and-shortik-showcase.webp"],
   },
 };
@@ -140,7 +140,7 @@ export default async function RootLayout({
                   "name": "Horvvalle",
                   "url": "https://horvvalle.com",
                   "logo": "https://horvvalle.com/brand/icon-dark.png",
-                  "description": "Lüks Geyim & Fərdi Atelye. Dərzilik və fərdi DTG çap studiyası.",
+                  "description": "Premium geyim mağazası və 3D dizayn studiyası.",
                   "sameAs": [
                     "https://www.instagram.com/horwalle?vrfl=dGJ0anppbmYyeXRy&utm_source=qr",
                     "https://www.tiktok.com/@horwalle"
@@ -161,7 +161,7 @@ export default async function RootLayout({
                 {
                   "@type": "ClothingStore",
                   "@id": "https://horvvalle.com/#store",
-                  "name": "Horvvalle Atelier",
+                  "name": "Horvvalle",
                   "url": "https://horvvalle.com",
                   "priceRange": "₼₼",
                   "currenciesAccepted": "AZN",

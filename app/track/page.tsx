@@ -394,7 +394,7 @@ function OrderTrackerContent() {
           </h1>
 
           <p className="text-xs sm:text-sm text-stone-600 max-w-md mx-auto leading-relaxed">
-            {t.track.subtitle || "Sifarişinizin canlı statusunu, atelye hazırlığını və kuryer məlumatlarını öyrənin"}
+            {t.track.subtitle || "Sifarişinizin canlı statusunu, hazırlığını və kuryer məlumatlarını öyrənin"}
           </p>
         </div>
 
@@ -805,7 +805,7 @@ function OrderTrackerContent() {
               <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs space-y-1">
                 <div className="font-bold">Bu sifariş ləğv edilmişdir.</div>
                 <div className="text-[11px] text-rose-600">
-                  Ətraflı məlumat almaq və ya ödənişin geri qaytarılması üçün atelyemizin dəstək xidməti ilə əlaqə saxlaya bilərsiniz.
+                  Ətraflı məlumat almaq və ya ödənişin geri qaytarılması üçün dəstək xidmətimiz ilə əlaqə saxlaya bilərsiniz.
                 </div>
               </div>
             )}

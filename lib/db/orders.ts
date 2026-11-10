@@ -281,7 +281,7 @@ async function deleteOrderRows(rows: any[]): Promise<number> {
 
   unwrap(await db().from('order_items').delete().in('order_id', ids), 'Sifariş məhsulları silinmədi');
   if (numbers.length > 0) {
-    unwrap(await db().from('pod_orders').delete().in('order_id', numbers), 'Fərdi çap sifarişləri silinmədi');
+    unwrap(await db().from('pod_orders').delete().in('order_id', numbers), 'Öz dizayn sifarişləri silinmədi');
   }
   unwrap(await db().from('orders').delete().in('id', ids), 'Sifariş silinmədi');
   return ids.length;
@@ -305,7 +305,7 @@ export async function deleteTestOrders(): Promise<number> {
 export async function deleteAllOrders(): Promise<number> {
   const rows = unwrap(await db().from('orders').select('id, order_number'), 'Sifarişlər oxunmadı');
   const count = await deleteOrderRows(rows || []);
-  unwrap(await db().from('pod_orders').delete().neq('id', ''), 'Fərdi çap sifarişləri silinmədi');
+  unwrap(await db().from('pod_orders').delete().neq('id', ''), 'Öz dizayn sifarişləri silinmədi');
   return count;
 }
 
@@ -386,7 +386,7 @@ export function rowToPodOrder(r: any): PodOrder {
 export async function listPodOrders(): Promise<PodOrder[]> {
   const rows = unwrap(
     await db().from('pod_orders').select('*').order('created_at', { ascending: false }),
-    'Fərdi çap sifarişləri oxunmadı'
+    'Öz dizayn sifarişləri oxunmadı'
   );
   return (rows || []).map(rowToPodOrder);
 }
@@ -419,7 +419,7 @@ export async function createPodOrder(pod: Omit<PodOrder, 'id' | 'createdAt'>): P
     lastError = res.error.message;
     if (res.error.code !== '23505') break;
   }
-  throw new Error(`Fərdi çap sifarişi yadda saxlanılmadı: ${lastError}`);
+  throw new Error(`Öz dizayn sifarişi yadda saxlanılmadı: ${lastError}`);
 }
 
 export async function updatePodOrderStatus(id: string, status: string): Promise<PodOrder | null> {
@@ -429,7 +429,7 @@ export async function updatePodOrderStatus(id: string, status: string): Promise<
       .update({ status, updated_at: new Date().toISOString() })
       .eq('id', id)
       .select('*'),
-    'Fərdi çap sifarişi yenilənmədi'
+    'Öz dizayn sifarişi yenilənmədi'
   );
   return rows && rows.length > 0 ? rowToPodOrder(rows[0]) : null;
 }
@@ -438,7 +438,7 @@ export async function findPodOrderByOrderId(orderId: string): Promise<PodOrder |
   if (!orderId) return null;
   const rows = unwrap(
     await db().from('pod_orders').select('*').eq('order_id', orderId).limit(1),
-    'Fərdi çap sifarişi axtarılmadı'
+    'Öz dizayn sifarişi axtarılmadı'
   );
   return rows && rows.length > 0 ? rowToPodOrder(rows[0]) : null;
 }
@@ -449,7 +449,7 @@ export async function searchPodOrders(query: { phoneDigits?: string; code?: stri
     if (code.length < 4) return [];
     const rows = unwrap(
       await db().from('pod_orders').select('*').ilike('id', `%${code}%`).order('created_at', { ascending: false }).limit(10),
-      'Fərdi çap sifarişi axtarılmadı'
+      'Öz dizayn sifarişi axtarılmadı'
     );
     return (rows || []).map(rowToPodOrder);
   }
@@ -461,7 +461,7 @@ export async function searchPodOrders(query: { phoneDigits?: string; code?: stri
     // Match on the light columns first: the design payloads can be large.
     const phones = unwrap(
       await db().from('pod_orders').select('id, customer_phone').order('created_at', { ascending: false }),
-      'Fərdi çap sifarişi axtarılmadı'
+      'Öz dizayn sifarişi axtarılmadı'
     );
     const ids = (phones || [])
       .filter((p: any) => String(p.customer_phone || '').replace(/\D/g, '').endsWith(tail))
@@ -470,7 +470,7 @@ export async function searchPodOrders(query: { phoneDigits?: string; code?: stri
     if (ids.length === 0) return [];
     const rows = unwrap(
       await db().from('pod_orders').select('*').in('id', ids).order('created_at', { ascending: false }),
-      'Fərdi çap sifarişi axtarılmadı'
+      'Öz dizayn sifarişi axtarılmadı'
     );
     return (rows || []).map(rowToPodOrder);
   }

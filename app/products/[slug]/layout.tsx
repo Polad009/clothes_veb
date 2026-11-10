@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!product) {
     return {
       title: "Məhsul",
-      description: "Horwalle Atelier eksklüziv kolleksiyası.",
+      description: "Horwalle eksklüziv kolleksiyası.",
       alternates: { canonical: canonicalUrl },
     };
   }
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     ? summary.length > 160
       ? `${summary.slice(0, 157).trimEnd()}…`
       : summary
-    : `${product.name} — 100% premium keyfiyyət və fərdi dərzilik kəsimi ilə Horwalle Atelier-də.`;
+    : `${product.name} — 100% premium keyfiyyət və dəqiq kəsim, Horwalle-də.`;
   const imageUrl = product.image.startsWith("http") ? product.image : `${SITE_URL}${product.image}`;
 
   return {
@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: canonicalUrl,
       title,
       description,
-      siteName: "Horwalle Atelier",
+      siteName: "Horwalle",
       images: [{ url: imageUrl, alt: product.name }],
     },
     twitter: {

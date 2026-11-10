@@ -122,7 +122,7 @@ export async function POST(req: NextRequest) {
         const studioPrice = customPrintPrice(clientItemId, (clientItem as any).customData?.placementKey);
         if (studioPrice === null) {
           return NextResponse.json(
-            { success: false, message: "Fərdi çap məhsulu tanınmadı. Zəhmət olmasa dizaynı studiyada yenidən səbətə əlavə edin." },
+            { success: false, message: "Öz dizaynlı məhsul tanınmadı. Zəhmət olmasa dizaynı studiyada yenidən səbətə əlavə edin." },
             { status: 409 }
           );
         }

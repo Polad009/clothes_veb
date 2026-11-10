@@ -1,7 +1,7 @@
 {
   "settings": {
     "storeName": "HORVVALLE",
-    "tagline": "LÜKS MODA & FƏRDİ DƏRZİLİK ATELYESİ",
+    "tagline": "PREMIUM GEYİM MAĞAZASI",
     "freeShippingThreshold": 60,
     "currency": "AZN",
     "currencySymbol": "₼",
@@ -13,9 +13,9 @@
       "Test announcement 1"
     ],
     "hero": {
-      "tag": "HORVVALLE ATELIER · 2026 COUTURE · BAKI",
+      "tag": "HORVVALLE · 2026 KOLLEKSİYA · BAKI",
       "headline": "GEYİMDƏ LÜKS VƏ FƏRDİ İMZA",
-      "subheadline": "Horvvalle fərdi atelyesi: 100% daranmış premium pambıq köynəklər, dəqiq kəsimli şalvarlar və geyiminizi sənət əsərinə çevirən canlı 3D çap studiyası.",
+      "subheadline": "Horvvalle: 100% daranmış premium pambıq köynəklər, dəqiq kəsimli şalvarlar və öz dizaynını geyimə köçürə biləcəyin 3D dizayn studiyası.",
       "primaryCta": {
         "label": "3D Studiyada Dizayn Et",
         "link": "/studio"
@@ -62,9 +62,9 @@
       }
     ],
     "podBanner": {
-      "tag": "HORVVALLE 3D ATELYE STUDİYASI",
+      "tag": "HORVVALLE 3D DİZAYN STUDİYASI",
       "title": "ÖZ DİZAYNINI HORVVALLE KEYFİYYƏTİ İLƏ YARAT",
-      "description": "Sevdiyiniz şəkli, loqonu və ya eksklüziv rəsmi göndərin — Horvvalle atelyesi 100% yüksək keyfiyyətli premium pambıq üzərində canlı DTG texnologiyası ilə çap edib ünvanınıza çatdırsın.",
+      "description": "Sevdiyiniz şəkli, loqonu və ya eksklüziv rəsmi göndərin — Horvvalle onu 100% yüksək keyfiyyətli premium pambıq geyimə köçürüb ünvanınıza çatdırsın.",
       "image": "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?q=80&w=800&auto=format&fit=crop",
       "ctaText": "Dizayn Studiyasına Keç",
       "ctaLink": "/studio"
@@ -80,7 +80,7 @@
     "campaignSecondary": {
       "tag": "HORVVALLE COUTURE",
       "title": "İSTİ VƏ RAHAT OVERSIZED HUDİ KOLLEKSİYASI",
-      "subtitle": "Qalın 380 GSM pambıq toxunuşu, isti astar və canlı DTF çap keyfiyyəti. Şəhər stili üçün ideal.",
+      "subtitle": "Qalın 380 GSM pambıq toxunuşu, isti astar və canlı, uzunömürlü dizayn. Şəhər stili üçün ideal.",
       "ctaText": "HUDİLƏRƏ BAX",
       "ctaLink": "/collections?category=hudi",
       "image": "/images/products/heavyweight-hoodie-black/mockup.jpg"

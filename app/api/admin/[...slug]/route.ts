@@ -248,7 +248,7 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
       const status = String(body.status || '').replace(/[<>]/g, '').trim().slice(0, 50);
       if (!status) return json({ error: 'Status tələb olunur' }, 400);
       const podOrder = await updatePodOrderStatus(id, status);
-      if (!podOrder) return json({ error: 'Fərdi çap sifarişi tapılmadı' }, 404);
+      if (!podOrder) return json({ error: 'Öz dizayn sifarişi tapılmadı' }, 404);
       return json({ success: true, podOrder });
     }
 

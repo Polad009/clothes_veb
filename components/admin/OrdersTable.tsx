@@ -138,7 +138,7 @@ export function OrdersTable({ orders, initialStatus }: { orders: OrderRow[]; ini
                         </Link>
                         {o.isTest && <span className="ml-2"><Badge tone="violet">Test</Badge></span>}
                         <p className="mt-0.5 text-xs text-stone-500">
-                          {formatDate(o.date)} · {o.items} məhsul{o.hasCustom ? " · fərdi çap" : ""}
+                          {formatDate(o.date)} · {o.items} məhsul{o.hasCustom ? " · öz dizayn" : ""}
                         </p>
                       </td>
                       <td className="px-3 py-3">

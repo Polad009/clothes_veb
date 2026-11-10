@@ -868,7 +868,7 @@ export function GarmentCanvas({
                       : "text-sky-200 bg-black/60"
                   }`}
                 >
-                  Çap Sahəsi (Dizayn əlavə et)
+                  Dizayn Sahəsi (Dizayn əlavə et)
                 </span>
               </div>
             )}
@@ -1188,7 +1188,7 @@ export function GarmentCanvas({
           {isOverflowing && (
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/95 text-stone-950 font-bold text-[10px] shadow-lg backdrop-blur-md animate-pulse">
               <AlertTriangle size={12} />
-              <span>Dizayn çap sahəsindən kənara çıxır və kəsiləcək</span>
+              <span>Dizayn sahədən kənara çıxır və kəsiləcək</span>
             </div>
           )}
 

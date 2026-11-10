@@ -319,14 +319,14 @@ function CollectionsContent() {
             {/* Editorial Subtitle */}
             <p className="text-stone-600 text-sm sm:text-[14.5px] leading-relaxed max-w-xl font-sans mt-2">
               {selectedGender === "men" && selectedCategory === "all"
-                ? (language === "az" ? "Kişilər üçün hazırlanmış premium kəsimli köynəklər, hudilər və şalvarlar." : language === "ru" ? "Мужская коллекция: футболки, плотные худи и брюки из гребенного хлопка." : language === "tr" ? "Erkekler için özenle tasarlanmış premium t-shirtler, polar hudiler ve pantolonlar." : "Curated men's collection featuring bespoke tees, fleece hoodies, and tailored trousers.")
+                ? (language === "az" ? "Kişilər üçün hazırlanmış premium kəsimli köynəklər, hudilər və şalvarlar." : language === "ru" ? "Мужская коллекция: футболки, плотные худи и брюки из гребенного хлопка." : language === "tr" ? "Erkekler için özenle tasarlanmış premium t-shirtler, polar hudiler ve pantolonlar." : "Curated men's collection featuring premium tees, fleece hoodies, and trousers.")
                 : selectedGender === "women" && selectedCategory === "all"
-                ? (language === "az" ? "Qadınlar üçün zərif və rahat atelye kəsimli modellər." : language === "ru" ? "Женская коллекция базовых и утонченных моделей с безупречной посадкой." : language === "tr" ? "Kadınlar için zarif ve konforlu atölye kesimli modeller." : "Refined women's wardrobe essentials with atelier tailoring.")
+                ? (language === "az" ? "Qadınlar üçün zərif və rahat kəsimli modellər." : language === "ru" ? "Женская коллекция базовых и утонченных моделей с безупречной посадкой." : language === "tr" ? "Kadınlar için zarif ve konforlu kesimli modeller." : "Refined women's wardrobe essentials with a perfect fit.")
                 : selectedGender === "unisex" && selectedCategory === "all"
                 ? (language === "az" ? "Həm kişi, həm də qadınlar üçün universal oversize və rahat siluetlər." : language === "ru" ? "Универсальные оверсайз силуэты, подходящие каждому." : language === "tr" ? "Hem kadın hem erkek için konforlu uniseks silüetler." : "Universal oversize silhouettes designed for all genders.")
                 : activeCategory && activeDescription
                 ? activeDescription
-                : (language === "az" ? "Premium köynəklər, 3iplik hudilər, şalvarlar və fərdi atelye kolleksiyası." : language === "ru" ? "Премиальные рубашки, плотные худи, брюки и коллекция ателье." : language === "tr" ? "Premium gömlekler, 3iplik polarlar, pantolonlar ve özel atölye koleksiyonu." : "Premium shirts, heavyweight hoodies, tailored trousers, and bespoke couture.")}
+                : (language === "az" ? "Premium köynəklər, 3iplik hudilər, şalvarlar və aksesuarlar." : language === "ru" ? "Премиальные рубашки, плотные худи, брюки и аксессуары." : language === "tr" ? "Premium gömlekler, 3iplik polarlar, pantolonlar ve aksesuarlar." : "Premium shirts, heavyweight hoodies, trousers, and accessories.")}
             </p>
           </motion.div>
 

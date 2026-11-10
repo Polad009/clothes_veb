@@ -148,7 +148,7 @@ export function HeroVideo({
       ref={containerRef}
       id="hero-section"
       className={`relative w-full min-h-[100svh] flex flex-col justify-between overflow-hidden bg-[#090A0E] text-white select-none isolate ${className}`}
-      aria-label="Horwalle Atelier Ambient Video Hero"
+      aria-label="Horwalle Ambient Video Hero"
     >
       {/* =========================================================================
           1. ZERO-CLS POSTER FALLBACK (Responsive <picture>)
@@ -157,7 +157,7 @@ export function HeroVideo({
         <source media="(max-width: 767px)" srcSet={posterMobile} type="image/webp" />
         <img
           src={posterDesktop}
-          alt="Horwalle Atelier Ambient Poster"
+          alt="Horwalle Ambient Poster"
           fetchPriority="high"
           decoding="async"
           className="w-full h-full object-cover object-center"
@@ -214,7 +214,7 @@ export function HeroVideo({
         {/* Editorial Kicker */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[#E6C280] text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.25em] mb-4 sm:mb-6 shadow-sm">
           <span className="w-1.5 h-1.5 rounded-full bg-[#E6C280]" />
-          <span>{kicker || "HORWALLE ATELIER · 2026 COUTURE"}</span>
+          <span>{kicker || "HORWALLE · 2026 COLLECTION"}</span>
         </div>
 
         {/* Headline */}
@@ -262,7 +262,7 @@ export function HeroVideo({
         <div className="hidden sm:flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span className="uppercase tracking-widest text-[10px] font-semibold text-white/70">
-            BAKU ATELIER · BESPOKE ON DEMAND
+            BAKU · PREMIUM APPAREL
           </span>
         </div>
 

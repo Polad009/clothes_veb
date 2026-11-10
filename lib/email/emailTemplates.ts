@@ -64,7 +64,7 @@ export function getEmailBaseWrapper(contentHtml: string, contact: EmailContact =
   <div class="container">
     <div class="header">
       <div class="logo">${BRAND}</div>
-      <div class="tagline">Lüks Moda &amp; Fərdi Dərzilik Atelyesi</div>
+      <div class="tagline">Premium Geyim Mağazası</div>
     </div>
     <div class="body-content">
       ${contentHtml}
@@ -195,7 +195,7 @@ export function generateStatusUpdateHtml(order: any, newStatus: string, contact:
   } else if (s.includes("təsdiq")) {
     statusDescription = "Sifarişiniz təsdiqləndi və hazırlanmağa başladı.";
   } else if (s.includes("çap") || s.includes("dərzi")) {
-    statusDescription = "Sifarişiniz hazırda atelyedə hazırlanır.";
+    statusDescription = "Sifarişiniz hazırlanır.";
   } else if (s.includes("kuryer")) {
     statusDescription = "Sifarişiniz kuryerə təhvil verildi və ünvanınıza yoldadır.";
   } else if (s.includes("çatdırıldı")) {
@@ -270,7 +270,7 @@ export function generateNewOrderAlertHtml(order: any, contact: EmailContact = {}
     .map(
       (item: any) => `
     <tr>
-      <td><strong>${esc(item.name)}</strong>${item.isCustom ? " (fərdi çap)" : ""}<br><span style="font-size: 11px; color: #7A7269;">${[item.size && `Ölçü: ${esc(item.size)}`, item.color && `Rəng: ${esc(item.color)}`].filter(Boolean).join(" · ")}</span></td>
+      <td><strong>${esc(item.name)}</strong>${item.isCustom ? " (öz dizayn)" : ""}<br><span style="font-size: 11px; color: #7A7269;">${[item.size && `Ölçü: ${esc(item.size)}`, item.color && `Rəng: ${esc(item.color)}`].filter(Boolean).join(" · ")}</span></td>
       <td style="text-align: center;">${Number(item.quantity) || 1}</td>
       <td style="text-align: right;">${price((Number(item.price) || 0) * (Number(item.quantity) || 1))}</td>
     </tr>`

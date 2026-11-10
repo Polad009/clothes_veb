@@ -71,7 +71,7 @@ export class EpointPaymentProvider implements PaymentProvider {
         currency: request.currency || "AZN",
         language: "az",
         order_id: request.orderId,
-        description: `Horwalle Atelier Sifariş #${request.orderId}`,
+        description: `Horwalle Sifariş #${request.orderId}`,
         success_redirect_url: `${siteUrl}/checkout/success?orderId=${request.orderId}`,
         error_redirect_url: `${siteUrl}/checkout/failed?orderId=${request.orderId}`,
       };

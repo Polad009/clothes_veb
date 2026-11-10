@@ -47,9 +47,9 @@ export default function Home() {
   const bt = (section: string, field: string, builtIn: Record<string, string>, az: string) =>
     language === "az" ? az : (i18n?.[language]?.[section]?.[field] || builtIn[language] || az);
   const badgeMessages = [
-    (language !== "az" && i18n?.[language]?.hero?.tag) || hero.tag || "HORVVALLE ATELIER · 2026 COUTURE · BAKI",
+    (language !== "az" && i18n?.[language]?.hero?.tag) || hero.tag || "HORVVALLE · 2026 KOLLEKSİYA · BAKI",
     language === "en" ? "100% PURE COMBED COTTON (220-380 GSM)" : language === "ru" ? "100% ЧИСТЫЙ ГРЕБЕННОЙ ХЛОПОК (220-380 GSM)" : language === "tr" ? "%100 SAF TARANMIŞ PAMUK (220-380 GSM)" : "100% XALİS DARANMIŞ PAMBIQ (220-380 GSM)",
-    language === "en" ? "LIVE ATELIER DTG PRINT STUDIO — BAKU" : language === "ru" ? "ЖИВАЯ АТЕЛЬЕ DTG СТУДИЯ ПЕЧАТИ — БАКУ" : language === "tr" ? "CANLI ATÖLYE DTG BASKI STÜDYOSU — BAKÜ" : "CANLI ATELYE DTG ÇAP STUDİYASI — BAKI",
+    language === "en" ? "PREMIUM APPAREL & 3D DESIGN STUDIO — BAKU" : language === "ru" ? "ПРЕМИУМ ОДЕЖДА И 3D СТУДИЯ ДИЗАЙНА — БАКУ" : language === "tr" ? "PREMİUM GİYİM & 3D TASARIM STÜDYOSU — BAKÜ" : "PREMİUM GEYİM & 3D DİZAYN STUDİYASI — BAKI",
     language === "en" ? "FREE DELIVERY TO BAKU & SUMGAYIT" : language === "ru" ? "БЕСПЛАТНАЯ ДОСТАВКА В БАКУ И СУМГАИТ" : language === "tr" ? "BAKÜ VE SUMGAYIT'A ÜCRETSİZ TESLİMAT" : "BAKI VƏ SUMQAYIT ƏRAZİSİNƏ PULSUZ ÇATDIRILMA",
   ];
 
@@ -86,7 +86,7 @@ export default function Home() {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4 text-center">
           <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-stone-600">
-            {t.home.atelierShowcase || "CANLI ATELYE VİTRİNİ"}
+            {t.home.atelierShowcase || "CANLI VİTRİN"}
           </span>
           <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-tight text-stone-900 font-editorial mt-0.5">
             {t.home.selectedShowcase || "HORVVALLE SEÇİLMİŞ MODELLƏR"}
@@ -104,7 +104,7 @@ export default function Home() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-stone-200/80">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-stone-100 border border-stone-200/80 text-[10px] font-bold uppercase tracking-[0.2em] text-stone-600 mb-2">
-              <span>HORVVALLE ATELIER</span>
+              <span>HORVVALLE</span>
               <span className="w-1 h-1 rounded-full bg-stone-400" />
               <span>COUTURE</span>
             </div>
@@ -182,14 +182,14 @@ export default function Home() {
       </section>
 
       {/* 4. PRINT ON DEMAND (POD) SPOTLIGHT BANNER */}
-      <section data-cms-section="podBanner" data-cms-title="Fərdi Çap Banneri" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+      <section data-cms-section="podBanner" data-cms-title="Dizayn Studiyası Banneri" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="relative rounded-3xl overflow-hidden border border-stone-200/80 bg-gradient-to-br from-white via-[#FAF7F2] to-[#F5EFE6] p-8 sm:p-12 lg:p-16 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.06)]">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             {/* Left Content */}
             <div className="lg:col-span-7 space-y-5">
               <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-stone-100 border border-stone-200 text-stone-800 text-xs font-medium uppercase tracking-wider">
                 <Palette size={14} className="text-stone-700" />
-                <span>{bt("podBanner", "tag", { en: "BESPOKE ATELIER PRINT STUDIO", ru: "ИНДИВИДУАЛЬНОЕ АТЕЛЬЕ ПЕЧАТИ", tr: "ÖZEL ATÖLYE BASKI STÜDYOSU" }, podBanner.tag && !podBanner.tag.includes("3D") ? podBanner.tag : "FƏRDİ ATELYE ÇAP STUDİYASI")}</span>
+                <span>{bt("podBanner", "tag", { en: "3D CUSTOM DESIGN STUDIO", ru: "3D СТУДИЯ ДИЗАЙНА", tr: "3D TASARIM STÜDYOSU" }, podBanner.tag || "3D DİZAYN STUDİYASI")}</span>
               </div>
 
               <h2 className="text-3xl sm:text-5xl font-normal uppercase tracking-tight text-stone-900 font-serif-luxury leading-[1.05]">
@@ -197,7 +197,7 @@ export default function Home() {
               </h2>
 
               <p className="text-sm sm:text-base text-stone-600 leading-relaxed max-w-xl">
-                {bt("podBanner", "description", { en: "Send your favorite image, logo, or artwork — the Horvvalle atelier prints it on 100% premium cotton with vivid DTG technology and delivers to your doorstep.", ru: "Отправьте любимое изображение или логотип — ателье Horvvalle напечатает его на 100% премиум-хлопке с помощью технологии DTG и доставит вам.", tr: "Favori görselinizi, logonuzu veya özel çiziminizi gönderin — Horvvalle atölyesi %100 birinci sınıf pamuk üzerine canlı DTG teknolojisiyle basıp adresinize teslim etsin." }, podBanner?.description || "Sevdiyiniz şəkli, loqonu və ya eksklüziv rəsmi göndərin — Horvvalle atelyesi 100% yüksək keyfiyyətli premium pambıq üzərində canlı DTG texnologiyası ilə çap edib ünvanınıza çatdırsın.")}
+                {bt("podBanner", "description", { en: "Send your favorite image, logo, or artwork — Horvvalle puts it on a 100% premium cotton garment and delivers it to your doorstep.", ru: "Отправьте любимое изображение или логотип — Horvvalle перенесёт его на одежду из 100% премиум-хлопка и доставит вам.", tr: "Favori görselinizi, logonuzu veya özel çiziminizi gönderin — Horvvalle onu %100 birinci sınıf pamuklu giysiye aktarıp adresinize teslim etsin." }, podBanner?.description || "Sevdiyiniz şəkli, loqonu və ya eksklüziv rəsmi göndərin — Horvvalle onu 100% yüksək keyfiyyətli premium pambıq geyimə köçürüb ünvanınıza çatdırsın.")}
               </p>
 
               <div className="grid grid-cols-3 gap-3 pt-2">
@@ -206,7 +206,7 @@ export default function Home() {
                   <div className="text-[11px] text-stone-600 mt-0.5">{language === "en" ? "220 GSM Dense Weave" : language === "ru" ? "220 GSM Плотное плетение" : language === "tr" ? "220 GSM Sıkı Doku" : "220 GSM sıx toxunuş"}</div>
                 </div>
                 <div className="p-3.5 rounded-2xl bg-white border border-stone-200/80 shadow-2xs">
-                  <div className="text-xs font-bold text-stone-900 uppercase">{language === "en" ? "Ultra HD Print" : language === "ru" ? "Ultra HD Печать" : language === "tr" ? "Ultra HD Baskı" : "Ultra HD Çap"}</div>
+                  <div className="text-xs font-bold text-stone-900 uppercase">{language === "en" ? "Ultra HD Quality" : language === "ru" ? "Ultra HD Качество" : language === "tr" ? "Ultra HD Kalite" : "Ultra HD Keyfiyyət"}</div>
                   <div className="text-[11px] text-stone-600 mt-0.5">{language === "en" ? "Durable & Vibrant" : language === "ru" ? "Стойкая и яркая" : language === "tr" ? "Dayanıklı ve parlak" : "Davamlı və parlaq"}</div>
                 </div>
                 <div className="p-3.5 rounded-2xl bg-white border border-stone-200/80 shadow-2xs">
@@ -233,7 +233,7 @@ export default function Home() {
               <div className="relative aspect-square max-w-md mx-auto rounded-3xl overflow-hidden border border-stone-200/80 bg-white shadow-apple p-6 flex items-center justify-center">
                 <Image
                   src={podBanner.image || "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?q=80&w=800&auto=format&fit=crop"}
-                  alt="Custom Print Cotton Tee"
+                  alt="Custom Design Cotton Tee"
                   fill
                   sizes="(max-width: 1024px) 100vw, 450px"
                   className="object-contain p-6"
@@ -246,7 +246,7 @@ export default function Home() {
                     {language === "en" ? "YOUR DESIGN" : language === "ru" ? "ВАШ ДИЗАЙН" : language === "tr" ? "SENİN TASARIMIN" : "SƏNİN DİZAYNIN"}
                   </span>
                   <span className="text-[10px] uppercase tracking-wider text-stone-600 font-bold mt-1">
-                    {language === "en" ? "[ PRINT AREA ]" : language === "ru" ? "[ ОБЛАСТЬ ПЕЧАТИ ]" : language === "tr" ? "[ BASKI ALANI ]" : "[ ÇAP SAHƏSİ ]"}
+                    {language === "en" ? "[ DESIGN AREA ]" : language === "ru" ? "[ ОБЛАСТЬ ДИЗАЙНА ]" : language === "tr" ? "[ TASARIM ALANI ]" : "[ DİZAYN SAHƏSİ ]"}
                   </span>
                 </div>
 
@@ -278,7 +278,7 @@ export default function Home() {
             <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-transparent flex flex-col justify-end p-6 sm:p-10 text-white z-10 pointer-events-none" />
             <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-10 text-white z-20">
               <span className="text-xs font-semibold text-[#E6C280] uppercase tracking-wider">
-                {bt("promoBanner", "tag", { en: "HORVVALLE TAILORING", ru: "КРОЙ HORVVALLE", tr: "HORVVALLE KESİMLERİ" }, promoBanner?.tag || "HORVVALLE KƏSİMLƏRİ")}
+                {bt("promoBanner", "tag", { en: "HORVVALLE CUTS", ru: "КРОЙ HORVVALLE", tr: "HORVVALLE KESİMLERİ" }, promoBanner?.tag || "HORVVALLE KƏSİMLƏRİ")}
               </span>
               <h3 className="text-2xl sm:text-3xl font-serif-luxury font-normal uppercase mt-1 leading-tight drop-shadow-sm">
                 {bt("promoBanner", "title", { en: "PERFECT PANTS FOR EVERY DAY", ru: "ИДЕАЛЬНЫЕ БРЮКИ НА КАЖДЫЙ ДЕНЬ", tr: "HER GÜN İÇİN İDEAL PANTOLONLAR" }, promoBanner?.title || "HƏR GÜN ÜÇÜN İDEAL ŞALVARLAR")}
@@ -318,7 +318,7 @@ export default function Home() {
                 {bt("campaignSecondary", "title", { en: "WARM & COMFORTABLE OVERSIZED HOODIE COLLECTION", ru: "ТЕПЛАЯ И УДОБНАЯ КОЛЛЕКЦИЯ ОВЕРСАЙЗ ХУДИ", tr: "SICAK VE RAHAT OVERSIZED HUDİ KOLEKSİYONU" }, campaignSecondary?.title || "İSTİ VƏ RAHAT OVERSIZED HUDİ KOLLEKSİYASI")}
               </h3>
               <p className="text-xs sm:text-sm text-stone-200 mt-1.5 max-w-sm line-clamp-2 leading-relaxed">
-                {bt("campaignSecondary", "subtitle", { en: "Thick 380 GSM cotton feel, warm lining, and vibrant DTF print quality. Ideal for streetwear style.", ru: "Плотный хлопок 380 GSM, теплая подкладка и яркая печать DTF. Идеально для уличного стиля.", tr: "Kalın 380 GSM pamuk dokusu, sıcak astar ve canlı DTF baskı kalitesi. Şehir stili için ideal." }, campaignSecondary?.subtitle || "Qalın 380 GSM pambıq toxunuşu, isti astar və canlı DTF çap keyfiyyəti. Şəhər stili üçün ideal.")}
+                {bt("campaignSecondary", "subtitle", { en: "Thick 380 GSM cotton feel, warm lining, and a vivid, long-lasting design. Ideal for streetwear style.", ru: "Плотный хлопок 380 GSM, теплая подкладка и яркий стойкий дизайн. Идеально для уличного стиля.", tr: "Kalın 380 GSM pamuk dokusu, sıcak astar ve canlı, uzun ömürlü tasarım. Şehir stili için ideal." }, campaignSecondary?.subtitle || "Qalın 380 GSM pambıq toxunuşu, isti astar və canlı, uzunömürlü dizayn. Şəhər stili üçün ideal.")}
               </p>
               <div className="pt-4">
                 <Link

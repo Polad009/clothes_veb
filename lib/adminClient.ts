@@ -46,8 +46,8 @@ export const ORDER_STATUSES = ['Yeni Sifariş', 'Təsdiqləndi', 'Kuryerdədir',
 
 export const POD_STATUSES: Array<{ value: string; label: string }> = [
   { value: 'Pending Print', label: 'Gözləmədə' },
-  { value: 'In Production', label: 'Çapdadır' },
-  { value: 'Printed', label: 'Çap olundu' },
+  { value: 'In Production', label: 'Hazırlanır' },
+  { value: 'Printed', label: 'Hazırdır' },
   { value: 'Shipped', label: 'Göndərildi' },
 ];
 

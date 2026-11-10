@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     // Perform mTLS call to Apple Validation Server
     const payload = JSON.stringify({
       merchantIdentifier,
-      displayName: "HORVVALLE Atelier",
+      displayName: "HORVVALLE",
       initiative: "web",
       initiativeContext: req.headers.get("host") || "horvvalle.com",
     });

@@ -33,7 +33,7 @@ const NAV: Array<{ heading: string; items: Array<{ href: string; label: string; 
     items: [
       { href: "/admin", label: "İcmal", icon: LayoutDashboard },
       { href: "/admin/orders", label: "Sifarişlər", icon: ShoppingBag, badgeKey: "orders" },
-      { href: "/admin/pod", label: "Fərdi çap", icon: Palette, badgeKey: "pod" },
+      { href: "/admin/pod", label: "Öz dizayn", icon: Palette, badgeKey: "pod" },
       { href: "/admin/products", label: "Məhsullar", icon: Shirt },
       { href: "/admin/categories", label: "Kateqoriyalar", icon: Tags },
       { href: "/admin/discounts", label: "Endirimlər", icon: Percent },

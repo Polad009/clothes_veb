@@ -37,23 +37,23 @@ const FAQ_ITEMS: FAQItem[] = [
       tr: "Bedenimi nasıl doğru seçebilirim?",
     },
     a: {
-      az: "Hər bir məhsul səhifəsində dəqiq santimetrlərlə ölçü cədvəli qeyd olunub. Əlavə olaraq Horvvalle atelye xidməti sayəsində sifariş zamanı boy və çəkinizi qeyd edərək geyimin bədəninizə tam oturmasını sifariş edə bilərsiniz.",
-      en: "Each product page contains an exact measurement chart. Furthermore, our atelier allows you to input your height and weight at checkout for tailored fitting.",
-      ru: "На странице каждого товара указана точная таблица размеров. Кроме того, наше ателье позволяет указать ваш рост и вес для идеальной индивидуальной посадки.",
-      tr: "Her ürün sayfasında detaylı beden tablosu mevcuttur. Ayrıca atölyemiz sayesinde sipariş verirken boy ve kilonuzu belirterek özel kesim talep edebilirsiniz.",
+      az: "Hər bir məhsul səhifəsində dəqiq santimetrlərlə ölçü cədvəli qeyd olunub. Ölçü seçməkdə çətinlik çəkirsinizsə, boy və çəkinizi WhatsApp-da yazın, sizə uyğun ölçünü tövsiyə edək.",
+      en: "Each product page contains an exact measurement chart. If you are unsure, send us your height and weight on WhatsApp and we will recommend the right size.",
+      ru: "На странице каждого товара указана точная таблица размеров. Если сомневаетесь, напишите нам рост и вес в WhatsApp — мы подскажем подходящий размер.",
+      tr: "Her ürün sayfasında detaylı beden tablosu mevcuttur. Emin değilseniz boy ve kilonuzu WhatsApp’tan yazın, size uygun bedeni önerelim.",
     },
   },
   {
     id: "studio-print",
     q: {
-      az: "3D Studiyada hazırladığım dizayn paltara necə çap olunur?",
-      en: "How is my 3D Studio custom design printed on the garment?",
+      az: "3D Studiyada hazırladığım dizayn paltara necə köçürülür?",
+      en: "How is my 3D Studio custom design applied to the garment?",
       ru: "Как наносится принт, созданный в 3D студии?",
       tr: "3D Stüdyoda hazırladığım tasarım kıyafete nasıl basılır?",
     },
     a: {
       az: "3D studiyada köynəyə yerləşdirdiyiniz loqo və ya qrafika İtaliya istehsalı olan premium DTF və termo-transfer texnologiyası ilə parçaya dərindən hopdurulur. Yuyulma zamanı qətiyyən solmur, rəngini və elastikliyini itirmir.",
-      en: "Your uploaded graphics or text are transferred using Italian premium DTF and thermal transfer technology. The print will not crack, fade, or lose elasticity after washing.",
+      en: "Your uploaded graphics or text are transferred using Italian premium DTF and thermal transfer technology. The design will not crack, fade, or lose elasticity after washing.",
       ru: "Ваш дизайн переносится с использованием премиальной итальянской DTF-технологии. Принт не трескается, не выцветает и выдерживает многократные стирки.",
       tr: "Yüklediğiniz logo veya grafik İtalyan DTF teknolojisiyle kumaşa işlenir. Yıkamada kesinlikle solmaz, çatlamaz ve elastikiyetini korur.",
     },
@@ -133,12 +133,12 @@ export function FAQSection() {
           </h2>
           <p className="mt-3 text-stone-400 text-sm max-w-xl mx-auto">
             {language === "en"
-              ? "Everything you need to know about Horvvalle bespoke atelier tailoring, delivery, and design studio."
+              ? "Everything you need to know about Horvvalle sizing, delivery, and the design studio."
               : language === "ru"
-              ? "Всё, что вам нужно знать о пошиве в ателье, доставке и студии индивидуального дизайна."
+              ? "Всё, что вам нужно знать о размерах, доставке и студии индивидуального дизайна."
               : language === "tr"
-              ? "Horvvalle atölye kesimi, teslimat ve özel tasarım stüdyosu hakkında merak ettiğiniz her şey."
-              : "Horvvalle fərdi atelye tikilişi, operativ çatdırılma və fərdi dizayn studiyası haqqında ən çox soruşulanlar."}
+              ? "Horvvalle bedenleri, teslimat ve özel tasarım stüdyosu hakkında merak ettiğiniz her şey."
+              : "Horvvalle ölçüləri, operativ çatdırılma və fərdi dizayn studiyası haqqında ən çox soruşulanlar."}
           </p>
         </div>
 
@@ -208,12 +208,12 @@ export function FAQSection() {
             className="text-[#E6C280] font-semibold underline underline-offset-4 hover:text-white transition"
           >
             {language === "en"
-              ? "Contact Atelier Specialist on WhatsApp"
+              ? "Contact a Specialist on WhatsApp"
               : language === "ru"
-              ? "Связаться со специалистом ателье в WhatsApp"
+              ? "Связаться со специалистом в WhatsApp"
               : language === "tr"
-              ? "WhatsApp ile Atölye Uzmanına Ulaşın"
-              : "WhatsApp Atelye Mütəxəssisi ilə əlaqə saxlayın"}
+              ? "WhatsApp ile Uzmanımıza Ulaşın"
+              : "WhatsApp-da mütəxəssisimizlə əlaqə saxlayın"}
           </a>
         </div>
       </div>

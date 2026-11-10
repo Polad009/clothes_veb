@@ -22,7 +22,7 @@ export class MockPaymentProvider implements PaymentProvider {
       return {
         success: false,
         status: "failed",
-        message: "Fərdi çap (custom) məhsulları üçün qapıda ödəniş mövcud deyil. Zəhmət olmasa kart, Apple Pay və ya Google Pay ilə öncədən ödəniş edin.",
+        message: "Öz dizaynınızla hazırlanan məhsullar üçün qapıda ödəniş mövcud deyil. Zəhmət olmasa kart, Apple Pay və ya Google Pay ilə öncədən ödəniş edin.",
         isTest: true,
       };
     }

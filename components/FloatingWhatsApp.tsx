@@ -64,7 +64,7 @@ const CHAT_I18N = {
     onlineBadge: "Onlayn • Dərhal cavab",
     offlineBadge: "Tezliklə cavablandırılacaq",
     welcomeBadge: "Xoş gəlmisiniz! Sizə necə kömək edə bilərik?",
-    welcomeSubtitle: "Sualınızı daxil edin, atelye nümayəndəmiz dərhal cavablayacaq.",
+    welcomeSubtitle: "Sualınızı daxil edin, nümayəndəmiz dərhal cavablayacaq.",
     inputPlaceholder: "Mesajınızı daxil edin...",
     operatorTyping: "Operator yazır",
     endChatBtn: "Söhbəti bitir",
@@ -90,13 +90,13 @@ const CHAT_I18N = {
     onlineBadge: "Online • Instant reply",
     offlineBadge: "Will reply shortly",
     welcomeBadge: "Welcome! How can we assist you today?",
-    welcomeSubtitle: "Type your query, our atelier concierge will reply immediately.",
+    welcomeSubtitle: "Type your query, our team will reply immediately.",
     inputPlaceholder: "Type your message...",
     operatorTyping: "Support is typing",
     endChatBtn: "End Chat",
     endChatConfirm: "Are you sure you want to end this chat session?",
     chatEndedTitle: "Chat Ended",
-    chatEndedSubtitle: "Thank you for contacting Horwalle Atelier. You can start a new chat anytime.",
+    chatEndedSubtitle: "Thank you for contacting Horwalle. You can start a new chat anytime.",
     startNewChatBtn: "Start New Chat",
     welcomeFormTitle: "Welcome to Live Support",
     welcomeFormDesc: "Please provide your details so we can assist you with your bespoke orders:",
@@ -116,13 +116,13 @@ const CHAT_I18N = {
     onlineBadge: "В сети • Быстрый ответ",
     offlineBadge: "Ответим в ближайшее время",
     welcomeBadge: "Добро пожаловать! Чем мы можем вам помочь?",
-    welcomeSubtitle: "Задайте ваш вопрос, консьерж ателье ответит прямо сейчас.",
+    welcomeSubtitle: "Задайте ваш вопрос, наш консультант ответит прямо сейчас.",
     inputPlaceholder: "Введите сообщение...",
     operatorTyping: "Оператор печатает",
     endChatBtn: "Завершить чат",
     endChatConfirm: "Вы уверены, что хотите завершить сеанс чата?",
     chatEndedTitle: "Чат Завершен",
-    chatEndedSubtitle: "Спасибо за обращение в Horwalle Atelier. Вы можете начать новый диалог в любое время.",
+    chatEndedSubtitle: "Спасибо за обращение в Horwalle. Вы можете начать новый диалог в любое время.",
     startNewChatBtn: "Начать Новый Чат",
     welcomeFormTitle: "Добро пожаловать в Онлайн-Чат",
     welcomeFormDesc: "Пожалуйста, укажите контактные данные для более оперативного обслуживания:",
@@ -142,13 +142,13 @@ const CHAT_I18N = {
     onlineBadge: "Çevrimiçi • Anında yanıt",
     offlineBadge: "Kısa sürede yanıtlanacak",
     welcomeBadge: "Hoş geldiniz! Size nasıl yardımcı olabiliriz?",
-    welcomeSubtitle: "Sorunuzu iletin, atölye temsilcimiz derhal cevaplasın.",
+    welcomeSubtitle: "Sorunuzu iletin, temsilcimiz derhal cevaplasın.",
     inputPlaceholder: "Mesajınızı yazın...",
     operatorTyping: "Temsilci yazıyor",
     endChatBtn: "Sohbeti Bitir",
     endChatConfirm: "Canlı destek görüşmesini sonlandırmak istediğinize emin misiniz?",
     chatEndedTitle: "Sohbet Sonlandırıldı",
-    chatEndedSubtitle: "Horwalle Atölyesi ile iletişime geçtiğiniz için teşekkür ederiz.",
+    chatEndedSubtitle: "Horwalle ile iletişime geçtiğiniz için teşekkür ederiz.",
     startNewChatBtn: "Yeni Sohbet Başlat",
     welcomeFormTitle: "Canlı Desteğe Hoş Geldiniz",
     welcomeFormDesc: "Siparişlerinizle ilgili size özel destek sunabilmemiz için bilgilerinizi giriniz:",
@@ -196,7 +196,7 @@ export function FloatingWhatsApp() {
   const typingStopRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const phoneNumber = support.phone;
-  const whatsappUrl = support.link("Salam! Horwalle atelyesinə yazıram. Məhsul və ya sifarişlə bağlı kömək edə bilərsiniz?");
+  const whatsappUrl = support.link("Salam! Horwalle-yə yazıram. Məhsul və ya sifarişlə bağlı kömək edə bilərsiniz?");
 
   useEffect(() => {
     isOpenRef.current = isChatOpen;

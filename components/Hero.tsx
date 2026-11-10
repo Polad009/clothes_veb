@@ -327,7 +327,7 @@ export function Hero() {
         ["--hero-ink" as any]: currentItem.colorHex,
       }}
       className="relative w-full min-h-[100dvh] h-auto lg:h-[100dvh] lg:max-h-[100dvh] flex flex-col justify-between overflow-x-hidden text-white select-none isolate pb-8 lg:pb-0"
-      aria-label="Horvvalle Atelier Hero"
+      aria-label="Horvvalle Hero"
     >
       {/* =========================================================================
           MAIN HERO CONTENT (Left Typography, Center Product, Right Spec)
@@ -367,12 +367,12 @@ export function Hero() {
             {/* Localized Description */}
             <p className="text-white/80 text-xs sm:text-[13.5px] leading-relaxed max-w-sm mx-auto lg:mx-0 font-sans">
               {language === "az"
-                ? "Atelyedə hər geyim ölçünə görə tikilir, istədiyin dizayn isə canlı DTG çapla köynəyə köçürülür."
+                ? "Premium parçalar, dəqiq kəsim və istəsən öz dizaynın — hamısı bir yerdə."
                 : language === "en"
-                ? "Every garment is crafted to your exact fit, with bespoke DTG prints brought to life."
+                ? "Premium fabrics, precise cuts and, if you like, your own design — all in one place."
                 : language === "ru"
-                ? "Каждая вещь шьется точно по вашей фигуре, а ваш дизайн переносится живой печатью DTG."
-                : "Her kıyafet bedeninize özel dikilir, dilediğiniz tasarım canlı DTG baskıyla hayata geçer."}
+                ? "Премиальные ткани, точный крой и, по желанию, ваш собственный дизайн — всё в одном месте."
+                : "Premium kumaşlar, net kesimler ve dilerseniz kendi tasarımınız — hepsi bir arada."}
             </p>
 
             {/* Shared UI Buttons */}

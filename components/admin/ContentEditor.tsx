@@ -31,7 +31,7 @@ interface ContentDraft {
 }
 
 const SECTIONS: Array<{ key: SectionKey; title: string; bodyField: "description" | "subtitle"; hasImage: boolean }> = [
-  { key: "podBanner", title: "Fərdi çap studiyası bloku", bodyField: "description", hasImage: true },
+  { key: "podBanner", title: "Dizayn studiyası bloku", bodyField: "description", hasImage: true },
   { key: "promoBanner", title: "Şalvar kolleksiyası bloku", bodyField: "subtitle", hasImage: false },
   { key: "campaignSecondary", title: "Hudi kolleksiyası bloku", bodyField: "subtitle", hasImage: false },
 ];

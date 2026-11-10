@@ -278,12 +278,12 @@ export function HeaderQuickSearch({ isLightMode, onOpenChange }: HeaderQuickSear
                   onKeyDown={handleInputKeyDown}
                   placeholder={
                     language === "en"
-                      ? "Search atelier garments, fits, fabrics..."
+                      ? "Search garments, fits, fabrics..."
                       : language === "ru"
                       ? "Поиск по каталогу, фасонам, тканям..."
                       : language === "tr"
-                      ? "Atölye modelleri, kumaşlar ve kesimler ara..."
-                      : "Atelye geyimləri, kəsimlər və parçaları axtarın..."
+                      ? "Modeller, kumaşlar ve kesimler ara..."
+                      : "Geyimlər, kəsimlər və parçaları axtarın..."
                   }
                   className="w-full bg-transparent font-serif-luxury text-base sm:text-lg text-stone-900 placeholder-stone-400 focus:outline-none"
                 />
@@ -325,7 +325,7 @@ export function HeaderQuickSearch({ isLightMode, onOpenChange }: HeaderQuickSear
                     <div>
                       <div className="flex items-center justify-between pb-2 border-b border-stone-200/70">
                         <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-500">
-                          {language === "en" ? "Curated Suggestions" : language === "ru" ? "Рекомендации ателье" : language === "tr" ? "Öne Çıkan Aramalar" : "Tövsiyə Edilən Axtarışlar"}
+                          {language === "en" ? "Curated Suggestions" : language === "ru" ? "Рекомендации" : language === "tr" ? "Öne Çıkan Aramalar" : "Tövsiyə Edilən Axtarışlar"}
                         </span>
                         <span className="text-[10px] text-stone-400 font-mono">
                           {language === "en" ? "Quick Select" : "Sürətli Seçim"}
@@ -374,7 +374,7 @@ export function HeaderQuickSearch({ isLightMode, onOpenChange }: HeaderQuickSear
                     <div className="flex items-center justify-between pb-2 border-b border-stone-200/70">
                       <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-500">
                         {language === "en"
-                          ? `Atelier Results (${matchingProducts.length})`
+                          ? `Results (${matchingProducts.length})`
                           : language === "ru"
                           ? `Найдено моделей (${matchingProducts.length})`
                           : language === "tr"
@@ -458,7 +458,7 @@ export function HeaderQuickSearch({ isLightMode, onOpenChange }: HeaderQuickSear
                       <div className="py-8 text-center space-y-2">
                         <p className="text-sm text-stone-600 font-serif-luxury">
                           {language === "en"
-                            ? `No atelier pieces found for "${query}"`
+                            ? `No pieces found for "${query}"`
                             : language === "ru"
                             ? `По запросу "${query}" ничего не найдено`
                             : language === "tr"

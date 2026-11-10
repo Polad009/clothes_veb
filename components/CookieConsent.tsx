@@ -72,12 +72,12 @@ export function CookieConsent() {
 
               <p className="text-xs text-stone-300 leading-relaxed mb-4">
                 {language === "en"
-                  ? "We use cookies to personalize your atelier experience, save your cart, and analyze site performance."
+                  ? "We use cookies to personalize your shopping experience, save your cart, and analyze site performance."
                   : language === "ru"
                   ? "Мы используем файлы cookie для персонализации вашего опыта, сохранения корзины и анализа работы сайта."
                   : language === "tr"
-                  ? "Atölye deneyiminizi kişiselleştirmek, sepetinizi kaydetmek ve site performansını analiz etmek için cookie'ler kullanıyoruz."
-                  : "Saytımızda sizə ən yaxşı atelye təcrübəsini təqdim etmək, səbətinizi qorumaq və analitika üçün cookie-lərdən istifadə edirik."}
+                  ? "Alışveriş deneyiminizi kişiselleştirmek, sepetinizi kaydetmek ve site performansını analiz etmek için cookie'ler kullanıyoruz."
+                  : "Saytımızda sizə ən yaxşı alış-veriş təcrübəsini təqdim etmək, səbətinizi qorumaq və analitika üçün cookie-lərdən istifadə edirik."}
                 {" "}
                 <Link href="/privacy" className="text-[#E6C280] hover:underline">
                   {language === "en" ? "Privacy Policy" : language === "ru" ? "Подробнее" : language === "tr" ? "Detaylar" : "Ətraflı məlumat"}

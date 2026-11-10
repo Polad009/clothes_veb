@@ -15,7 +15,7 @@ export default async function NotFound() {
         {/* Luxury Badge */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-semibold tracking-widest text-[#E6C280] uppercase mb-6">
           <Sparkles size={14} />
-          Horvvalle Atelier
+          Horvvalle
         </div>
 
         {/* 404 Display */}
@@ -59,7 +59,7 @@ export default async function NotFound() {
             rel="noopener noreferrer"
             className="text-[#E6C280] underline underline-offset-4 hover:text-white transition"
           >
-            Atelye Dəstək Xidməti (WhatsApp)
+            Dəstək Xidməti (WhatsApp)
           </a>
         </div>
       </div>

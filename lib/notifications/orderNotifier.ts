@@ -40,7 +40,7 @@ export async function notifyNewOrder(order: any) {
       .map((item: any) => {
         let line = `• ${item.quantity || 1}x ${item.name} (${item.color || ""}, ${item.size || ""}) — ${((Number(item.price) || 0) * (item.quantity || 1)).toFixed(2)} ₼`;
         if (item.customData?.placement) {
-          line += `\n   ↳ 📍 Çap hissəsi: ${item.customData.placement}`;
+          line += `\n   ↳ 📍 Dizaynın yeri: ${item.customData.placement}`;
         }
         if (item.customData?.customerNote) {
           line += `\n   ↳ 📝 Qeyd: "${item.customData.customerNote}"`;

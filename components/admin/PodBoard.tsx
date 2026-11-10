@@ -50,8 +50,8 @@ export function PodBoard({ jobs }: { jobs: PodJob[] }) {
   return (
     <>
       <PageHeader
-        title="Fərdi çap"
-        description="Müştərilərin studiyada hazırladığı dizaynlar. Hər kart bir çap işidir."
+        title="Öz dizayn sifarişləri"
+        description="Müştərilərin studiyada hazırladığı dizaynlar. Hər kart bir işdir."
         actions={
           <Select value={filter} onChange={(e) => setFilter(e.target.value)} aria-label="Status üzrə süz" className="w-auto">
             <option value="open">Açıq işlər</option>
@@ -66,7 +66,7 @@ export function PodBoard({ jobs }: { jobs: PodJob[] }) {
       {visible.length === 0 ? (
         <Card>
           <EmptyState
-            title={jobs.length === 0 ? "Hələ fərdi çap sifarişi yoxdur" : "Bu süzgəcdə iş yoxdur"}
+            title={jobs.length === 0 ? "Hələ öz dizayn sifarişi yoxdur" : "Bu süzgəcdə iş yoxdur"}
             description={jobs.length === 0 ? "Studiyadan gələn sifarişlər burada görünəcək." : undefined}
           />
         </Card>
@@ -128,7 +128,7 @@ export function PodBoard({ jobs }: { jobs: PodJob[] }) {
                           rel="noreferrer"
                           className="inline-flex items-center gap-1 rounded-md border border-stone-300 px-2 py-1 text-xs text-stone-700 hover:border-stone-900 hover:text-stone-900"
                         >
-                          <Download className="h-3.5 w-3.5" /> Çap faylı {job.artwork.length > 1 ? i + 1 : ""}
+                          <Download className="h-3.5 w-3.5" /> Dizayn faylı {job.artwork.length > 1 ? i + 1 : ""}
                         </a>
                       ))}
                     </div>

@@ -1,33 +1,25 @@
-# Horvvalle Atelier
+# Horwalle
 
-> Luxury fashion brand and bespoke tailoring atelier based in Baku, Azerbaijan. Offering ready-to-wear premium men's garments, custom made-to-measure tailoring, and an interactive 3D live print studio.
+> Premium apparel store based in Baku, Azerbaijan. Ready-to-wear t-shirts, polos, hoodies, trousers and accessories, plus an interactive 3D design studio where customers place their own graphic on a garment.
 
-## Core Capabilities & Services
+## What we offer
 
-- **Bespoke Atelier Tailoring**: Garments crafted to individual customer measurements (height, weight, body proportions) using premium combed cotton, 3-thread heavyweight fleece (380 GSM), and luxury linen.
-- **3D Interactive Custom Studio**: Real-time 3D canvas allowing customers to upload custom graphics, brand logos, or text onto premium t-shirts and apparel with industrial DTF thermal transfer.
-- **Ready-to-Wear Luxury Collections**:
-  - Classic & Vintage Heavyweight Polos (Angelus, McLaren Racing editions)
-  - 3-Thread Oversized Heavyweight Hoodies & Sweatshirts
-  - Tailored Chino & Smart Classic Trousers
-  - Snapback Caps & Eco Canvas Tote Bags
-- **Fast Delivery & Guarantee**: 24-hour free delivery across Baku; nationwide shipping across Azerbaijan within 2-3 business days. 14-day hassle-free return and exchange guarantee.
-- **Secure Payments**: Apple Pay, Google Pay, Visa, Mastercard, and Cash on Delivery / Mobile POS.
+- **Ready-to-wear collections**: heavyweight vintage polos, 3-thread oversized hoodies and sweatshirts, trousers, caps and tote bags.
+- **3D Design Studio**: customers upload their own image, logo or text, place it on a garment in a live 3D preview and order it.
+- **Delivery**: fast courier delivery in Baku and Sumqayit; nationwide shipping across Azerbaijan.
+- **Payments**: card payments online and cash on delivery for ready-to-wear items.
 
-## Key Links & Endpoints
+## Key links
 
-- [Home Page](https://horvvalle.com/): Official flagship store, brand philosophy, and featured drops.
-- [Collections](https://horvvalle.com/collections): Browse all products filtered by category (koynek, hudi, salvar, aksesuar) and gender.
-- [3D Custom Studio](https://horvvalle.com/studio): Interactive custom apparel designer with 3D model preview.
-- [Order Tracking](https://horvvalle.com/track): Real-time shipment status lookup by order code (e.g. HV-XXXX).
-- [Checkout](https://horvvalle.com/checkout): Seamless checkout with multi-currency (AZN, USD, EUR) and instant payment methods.
-- [Privacy Policy](https://horvvalle.com/privacy): Personal data protection, encryption, and GDPR compliance.
-- [Terms of Service](https://horvvalle.com/terms): Official terms, return policy, delivery conditions, and customer rights.
+- [Home](https://www.horwalle.com/): featured products and new drops.
+- [Collections](https://www.horwalle.com/collections): all products by category (koynek, hudi, salvar, aksesuar).
+- [3D Design Studio](https://www.horwalle.com/studio): put your own design on a garment.
+- [Order tracking](https://www.horwalle.com/track): order status by order number, phone or e-mail.
+- [Privacy policy](https://www.horwalle.com/privacy)
+- [Terms of service](https://www.horwalle.com/terms): returns, delivery and customer rights.
 
-## Contact & Atelier
+## Contact
 
 - Location: Baku, Azerbaijan
-- Official WhatsApp Support: +994 55 766 90 50
+- Website: https://www.horwalle.com
 - Instagram: @horvvalle
-- Website: https://horvvalle.com
-

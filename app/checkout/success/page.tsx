@@ -91,7 +91,7 @@ function CheckoutSuccessContent() {
         <p className="text-xs sm:text-sm text-stone-600 max-w-md mx-auto leading-relaxed">
           {method === "cash_on_delivery" || method === "cod"
             ? "Sifarişiniz qeydə alındı. Məhsul çatdırılan zaman kuryerə nağd və ya kartla ödəniş edə bilərsiniz."
-            : "Ödəniş uğurla qəbul edildi. Sifarişiniz atelyedə qablaşdırılmaya göndərildi və kuryerimiz 1-2 iş günü ərzində sizinlə əlaqə saxlayacaq."}
+            : "Ödəniş uğurla qəbul edildi. Sifarişiniz qablaşdırılmaya göndərildi və kuryerimiz 1-2 iş günü ərzində sizinlə əlaqə saxlayacaq."}
         </p>
       </div>
 

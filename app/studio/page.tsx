@@ -242,7 +242,7 @@ export default function SimpleStudioPage() {
   // Add to Bag / Order
   const handleAddToCart = async () => {
     if (!uploadedImage) {
-      setUploadError("Zəhmət olmasa çap olunacaq dizayn şəklinizi yükləyin.");
+      setUploadError("Zəhmət olmasa dizayn şəklinizi yükləyin.");
       if (fileInputRef.current) {
         fileInputRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
       }
@@ -272,7 +272,7 @@ export default function SimpleStudioPage() {
     addItem({
       id: `pod_${Date.now()}_${selectedGarment.id}_${selectedSize}`,
       productId: selectedGarment.id,
-      name: `Fərdi Çap: ${selectedGarment.name}`,
+      name: `Öz dizayn: ${selectedGarment.name}`,
       price: totalPrice,
       size: selectedSize,
       color: selectedColor.name,
@@ -371,13 +371,13 @@ export default function SimpleStudioPage() {
         {/* Header */}
         <div className="py-6 border-b border-stone-200/80 mb-8">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-stone-100 border border-stone-200 text-stone-800 text-[11px] font-bold uppercase tracking-wider mb-2.5">
-            <span>Fərdi Çap Atelyesi</span>
+            <span>Öz Dizaynın</span>
           </div>
           <h1 className="font-eb-garamond text-3xl sm:text-5xl font-normal text-stone-900 tracking-wide">
             Öz dizaynını <span className="italic font-normal">yarat</span>
           </h1>
           <p className="text-xs sm:text-sm text-stone-600 mt-2 max-w-2xl leading-relaxed">
-            İstədiyiniz şəkli, loqonu və ya qrafikanı yükləyin və geyimin hansı hissəsinə vurmaq istədiyinizi seçin. Atelye ustalarımız xüsusi proqramla rəng və ölçüləri dəqiqləşdirib geyiminizə yüksək dəqiqliklə çap edəcək.
+            İstədiyiniz şəkli, loqonu və ya qrafikanı yükləyin və geyimin hansı hissəsinə vurmaq istədiyinizi seçin. Ustalarımız rəng və ölçüləri dəqiqləşdirib dizaynı geyiminizə yüksək dəqiqliklə köçürəcək.
           </p>
         </div>
 
@@ -451,7 +451,7 @@ export default function SimpleStudioPage() {
                     style={getOverlayStyle()}
                   >
                     <span className="text-[10px] font-bold text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-1 rounded-md shadow-2xs">
-                      Çap Sahəsi ({selectedPlacement.label.split(" ")[0]})
+                      Dizayn Sahəsi ({selectedPlacement.label.split(" ")[0]})
                     </span>
                   </div>
                 )}
@@ -612,7 +612,7 @@ export default function SimpleStudioPage() {
               <div className="p-3.5 rounded-2xl bg-stone-100/80 border border-stone-200/80 text-xs text-stone-600 flex items-start gap-2.5">
                 <Info size={16} className="text-stone-700 shrink-0 mt-0.5" />
                 <p className="text-[11px] leading-relaxed text-stone-600">
-                  Göstərilən şəkil vizual önbaxış üçündür. Çap prosesində dəqiqlik, rəng balansı və ölçülər atelye mütəxəssislərimiz tərəfindən xüsusi çap proqramı ilə tənzimlənir.
+                  Göstərilən şəkil vizual önbaxış üçündür. Hazırlıq zamanı dəqiqlik, rəng balansı və ölçülər mütəxəssislərimiz tərəfindən tənzimlənir.
                 </p>
               </div>
             </div>
@@ -799,7 +799,7 @@ export default function SimpleStudioPage() {
               <div className="flex items-center justify-between border-b border-stone-100 pb-3">
                 <div className="flex items-center gap-2">
                   <span className="w-5 h-5 rounded-full bg-stone-900 text-white text-[11px] font-bold flex items-center justify-center">3</span>
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">Çapın Vurulacağı Hissə</h3>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">Dizaynın Yeri</h3>
                 </div>
                 <span className="text-[11px] text-stone-500 font-medium">Hissəni seçin</span>
               </div>
@@ -837,14 +837,14 @@ export default function SimpleStudioPage() {
               </div>
 
               <p className="text-[11px] text-stone-500">
-                Çapın dəqiq ölçüsü, yerləşməsi və ya xüsusi istəyiniz varsa qeyd edin. Atelye ustalarımız çapdan öncə bunu mütləq nəzərə alacaq.
+                Dizaynın dəqiq ölçüsü, yerləşməsi və ya xüsusi istəyiniz varsa qeyd edin. Ustalarımız hazırlıqdan öncə bunu mütləq nəzərə alacaq.
               </p>
 
               <textarea
                 rows={3}
                 value={customerNote}
                 onChange={(e) => setCustomerNote(e.target.value)}
-                placeholder="Məs: Çap sinənin bir qədər yuxarısında olsun, ölçüsü təxminən 25 sm olsun, arxada əlavə ad/nömrə yazılsın..."
+                placeholder="Məs: Dizayn sinənin bir qədər yuxarısında olsun, ölçüsü təxminən 25 sm olsun, arxada əlavə ad/nömrə yazılsın..."
                 className="w-full rounded-2xl p-3.5 text-xs text-stone-900 bg-stone-50 border border-stone-200 placeholder-stone-400 focus:outline-none focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900 transition"
               />
             </div>
@@ -852,7 +852,7 @@ export default function SimpleStudioPage() {
             {/* SUMMARY & ORDER BUTTON */}
             <div className="bg-stone-900 text-white rounded-3xl p-6 space-y-4 shadow-xl">
               <div className="flex items-center justify-between text-xs text-stone-300 pb-3 border-b border-stone-800">
-                <span>Geyim & Çap Xülasəsi:</span>
+                <span>Geyim & Dizayn Xülasəsi:</span>
                 <span className="font-semibold text-white">
                   {selectedGarment.name} · {selectedColor.name} · {selectedSize}
                 </span>

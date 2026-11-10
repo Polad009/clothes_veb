@@ -322,7 +322,7 @@ export function VirtualTryOnModal() {
   // Share with a friend
   const handleShare = async () => {
     const shareUrl = typeof window !== "undefined" ? window.location.href : "https://www.horwalle.com";
-    const shareText = `${product?.name || "Horwalle Atelier"} Virtual Try-On · Əynimdə necə qaldığına bax: ${shareUrl}`;
+    const shareText = `${product?.name || "Horwalle"} Virtual Try-On · Əynimdə necə qaldığına bax: ${shareUrl}`;
 
     if (navigator.share) {
       try {
@@ -755,7 +755,7 @@ export function VirtualTryOnModal() {
                       Öz Şəklini Yüklə
                     </h3>
                     <p className="text-xs text-stone-400 mb-5 leading-relaxed">
-                      Boydan və ya yarıboy şəklini seç, atelye geyiminin səndə necə qalacağını dərhal canlı gör.
+                      Boydan və ya yarıboy şəklini seç, geyimin səndə necə qalacağını dərhal canlı gör.
                     </p>
                     <button
                       type="button"
@@ -784,7 +784,7 @@ export function VirtualTryOnModal() {
 
                   <div className="absolute bottom-6 px-4 py-2 rounded-full bg-black/70 border border-white/10 backdrop-blur-md text-[11px] text-stone-300 flex items-center gap-2 shadow-lg">
                     <User className="w-3.5 h-3.5 text-[#E6C280]" />
-                    <span>Unisex Atelier Fit · 182 sm / 74 kq</span>
+                    <span>Unisex Fit · 182 sm / 74 kq</span>
                   </div>
                 </div>
               </div>
@@ -927,7 +927,7 @@ export function VirtualTryOnModal() {
                   }`}
                 >
                   <User className="w-4 h-4 shrink-0" />
-                  <span className="hidden sm:inline">Atelier Model</span>
+                  <span className="hidden sm:inline">Studio Model</span>
                   <span className="sm:hidden">Model</span>
                 </button>
               </div>

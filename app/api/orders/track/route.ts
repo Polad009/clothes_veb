@@ -199,7 +199,7 @@ export async function GET(req: NextRequest) {
             email: maskEmail((matchedPod as any).customerEmail || "-"),
             city: (matchedPod as any).city || "Bakı",
             country: (matchedPod as any).country || "Azərbaycan",
-            address: "Atelyedən təhvil / Çatdırılma",
+            address: "Mağazadan təhvil / Çatdırılma",
           },
           items: [
             {

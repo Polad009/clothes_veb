@@ -203,7 +203,7 @@ export function HeaderLogo({
     <div
       ref={containerRef}
       className={`inline-flex items-center gap-3 select-none group cursor-pointer ${className}`}
-      aria-label="HORVVALLE Fərdi Atelye Ana Səhifə"
+      aria-label="HORVVALLE Ana Səhifə"
     >
       {/* Handcrafted Atelier Seal with Hand-drawn W Monogram */}
       <div

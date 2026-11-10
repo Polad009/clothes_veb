@@ -6,8 +6,8 @@ import { Metadata } from "next";
 import { Scale, ArrowLeft, RefreshCw, Truck, CreditCard, ShieldCheck } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "İstifadə Şərtləri & Qaydalar | Horwalle Atelier",
-  description: "Horwalle Atelier onlayn mağaza və atelye xidmətlərinin istifadə şərtləri, qaytarılma və çatdırılma qaydaları.",
+  title: "İstifadə Şərtləri & Qaydalar | Horwalle",
+  description: "Horwalle onlayn mağazasının istifadə şərtləri, qaytarılma və çatdırılma qaydaları.",
   alternates: {
     canonical: "https://www.horwalle.com/terms",
   },
@@ -39,7 +39,7 @@ export default async function TermsPage() {
             İstifadə Şərtləri
           </h1>
           <p className="text-stone-400 text-sm sm:text-base leading-relaxed">
-            Horwalle Atelier veb-saytından istifadə etməklə və ya sifariş verməklə aşağıdakı rəsmi şərtləri qəbul etmiş sayılırsınız.
+            Horwalle veb-saytından istifadə etməklə və ya sifariş verməklə aşağıdakı rəsmi şərtləri qəbul etmiş sayılırsınız.
           </p>
         </div>
 
@@ -52,10 +52,10 @@ export default async function TermsPage() {
               <h2 className="text-xl font-serif font-bold">1. Ümumi Müddəalar</h2>
             </div>
             <p className="mb-3 text-stone-400">
-              Bu müqavilə Horwalle Atelier ilə alıcı arasında bağlanmış rəsmi elektron təklif (oferta) xarakteri daşıyır.
+              Bu müqavilə Horwalle ilə alıcı arasında bağlanmış rəsmi elektron təklif (oferta) xarakteri daşıyır.
             </p>
             <p className="text-stone-400">
-              Alıcı sayt üzərindən hazır kolleksiyadan geyim sifariş edə və ya 3D İnteraktiv Çap Studiyasından istifadə edərək fərdi dizaynlı məhsul hazırlada bilər.
+              Alıcı sayt üzərindən hazır kolleksiyadan geyim sifariş edə və ya 3D Dizayn Studiyasından istifadə edərək fərdi dizaynlı məhsul hazırlada bilər.
             </p>
           </section>
 
@@ -97,7 +97,7 @@ export default async function TermsPage() {
             </p>
             <ul className="list-disc list-inside space-y-2 text-stone-300">
               <li>Hazır kolleksiya məhsulları alındığı tarixdən etibarən <strong className="text-white">14 gün ərzində</strong> istifadə edilmədən, etiketləri zədələnmədən asanlıqla dəyişdirilə və ya qaytarıla bilər.</li>
-              <li>Müştərinin sifarişi əsasında fərdi bədən ölçüləri ilə tikilmiş və ya 3D studiyada fərdi ad/loqo ilə çap edilmiş eksklüziv məhsullarda yalnız istehsal qüsuru (defekt) aşkarlandıqda ödənişsiz yenidən hazırlanır və ya qaytarılır.</li>
+              <li>Müştərinin sifarişi əsasında 3D studiyada fərdi ad/loqo ilə hazırlanmış eksklüziv məhsullarda yalnız istehsal qüsuru (defekt) aşkarlandıqda ödənişsiz yenidən hazırlanır və ya qaytarılır.</li>
             </ul>
           </section>
 

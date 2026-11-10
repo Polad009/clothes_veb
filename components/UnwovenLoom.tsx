@@ -156,7 +156,7 @@ export function UnwovenLoom() {
               slug: p.slug,
               src: imgSrc,
               title: c.name && c.name !== "Standart" ? `${p.name} (${c.name})` : p.name,
-              tag: p.composition?.split(",")[0]?.trim() || p.fit || "ATELIER COUTURE",
+              tag: p.composition?.split(",")[0]?.trim() || p.fit || "HORVVALLE",
               defaultPrice: p.price,
               link: `/products/${p.slug}`,
             });
@@ -179,7 +179,7 @@ export function UnwovenLoom() {
           slug: p.slug,
           src: mainImg,
           title: p.name,
-          tag: p.composition?.split(",")[0]?.trim() || p.fit || "ATELIER COUTURE",
+          tag: p.composition?.split(",")[0]?.trim() || p.fit || "HORVVALLE",
           defaultPrice: p.price,
           link: `/products/${p.slug}`,
         });

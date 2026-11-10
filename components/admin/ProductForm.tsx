@@ -271,7 +271,7 @@ export function ProductForm({ product, categories }: { product: CatalogProduct |
               <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Məs: Angel Dust Vintage Hoodie" />
             </Field>
             <Field label="Təsvir" className="sm:col-span-2">
-              <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={6} placeholder="Parça, kəsim və çap haqqında qısa məlumat" />
+              <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={6} placeholder="Parça, kəsim və dizayn haqqında qısa məlumat" />
             </Field>
             <Field label="Kateqoriya">
               <Select value={category} onChange={(e) => setCategory(e.target.value)}>
