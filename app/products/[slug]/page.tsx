@@ -1,812 +1,390 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useParams, notFound } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import { Product } from "@/data/products";
+import { notFound, useParams } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
+import { Check, Minus, Plus, X } from "lucide-react";
+import type { Product } from "@/data/products";
 import { availableQty, LOW_STOCK } from "@/lib/stock";
 import { CampaignCountdown } from "@/components/CampaignCountdown";
-import { useStoreData, normalizeProduct, useSupport } from "@/context/StoreDataContext";
+import { normalizeProduct, useCategories, useStoreData, useSupport } from "@/context/StoreDataContext";
+import { categoryTitle } from "@/lib/categories";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useLanguage } from "@/context/LanguageContext";
-import { translateColor, translateBadge } from "@/lib/translations";
-import { ProductCard } from "@/components/ProductCard";
 import { useCart } from "@/context/CartContext";
-import { useTryOn } from "@/context/TryOnContext";
-import {
-  ShoppingBag,
-  ShieldCheck,
-  Truck,
-  RotateCcw,
-  Check,
-  Ruler,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  ArrowRight,
-  MessageCircle,
-  Share2,
-  Copy,
-  Sparkles,
-} from "lucide-react";
-import { ApplePayLogo, PaymentLogosRow } from "@/components/PaymentLogos";
+import { translateColor } from "@/lib/translations";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
+import { ProductTile } from "@/components/store/ProductTile";
+import { T, tr } from "@/components/store/i18n";
 
-function getGenderLabel(gender: string | undefined, lang: string): string {
-  if (!gender) return "";
-  const g = gender.toLowerCase().trim();
-  const map: Record<string, Record<string, string>> = {
-    men: { az: "Kişi", en: "Men", ru: "Мужское", tr: "Erkek" },
-    women: { az: "Qadın", en: "Women", ru: "Женское", tr: "Kadın" },
-    unisex: { az: "Unisex", en: "Unisex", ru: "Унисекс", tr: "Unisex" },
-  };
-  return map[g]?.[lang] || map[g]?.["az"] || gender;
+const SIZE_ROWS = [
+  ["S / 30", "92 – 98", "72 / 100"],
+  ["M / 32", "98 – 104", "74 / 102"],
+  ["L / 34", "104 – 110", "76 / 104"],
+  ["XL / 36", "110 – 118", "78 / 106"],
+];
+
+function Accordion({ title, children, open = false }: { title: string; children: React.ReactNode; open?: boolean }) {
+  const [isOpen, setOpen] = useState(open);
+  return (
+    <div className="border-b border-white/10">
+      <button type="button" onClick={() => setOpen(!isOpen)} className="flex w-full items-center justify-between py-4 text-left">
+        <span className="text-[12px] font-extrabold uppercase tracking-[0.16em]">{title}</span>
+        {isOpen ? <Minus size={15} /> : <Plus size={15} />}
+      </button>
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.22 }}
+            className="overflow-hidden"
+          >
+            <div className="pb-5 text-[14px] leading-relaxed text-bone-dim">{children}</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
 }
 
-
-export default function ProductDetailPage() {
+function ProductView({ product, related }: { product: Product; related: Product[] }) {
+  const { language } = useLanguage();
+  const { formatProductPrice, formatPrice } = useCurrency();
+  const { addItem } = useCart();
   const support = useSupport();
-  const params = useParams();
-  const slug = params?.slug as string;
-  const { formatPrice, formatProductPrice } = useCurrency();
-  const { language, t } = useLanguage();
+  const categories = useCategories();
+  const cat = categories.find((c) => c.id === product.category);
 
-  // Məhsula klikləyəndə səhifənin ən yuxarıdan açılmasını təmin et
-  useEffect(() => {
-    const resetScroll = () => {
-      if (typeof window !== "undefined") {
-        if ((window as any).__lenis) {
-          (window as any).__lenis.scrollTo(0, { immediate: true });
-        }
-        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-        document.documentElement.scrollTop = 0;
-        document.body.scrollTop = 0;
-      }
-    };
-
-    resetScroll();
-    const t = setTimeout(resetScroll, 50);
-    return () => clearTimeout(t);
-  }, [slug]);
-
-  const { products } = useStoreData();
-  const [directProduct, setDirectProduct] = useState<Product | null>(null);
-  const [hasCheckedDirect, setHasCheckedDirect] = useState(false);
-
-  const product =
-    directProduct ||
-    products.find((p) => p.slug === slug || p.id === slug);
-
-  useEffect(() => {
-    let isCancelled = false;
-    fetch(`/api/store/products?q=${encodeURIComponent(slug)}&_t=${Date.now()}`, {
-      cache: "no-store",
-      headers: { "Cache-Control": "no-cache" },
-    })
-      .then((res) => res.json())
-      .then((items) => {
-        if (!isCancelled && Array.isArray(items)) {
-          const found = items.find((p: any) => p.slug === slug || p.id === slug);
-          if (found) {
-            setDirectProduct(normalizeProduct(found));
-          }
-        }
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (!isCancelled) setHasCheckedDirect(true);
-      });
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [slug]);
-
-  if (!product) {
-    if (!hasCheckedDirect) {
-      return (
-        <div className="w-full min-h-screen bg-[#FAF7F2] flex items-center justify-center">
-          <div className="w-8 h-8 rounded-full border-2 border-stone-300 border-t-stone-800 animate-spin" />
-        </div>
-      );
-    }
-    return notFound();
-  }
-
-  const { addItem, openCart } = useCart();
-  const { openTryOn } = useTryOn();
-
-  const [selectedColorIndex, setSelectedColorIndex] = useState(0);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [selectedSize, setSelectedSize] = useState(product.sizes[0] || "L");
+  const [colorIndex, setColorIndex] = useState(0);
+  const color = product.colors[colorIndex] || product.colors[0];
+  const [size, setSize] = useState(product.sizes[0] || "");
   const [quantity, setQuantity] = useState(1);
-  const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
-  const [isAdded, setIsAdded] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [added, setAdded] = useState(false);
+  const [guideOpen, setGuideOpen] = useState(false);
+  const [slide, setSlide] = useState(0);
+  const railRef = useRef<HTMLDivElement>(null);
+  useBodyScrollLock(guideOpen);
 
-  const handleCopyLink = () => {
-    if (typeof window !== "undefined") {
-      navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2200);
-    }
-  };
+  const left = (s: string) => availableQty(product, color?.name || "", s);
+  const selectedLeft = left(size);
+  const soldOut = product.inStock === false || selectedLeft === 0;
+  const onSale = Boolean(product.compareAtPrice && product.compareAtPrice > product.price);
 
-  useBodyScrollLock(sizeGuideOpen);
-  const [activeAccordion, setActiveAccordion] = useState<string | null>("details");
-
-  const activeColor = product.colors[selectedColorIndex] || product.colors[0];
-  const sizeLeft = (size: string) => availableQty(product, activeColor?.name || "", size);
-  const selectedLeft = sizeLeft(selectedSize);
-  const selectedSoldOut = selectedLeft === 0;
-
-  // When the chosen size is gone in this colour, move to the first size that is still available
+  // move off a size that is gone in this colour
   useEffect(() => {
-    if (sizeLeft(selectedSize) !== 0) return;
-    const next = product.sizes.find((s) => sizeLeft(s) !== 0);
-    if (next && next !== selectedSize) setSelectedSize(next);
+    if (left(size) !== 0) return;
+    const next = product.sizes.find((s) => left(s) !== 0);
+    if (next) setSize(next);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [product.id, activeColor?.name, product.stock]);
-  const hasDistinctHover = Boolean(
-    activeColor?.hoverImage &&
-    typeof activeColor.hoverImage === "string" &&
-    activeColor.hoverImage.trim() !== "" &&
-    activeColor.hoverImage !== activeColor.image
-  );
+  }, [product.id, color?.name, product.stock]);
 
-  const rawGallery = (activeColor.gallery && activeColor.gallery.length > 0
-    ? activeColor.gallery
-    : hasDistinctHover
-    ? [activeColor.image, activeColor.hoverImage!]
-    : [activeColor.image]
-  );
-  // Ensure unique, non-empty images only
-  const gallery = rawGallery.filter((img, idx, arr) => img && typeof img === "string" && img.trim() !== "" && arr.indexOf(img) === idx);
-  const activeImage = gallery[selectedImageIndex] || gallery[0] || activeColor.image;
+  const gallery = useMemo(() => {
+    const list = [color?.image, color?.hoverImage, ...(color?.gallery || [])];
+    return list.filter((img, i, arr): img is string => Boolean(img && typeof img === "string" && img.trim()) && arr.indexOf(img) === i);
+  }, [color]);
 
-  // Touch & Mouse Swipe Gesture Handlers for Main Gallery Image
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
-  const [isMouseDown, setIsMouseDown] = useState(false);
-  const minSwipeDistance = 40;
+  useEffect(() => {
+    setSlide(0);
+    railRef.current?.scrollTo({ left: 0 });
+  }, [colorIndex]);
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
+  const add = () => {
+    if (soldOut) return;
+    addItem(
+      {
+        id: `${product.id}_${color.name}_${size}`,
+        productId: product.id,
+        name: product.name,
+        price: product.price,
+        internationalPrice: product.internationalPrice,
+        size,
+        color: color.name,
+        image: color.image,
+        type: "ready",
+        stockQuantity: selectedLeft === null ? 99 : Math.min(99, selectedLeft),
+      },
+      selectedLeft === null ? quantity : Math.min(quantity, selectedLeft)
+    );
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1800);
   };
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    if (distance > minSwipeDistance && gallery.length > 1) {
-      setSelectedImageIndex((prev) => (prev + 1) % gallery.length);
-    } else if (distance < -minSwipeDistance && gallery.length > 1) {
-      setSelectedImageIndex((prev) => (prev - 1 + gallery.length) % gallery.length);
-    }
-    setTouchStart(null);
-    setTouchEnd(null);
-  };
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsMouseDown(true);
-    setTouchEnd(null);
-    setTouchStart(e.clientX);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isMouseDown) return;
-    setTouchEnd(e.clientX);
-  };
-
-  const handleMouseUp = () => {
-    if (isMouseDown) {
-      handleTouchEnd();
-      setIsMouseDown(false);
-    }
-  };
-
-  const handleAddToCart = () => {
-    if (selectedSoldOut) return;
-    addItem({
-      id: `${product.id}_${activeColor.name}_${selectedSize}`,
-      productId: product.id,
-      name: product.name,
-      price: product.price,
-      internationalPrice: product.internationalPrice,
-      size: selectedSize,
-      color: activeColor.name,
-      image: activeColor.image,
-      type: "ready",
-      stockQuantity: selectedLeft === null ? 99 : Math.min(99, selectedLeft),
-    }, selectedLeft === null ? quantity : Math.min(quantity, selectedLeft));
-
-    setIsAdded(true);
-    setTimeout(() => {
-      setIsAdded(false);
-    }, 2000);
-  };
-
-  const handleDirectBuy = () => {
-    handleAddToCart();
-    openCart();
-  };
-
-  const recommended = products.filter((p) => p.id !== product.id).slice(0, 4);
+  const share = typeof window !== "undefined" ? window.location.href : "";
 
   return (
-    <div className="w-full min-h-screen bg-[#FAF7F2] text-[#111827] pt-8 pb-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Main Product Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-          {/* Left Column: Image Gallery (Clean, sized to photo with no excess white padding) */}
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-            className="lg:col-span-6 flex flex-col-reverse sm:flex-row gap-4 items-start justify-center sm:justify-start"
+    <div className="min-h-screen bg-ink font-grotesk text-bone">
+      <div className="mx-auto max-w-[1600px] lg:grid lg:grid-cols-12 lg:gap-10 lg:px-10 lg:pt-8">
+        {/* gallery: swipe rail on phones, two-column stack on desktop */}
+        <div className="lg:col-span-7">
+          <div
+            ref={railRef}
+            onScroll={(e) => {
+              const el = e.currentTarget;
+              setSlide(Math.round(el.scrollLeft / el.clientWidth));
+            }}
+            className="flex snap-x snap-mandatory overflow-x-auto [scrollbar-width:none] lg:grid lg:grid-cols-2 lg:gap-2 lg:overflow-visible [&::-webkit-scrollbar]:hidden"
           >
-            {/* Thumbnails (Only displayed if more than 1 image exists) */}
-            {gallery.length > 1 && (
-              <div className="flex sm:flex-col gap-2.5 overflow-x-auto sm:overflow-visible shrink-0 pb-2 sm:pb-0">
-                {gallery.map((img, idx) => {
-                  return (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setSelectedImageIndex(idx)}
-                      className={`relative w-16 h-20 sm:w-20 sm:h-26 rounded-xl overflow-hidden transition-all group cursor-pointer ${
-                        selectedImageIndex === idx
-                          ? "bg-white border-2 border-stone-900 shadow-sm ring-1 ring-stone-900/10 scale-102"
-                          : "bg-white border border-stone-200/80 opacity-70 hover:opacity-100 hover:border-stone-400"
-                      }`}
-                    >
-                      <div className="relative w-full h-full overflow-hidden rounded-lg bg-[#F5EFE6]">
-                        <Image
-                          src={img}
-                          alt={product.name}
-                          fill
-                          sizes="80px"
-                          className="object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                      </div>
-                    </button>
-                  );
-                })}
+            {gallery.map((src, i) => (
+              <div
+                key={src}
+                className={`relative aspect-[4/5] w-full shrink-0 snap-center bg-tile ${i === 0 && gallery.length % 2 === 1 ? "lg:col-span-2 lg:aspect-[5/4]" : ""}`}
+              >
+                <Image src={src} alt={`${product.name} ${i + 1}`} fill priority={i === 0} sizes="(max-width: 1024px) 100vw, 40vw" className="object-contain p-[7%] mix-blend-multiply" />
+              </div>
+            ))}
+          </div>
+          {gallery.length > 1 && (
+            <div className="flex justify-center gap-1.5 py-3 lg:hidden">
+              {gallery.map((_, i) => (
+                <span key={i} className={`h-1 transition-all ${slide === i ? "w-6 bg-bone" : "w-2 bg-white/25"}`} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* buy panel */}
+        <div className="px-4 pb-16 pt-6 sm:px-6 lg:col-span-5 lg:px-0 lg:pt-0">
+          <div className="lg:sticky lg:top-24">
+            <nav className="text-[11px] font-bold uppercase tracking-[0.16em] text-bone-faint">
+              <Link href="/collections" className="hover:text-bone">{tr(language, T.allProducts)}</Link>
+              <span className="mx-2">/</span>
+              <Link href={`/collections?category=${product.category}`} className="hover:text-bone">{cat ? categoryTitle(cat, language) : product.category}</Link>
+            </nav>
+
+            <h1 lang="en" className="mt-4 text-4xl font-black uppercase leading-[0.92] tracking-[-0.015em] [font-stretch:112%] sm:text-5xl">{product.name}</h1>
+
+            <div className="mt-4 flex items-baseline gap-3">
+              <span className={`text-2xl font-bold tabular-nums ${onSale ? "text-sale" : ""}`}>{formatProductPrice(product)}</span>
+              {onSale && <span className="text-base text-bone-faint line-through">{formatPrice(product.compareAtPrice!)}</span>}
+            </div>
+            {product.campaign?.showCountdown && product.campaign.endsAt && (
+              <div className="mt-3">
+                <CampaignCountdown endsAt={product.campaign.endsAt} percent={product.campaign.percent} language={language} />
               </div>
             )}
 
-            {/* Main Featured Image / Full area cover */}
-            <div
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              className="relative w-full max-w-[440px] sm:max-w-[460px] mx-auto sm:mx-0 rounded-2xl overflow-hidden bg-[#F5EFE6] border border-stone-200/80 shadow-xs group select-none cursor-grab active:cursor-grabbing aspect-[3/4]"
-            >
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeImage}
-                  initial={{ opacity: 0.6, scale: 0.98 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0.6, scale: 0.98 }}
-                  transition={{ duration: 0.22, ease: "easeOut" }}
-                  className="relative w-full h-full"
-                >
-                  <Image
-                    src={activeImage}
-                    alt={product.name}
-                    fill
-                    priority
-                    sizes="(max-width: 640px) 100vw, 460px"
-                    className="object-contain p-2 sm:p-4 transition-transform duration-500 ease-out group-hover:scale-105 pointer-events-none select-none"
-                  />
-                </motion.div>
-              </AnimatePresence>
-
-              {/* Swipe Navigation Arrows & Pagination Dots (Shown only if multiple images exist) */}
-              {gallery.length > 1 && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedImageIndex((prev) => (prev - 1 + gallery.length) % gallery.length)}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-white/90 hover:bg-white text-stone-800 shadow-md flex items-center justify-center transition-all opacity-80 sm:opacity-0 group-hover:opacity-100 active:scale-95 cursor-pointer border border-stone-200"
-                    aria-label="Əvvəlki şəkil"
-                  >
-                    <ChevronLeft size={18} />
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setSelectedImageIndex((prev) => (prev + 1) % gallery.length)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-white/90 hover:bg-white text-stone-800 shadow-md flex items-center justify-center transition-all opacity-80 sm:opacity-0 group-hover:opacity-100 active:scale-95 cursor-pointer border border-stone-200"
-                    aria-label="Növbəti şəkil"
-                  >
-                    <ChevronRight size={18} />
-                  </button>
-
-                  {/* Clean Dot Indicators */}
-                  <div className="absolute bottom-3 inset-x-0 z-10 flex items-center justify-center gap-1.5 pointer-events-none">
-                    {gallery.map((_, dotIdx) => (
-                      <span
-                        key={dotIdx}
-                        className={`h-1.5 rounded-full transition-all duration-300 ${
-                          selectedImageIndex === dotIdx ? "w-6 bg-stone-900" : "w-1.5 bg-stone-300"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </>
-              )}
-
-              {(product.badge || product.gender) && (
-                <div className="absolute top-3 left-3 z-10 flex flex-wrap items-center gap-1.5 pointer-events-none">
-                  {product.badge && (
-                    <span className="px-3 py-1 rounded-full bg-white/95 backdrop-blur-md text-stone-900 border border-stone-200/90 font-semibold text-[11px] uppercase tracking-wider shadow-2xs">
-                      {translateBadge(product.badge, language)}
-                    </span>
-                  )}
-                  {product.gender && (
-                    <span className="px-2.5 py-1 rounded-full bg-stone-900/90 backdrop-blur-md text-white font-semibold text-[11px] uppercase tracking-wider shadow-2xs">
-                      {getGenderLabel(product.gender, language)}
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-          </motion.div>
-
-          {/* Right Column: Purchasing Panel */}
-          <div className="lg:col-span-6 flex flex-col justify-start space-y-6">
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <div className="flex items-center justify-between text-xs text-stone-500 mb-2">
-                <span className="uppercase tracking-widest font-mono font-semibold text-stone-700">
-                  {product.refCode || "HORVVALLE-ORIGINAL"}
-                </span>
-                {product.gender && (
-                  <span className="px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-800 border border-stone-200 text-xs font-semibold uppercase tracking-wider">
-                    {getGenderLabel(product.gender, language)}
-                  </span>
-                )}
-              </div>
-
-              <h1 className="font-eb-garamond text-3xl sm:text-4xl lg:text-5xl font-normal text-stone-900 tracking-wide">
-                {product.name}
-              </h1>
-
-              <div className="flex items-center gap-2 mt-2">
-                <p className="text-xs text-stone-500 font-medium uppercase tracking-wider">
-                  {product.fit}
+            {/* colour */}
+            {product.colors.length > 0 && (
+              <div className="mt-8">
+                <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-bone-dim">
+                  {tr(language, { az: "Rəng", en: "Colour", ru: "Цвет", tr: "Renk" })}: <span className="text-bone">{translateColor(color.name, language as any)}</span>
                 </p>
-                {product.gender && (
-                  <>
-                    <span className="text-stone-300">•</span>
-                    <span className="text-xs font-semibold text-stone-700 uppercase tracking-wider">
-                      {getGenderLabel(product.gender, language)}
-                    </span>
-                  </>
-                )}
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {product.colors.map((c, i) => (
+                    <button
+                      key={c.name}
+                      type="button"
+                      onClick={() => setColorIndex(i)}
+                      title={translateColor(c.name, language as any)}
+                      className={`relative h-14 w-12 overflow-hidden border-2 bg-tile transition ${i === colorIndex ? "border-bone" : "border-transparent opacity-70 hover:opacity-100"}`}
+                    >
+                      <Image src={c.image} alt="" fill sizes="48px" className="object-contain p-1 mix-blend-multiply" />
+                    </button>
+                  ))}
+                </div>
               </div>
+            )}
 
-              {/* Price */}
-              <div className="flex items-center gap-3 mt-4">
-                <span className="text-3xl sm:text-4xl font-light text-stone-900 tracking-tight">
-                  {formatProductPrice(product)}
-                </span>
-                {product.compareAtPrice && (
-                  <span className="text-lg text-stone-400 line-through">
-                    {formatPrice(product.compareAtPrice)}
-                  </span>
-                )}
-                {product.compareAtPrice && (
-                  <span className="px-2.5 py-1 rounded-full bg-stone-100 text-stone-800 border border-stone-200 text-xs font-semibold">
-                    {language === "az" ? "Qənaət: " : language === "ru" ? "Экономия: " : language === "tr" ? "Kazanç: " : "Save: "}
-                    {formatPrice(product.compareAtPrice - product.price)}
-                  </span>
-                )}
-              </div>
-              {product.campaign?.showCountdown && product.campaign.endsAt && (
-                <CampaignCountdown endsAt={product.campaign.endsAt} percent={product.campaign.percent} language={language} />
-              )}
-            </motion.div>
-
-            {/* Color Selector */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.16, ease: [0.16, 1, 0.3, 1] }}
-              className="space-y-2.5 pt-4 border-t border-stone-200"
-            >
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-stone-600">
-                  {t.product.color}: <strong className="text-stone-900">{translateColor(activeColor.name, language)}</strong>
-                </span>
-                <span className="text-stone-400 text-[11px]">
-                  {product.colors.length} {t.product.choices}
-                </span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                {product.colors.map((c, idx) => (
-                  <button
-                    key={c.name}
-                    onClick={() => {
-                      setSelectedColorIndex(idx);
-                      setSelectedImageIndex(0);
-                    }}
-                    className={`w-9 h-9 rounded-xl border-2 transition-all flex items-center justify-center cursor-pointer ${
-                      selectedColorIndex === idx
-                        ? "border-stone-900 ring-2 ring-stone-900/20 scale-105"
-                        : "border-stone-300 opacity-80 hover:opacity-100 hover:border-stone-500"
-                    }`}
-                    style={{ backgroundColor: c.hex }}
-                    title={translateColor(c.name, language)}
-                  >
-                    {selectedColorIndex === idx && (
-                      <Check size={14} className={c.hex === "#FFFFFF" || c.hex === "#F5F5F0" ? "text-black" : "text-white"} />
-                    )}
+            {/* size */}
+            {product.sizes.length > 0 && (
+              <div className="mt-7">
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-bone-dim">
+                    {tr(language, { az: "Ölçü", en: "Size", ru: "Размер", tr: "Beden" })}: <span className="text-bone">{size}</span>
+                  </p>
+                  <button type="button" onClick={() => setGuideOpen(true)} className="text-[11px] font-bold uppercase tracking-[0.14em] text-bone-dim underline underline-offset-4 hover:text-bone">
+                    {tr(language, { az: "Ölçü cədvəli", en: "Size guide", ru: "Таблица размеров", tr: "Beden tablosu" })}
                   </button>
-                ))}
+                </div>
+                <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6">
+                  {product.sizes.map((s) => {
+                    const gone = left(s) === 0;
+                    return (
+                      <button
+                        key={s}
+                        type="button"
+                        disabled={gone}
+                        onClick={() => setSize(s)}
+                        className={`h-11 border text-[12px] font-bold uppercase transition ${
+                          gone
+                            ? "cursor-not-allowed border-white/10 text-bone-faint line-through"
+                            : size === s
+                            ? "border-bone bg-bone text-ink"
+                            : "border-white/20 hover:border-bone"
+                        }`}
+                      >
+                        {s}
+                      </button>
+                    );
+                  })}
+                </div>
+                {selectedLeft !== null && selectedLeft > 0 && selectedLeft <= LOW_STOCK && (
+                  <p className="mt-3 text-[12px] font-semibold text-amber-400">
+                    {tr(language, { az: `Bu ölçüdən son ${selectedLeft} ədəd`, en: `Only ${selectedLeft} left in this size`, ru: `Осталось ${selectedLeft} шт.`, tr: `Bu bedenden son ${selectedLeft} adet` })}
+                  </p>
+                )}
               </div>
-            </motion.div>
+            )}
 
-            {/* Size Selector & Size Guide */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.24, ease: [0.16, 1, 0.3, 1] }}
-              className="space-y-2.5 pt-4 border-t border-stone-200"
-            >
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-stone-600">
-                  {t.product.size}: <strong className="text-stone-900">{selectedSize}</strong>
-                </span>
-                <button
-                  onClick={() => setSizeGuideOpen(true)}
-                  className="flex items-center gap-1.5 text-stone-700 hover:text-stone-900 font-medium underline cursor-pointer"
-                >
-                  <Ruler size={13} />
-                  <span>{t.product.sizeGuide}</span>
+            {/* add */}
+            <div className="mt-8 flex gap-2">
+              <div className="flex items-center border border-white/20">
+                <button type="button" onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="h-14 px-3 hover:bg-white/10" aria-label="Azalt">
+                  <Minus size={14} />
+                </button>
+                <span className="w-8 text-center text-sm font-bold tabular-nums">{quantity}</span>
+                <button type="button" onClick={() => setQuantity((q) => Math.min(selectedLeft ?? 99, q + 1))} className="h-14 px-3 hover:bg-white/10" aria-label="Artır">
+                  <Plus size={14} />
                 </button>
               </div>
-
-              <div className="flex items-center gap-2 flex-wrap">
-                {product.sizes.map((size) => {
-                  const soldOut = sizeLeft(size) === 0;
-                  return (
-                    <button
-                      key={size}
-                      onClick={() => !soldOut && setSelectedSize(size)}
-                      disabled={soldOut}
-                      aria-label={soldOut ? `${size} — bitib` : size}
-                      className={`py-2.5 px-4 rounded-xl text-xs font-semibold uppercase transition-all ${
-                        soldOut
-                          ? "bg-stone-50 border border-stone-200 text-stone-300 line-through cursor-not-allowed"
-                          : selectedSize === size
-                          ? "bg-stone-900 text-white shadow-sm scale-105 cursor-pointer"
-                          : "bg-white border border-stone-200 text-stone-700 hover:border-stone-400 hover:text-stone-900 cursor-pointer"
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  );
-                })}
-              </div>
-              {selectedLeft !== null && selectedLeft > 0 && selectedLeft <= LOW_STOCK && (
-                <p className="text-xs font-medium text-amber-700">Bu ölçüdən son {selectedLeft} ədəd qalıb.</p>
-              )}
-              {selectedSoldOut && (
-                <p className="text-xs font-medium text-red-600">Bu rəngdə bütün ölçülər bitib.</p>
-              )}
-            </motion.div>
-
-            {/* Action Buttons: Add to Bag & Apple Pay */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.32, ease: [0.16, 1, 0.3, 1] }}
-              className="space-y-3 pt-3"
-            >
-<button
-                onClick={handleAddToCart}
-                disabled={selectedSoldOut}
-                className={`w-full py-4 disabled:opacity-50 disabled:cursor-not-allowed rounded-full font-semibold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-98 cursor-pointer ${
-                  isAdded
-                    ? "bg-emerald-600 text-white"
-                    : "bg-stone-900 hover:bg-black text-white"
+              <button
+                type="button"
+                onClick={add}
+                disabled={soldOut}
+                className={`flex h-14 flex-1 items-center justify-center gap-2 rounded-full text-[12px] font-extrabold uppercase tracking-[0.16em] transition [font-stretch:108%] ${
+                  soldOut ? "cursor-not-allowed bg-white/10 text-bone-faint" : added ? "bg-emerald-500 text-ink" : "bg-bone text-ink hover:bg-white"
                 }`}
               >
-                {isAdded ? (
-                  <>
-                    <Check size={16} />
-                    <span>{t.product.addedToBag}</span>
-                  </>
-                ) : (
-                  <>
-                    <ShoppingBag size={16} />
-                    <span>{t.product.addToBag}</span>
-                  </>
-                )}
+                {soldOut ? tr(language, T.soldOut) : added ? <><Check size={16} /> {tr(language, { az: "Səbətə əlavə olundu", en: "Added to bag", ru: "Добавлено", tr: "Sepete eklendi" })}</> : tr(language, { az: "Səbətə at", en: "Add to bag", ru: "В корзину", tr: "Sepete ekle" })}
               </button>
-
-              <button
-                onClick={handleDirectBuy}
-                className="w-full py-3.5 rounded-full bg-white hover:bg-stone-50 text-stone-900 border border-stone-200 font-semibold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 active:scale-98 shadow-2xs cursor-pointer"
-              >
-                <ApplePayLogo className="h-4 w-auto" variant="light" />
-                <span>{language === "az" ? "ilə İndi Al" : language === "ru" ? "Купить сейчас с" : language === "tr" ? "ile Hemen Al" : "Buy now with"}</span>
-              </button>
-
-              {/* WhatsApp Direct Order / Consultation Button */}
-              <a
-                href={support.link(
-                  `Salam! HORWALLE-də "${product.name}" (${selectedSize}, ${activeColor?.name || ""}) haqqında məlumat almaq və ya sifariş etmək istəyirəm.`
-                )}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-3 rounded-full bg-emerald-50 hover:bg-emerald-100/90 text-emerald-800 border border-emerald-300/80 font-bold text-xs transition-all flex items-center justify-center gap-2 active:scale-98 shadow-2xs cursor-pointer"
-              >
-                <MessageCircle size={15} className="text-emerald-600 fill-emerald-600" />
-                <span>WhatsApp Dəstək ({support.phone})</span>
-              </a>
-            </motion.div>
-
-            {/* Trust Badges & Supported Payments */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.40, ease: [0.16, 1, 0.3, 1] }}
-              className="space-y-3 pt-4 border-t border-stone-200"
+            </div>
+            <a
+              href={support.link(`Salam! "${product.name}" (${size}, ${color?.name || ""}) haqqında soruşmaq istəyirəm.`)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 flex h-12 items-center justify-center rounded-full border border-white/20 text-[12px] font-extrabold uppercase tracking-[0.16em] transition hover:border-bone"
             >
-              <div className="grid grid-cols-2 gap-3 text-[11px] text-stone-600">
-                <div className="flex items-center gap-2">
-                  <Truck size={16} className="text-stone-700 shrink-0" />
-                  <span>{t.product.freeShipping}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <RotateCcw size={16} className="text-stone-700 shrink-0" />
-                  <span>{t.product.easyReturn}</span>
-                </div>
-              </div>
+              {tr(language, { az: "WhatsApp ilə soruş", en: "Ask on WhatsApp", ru: "Спросить в WhatsApp", tr: "WhatsApp'tan sor" })}
+            </a>
 
-              <div className="flex items-center justify-between pt-2">
-                <span className="text-[10px] text-stone-400 font-semibold uppercase tracking-wider">
-                  {t.product.securePayment}:
-                </span>
-                <PaymentLogosRow size="sm" />
-              </div>
-            </motion.div>
+            <ul className="mt-6 space-y-1.5 text-[13px] text-bone-dim">
+              <li>— {tr(language, T.freeShipping)}</li>
+              <li>— {tr(language, { az: "14 gün ərzində qaytarılma", en: "14-day returns", ru: "Возврат в течение 14 дней", tr: "14 gün içinde iade" })}</li>
+            </ul>
 
-            {/* Social Sharing */}
-            <div className="pt-3 border-t border-stone-200 flex flex-wrap items-center justify-between gap-2 text-xs text-stone-500">
-              <span className="font-medium text-stone-700 flex items-center gap-1.5">
-                <Share2 size={14} className="text-stone-500" />
-                {language === "en" ? "Share item:" : language === "ru" ? "Поделиться:" : language === "tr" ? "Paylaş:" : "Məhsulu Paylaş:"}
-              </span>
-              <div className="flex items-center gap-2">
-                <a
-                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
-                    `${product.name} - Horvvalle: ${typeof window !== "undefined" ? window.location.href : ""}`
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold text-[11px] transition-colors"
-                >
-                  WhatsApp
-                </a>
-                <a
-                  href={`https://t.me/share/url?url=${encodeURIComponent(
-                    typeof window !== "undefined" ? window.location.href : ""
-                  )}&text=${encodeURIComponent(product.name + " - Horvvalle")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 font-semibold text-[11px] transition-colors"
-                >
-                  Telegram
-                </a>
-                <button
-                  type="button"
-                  onClick={handleCopyLink}
-                  className="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold text-[11px] transition-colors flex items-center gap-1 cursor-pointer"
-                >
-                  {copied ? (
-                    <>
-                      <Check size={12} className="text-emerald-600" />
-                      <span className="text-emerald-600">Kopyalandı!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy size={12} />
-                      <span>Linki Kopyala</span>
-                    </>
-                  )}
-                </button>
-              </div>
+            <div className="mt-8 border-t border-white/10">
+              {product.description && (
+                <Accordion open title={tr(language, { az: "Təsvir", en: "Description", ru: "Описание", tr: "Açıklama" })}>
+                  <p className="whitespace-pre-line">{product.description}</p>
+                </Accordion>
+              )}
+              <Accordion title={tr(language, { az: "Material və qulluq", en: "Material & care", ru: "Материал и уход", tr: "Materyal ve bakım" })}>
+                <p><strong className="text-bone">{tr(language, { az: "Tərkib", en: "Composition", ru: "Состав", tr: "İçerik" })}:</strong> {product.composition}</p>
+                <p className="mt-1"><strong className="text-bone">{tr(language, { az: "Kəsim", en: "Fit", ru: "Крой", tr: "Kalıp" })}:</strong> {product.fit}</p>
+                <p className="mt-1"><strong className="text-bone">{tr(language, { az: "Qulluq", en: "Care", ru: "Уход", tr: "Bakım" })}:</strong> {product.care}</p>
+              </Accordion>
+              <Accordion title={tr(language, { az: "Çatdırılma və qaytarılma", en: "Delivery & returns", ru: "Доставка и возврат", tr: "Teslimat ve iade" })}>
+                <p>
+                  {tr(language, {
+                    az: "Bakı və Sumqayıtda 1–2 iş günü, rayonlara 2–4 iş günü. Məhsulu 14 gün ərzində qaytara və ya dəyişə bilərsiniz.",
+                    en: "1–2 business days in Baku and Sumgayit, 2–4 days to the regions. Return or exchange within 14 days.",
+                    ru: "1–2 рабочих дня по Баку и Сумгаиту, 2–4 дня в регионы. Возврат или обмен в течение 14 дней.",
+                    tr: "Bakü ve Sumgayıt'ta 1–2 iş günü, bölgelere 2–4 gün. 14 gün içinde iade veya değişim.",
+                  })}{" "}
+                  <Link href="/terms" className="text-bone underline underline-offset-4">{tr(language, { az: "Ətraflı", en: "Details", ru: "Подробнее", tr: "Detaylar" })}</Link>
+                </p>
+              </Accordion>
             </div>
 
-            {/* Accordions */}
-            <div className="pt-4 border-t border-stone-200 space-y-3">
-              {/* 1. Description */}
-              <div className="border border-stone-200/90 rounded-2xl overflow-hidden bg-white shadow-2xs">
-                <button
-                  type="button"
-                  onClick={() => setActiveAccordion(activeAccordion === "details" ? null : "details")}
-                  className="w-full p-4 text-left font-semibold text-xs uppercase tracking-wider flex items-center justify-between text-stone-900 cursor-pointer"
-                >
-                  <span>{language === "az" ? "Məhsulun Təsviri & Kəsim" : language === "ru" ? "Описание и покрой" : language === "tr" ? "Ürün Açıklaması & Kalıp" : "Product Description & Fit"}</span>
-                  <motion.span
-                    animate={{ rotate: activeAccordion === "details" ? 180 : 0 }}
-                    transition={{ duration: 0.22, ease: "easeInOut" }}
-                  >
-                    <ChevronDown size={16} className="text-stone-600" />
-                  </motion.span>
-                </button>
-                <AnimatePresence initial={false}>
-                  {activeAccordion === "details" && (
-                    <motion.div
-                      key="details-content"
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-                      className="overflow-hidden"
-                    >
-                      <div className="p-4 pt-0 text-xs text-stone-600 leading-relaxed space-y-2 border-t border-stone-100">
-                        <p>{product.description}</p>
-                        <div className="pt-2">
-                          <strong className="text-stone-900 block mb-1">
-                            {language === "az" ? "Xüsusiyyətlər:" : language === "ru" ? "Особенности:" : language === "tr" ? "Özellikler:" : "Features:"}
-                          </strong>
-                          <ul className="list-disc pl-4 space-y-1 text-stone-600">
-                            <li>{language === "az" ? "Siluet: " : language === "ru" ? "Силуэт: " : language === "tr" ? "Kalıp: " : "Fit: "}{product.fit}</li>
-                            <li>{language === "az" ? "Davamlı möhkəm tikişlər" : language === "ru" ? "Прочные усиленные швы" : language === "tr" ? "Dayanıklı dikişler" : "Durable reinforced seams"}</li>
-                            <li>{language === "az" ? "Mövsümün ən çox tələb olunan modeli" : language === "ru" ? "Хит сезона" : language === "tr" ? "Sezonun en popüler modeli" : "Season favourite silhouette"}</li>
-                          </ul>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* 2. Composition & Care */}
-              <div className="border border-stone-200/90 rounded-2xl overflow-hidden bg-white shadow-2xs">
-                <button
-                  type="button"
-                  onClick={() => setActiveAccordion(activeAccordion === "care" ? null : "care")}
-                  className="w-full p-4 text-left font-semibold text-xs uppercase tracking-wider flex items-center justify-between text-stone-900 cursor-pointer"
-                >
-                  <span>{language === "az" ? "Material & Qulluq Təlimatı" : language === "ru" ? "Материал и уход" : language === "tr" ? "Materyal & Bakım Talimatı" : "Composition & Care"}</span>
-                  <motion.span
-                    animate={{ rotate: activeAccordion === "care" ? 180 : 0 }}
-                    transition={{ duration: 0.22, ease: "easeInOut" }}
-                  >
-                    <ChevronDown size={16} className="text-stone-600" />
-                  </motion.span>
-                </button>
-                <AnimatePresence initial={false}>
-                  {activeAccordion === "care" && (
-                    <motion.div
-                      key="care-content"
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-                      className="overflow-hidden"
-                    >
-                      <div className="p-4 pt-0 text-xs text-stone-600 leading-relaxed space-y-2 border-t border-stone-100">
-                        <p><strong className="text-stone-900">{language === "az" ? "Tərkib:" : language === "ru" ? "Состав:" : language === "tr" ? "İçerik:" : "Composition:"}</strong> {product.composition}</p>
-                        <p><strong className="text-stone-900">{language === "az" ? "Qulluq:" : language === "ru" ? "Уход:" : language === "tr" ? "Bakım:" : "Care:"}</strong> {product.care}</p>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+            <div className="mt-6 flex gap-4 text-[11px] font-bold uppercase tracking-[0.14em] text-bone-faint">
+              <a href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`${product.name} — ${share}`)}`} target="_blank" rel="noopener noreferrer" className="hover:text-bone">WhatsApp</a>
+              <a href={`https://t.me/share/url?url=${encodeURIComponent(share)}&text=${encodeURIComponent(product.name)}`} target="_blank" rel="noopener noreferrer" className="hover:text-bone">Telegram</a>
+              <button type="button" onClick={() => navigator.clipboard?.writeText(share)} className="uppercase hover:text-bone">
+                {tr(language, { az: "Linki kopyala", en: "Copy link", ru: "Копировать", tr: "Linki kopyala" })}
+              </button>
             </div>
           </div>
         </div>
-
-        {/* Complete the look recommendation grid */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.48, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-20 pt-10 border-t border-stone-200"
-        >
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="font-eb-garamond text-2xl sm:text-3xl lg:text-4xl font-normal text-stone-900">
-              {language === "az" ? (
-                <>Bu görünüşü <span className="italic text-stone-700">tamamla</span></>
-              ) : language === "ru" ? (
-                <>Дополните <span className="italic text-stone-700">образ</span></>
-              ) : language === "tr" ? (
-                <>Görünümü <span className="italic text-stone-700">tamamla</span></>
-              ) : (
-                <>Complete the <span className="italic text-stone-700">look</span></>
-              )}
-            </h2>
-            <Link href="/collections" className="text-xs font-semibold text-stone-600 hover:text-stone-900 flex items-center gap-1 group">
-              <span>{language === "az" ? "Hamısına Bax" : language === "ru" ? "Смотреть все" : language === "tr" ? "Tümünü Gör" : "View All"}</span>
-              <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform text-stone-900" />
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {recommended.map((p) => (
-              <ProductCard key={p.id} product={p} variant="light" />
-            ))}
-          </div>
-        </motion.div>
       </div>
 
-      {/* Size Guide Modal */}
-      {sizeGuideOpen && (
-        <div data-lenis-prevent className="fixed inset-0 z-50 bg-black/50 backdrop-blur-md flex items-center justify-center p-4 overscroll-contain">
-          <div data-lenis-prevent className="bg-white border border-stone-200 rounded-3xl p-6 max-w-lg w-full space-y-4 shadow-2xl text-stone-900 overscroll-contain">
-            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
-              <h3 className="text-lg font-bold uppercase text-stone-900 flex items-center gap-2">
-                <Ruler size={18} className="text-stone-700" />
-                <span>{language === "az" ? "Ölçü Cədvəli (CM)" : language === "ru" ? "Таблица размеров (СМ)" : language === "tr" ? "Beden Tablosu (CM)" : "Size Guide (CM)"}</span>
-              </h3>
-              <button onClick={() => setSizeGuideOpen(false)} className="text-stone-400 hover:text-stone-900 text-lg cursor-pointer">
-                ✕
-              </button>
-            </div>
-            <p className="text-xs text-stone-500">
-              {language === "az" ? "Dəqiq oturuş üçün ölçülərinizi yoxlayın." : language === "ru" ? "Проверьте свои параметры для идеальной посадки." : language === "tr" ? "Mükemmel kalıp için ölçülerinizi kontrol edin." : "Check your measurements for an optimal fit."}
-            </p>
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs text-left text-stone-700">
-                <thead className="bg-stone-50 text-stone-900 uppercase text-[10px]">
+      {related.length > 0 && (
+        <section className="mx-auto max-w-[1600px] border-t border-white/10 px-4 py-16 sm:px-6 lg:px-10">
+          <h2 className="mb-8 text-3xl font-black uppercase leading-none tracking-[-0.02em] [font-stretch:118%] sm:text-5xl">
+            {tr(language, { az: "Bunlar da xoşuna gələr", en: "You may also like", ru: "Вам может понравиться", tr: "Bunları da beğenebilirsin" })}
+          </h2>
+          <div className="grid grid-cols-2 gap-x-3 gap-y-8 sm:gap-x-5 lg:grid-cols-4">
+            {related.map((p) => (
+              <ProductTile key={p.id} product={p} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      <AnimatePresence>
+        {guideOpen && (
+          <div data-lenis-prevent className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/75" onClick={() => setGuideOpen(false)} />
+            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className="relative w-full max-w-lg border border-white/10 bg-ink p-6 font-grotesk text-bone">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-black uppercase [font-stretch:112%]">{tr(language, { az: "Ölçü cədvəli (sm)", en: "Size guide (cm)", ru: "Таблица размеров (см)", tr: "Beden tablosu (cm)" })}</h3>
+                <button type="button" onClick={() => setGuideOpen(false)} aria-label={tr(language, T.close)}><X size={20} /></button>
+              </div>
+              <table className="mt-5 w-full text-left text-[13px]">
+                <thead className="text-[11px] uppercase tracking-[0.14em] text-bone-faint">
                   <tr>
-                    <th className="p-2.5">{t.product.size}</th>
-                    <th className="p-2.5">{language === "az" ? "Sinə / Bel (cm)" : language === "ru" ? "Грудь / Талия (см)" : language === "tr" ? "Göğüs / Bel (cm)" : "Chest / Waist (cm)"}</th>
-                    <th className="p-2.5">{language === "az" ? "Uzunluq (cm)" : language === "ru" ? "Длина (см)" : language === "tr" ? "Uzunluk (cm)" : "Length (cm)"}</th>
+                    <th className="py-2">{tr(language, { az: "Ölçü", en: "Size", ru: "Размер", tr: "Beden" })}</th>
+                    <th className="py-2">{tr(language, { az: "Sinə / bel", en: "Chest / waist", ru: "Грудь / талия", tr: "Göğüs / bel" })}</th>
+                    <th className="py-2">{tr(language, { az: "Uzunluq", en: "Length", ru: "Длина", tr: "Uzunluk" })}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-stone-100">
-                  <tr>
-                    <td className="p-2.5 font-bold text-stone-900">S / 30</td>
-                    <td className="p-2.5">92 - 98</td>
-                    <td className="p-2.5">72 / 100</td>
-                  </tr>
-                  <tr>
-                    <td className="p-2.5 font-bold text-stone-900">M / 32</td>
-                    <td className="p-2.5">98 - 104</td>
-                    <td className="p-2.5">74 / 102</td>
-                  </tr>
-                  <tr>
-                    <td className="p-2.5 font-bold text-stone-900">L / 34</td>
-                    <td className="p-2.5">104 - 110</td>
-                    <td className="p-2.5">76 / 104</td>
-                  </tr>
-                  <tr>
-                    <td className="p-2.5 font-bold text-stone-900">XL / 36</td>
-                    <td className="p-2.5">110 - 118</td>
-                    <td className="p-2.5">78 / 106</td>
-                  </tr>
+                <tbody className="divide-y divide-white/10">
+                  {SIZE_ROWS.map((r) => (
+                    <tr key={r[0]}>
+                      <td className="py-2.5 font-bold">{r[0]}</td>
+                      <td className="py-2.5 text-bone-dim">{r[1]}</td>
+                      <td className="py-2.5 text-bone-dim">{r[2]}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
-            </div>
-            <button
-              onClick={() => setSizeGuideOpen(false)}
-              className="w-full py-3 rounded-full bg-stone-900 text-white font-semibold text-xs uppercase hover:bg-black transition-all cursor-pointer"
-            >
-              {language === "az" ? "Bağla" : language === "ru" ? "Закрыть" : language === "tr" ? "Kapat" : "Close"}
-            </button>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
+}
+
+export default function ProductDetailPage() {
+  const params = useParams();
+  const slug = params?.slug as string;
+  const { products } = useStoreData();
+  const [direct, setDirect] = useState<Product | null>(null);
+  const [checked, setChecked] = useState(false);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+    let cancelled = false;
+    fetch(`/api/store/products?q=${encodeURIComponent(slug)}&_t=${Date.now()}`, { cache: "no-store" })
+      .then((r) => r.json())
+      .then((items) => {
+        const found = Array.isArray(items) ? items.find((p: any) => p.slug === slug || p.id === slug) : null;
+        if (!cancelled && found) setDirect(normalizeProduct(found));
+      })
+      .catch(() => {})
+      .finally(() => !cancelled && setChecked(true));
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
+
+  const fromStore = products.find((p) => p.slug === slug || p.id === slug);
+  // the store copy carries the visitor's language; the direct fetch only fills in when the store does not have it
+  const product = fromStore || direct;
+  const related = useMemo(() => {
+    if (!product) return [];
+    const same = products.filter((p) => p.id !== product.id && p.category === product.category);
+    const rest = products.filter((p) => p.id !== product.id && p.category !== product.category);
+    return [...same, ...rest].slice(0, 4);
+  }, [products, product]);
+
+  if (!product) {
+    if (!checked) return <div className="min-h-screen bg-ink" />;
+    return notFound();
+  }
+  return <ProductView key={product.id} product={product} related={related} />;
 }

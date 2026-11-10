@@ -12,6 +12,22 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        ink: {
+          DEFAULT: "#0A0A0A",
+          900: "#0A0A0A",
+          850: "#111111",
+          800: "#161616",
+          700: "#1F1F1F",
+          600: "#2A2A2A",
+          500: "#3A3A3A",
+        },
+        bone: {
+          DEFAULT: "#EDEAE3",
+          dim: "#A8A49C",
+          faint: "#6E6B66",
+        },
+        sale: "#FF4D3D",
+        tile: "#E6E3DC",
         background: "#1C0D05",
         foreground: "#ffffff",
         atelier: {
@@ -33,6 +49,7 @@ const config: Config = {
         "card-lg": "20px",
       },
       fontFamily: {
+        grotesk: ['"Archivo"', '"Helvetica Neue"', "Arial", "sans-serif"],
         sans: [
           '"Plus Jakarta Sans"',
           "-apple-system",

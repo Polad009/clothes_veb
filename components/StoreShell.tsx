@@ -2,13 +2,9 @@
 
 import React, { Suspense } from "react";
 import { usePathname } from "next/navigation";
-import { Ticker } from "@/components/Ticker";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
-import { CartDrawer } from "@/components/CartDrawer";
-import { Intro } from "@/components/Intro";
-import { SmoothScroll } from "@/components/SmoothScroll";
-
+import { StoreHeader } from "@/components/store/StoreHeader";
+import { StoreFooter } from "@/components/store/StoreFooter";
+import { CartPanel } from "@/components/store/CartPanel";
 import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
 import { AuthModal } from "@/components/AuthModal";
 import { CookieConsent } from "@/components/CookieConsent";
@@ -17,30 +13,24 @@ export function StoreShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAdmin = pathname === "/admin" || pathname?.startsWith("/admin");
 
-  // On admin routes, render ONLY the pure admin panel - zero ticker, zero header, zero footer
+  // Admin routes render only the panel: no storefront header or footer
   if (isAdmin) {
-    return (
-      <main className="w-full min-h-screen bg-[#F8F9FA] flex flex-col p-0 m-0">
-        {children}
-      </main>
-    );
+    return <main className="m-0 flex min-h-screen w-full flex-col bg-[#F8F9FA] p-0">{children}</main>;
   }
 
   return (
-    <SmoothScroll>
-      <Intro />
-      <Suspense fallback={<div className="h-24 w-full bg-transparent" />}>
-        <Ticker />
-        <Header />
+    <>
+      <Suspense fallback={<div className="h-[100px] w-full bg-ink" />}>
+        <StoreHeader />
       </Suspense>
-      <main id="main-content" className="flex-grow flex flex-col focus:outline-none">
+      <main id="main-content" className="flex flex-grow flex-col focus:outline-none">
         {children}
       </main>
-      <Footer />
-      <CartDrawer />
+      <StoreFooter />
+      <CartPanel />
       <FloatingWhatsApp />
       <AuthModal />
       <CookieConsent />
-    </SmoothScroll>
+    </>
   );
 }

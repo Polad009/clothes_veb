@@ -81,6 +81,20 @@
     letter-spacing: -0.01em;
   }
 
+  @keyframes hw-rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+  }
+  .hw-rise { animation: hw-rise 0.45s ease-out backwards; }
+  @keyframes hw-fade { from { opacity: 0; } to { opacity: 1; } }
+  .hw-fade { animation: hw-fade 0.3s ease-out backwards; }
+  @media (prefers-reduced-motion: reduce) { .hw-rise, .hw-fade { animation: none; } }
+
+  /* New dark storefront: headings use the grotesk of their section */
+  .font-grotesk h1, .font-grotesk h2, .font-grotesk h3, .font-grotesk h4 {
+    font-family: inherit;
+  }
+
   ::selection {
     background-color: #E6C280;
     color: #000000;
