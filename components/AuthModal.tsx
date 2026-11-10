@@ -102,10 +102,6 @@ export function AuthModal() {
 
         {/* Header */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-100 text-stone-700 text-[10px] font-bold uppercase tracking-wider">
-            <Lock size={12} />
-            <span>HORVVALLE SECURE AUTH</span>
-          </div>
           <h2 className="font-eb-garamond text-2xl sm:text-3xl font-normal text-stone-900">
             {mode === "signin" ? t.auth.signIn : t.auth.signUp}
           </h2>

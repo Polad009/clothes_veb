@@ -18,6 +18,7 @@ import { translateColor } from "@/lib/translations";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import { ProductTile } from "@/components/store/ProductTile";
 import { T, tr } from "@/components/store/i18n";
+import { useRegionCopy } from "@/components/store/region";
 
 const SIZE_ROWS = [
   ["S / 30", "92 – 98", "72 / 100"],
@@ -56,6 +57,7 @@ function ProductView({ product, related }: { product: Product; related: Product[
   const { formatProductPrice, formatPrice } = useCurrency();
   const { addItem } = useCart();
   const support = useSupport();
+  const region = useRegionCopy();
   const categories = useCategories();
   const cat = categories.find((c) => c.id === product.category);
 
@@ -262,7 +264,7 @@ function ProductView({ product, related }: { product: Product; related: Product[
             </a>
 
             <ul className="mt-6 space-y-1.5 text-[13px] text-bone-dim">
-              <li>— {tr(language, T.freeShipping)}</li>
+              <li>— {region.strip}</li>
               <li>— {tr(language, { az: "14 gün ərzində qaytarılma", en: "14-day returns", ru: "Возврат в течение 14 дней", tr: "14 gün içinde iade" })}</li>
             </ul>
 
@@ -279,12 +281,8 @@ function ProductView({ product, related }: { product: Product; related: Product[
               </Accordion>
               <Accordion title={tr(language, { az: "Çatdırılma və qaytarılma", en: "Delivery & returns", ru: "Доставка и возврат", tr: "Teslimat ve iade" })}>
                 <p>
-                  {tr(language, {
-                    az: "Bakı və Sumqayıtda 1–2 iş günü, rayonlara 2–4 iş günü. Məhsulu 14 gün ərzində qaytara və ya dəyişə bilərsiniz.",
-                    en: "1–2 business days in Baku and Sumgayit, 2–4 days to the regions. Return or exchange within 14 days.",
-                    ru: "1–2 рабочих дня по Баку и Сумгаиту, 2–4 дня в регионы. Возврат или обмен в течение 14 дней.",
-                    tr: "Bakü ve Sumgayıt'ta 1–2 iş günü, bölgelere 2–4 gün. 14 gün içinde iade veya değişim.",
-                  })}{" "}
+                  {region.delivery}{" "}
+                  {tr(language, { az: "Məhsulu 14 gün ərzində qaytara və ya dəyişə bilərsiniz.", en: "Return or exchange within 14 days.", ru: "Возврат или обмен в течение 14 дней.", tr: "14 gün içinde iade veya değişim." })}{" "}
                   <Link href="/terms" className="text-bone underline underline-offset-4">{tr(language, { az: "Ətraflı", en: "Details", ru: "Подробнее", tr: "Detaylar" })}</Link>
                 </p>
               </Accordion>

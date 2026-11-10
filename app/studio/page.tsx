@@ -366,18 +366,15 @@ export default function SimpleStudioPage() {
   const garmentMockup = getGarmentMockupUrl(selectedGarment.category, selectedColor.key, activeSide);
 
   return (
-    <div className="w-full min-h-screen bg-[#FAF7F2] text-[#111827] pt-6 pb-24">
+    <div className="w-full min-h-screen bg-ink font-grotesk text-bone pt-6 pb-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="py-6 border-b border-stone-200/80 mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-stone-100 border border-stone-200 text-stone-800 text-[11px] font-bold uppercase tracking-wider mb-2.5">
-            <span>Öz Dizaynın</span>
-          </div>
-          <h1 className="font-eb-garamond text-3xl sm:text-5xl font-normal text-stone-900 tracking-wide">
-            Öz dizaynını <span className="italic font-normal">yarat</span>
+        <div className="py-6 border-b border-white/12 mb-8">
+          <h1 className="text-5xl font-black uppercase leading-[0.9] tracking-[-0.02em] text-bone [font-stretch:115%] sm:text-7xl">
+            Öz dizaynını yarat
           </h1>
-          <p className="text-xs sm:text-sm text-stone-600 mt-2 max-w-2xl leading-relaxed">
-            İstədiyiniz şəkli, loqonu və ya qrafikanı yükləyin və geyimin hansı hissəsinə vurmaq istədiyinizi seçin. Ustalarımız rəng və ölçüləri dəqiqləşdirib dizaynı geyiminizə yüksək dəqiqliklə köçürəcək.
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-bone-dim">
+            Şəklini, loqonu və ya yazını yüklə, geyimdə yerini seç və sifariş ver. Hazırlamadan əvvəl rəngi və ölçünü sənin üçün yoxlayırıq.
           </p>
         </div>
 
@@ -390,7 +387,7 @@ export default function SimpleStudioPage() {
               <div
                 ref={previewBoxRef}
                 onWheel={handleWheelZoom}
-                className="relative w-full aspect-square bg-white rounded-3xl border border-stone-200/90 p-4 sm:p-6 shadow-sm flex items-center justify-center overflow-hidden select-none"
+                className="relative w-full aspect-square bg-ink-800 rounded-3xl border border-white/12 p-4 sm:p-6 shadow-sm flex items-center justify-center overflow-hidden select-none"
               >
                 {/* Garment Base Mockup */}
                 <img
@@ -424,9 +421,9 @@ export default function SimpleStudioPage() {
                       />
 
                       {/* Four Corner Indicator Dots */}
-                      <span className="absolute -top-1.5 -left-1.5 w-3 h-3 rounded-full bg-white border-2 border-amber-600 shadow-2xs pointer-events-none" />
-                      <span className="absolute -top-1.5 -right-1.5 w-3 h-3 rounded-full bg-white border-2 border-amber-600 shadow-2xs pointer-events-none" />
-                      <span className="absolute -bottom-1.5 -left-1.5 w-3 h-3 rounded-full bg-white border-2 border-amber-600 shadow-2xs pointer-events-none" />
+                      <span className="absolute -top-1.5 -left-1.5 w-3 h-3 rounded-full bg-ink-800 border-2 border-amber-600 shadow-2xs pointer-events-none" />
+                      <span className="absolute -top-1.5 -right-1.5 w-3 h-3 rounded-full bg-ink-800 border-2 border-amber-600 shadow-2xs pointer-events-none" />
+                      <span className="absolute -bottom-1.5 -left-1.5 w-3 h-3 rounded-full bg-ink-800 border-2 border-amber-600 shadow-2xs pointer-events-none" />
                       
                       {/* Interactive Bottom-Right Resize Handle */}
                       <div
@@ -447,10 +444,10 @@ export default function SimpleStudioPage() {
                   </div>
                 ) : (
                   <div
-                    className="absolute pointer-events-none border-2 border-dashed border-stone-400/60 rounded-xl flex items-center justify-center p-2 transition-all duration-300"
+                    className="absolute pointer-events-none border-2 border-dashed border-white/25 rounded-xl flex items-center justify-center p-2 transition-all duration-300"
                     style={getOverlayStyle()}
                   >
-                    <span className="text-[10px] font-bold text-stone-500 bg-white/90 backdrop-blur-xs px-2 py-1 rounded-md shadow-2xs">
+                    <span className="text-[10px] font-bold text-bone-dim bg-ink-800/90 backdrop-blur-xs px-2 py-1 rounded-md shadow-2xs">
                       Dizayn Sahəsi ({selectedPlacement.label.split(" ")[0]})
                     </span>
                   </div>
@@ -463,8 +460,8 @@ export default function SimpleStudioPage() {
                     onClick={() => setActiveSide("front")}
                     className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
                       activeSide === "front"
-                        ? "bg-white text-stone-950 shadow-xs"
-                        : "text-stone-300 hover:text-white"
+                        ? "bg-ink-800 text-bone shadow-xs"
+                        : "text-bone-faint hover:text-white"
                     }`}
                   >
                     Ön
@@ -474,8 +471,8 @@ export default function SimpleStudioPage() {
                     onClick={() => setActiveSide("back")}
                     className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
                       activeSide === "back"
-                        ? "bg-white text-stone-950 shadow-xs"
-                        : "text-stone-300 hover:text-white"
+                        ? "bg-ink-800 text-bone shadow-xs"
+                        : "text-bone-faint hover:text-white"
                     }`}
                   >
                     Arxa
@@ -485,8 +482,8 @@ export default function SimpleStudioPage() {
                     onClick={() => setActiveSide("left")}
                     className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
                       activeSide === "left"
-                        ? "bg-white text-stone-950 shadow-xs"
-                        : "text-stone-300 hover:text-white"
+                        ? "bg-ink-800 text-bone shadow-xs"
+                        : "text-bone-faint hover:text-white"
                     }`}
                   >
                     Sol qol
@@ -496,8 +493,8 @@ export default function SimpleStudioPage() {
                     onClick={() => setActiveSide("right")}
                     className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
                       activeSide === "right"
-                        ? "bg-white text-stone-950 shadow-xs"
-                        : "text-stone-300 hover:text-white"
+                        ? "bg-ink-800 text-bone shadow-xs"
+                        : "text-bone-faint hover:text-white"
                     }`}
                   >
                     Sağ qol
@@ -505,23 +502,23 @@ export default function SimpleStudioPage() {
                 </div>
 
                 {/* Color & Size badge */}
-                <div className="absolute bottom-4 right-4 z-10 px-3 py-1 rounded-full bg-white/90 backdrop-blur-md border border-stone-200 text-[11px] font-bold text-stone-800 shadow-2xs">
+                <div className="absolute bottom-4 right-4 z-10 px-3 py-1 rounded-full bg-ink-800/90 backdrop-blur-md border border-white/12 text-[11px] font-bold text-bone shadow-2xs">
                   {selectedColor.name} · {selectedSize}
                 </div>
               </div>
 
               {/* Interactive Precision Control Bar (Scale, Nudge, Center Reset) */}
               {uploadedImage && (
-                <div className="bg-white rounded-3xl p-4 border border-stone-200/90 shadow-2xs space-y-3">
-                  <div className="flex items-center justify-between border-b border-stone-100 pb-2">
-                    <span className="font-bold text-xs text-stone-900 flex items-center gap-1.5">
-                      <Move size={14} className="text-amber-700" />
+                <div className="bg-ink-800 rounded-3xl p-4 border border-white/12 shadow-2xs space-y-3">
+                  <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                    <span className="font-bold text-xs text-bone flex items-center gap-1.5">
+                      <Move size={14} className="text-amber-300" />
                       <span>Dizaynın Ölçü və Mövqeyi</span>
                     </span>
                     <button
                       type="button"
                       onClick={() => updateTransform({ posX: 0, posY: 0, scale: 1, rotation: 0 })}
-                      className="text-[11px] font-bold text-stone-500 hover:text-stone-900 flex items-center gap-1 hover:underline transition cursor-pointer"
+                      className="text-[11px] font-bold text-bone-dim hover:text-bone flex items-center gap-1 hover:underline transition cursor-pointer"
                     >
                       <RotateCcw size={12} />
                       <span>Mərkəzə Qaytar</span>
@@ -530,12 +527,12 @@ export default function SimpleStudioPage() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {/* Scale Slider & +/- */}
-                    <div className="bg-stone-50/80 p-2.5 rounded-2xl border border-stone-200/80 flex items-center gap-2">
-                      <span className="text-[11px] font-bold text-stone-600 shrink-0">Ölçü:</span>
+                    <div className="bg-ink-700 p-2.5 rounded-2xl border border-white/12 flex items-center gap-2">
+                      <span className="text-[11px] font-bold text-bone-dim shrink-0">Ölçü:</span>
                       <button
                         type="button"
                         onClick={() => updateTransform({ scale: Math.max(0.4, Number((currentTransform.scale - 0.1).toFixed(2))) })}
-                        className="w-7 h-7 rounded-lg bg-white border border-stone-200 text-stone-800 font-bold hover:bg-stone-100 transition active:scale-95 flex items-center justify-center cursor-pointer shadow-2xs"
+                        className="w-7 h-7 rounded-lg bg-ink-800 border border-white/12 text-bone font-bold hover:bg-ink-600 transition active:scale-95 flex items-center justify-center cursor-pointer shadow-2xs"
                         title="Kiçilt"
                       >
                         -
@@ -552,24 +549,24 @@ export default function SimpleStudioPage() {
                       <button
                         type="button"
                         onClick={() => updateTransform({ scale: Math.min(1.8, Number((currentTransform.scale + 0.1).toFixed(2))) })}
-                        className="w-7 h-7 rounded-lg bg-white border border-stone-200 text-stone-800 font-bold hover:bg-stone-100 transition active:scale-95 flex items-center justify-center cursor-pointer shadow-2xs"
+                        className="w-7 h-7 rounded-lg bg-ink-800 border border-white/12 text-bone font-bold hover:bg-ink-600 transition active:scale-95 flex items-center justify-center cursor-pointer shadow-2xs"
                         title="Böyüt"
                       >
                         +
                       </button>
-                      <span className="text-[11px] font-mono font-bold text-stone-900 w-10 text-right">
+                      <span className="text-[11px] font-mono font-bold text-bone w-10 text-right">
                         {Math.round(currentTransform.scale * 100)}%
                       </span>
                     </div>
 
                     {/* Position Nudge Arrows */}
-                    <div className="bg-stone-50/80 p-2.5 rounded-2xl border border-stone-200/80 flex items-center justify-between">
-                      <span className="text-[11px] font-bold text-stone-600 shrink-0">Sürüşdür:</span>
+                    <div className="bg-ink-700 p-2.5 rounded-2xl border border-white/12 flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-bone-dim shrink-0">Sürüşdür:</span>
                       <div className="flex items-center gap-1">
                         <button
                           type="button"
                           onClick={() => updateTransform({ posX: Math.max(-35, currentTransform.posX - 4) })}
-                          className="w-7 h-7 rounded-lg bg-white border border-stone-200 text-stone-800 font-bold hover:bg-stone-100 transition active:scale-95 flex items-center justify-center cursor-pointer shadow-2xs text-xs"
+                          className="w-7 h-7 rounded-lg bg-ink-800 border border-white/12 text-bone font-bold hover:bg-ink-600 transition active:scale-95 flex items-center justify-center cursor-pointer shadow-2xs text-xs"
                           title="Sola"
                         >
                           ←
@@ -577,7 +574,7 @@ export default function SimpleStudioPage() {
                         <button
                           type="button"
                           onClick={() => updateTransform({ posY: Math.max(-35, currentTransform.posY - 4) })}
-                          className="w-7 h-7 rounded-lg bg-white border border-stone-200 text-stone-800 font-bold hover:bg-stone-100 transition active:scale-95 flex items-center justify-center cursor-pointer shadow-2xs text-xs"
+                          className="w-7 h-7 rounded-lg bg-ink-800 border border-white/12 text-bone font-bold hover:bg-ink-600 transition active:scale-95 flex items-center justify-center cursor-pointer shadow-2xs text-xs"
                           title="Yuxarı"
                         >
                           ↑
@@ -585,7 +582,7 @@ export default function SimpleStudioPage() {
                         <button
                           type="button"
                           onClick={() => updateTransform({ posY: Math.min(35, currentTransform.posY + 4) })}
-                          className="w-7 h-7 rounded-lg bg-white border border-stone-200 text-stone-800 font-bold hover:bg-stone-100 transition active:scale-95 flex items-center justify-center cursor-pointer shadow-2xs text-xs"
+                          className="w-7 h-7 rounded-lg bg-ink-800 border border-white/12 text-bone font-bold hover:bg-ink-600 transition active:scale-95 flex items-center justify-center cursor-pointer shadow-2xs text-xs"
                           title="Aşağı"
                         >
                           ↓
@@ -593,7 +590,7 @@ export default function SimpleStudioPage() {
                         <button
                           type="button"
                           onClick={() => updateTransform({ posX: Math.min(35, currentTransform.posX + 4) })}
-                          className="w-7 h-7 rounded-lg bg-white border border-stone-200 text-stone-800 font-bold hover:bg-stone-100 transition active:scale-95 flex items-center justify-center cursor-pointer shadow-2xs text-xs"
+                          className="w-7 h-7 rounded-lg bg-ink-800 border border-white/12 text-bone font-bold hover:bg-ink-600 transition active:scale-95 flex items-center justify-center cursor-pointer shadow-2xs text-xs"
                           title="Sağa"
                         >
                           →
@@ -602,16 +599,16 @@ export default function SimpleStudioPage() {
                     </div>
                   </div>
 
-                  <p className="text-[10px] text-stone-500 leading-relaxed text-center">
+                  <p className="text-[10px] text-bone-dim leading-relaxed text-center">
                     💡 <strong>İpucu:</strong> Şəkli həmçinin birbaşa köynəyin üzərində tutub istədiyiniz yerə çəkə və küncündəki düyməni dartaraq ölçüsünü dəyişə bilərsiniz.
                   </p>
                 </div>
               )}
 
               {/* Quick Assurance Notice */}
-              <div className="p-3.5 rounded-2xl bg-stone-100/80 border border-stone-200/80 text-xs text-stone-600 flex items-start gap-2.5">
-                <Info size={16} className="text-stone-700 shrink-0 mt-0.5" />
-                <p className="text-[11px] leading-relaxed text-stone-600">
+              <div className="p-3.5 rounded-2xl bg-ink-700 border border-white/12 text-xs text-bone-dim flex items-start gap-2.5">
+                <Info size={16} className="text-bone-dim shrink-0 mt-0.5" />
+                <p className="text-[11px] leading-relaxed text-bone-dim">
                   Göstərilən şəkil vizual önbaxış üçündür. Hazırlıq zamanı dəqiqlik, rəng balansı və ölçülər mütəxəssislərimiz tərəfindən tənzimlənir.
                 </p>
               </div>
@@ -622,20 +619,20 @@ export default function SimpleStudioPage() {
           <div className="lg:col-span-7 space-y-7">
             
             {/* STEP 1: Garment Selection */}
-            <div data-lenis-prevent className="bg-white rounded-3xl p-5 sm:p-6 border border-stone-200/90 shadow-2xs space-y-4">
-              <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+            <div data-lenis-prevent className="bg-ink-800 rounded-3xl p-5 sm:p-6 border border-white/12 shadow-2xs space-y-4">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-stone-900 text-white text-[11px] font-bold flex items-center justify-center">1</span>
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">Geyim Növü və Rəngi</h3>
+                  <span className="w-5 h-5 rounded-full bg-bone text-ink text-[11px] font-bold flex items-center justify-center">1</span>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-bone">Geyim Növü və Rəngi</h3>
                 </div>
-                <span className="text-xs font-mono font-bold text-stone-900">{formatPrice(selectedGarment.basePrice)}</span>
+                <span className="text-xs font-mono font-bold text-bone">{formatPrice(selectedGarment.basePrice)}</span>
               </div>
 
               {/* Garment Type Dropdown/Buttons */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs">
-                  <label className="font-semibold text-stone-700 uppercase">Geyim Modeli ({GARMENTS.length} Çeşid)</label>
-                  <span className="text-stone-500 text-[11px]">Seçilmiş: <strong className="text-stone-900">{selectedGarment.name}</strong></span>
+                  <label className="font-semibold text-bone-dim uppercase">Geyim Modeli ({GARMENTS.length} Çeşid)</label>
+                  <span className="text-bone-dim text-[11px]">Seçilmiş: <strong className="text-bone">{selectedGarment.name}</strong></span>
                 </div>
                 <div
                   data-lenis-prevent
@@ -650,8 +647,8 @@ export default function SimpleStudioPage() {
                       onClick={() => setSelectedGarment(g)}
                       className={`p-3 rounded-2xl border text-left transition cursor-pointer flex flex-col justify-between ${
                         selectedGarment.id === g.id
-                          ? "bg-stone-900 text-white border-stone-900 shadow-sm ring-2 ring-stone-900/20"
-                          : "bg-stone-50/70 text-stone-800 border-stone-200 hover:border-stone-400 hover:bg-stone-100/60"
+                          ? "bg-bone text-ink border-bone shadow-sm ring-2 ring-bone/25"
+                          : "bg-ink-700 text-bone border-white/12 hover:border-white/40 hover:bg-ink-600"
                       }`}
                     >
                       <div className="text-xs font-bold leading-snug">{g.name}</div>
@@ -668,7 +665,7 @@ export default function SimpleStudioPage() {
               {/* Color Selection */}
               <div className="space-y-2 pt-2">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-semibold text-stone-700 uppercase">Rəng: <strong>{selectedColor.name}</strong></span>
+                  <span className="font-semibold text-bone-dim uppercase">Rəng: <strong>{selectedColor.name}</strong></span>
                 </div>
                 <div className="flex flex-wrap items-center gap-2.5">
                   {COLORS.map((c) => (
@@ -678,14 +675,14 @@ export default function SimpleStudioPage() {
                       onClick={() => setSelectedColor(c)}
                       className={`w-9 h-9 rounded-xl border-2 transition-all flex items-center justify-center cursor-pointer ${
                         selectedColor.key === c.key
-                          ? "border-stone-900 ring-2 ring-stone-900/20 scale-105"
-                          : "border-stone-200 opacity-80 hover:opacity-100 hover:border-stone-400"
+                          ? "border-bone ring-2 ring-bone/25 scale-105"
+                          : "border-white/12 opacity-80 hover:opacity-100 hover:border-white/40"
                       }`}
                       style={{ backgroundColor: c.hex }}
                       title={c.name}
                     >
                       {selectedColor.key === c.key && (
-                        <Check size={14} className={c.hex === "#FFFFFF" || c.hex === "#D7CEC7" ? "text-black" : "text-white"} />
+                        <Check size={14} className={c.hex === "#FFFFFF" || c.hex === "#D7CEC7" ? "text-ink" : "text-white"} />
                       )}
                     </button>
                   ))}
@@ -695,7 +692,7 @@ export default function SimpleStudioPage() {
               {/* Size Selection */}
               <div className="space-y-2 pt-2">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-semibold text-stone-700 uppercase">Ölçü</span>
+                  <span className="font-semibold text-bone-dim uppercase">Ölçü</span>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   {SIZES.map((s) => (
@@ -705,8 +702,8 @@ export default function SimpleStudioPage() {
                       onClick={() => setSelectedSize(s)}
                       className={`w-11 h-9 rounded-xl border text-xs font-bold transition cursor-pointer ${
                         selectedSize === s
-                          ? "bg-stone-900 text-white border-stone-900 shadow-xs"
-                          : "bg-stone-50 text-stone-700 border-stone-200 hover:border-stone-400"
+                          ? "bg-bone text-ink border-bone shadow-xs"
+                          : "bg-ink-700 text-bone-dim border-white/12 hover:border-white/40"
                       }`}
                     >
                       {s}
@@ -717,24 +714,24 @@ export default function SimpleStudioPage() {
             </div>
 
             {/* STEP 2: File Upload (Müştərinin Dizaynı) */}
-            <div className="bg-white rounded-3xl p-5 sm:p-6 border border-stone-200/90 shadow-2xs space-y-4">
-              <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+            <div className="bg-ink-800 rounded-3xl p-5 sm:p-6 border border-white/12 shadow-2xs space-y-4">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-stone-900 text-white text-[11px] font-bold flex items-center justify-center">2</span>
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">Dizayn Şəklini Yükləyin *</h3>
+                  <span className="w-5 h-5 rounded-full bg-bone text-ink text-[11px] font-bold flex items-center justify-center">2</span>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-bone">Dizayn Şəklini Yükləyin *</h3>
                 </div>
-                <span className="text-[11px] text-stone-500 font-medium">Bütün formatlar dəstəklənir</span>
+                <span className="text-[11px] text-bone-dim font-medium">Bütün formatlar dəstəklənir</span>
               </div>
 
               {uploadedImage ? (
-                <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 flex items-center justify-between gap-4">
+                <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-400/30 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-14 h-14 rounded-xl bg-white border border-emerald-200 p-1 flex items-center justify-center shrink-0 overflow-hidden">
+                    <div className="w-14 h-14 rounded-xl bg-ink-800 border border-emerald-400/30 p-1 flex items-center justify-center shrink-0 overflow-hidden">
                       <img src={uploadedImage} alt="Yüklənmiş Dizayn" className="max-h-full max-w-full object-contain" />
                     </div>
                     <div className="min-w-0">
-                      <div className="text-xs font-bold text-stone-900 truncate">{uploadedFileName}</div>
-                      <div className="text-[11px] text-emerald-800 flex items-center gap-1 mt-0.5">
+                      <div className="text-xs font-bold text-bone truncate">{uploadedFileName}</div>
+                      <div className="text-[11px] text-emerald-300 flex items-center gap-1 mt-0.5">
                         <CheckCircle2 size={13} />
                         <span>Fayl uğurla yükləndi ({uploadedFileSize})</span>
                       </div>
@@ -745,7 +742,7 @@ export default function SimpleStudioPage() {
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="px-3 py-1.5 rounded-xl bg-white hover:bg-stone-100 border border-stone-200 text-stone-800 text-xs font-semibold transition cursor-pointer"
+                      className="px-3 py-1.5 rounded-xl bg-ink-800 hover:bg-ink-600 border border-white/12 text-bone text-xs font-semibold transition cursor-pointer"
                     >
                       Dəyiş
                     </button>
@@ -756,7 +753,7 @@ export default function SimpleStudioPage() {
                         setUploadedFileName(null);
                         setUploadedFileSize(null);
                       }}
-                      className="p-2 rounded-xl text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                      className="p-2 rounded-xl text-bone-faint hover:text-rose-600 hover:bg-rose-500/10 transition cursor-pointer"
                       title="Sil"
                     >
                       <Trash2 size={15} />
@@ -766,14 +763,14 @@ export default function SimpleStudioPage() {
               ) : (
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed border-stone-300 hover:border-stone-500 rounded-3xl p-8 text-center cursor-pointer transition-all duration-200 bg-stone-50/50 hover:bg-stone-50 flex flex-col items-center justify-center space-y-3 group"
+                  className="border-2 border-dashed border-white/20 hover:border-white/50 rounded-3xl p-8 text-center cursor-pointer transition-all duration-200 bg-ink-700 hover:bg-ink-600 flex flex-col items-center justify-center space-y-3 group"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-white border border-stone-200 flex items-center justify-center text-stone-700 shadow-2xs group-hover:scale-105 transition">
+                  <div className="w-14 h-14 rounded-2xl bg-ink-800 border border-white/12 flex items-center justify-center text-bone-dim shadow-2xs group-hover:scale-105 transition">
                     <Upload size={24} />
                   </div>
                   <div>
-                    <span className="text-xs font-bold text-stone-900 group-hover:text-black">Dizayn faylını seçmək üçün bura klikləyin</span>
-                    <p className="text-[11px] text-stone-500 mt-1">PNG, JPG, WEBP, PDF, SVG, AI formatları (Maksimum 30MB)</p>
+                    <span className="text-xs font-bold text-bone group-hover:text-bone">Dizayn faylını seçmək üçün bura klikləyin</span>
+                    <p className="text-[11px] text-bone-dim mt-1">PNG, JPG, WEBP, PDF, SVG, AI formatları (Maksimum 30MB)</p>
                   </div>
                 </div>
               )}
@@ -787,7 +784,7 @@ export default function SimpleStudioPage() {
               />
 
               {uploadError && (
-                <div className="text-[11px] text-rose-600 font-medium flex items-center gap-1.5 bg-rose-50 border border-rose-200 rounded-xl px-3 py-2">
+                <div className="text-[11px] text-rose-400 font-medium flex items-center gap-1.5 bg-rose-50 border border-rose-400/30 rounded-xl px-3 py-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
                   <span>{uploadError}</span>
                 </div>
@@ -795,13 +792,13 @@ export default function SimpleStudioPage() {
             </div>
 
             {/* STEP 3: Placement Selection (Dizaynı hansı hissəyə vurmaq istəyirsiniz?) */}
-            <div className="bg-white rounded-3xl p-5 sm:p-6 border border-stone-200/90 shadow-2xs space-y-4">
-              <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+            <div className="bg-ink-800 rounded-3xl p-5 sm:p-6 border border-white/12 shadow-2xs space-y-4">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-stone-900 text-white text-[11px] font-bold flex items-center justify-center">3</span>
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">Dizaynın Yeri</h3>
+                  <span className="w-5 h-5 rounded-full bg-bone text-ink text-[11px] font-bold flex items-center justify-center">3</span>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-bone">Dizaynın Yeri</h3>
                 </div>
-                <span className="text-[11px] text-stone-500 font-medium">Hissəni seçin</span>
+                <span className="text-[11px] text-bone-dim font-medium">Hissəni seçin</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -812,8 +809,8 @@ export default function SimpleStudioPage() {
                     onClick={() => handleSelectPlacement(p)}
                     className={`p-3.5 rounded-2xl border text-left transition cursor-pointer flex flex-col justify-between ${
                       selectedPlacement.id === p.id
-                        ? "bg-stone-900 text-white border-stone-900 shadow-sm"
-                        : "bg-stone-50/70 text-stone-800 border-stone-200 hover:border-stone-400 hover:bg-stone-100/50"
+                        ? "bg-bone text-ink border-bone shadow-sm"
+                        : "bg-ink-700 text-bone border-white/12 hover:border-white/40 hover:bg-ink-600"
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -827,16 +824,16 @@ export default function SimpleStudioPage() {
             </div>
 
             {/* STEP 4: Customer Note & Special Instructions */}
-            <div className="bg-white rounded-3xl p-5 sm:p-6 border border-stone-200/90 shadow-2xs space-y-3">
-              <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+            <div className="bg-ink-800 rounded-3xl p-5 sm:p-6 border border-white/12 shadow-2xs space-y-3">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-stone-900 text-white text-[11px] font-bold flex items-center justify-center">4</span>
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">Əlavə Qeyd və İstəkləriniz</h3>
+                  <span className="w-5 h-5 rounded-full bg-bone text-ink text-[11px] font-bold flex items-center justify-center">4</span>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-bone">Əlavə Qeyd və İstəkləriniz</h3>
                 </div>
-                <span className="text-[10px] text-stone-400 font-semibold uppercase">İstəyə bağlı</span>
+                <span className="text-[10px] text-bone-faint font-semibold uppercase">İstəyə bağlı</span>
               </div>
 
-              <p className="text-[11px] text-stone-500">
+              <p className="text-[11px] text-bone-dim">
                 Dizaynın dəqiq ölçüsü, yerləşməsi və ya xüsusi istəyiniz varsa qeyd edin. Ustalarımız hazırlıqdan öncə bunu mütləq nəzərə alacaq.
               </p>
 
@@ -845,13 +842,13 @@ export default function SimpleStudioPage() {
                 value={customerNote}
                 onChange={(e) => setCustomerNote(e.target.value)}
                 placeholder="Məs: Dizayn sinənin bir qədər yuxarısında olsun, ölçüsü təxminən 25 sm olsun, arxada əlavə ad/nömrə yazılsın..."
-                className="w-full rounded-2xl p-3.5 text-xs text-stone-900 bg-stone-50 border border-stone-200 placeholder-stone-400 focus:outline-none focus:border-stone-900 focus:bg-white focus:ring-1 focus:ring-stone-900 transition"
+                className="w-full rounded-2xl p-3.5 text-xs text-bone bg-ink-700 border border-white/12 placeholder-bone-faint focus:outline-none focus:border-bone focus:bg-ink-700 focus:ring-1 focus:ring-bone transition"
               />
             </div>
 
             {/* SUMMARY & ORDER BUTTON */}
-            <div className="bg-stone-900 text-white rounded-3xl p-6 space-y-4 shadow-xl">
-              <div className="flex items-center justify-between text-xs text-stone-300 pb-3 border-b border-stone-800">
+            <div className="bg-ink-850 text-bone border border-white/10 rounded-2xl p-6 space-y-4">
+              <div className="flex items-center justify-between text-xs text-bone-faint pb-3 border-b border-white/10">
                 <span>Geyim & Dizayn Xülasəsi:</span>
                 <span className="font-semibold text-white">
                   {selectedGarment.name} · {selectedColor.name} · {selectedSize}
@@ -860,8 +857,8 @@ export default function SimpleStudioPage() {
 
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-xs text-stone-400 block">Yekun Qiymət:</span>
-                  <span className="font-eb-garamond text-3xl font-light text-white tracking-tight">
+                  <span className="text-xs text-bone-faint block">Yekun Qiymət:</span>
+                  <span className="text-3xl font-black text-white tracking-tight">
                     {formatPrice(totalPrice)}
                   </span>
                 </div>
@@ -870,7 +867,7 @@ export default function SimpleStudioPage() {
                   type="button"
                   onClick={handleAddToCart}
                   disabled={isAdding}
-                  className="px-6 py-3.5 rounded-full bg-white hover:bg-stone-100 text-stone-900 font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 shadow-md active:scale-98 cursor-pointer disabled:opacity-50"
+                  className="px-6 py-3.5 rounded-full bg-bone hover:bg-white text-ink font-extrabold text-xs uppercase tracking-wider transition-all flex items-center gap-2 shadow-md active:scale-98 cursor-pointer disabled:opacity-50"
                 >
                   <ShoppingBag size={16} />
                   <span>{isAdding ? "Əlavə edilir..." : "Səbətə Əlavə Et"}</span>

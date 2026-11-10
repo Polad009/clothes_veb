@@ -20,7 +20,7 @@ export function StoreShell({ children }: { children: React.ReactNode }) {
 
   // Pages built for the old light design get the dark colour mapping from globals.css (.hw-dark)
   const p = pathname || "/";
-  const redesigned = p === "/" || p.startsWith("/collections") || p.startsWith("/products/");
+  const redesigned = p === "/" || p.startsWith("/collections") || p.startsWith("/products/") || p.startsWith("/studio");
 
   return (
     <>
@@ -32,9 +32,9 @@ export function StoreShell({ children }: { children: React.ReactNode }) {
       </main>
       <StoreFooter />
       <CartPanel />
+      <FloatingWhatsApp />
       {/* these overlays still use the old light classes: give them the dark mapping */}
       <div className="hw-dark contents">
-        <FloatingWhatsApp />
         <AuthModal />
         <CookieConsent />
       </div>

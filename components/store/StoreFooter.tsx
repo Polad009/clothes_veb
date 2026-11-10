@@ -28,8 +28,8 @@ export function StoreFooter() {
           <Logo theme="dark" size="sm" />
           <p className="mt-5 max-w-xs text-[13px] leading-relaxed text-bone-dim">
             {tr(language, {
-              az: "Bakıdan premium geyim. Qalın pambıq, dəqiq kəsim və istəsən öz dizaynın.",
-              en: "Premium apparel from Baku. Heavy cotton, precise cuts and, if you like, your own design.",
+              az: "Bakıdan bütün dünyaya geyim. Qalın pambıq, dəqiq kəsim və istəsən öz dizaynın.",
+              en: "Clothing from Baku, shipped worldwide. Heavy cotton, precise cuts and, if you like, your own design.",
               ru: "Премиальная одежда из Баку. Плотный хлопок, точный крой и, по желанию, ваш дизайн.",
               tr: "Bakü'den premium giyim. Kalın pamuk, net kesim ve dilersen kendi tasarımın.",
             })}

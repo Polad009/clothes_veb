@@ -92,7 +92,7 @@ const CHECKOUT_I18N = {
     codNoCustom: "Fərdi sifarişlərə şamil olunmur",
     freeDeliveryTitle: "Bakı və Sumqayıt Ərazisinə Pulsuz Çatdırılma",
     freeDeliveryDesc: "Bakı və Sumqayıt daxili bütün sifarişlər heç bir məbləğ məhdudiyyəti olmadan kuryerlə tam pulsuz çatdırılır.",
-    guaranteeTitle: "HORVVALLE Keyfiyyət Zəmanəti",
+    guaranteeTitle: "Qaytarma və dəyişmə",
     guaranteeDesc: "Ölçü uyğun gəlmədikdə 14 gün ərzində asan dəyişmə və ya ödənişin tam geri qaytarılması təmin edilir.",
     helpTitle: "Sifarişdə kömək lazımdır?",
     helpLive: "Canlı Dəstək",
@@ -114,7 +114,7 @@ const CHECKOUT_I18N = {
     validCity: "Düzgün şəhər adı daxil edin",
     promoExpired: "Bu promokodun istifadə müddəti bitmişdir.",
     promoMaxUses: "Bu promokodun maksimal istifadə sayı bitmişdir.",
-    secureOnlineOnly: "Bütün sifarişlər 256-bit SSL şifrələmə ilə yalnız onlayn qəbul edilir.",
+    secureOnlineOnly: "Ödəniş onlayn, kart və ya cüzdanla qəbul edilir.",
   },
   en: {
     testBanner: "No real payment is charged. You can safely complete a test order in test mode.",
@@ -163,7 +163,7 @@ const CHECKOUT_I18N = {
     codNoCustom: "Not eligible for custom designs",
     freeDeliveryTitle: "Free Delivery to Baku & Sumgayit",
     freeDeliveryDesc: "All orders within Baku and Sumgayit are delivered completely free of charge by courier, with no minimum spend.",
-    guaranteeTitle: "HORVVALLE Quality Guarantee",
+    guaranteeTitle: "Returns & exchanges",
     guaranteeDesc: "Easy exchange or full refund within 14 days if the fit is not suitable.",
     helpTitle: "Need help with your order?",
     helpLive: "Live Support",
@@ -185,7 +185,7 @@ const CHECKOUT_I18N = {
     validCity: "Please enter a valid city name",
     promoExpired: "This promo code has expired.",
     promoMaxUses: "This promo code has reached its maximum usage limit.",
-    secureOnlineOnly: "All orders are processed securely online with 256-bit SSL encryption.",
+    secureOnlineOnly: "Payment is taken online by card or wallet.",
   },
   ru: {
     testBanner: "Списание средств не производится. В тестовом режиме вы можете безопасно оформить заказ.",
@@ -234,7 +234,7 @@ const CHECKOUT_I18N = {
     codNoCustom: "Недоступно для индивидуальных заказов",
     freeDeliveryTitle: "Бесплатная доставка по Баку и Сумгаиту",
     freeDeliveryDesc: "Все заказы по Баку и Сумгаиту доставляются курьером абсолютно бесплатно, без ограничений по сумме.",
-    guaranteeTitle: "Гарантия качества HORVVALLE",
+    guaranteeTitle: "Возврат и обмен",
     guaranteeDesc: "Легкий обмен или полный возврат средств в течение 14 дней, если размер не подошел.",
     helpTitle: "Нужна помощь с заказом?",
     helpLive: "Живая поддержка",
@@ -256,7 +256,7 @@ const CHECKOUT_I18N = {
     validCity: "Введите корректное название города",
     promoExpired: "Срок действия этого промокода истек.",
     promoMaxUses: "Этот промокод исчерпал максимальный лимит использований.",
-    secureOnlineOnly: "Все заказы принимаются исключительно онлайн с 256-битным SSL-шифрованием.",
+    secureOnlineOnly: "Оплата принимается онлайн картой или кошельком.",
   },
   tr: {
     testBanner: "Gerçek ödeme alınmaz. Test modunda güvenle deneme siparişi verebilirsiniz.",
@@ -305,7 +305,7 @@ const CHECKOUT_I18N = {
     codNoCustom: "Özel tasarım ürünler için geçerli değildir",
     freeDeliveryTitle: "Bakü ve Sumgayıt'a Ücretsiz Teslimat",
     freeDeliveryDesc: "Bakü ve Sumgayıt içindeki tüm siparişler herhangi bir tutar sınırı olmaksızın kurye ile tamamen ücretsiz teslim edilir.",
-    guaranteeTitle: "HORVVALLE Kalite Garantisi",
+    guaranteeTitle: "İade ve değişim",
     guaranteeDesc: "Beden uymadığında 14 gün içinde kolay değişim veya tam iade sağlanır.",
     helpTitle: "Siparişte yardıma mı ihtiyacınız var?",
     helpLive: "Canlı Destek",
@@ -327,7 +327,7 @@ const CHECKOUT_I18N = {
     validCity: "Geçerli bir şehir adı giriniz",
     promoExpired: "Bu promosyon kodunun kullanım süresi dolmuştur.",
     promoMaxUses: "Bu promosyon kodunun kullanım limiti dolmuştur.",
-    secureOnlineOnly: "Tüm siparişler 256-bit SSL şifreleme ile yalnızca çevrimiçi kabul edilir.",
+    secureOnlineOnly: "Ödeme çevrimiçi, kart veya cüzdanla alınır.",
   },
 };
 
@@ -1175,7 +1175,8 @@ export default function CheckoutPage() {
                 <button
                   type="button"
                   onClick={() => handleNativePayment("google_pay")}
-                  className="py-3 px-4 rounded-full bg-white hover:bg-stone-50 border border-stone-200 text-stone-900 font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 active:scale-98 shadow-xs cursor-pointer"
+                  style={{ backgroundColor: "#EDEAE3" }}
+                  className="py-3 px-4 rounded-full border border-transparent hover:opacity-90 text-ink font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 active:scale-98 shadow-xs cursor-pointer"
                 >
                   <GooglePayLogo className="h-5 w-auto" />
                 </button>
@@ -1265,9 +1266,6 @@ export default function CheckoutPage() {
                         <h3 className="font-eb-garamond text-lg font-semibold text-stone-900">
                           {language === "az" ? "Müştəri Hesabı Tələb Olunur" : language === "tr" ? "Müşteri Hesabı Gereklidir" : language === "ru" ? "Требуется аккаунт клиента" : "Customer Account Required"}
                         </h3>
-                        <span className="text-[10px] font-bold bg-amber-200 text-amber-900 px-2.5 py-0.5 rounded-full border border-amber-300">
-                          {language === "az" ? "Təhlükəsiz İzləmə" : language === "tr" ? "Güvenli Takip" : language === "ru" ? "Безопасное отслеживание" : "Secure Tracking"}
-                        </span>
                       </div>
                       <p className="text-xs text-stone-600 leading-relaxed max-w-xl">
                         {language === "az"
@@ -1921,7 +1919,7 @@ export default function CheckoutPage() {
                       <div>
                         <div className="text-xs font-bold text-stone-900">Apple Pay</div>
                         <div className="text-[11px] text-stone-500">
-                          {language === "az" ? "Touch ID / Face ID ilə rəsmi Apple Wallet ödənişi" : "Instant payment with Apple Wallet & Face ID"}
+                          {language === "az" ? "Apple Wallet ilə ödəniş" : "Pay with Apple Wallet"}
                         </div>
                       </div>
                     </div>
@@ -1944,7 +1942,7 @@ export default function CheckoutPage() {
                       <div>
                         <div className="text-xs font-bold text-stone-900">Google Pay</div>
                         <div className="text-[11px] text-stone-500">
-                          {language === "az" ? "Google hesabınızdakı kartla təhlükəsiz ödəniş" : "Fast & secure payment with Google Account"}
+                          {language === "az" ? "Google hesabınızdakı kartla ödəniş" : "Pay with the card in your Google account"}
                         </div>
                       </div>
                     </div>
@@ -2094,12 +2092,12 @@ export default function CheckoutPage() {
                         <ShieldCheck size={14} className="text-emerald-600 shrink-0" />
                         <span>
                           {language === "en"
-                            ? "256-Bit SSL/TLS Encryption. Card data is never stored on servers (PCI-DSS compliant)."
+                            ? "Card details are not stored on this site."
                             : language === "ru"
-                            ? "256-битное SSL/TLS шифрование. Данные карт никогда не сохраняются на сервере (PCI-DSS)."
+                            ? "Данные карты не хранятся на сайте."
                             : language === "tr"
-                            ? "256-Bit SSL/TLS Şifreleme. Kart bilgileri sunucularda asla saklanmaz (PCI-DSS uyumlu)."
-                            : "256-Bit SSL / TLS Şifrələmə. Kart məlumatlarınız heç vaxt serverlərdə saxlanılmır (PCI-DSS Standartı)."}
+                            ? "Kart bilgileri sitede saklanmaz."
+                            : "Kart məlumatlarınız saytda saxlanılmır."}
                         </span>
                       </div>
                     </div>

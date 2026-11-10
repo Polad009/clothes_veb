@@ -10,6 +10,7 @@ import { categoryDescription, categoryTitle, type Category } from "@/lib/categor
 import { ProductTile } from "@/components/store/ProductTile";
 import { T, contentText, tr } from "@/components/store/i18n";
 import { DEFAULT_PHOTOS } from "@/components/store/photos";
+import { useRegionCopy } from "@/components/store/region";
 
 const pill =
   "inline-flex items-center gap-2 rounded-full bg-bone px-7 py-3.5 text-[12px] font-extrabold uppercase tracking-[0.16em] text-ink transition hover:bg-white active:scale-[0.98] [font-stretch:108%]";
@@ -53,7 +54,7 @@ function EditorialBlock({
 
       <div className={`relative z-10 mx-auto flex h-full max-w-[1600px] items-end px-4 font-grotesk text-bone sm:items-center sm:px-6 lg:px-10 ${full ? "pb-12 sm:pb-0" : "pb-10 sm:pb-0"}`}>
         <div className="max-w-xl sm:max-w-[46%]">
-          <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-bone-dim [font-stretch:110%]">{kicker}</p>
+          {kicker && <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-bone-dim [font-stretch:110%]">{kicker}</p>}
           {full ? (
             <h1 className="mt-3 text-[13vw] font-black uppercase leading-[0.86] tracking-[-0.02em] [font-stretch:115%] sm:text-6xl lg:text-8xl">{title}</h1>
           ) : (
@@ -73,20 +74,16 @@ function Hero() {
   const { language } = useLanguage();
   const { content } = useStoreData();
   const hero = content?.hero || {};
+  const region = useRegionCopy();
   return (
     <EditorialBlock
       full
       priority
       photo={hero.photo || DEFAULT_PHOTOS.hero}
       alt="Horwalle"
-      kicker={contentText(content, language, "hero", "tag", { az: "Yeni kolleksiya", en: "New collection", ru: "Новая коллекция", tr: "Yeni koleksiyon" })}
+      kicker={contentText(content, language, "hero", "kicker", { az: "", en: "", ru: "", tr: "" })}
       title={contentText(content, language, "hero", "title", { az: "Yeni sezon", en: "New season", ru: "Новый сезон", tr: "Yeni sezon" })}
-      body={contentText(content, language, "hero", "text", {
-        az: "Qalın pambıq, dəqiq kəsim, gündəlik geyim. Bakı və Sumqayıtda 1–2 günə çatdırılma.",
-        en: "Heavy cotton, precise cuts, everyday wear. 1–2 day delivery in Baku and Sumgayit.",
-        ru: "Плотный хлопок, точный крой, на каждый день. Доставка по Баку и Сумгаиту за 1–2 дня.",
-        tr: "Kalın pamuk, net kesim, günlük giyim. Bakü ve Sumgayıt'a 1–2 günde teslimat.",
-      })}
+      body={(language === "az" ? hero.text : content?.i18n?.[language]?.hero?.text) || region.heroText}
       href={hero.link || "/collections"}
       cta={tr(language, T.shopNow)}
     />
@@ -95,10 +92,11 @@ function Hero() {
 
 function ShippingStrip() {
   const { language } = useLanguage();
+  const region = useRegionCopy();
   return (
     <div className="border-y border-white/10 bg-ink font-grotesk">
       <div className="mx-auto flex max-w-[1600px] items-center justify-center gap-4 px-4 py-3.5 text-center text-[10px] font-extrabold uppercase tracking-[0.14em] text-bone [font-stretch:105%] sm:text-[11px] sm:tracking-[0.18em]">
-        <span>{tr(language, T.freeShipping)}</span>
+        <span>{region.strip}</span>
         <Link href="/collections" className="hidden items-center gap-1 underline-offset-4 hover:underline sm:inline-flex">
           {tr(language, T.shopAll)} <ArrowRight size={13} />
         </Link>
@@ -115,7 +113,7 @@ function CategoryBanner({ category, index }: { category: Category; index: number
     <EditorialBlock
       photo={photo}
       alt={categoryTitle(category, language)}
-      kicker={`${tr(language, T.collection)} · ${String(index + 1).padStart(2, "0")}`}
+      kicker=""
       title={categoryTitle(category, language)}
       body={categoryDescription(category, language) || undefined}
       href={`/collections?category=${encodeURIComponent(category.id)}`}
@@ -146,7 +144,6 @@ function StudioBanner({ art }: { art?: string }) {
     <section className="border-b border-white/10 bg-bone text-ink">
       <div className="mx-auto grid max-w-[1600px] items-center gap-10 px-4 py-16 font-grotesk sm:px-6 md:grid-cols-2 lg:px-10 lg:py-24">
         <div>
-          <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-ink/60 [font-stretch:110%]">{tag}</p>
           <h2 className="mt-3 text-4xl font-black uppercase leading-[0.9] tracking-[-0.02em] [font-stretch:115%] sm:text-6xl">{title}</h2>
           <p className="mt-5 max-w-md text-[15px] leading-relaxed text-ink/70">{body}</p>
           <Link
@@ -192,8 +189,8 @@ export default function Home() {
 
       {available.length > 0 && (
         <section className="mx-auto w-full max-w-[1600px] px-4 py-16 font-grotesk sm:px-6 lg:px-10 lg:py-24">
-          <div className="mb-8 flex items-end justify-between gap-4">
-            <h2 className="text-4xl font-black uppercase leading-none tracking-[-0.02em] [font-stretch:118%] sm:text-6xl">
+          <div className="mb-8 flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
+            <h2 className="text-[10vw] font-black uppercase leading-none tracking-[-0.02em] [font-stretch:118%] sm:text-6xl">
               {tr(language, T.newArrivals)}
             </h2>
             <Link href="/collections" className="inline-flex shrink-0 items-center gap-1 text-[12px] font-extrabold uppercase tracking-[0.16em] text-bone-dim hover:text-bone">

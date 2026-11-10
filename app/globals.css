@@ -930,3 +930,5 @@ div[class*="vton-btn"],
 .hw-dark [class~="text-zinc-500"],.hw-dark [class~="text-zinc-600"] { color: #A8A49C !important; }
 .hw-dark [class~="text-neutral-700"],.hw-dark [class~="text-neutral-800"],.hw-dark [class~="text-neutral-900"],.hw-dark [class~="text-neutral-950"] { color: #EDEAE3 !important; }
 .hw-dark [class~="text-neutral-500"],.hw-dark [class~="text-neutral-600"] { color: #A8A49C !important; }
+/* headings on remapped pages: a bit more compact on phones */
+@media (max-width: 640px) { .hw-dark h2, .hw-dark h3 { font-stretch: 100%; font-weight: 700; } }

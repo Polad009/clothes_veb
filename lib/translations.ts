@@ -388,7 +388,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
         "delivery": "Çatdırılma",
         "free": "PULSUZ (Bakı & Sumqayıt)",
         "grandTotal": "Yekun Məbləğ",
-        "secureCheckout": "256-Bit SSL Təhlükəsiz Ödəniş və 14 Gün Zəmanət"
+        "secureCheckout": "Onlayn ödəniş · 14 gün ərzində qaytarma"
     },
     "account": {
         "title": "Müştəri Hesabı",
@@ -624,7 +624,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
         "delivery": "Shipping",
         "free": "FREE EXPRESS",
         "grandTotal": "Grand Total",
-        "secureCheckout": "256-Bit SSL Encrypted Checkout & 14-Day Guarantee"
+        "secureCheckout": "Online payment · 14-day returns"
     },
     "account": {
         "title": "Customer Account",
@@ -860,7 +860,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
         "delivery": "Доставка",
         "free": "БЕСПЛАТНО",
         "grandTotal": "Итого к оплате",
-        "secureCheckout": "256-Bit SSL Защита платежей и 14 дней гарантия"
+        "secureCheckout": "Онлайн-оплата · возврат 14 дней"
     },
     "account": {
         "title": "Личный Кабинет",
@@ -1096,7 +1096,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
         "delivery": "Kargo",
         "free": "ÜCRETSİZ",
         "grandTotal": "Toplam Tutar",
-        "secureCheckout": "256-Bit SSL Güvenli Ödeme ve 14 Gün İade Garantisi"
+        "secureCheckout": "Çevrimiçi ödeme · 14 gün iade"
     },
     "account": {
         "title": "Müşteri Hesabı",

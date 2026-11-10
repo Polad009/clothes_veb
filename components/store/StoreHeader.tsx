@@ -15,18 +15,21 @@ import { useCategories, useStoreData } from "@/context/StoreDataContext";
 import { categoryTitle } from "@/lib/categories";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import { T, tr } from "@/components/store/i18n";
+import { useRegionCopy } from "@/components/store/region";
 
-const FALLBACK_ANNOUNCEMENTS = [T.freeShipping];
 
 /** One admin announcement at a time, centred, swapping every few seconds. */
 function AnnouncementBar() {
   const { language } = useLanguage();
   const { content } = useStoreData();
+  const region = useRegionCopy();
   const items = useMemo(() => {
     const source = language === "az" ? content?.announcements : content?.i18n?.[language]?.announcements;
     const list = Array.isArray(source) ? source.filter((a: unknown): a is string => typeof a === "string" && a.trim().length > 0) : [];
-    return list.length ? list : FALLBACK_ANNOUNCEMENTS.map((p) => tr(language, p));
-  }, [content, language]);
+    // Visitors abroad always see the worldwide-shipping line first
+    const base = list.length ? list : [region.strip];
+    return region.abroad && list.length ? [region.strip, ...list] : base;
+  }, [content, language, region]);
   const [i, setI] = useState(0);
   useEffect(() => {
     if (items.length < 2) return;
@@ -66,6 +69,10 @@ export function StoreHeader() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
   useEffect(() => setMenuOpen(false), [pathname]);
+  // keeps uppercase text and screen readers right for the chosen language
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
 
   const nav = [
     { href: "/collections", label: tr(language, T.allProducts) },

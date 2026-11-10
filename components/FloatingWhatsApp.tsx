@@ -482,19 +482,19 @@ export function FloatingWhatsApp() {
         <div
           role="dialog"
           aria-label={t.headerTitle}
-          className="fixed inset-x-2 bottom-24 sm:static sm:inset-auto w-[calc(100vw-1rem)] sm:w-[390px] h-[calc(100dvh-7.5rem)] sm:h-[530px] max-h-[640px] bg-white rounded-3xl shadow-2xl border border-stone-200/90 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-bottom-right z-50 overscroll-contain"
+          className="font-grotesk text-bone fixed inset-x-2 bottom-24 sm:static sm:inset-auto w-[calc(100vw-1rem)] sm:w-[390px] h-[calc(100dvh-7.5rem)] sm:h-[530px] max-h-[640px] bg-ink-800 rounded-2xl shadow-2xl border border-white/10 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-bottom-right z-50 overscroll-contain"
         >
           {/* Header */}
-          <div className="bg-[#111111] text-white p-3.5 sm:p-4 flex items-center justify-between border-b border-stone-800 shrink-0">
+          <div className="bg-ink-850 text-bone p-3.5 sm:p-4 flex items-center justify-between border-b border-white/10 shrink-0">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#94713A] to-[#E6C280] p-0.5 shadow-md">
-                  <div className="w-full h-full rounded-full bg-stone-900 flex items-center justify-center font-bold text-xs text-[#E6C280]">
+                <div className="w-10 h-10 rounded-full bg-bone p-0.5">
+                  <div className="w-full h-full rounded-full bg-ink flex items-center justify-center font-black text-xs text-bone">
                     H
                   </div>
                 </div>
                 <span
-                  className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-stone-900 ${
+                  className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-ink-850 ${
                     isAdminOnline ? "bg-emerald-500" : "bg-amber-400"
                   }`}
                   title={isAdminOnline ? t.onlineBadge : t.offlineBadge}
@@ -504,9 +504,9 @@ export function FloatingWhatsApp() {
               <div>
                 <h4 className="font-semibold text-xs text-white flex items-center gap-1.5">
                   <span>{t.headerTitle}</span>
-                  <ShieldCheck size={13} className="text-[#E6C280]" />
+                  
                 </h4>
-                <div className="text-[10.5px] text-stone-400 flex items-center gap-1.5">
+                <div className="text-[10.5px] text-bone-faint flex items-center gap-1.5">
                   <span
                     className={`w-1.5 h-1.5 rounded-full ${
                       isAdminOnline ? "bg-emerald-400 animate-pulse" : "bg-stone-500"
@@ -523,7 +523,7 @@ export function FloatingWhatsApp() {
                 <button
                   type="button"
                   onClick={handleEndChat}
-                  className="px-2 py-1 rounded-lg hover:bg-white/10 text-stone-400 hover:text-rose-400 transition text-[11px] font-medium flex items-center gap-1 cursor-pointer"
+                  className="px-2 py-1 rounded-lg hover:bg-white/10 text-bone-faint hover:text-rose-400 transition text-[11px] font-medium flex items-center gap-1 cursor-pointer"
                   title={t.endChatBtn}
                 >
                   <LogOut size={13} />
@@ -535,7 +535,7 @@ export function FloatingWhatsApp() {
               <button
                 type="button"
                 onClick={() => setIsChatOpen(false)}
-                className="p-1.5 rounded-full hover:bg-white/10 text-stone-400 hover:text-white transition cursor-pointer"
+                className="p-1.5 rounded-full hover:bg-white/10 text-bone-faint hover:text-white transition cursor-pointer"
                 aria-label={t.closeAria}
               >
                 <X size={18} />
@@ -545,21 +545,21 @@ export function FloatingWhatsApp() {
 
           {/* ─── CASE A: FIRST VISIT ONBOARDING FORM ───────────────────────────── */}
           {!hasCompletedOnboarding ? (
-            <div className="flex-1 p-5 overflow-y-auto flex flex-col justify-center bg-[#FAF7F2]/60">
-              <div className="bg-white p-5 sm:p-6 rounded-2xl border border-stone-200/90 shadow-sm text-left">
-                <div className="w-10 h-10 rounded-xl bg-stone-900 text-white flex items-center justify-center mb-3">
-                  <User size={18} className="text-[#E6C280]" />
+            <div className="flex-1 p-5 overflow-y-auto flex flex-col justify-center bg-ink">
+              <div className="bg-ink-800 p-5 sm:p-6 rounded-2xl border border-white/10 shadow-sm text-left">
+                <div className="w-10 h-10 rounded-full bg-bone text-ink flex items-center justify-center mb-3">
+                  <User size={18} />
                 </div>
-                <h3 className="text-sm font-bold text-stone-900 mb-1">{t.welcomeFormTitle}</h3>
-                <p className="text-[11.5px] text-stone-500 mb-4 leading-relaxed">{t.welcomeFormDesc}</p>
+                <h3 className="text-sm font-bold text-bone mb-1">{t.welcomeFormTitle}</h3>
+                <p className="text-[11.5px] text-bone-dim mb-4 leading-relaxed">{t.welcomeFormDesc}</p>
 
                 <form onSubmit={handleOnboardingSubmit} className="space-y-3">
                   <div>
-                    <label className="block text-[10.5px] font-bold text-stone-700 uppercase tracking-wider mb-1">
+                    <label className="block text-[10.5px] font-bold text-bone-dim uppercase tracking-wider mb-1">
                       {t.nameLabel} *
                     </label>
                     <div className="relative">
-                      <User size={14} className="text-stone-400 absolute left-3 top-3" />
+                      <User size={14} className="text-bone-faint absolute left-3 top-3" />
                       <input
                         type="text"
                         value={leadName}
@@ -569,34 +569,34 @@ export function FloatingWhatsApp() {
                         }}
                         placeholder={t.namePlaceholder}
                         required
-                        className="w-full bg-stone-50 border border-stone-200 rounded-xl pl-9 pr-3 py-2 text-xs text-stone-900 focus:bg-white focus:outline-none focus:border-black font-medium transition"
+                        className="w-full bg-ink-700 border border-white/15 rounded-xl pl-9 pr-3 py-2 text-xs text-bone focus:outline-none focus:border-bone font-medium transition"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-[10.5px] font-bold text-stone-700 uppercase tracking-wider mb-1">
+                    <label className="block text-[10.5px] font-bold text-bone-dim uppercase tracking-wider mb-1">
                       {t.phoneLabel}
                     </label>
                     <div className="relative">
-                      <Phone size={14} className="text-stone-400 absolute left-3 top-3" />
+                      <Phone size={14} className="text-bone-faint absolute left-3 top-3" />
                       <input
                         type="tel"
                         value={leadPhone}
                         onChange={(e) => setLeadPhone(e.target.value)}
                         placeholder={t.phonePlaceholder}
-                        className="w-full bg-stone-50 border border-stone-200 rounded-xl pl-9 pr-3 py-2 text-xs text-stone-900 focus:bg-white focus:outline-none focus:border-black font-medium transition"
+                        className="w-full bg-ink-700 border border-white/15 rounded-xl pl-9 pr-3 py-2 text-xs text-bone focus:outline-none focus:border-bone font-medium transition"
                       />
                     </div>
                   </div>
 
                   {leadError && (
-                    <p className="text-[11px] text-rose-600 font-medium">{leadError}</p>
+                    <p className="text-[11px] text-rose-400 font-medium">{leadError}</p>
                   )}
 
                   <button
                     type="submit"
-                    className="w-full py-2.5 mt-2 bg-black hover:bg-neutral-800 text-white rounded-xl text-xs font-bold transition shadow-sm cursor-pointer"
+                    className="w-full py-2.5 mt-2 bg-bone hover:bg-white text-ink rounded-full text-xs font-bold transition shadow-sm cursor-pointer"
                   >
                     {t.startChatSubmit}
                   </button>
@@ -605,18 +605,18 @@ export function FloatingWhatsApp() {
             </div>
           ) : isChatClosed ? (
             /* ─── CASE B: CHAT ENDED SCREEN ───────────────────────────────────── */
-            <div className="flex-1 p-6 flex flex-col items-center justify-center text-center bg-[#FAF7F2]/60">
-              <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center text-stone-700 mb-3 shadow-xs">
+            <div className="flex-1 p-6 flex flex-col items-center justify-center text-center bg-ink">
+              <div className="w-12 h-12 rounded-full bg-ink-700 flex items-center justify-center text-bone-dim mb-3 shadow-xs">
                 <CheckCheck size={24} className="text-emerald-600" />
               </div>
-              <h3 className="font-bold text-sm text-stone-900 mb-1">{t.chatEndedTitle}</h3>
-              <p className="text-xs text-stone-500 max-w-[260px] mb-6 leading-relaxed">
+              <h3 className="font-bold text-sm text-bone mb-1">{t.chatEndedTitle}</h3>
+              <p className="text-xs text-bone-dim max-w-[260px] mb-6 leading-relaxed">
                 {t.chatEndedSubtitle}
               </p>
               <button
                 type="button"
                 onClick={handleStartNewChat}
-                className="px-5 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-2 cursor-pointer"
+                className="px-5 py-2.5 bg-bone hover:bg-white text-ink rounded-full text-xs font-bold transition shadow-sm flex items-center gap-2 cursor-pointer"
               >
                 <RotateCcw size={14} />
                 <span>{t.startNewChatBtn}</span>
@@ -626,16 +626,16 @@ export function FloatingWhatsApp() {
             /* ─── CASE C: ACTIVE LIVE CONVERSATION ────────────────────────────── */
             <>
               {/* Messages Container */}
-              <div className="flex-1 p-3.5 sm:p-4 overflow-y-auto space-y-3 bg-[#FAF7F2]/60 overscroll-contain">
+              <div className="flex-1 p-3.5 sm:p-4 overflow-y-auto space-y-3 bg-ink overscroll-contain">
                 {/* Welcome banner */}
                 <div className="text-center py-1">
-                  <span className="text-[11px] bg-white border border-stone-200/80 px-3 py-1 rounded-full text-stone-500 shadow-2xs font-medium">
+                  <span className="text-[11px] bg-ink-800 border border-white/10 px-3 py-1 rounded-full text-bone-dim shadow-2xs font-medium">
                     {t.welcomeBadge}
                   </span>
                 </div>
 
                 {messages.length === 0 && (
-                  <div className="text-center text-xs text-stone-400 pt-10">
+                  <div className="text-center text-xs text-bone-faint pt-10">
                     {t.welcomeSubtitle}
                   </div>
                 )}
@@ -644,7 +644,7 @@ export function FloatingWhatsApp() {
                   const isCust = m.sender === "customer";
                   if (m.system) {
                     return (
-                      <p key={m.id} className="text-center text-[11px] text-stone-500 px-4">
+                      <p key={m.id} className="text-center text-[11px] text-bone-dim px-4">
                         {m.text}
                       </p>
                     );
@@ -657,8 +657,8 @@ export function FloatingWhatsApp() {
                       <div
                         className={`max-w-[84%] px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed shadow-2xs ${
                           isCust
-                            ? "bg-[#111111] text-white rounded-br-xs"
-                            : "bg-white text-stone-900 border border-stone-200/90 rounded-bl-xs"
+                            ? "bg-bone text-ink rounded-br-xs"
+                            : "bg-ink-800 text-bone border border-white/10 rounded-bl-xs"
                         }`}
                       >
                         <p className="whitespace-pre-wrap break-words">{m.text}</p>
@@ -666,7 +666,7 @@ export function FloatingWhatsApp() {
 
                       {/* Timestamp & WhatsApp Status Checks */}
                       <div className="flex items-center gap-1 mt-1 px-1">
-                        <span className="text-[9.5px] text-stone-400">
+                        <span className="text-[9.5px] text-bone-faint">
                           {new Date(m.timestamp).toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
@@ -678,7 +678,7 @@ export function FloatingWhatsApp() {
                         <button
                           type="button"
                           onClick={() => retryMessage(m)}
-                          className="mt-0.5 px-1 text-[10.5px] font-semibold text-rose-600 underline cursor-pointer"
+                          className="mt-0.5 px-1 text-[10.5px] font-semibold text-rose-400 underline cursor-pointer"
                         >
                           {t.sendFailed}
                         </button>
@@ -689,7 +689,7 @@ export function FloatingWhatsApp() {
 
                 {awaitingReply && !isTypingAdmin && (
                   <div className="flex flex-col items-start">
-                    <div className="max-w-[84%] px-3.5 py-2.5 rounded-2xl rounded-bl-xs text-xs leading-relaxed bg-white text-stone-600 border border-stone-200/90 shadow-2xs">
+                    <div className="max-w-[84%] px-3.5 py-2.5 rounded-2xl rounded-bl-xs text-xs leading-relaxed bg-ink-800 text-bone-dim border border-white/10 shadow-2xs">
                       {t.waitingMessage}
                     </div>
                   </div>
@@ -697,12 +697,12 @@ export function FloatingWhatsApp() {
 
                 {/* Admin typing indicator animation */}
                 {isTypingAdmin && (
-                  <div className="flex items-center gap-2 text-xs text-stone-600 bg-white/90 border border-stone-200/90 px-3.5 py-2 rounded-2xl w-fit shadow-xs animate-in fade-in slide-in-from-bottom-2 duration-200">
-                    <span className="text-[11px] font-medium text-stone-700">{t.operatorTyping}</span>
+                  <div className="flex items-center gap-2 text-xs text-bone-dim bg-ink-700 border border-white/10 px-3.5 py-2 rounded-2xl w-fit shadow-xs animate-in fade-in slide-in-from-bottom-2 duration-200">
+                    <span className="text-[11px] font-medium text-bone-dim">{t.operatorTyping}</span>
                     <span className="flex gap-1 items-center pt-0.5">
-                      <span className="w-1.5 h-1.5 bg-[#B08D57] rounded-full animate-bounce [animation-delay:-0.3s]" />
-                      <span className="w-1.5 h-1.5 bg-[#B08D57] rounded-full animate-bounce [animation-delay:-0.15s]" />
-                      <span className="w-1.5 h-1.5 bg-[#B08D57] rounded-full animate-bounce" />
+                      <span className="w-1.5 h-1.5 bg-bone-dim rounded-full animate-bounce [animation-delay:-0.3s]" />
+                      <span className="w-1.5 h-1.5 bg-bone-dim rounded-full animate-bounce [animation-delay:-0.15s]" />
+                      <span className="w-1.5 h-1.5 bg-bone-dim rounded-full animate-bounce" />
                     </span>
                   </div>
                 )}
@@ -713,7 +713,7 @@ export function FloatingWhatsApp() {
               {/* Input Footer: 16px font-size to strictly prevent iOS auto-zoom */}
               <form
                 onSubmit={handleSendMessage}
-                className="p-3 bg-white border-t border-stone-200 flex items-center gap-2 shrink-0"
+                className="p-3 bg-ink-800 border-t border-white/15 flex items-center gap-2 shrink-0"
               >
                 <input
                   type="text"
@@ -721,19 +721,19 @@ export function FloatingWhatsApp() {
                   onChange={handleInputChange}
                   placeholder={t.inputPlaceholder}
                   maxLength={2000}
-                  className="flex-1 bg-stone-100 border border-stone-200/80 rounded-full px-4 py-2.5 text-base sm:text-xs text-stone-900 focus:outline-none focus:border-stone-400 placeholder:text-stone-400 font-medium"
+                  className="flex-1 bg-ink-700 border border-white/10 rounded-full px-4 py-2.5 text-base sm:text-xs text-bone focus:outline-none focus:border-bone placeholder:text-bone-faint font-medium"
                 />
                 <button
                   type="submit"
                   disabled={!inputText.trim()}
-                  className="w-10 h-10 rounded-full bg-[#111111] hover:bg-black text-white flex items-center justify-center transition disabled:opacity-40 cursor-pointer shadow-sm shrink-0 active:scale-95"
+                  className="w-10 h-10 rounded-full bg-bone hover:bg-white text-ink flex items-center justify-center transition disabled:opacity-40 cursor-pointer shadow-sm shrink-0 active:scale-95"
                   aria-label="Göndər"
                 >
                   <Send size={15} className="ml-0.5" />
                 </button>
               </form>
               {sendError && (
-                <p className="px-4 pb-2 -mt-1 text-[11px] text-rose-600 bg-white" role="alert">
+                <p className="px-4 pb-2 -mt-1 text-[11px] text-rose-400 bg-ink-800" role="alert">
                   {sendError}
                 </p>
               )}
