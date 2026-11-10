@@ -475,7 +475,7 @@ export function FloatingWhatsApp() {
   return (
     <aside
       aria-label="Canlı Dəstək və Əlaqə"
-      className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 select-none pointer-events-auto"
+      className="fixed bottom-5 right-4 z-50 flex flex-col items-end gap-2.5 select-none pointer-events-auto sm:bottom-6 sm:right-6"
     >
       {/* ─── LIVE CHAT POPUP WINDOW ─────────────────────────────────────────── */}
       {isChatOpen && (
@@ -749,16 +749,17 @@ export function FloatingWhatsApp() {
           type="button"
           onClick={() => setIsChatOpen(!isChatOpen)}
           aria-label={t.liveChatAria}
-          className="relative flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#111111] hover:bg-black text-white shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 ring-4 ring-black/10 cursor-pointer"
+          style={{ backgroundColor: "#EDEAE3", color: "#0A0A0A" }}
+          className="hw-fab relative flex h-12 w-12 cursor-pointer items-center justify-center rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.5)] transition-transform duration-200 hover:scale-105 active:scale-95 sm:h-14 sm:w-14"
         >
           {isChatOpen ? (
-            <X size={26} className="text-white" />
+            <X size={22} strokeWidth={1.8} />
           ) : (
             <>
-              <MessageCircle size={28} className="text-white" />
+              <MessageCircle size={22} strokeWidth={1.8} />
               {/* Online Green Indicator */}
               {isAdminOnline && (
-                <span className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
+                <span className="absolute right-0 top-0 h-3.5 w-3.5 rounded-full border-2 border-[#EDEAE3] bg-emerald-500" />
               )}
               {/* Unread badge counter */}
               {unreadCount > 0 && (
@@ -776,13 +777,11 @@ export function FloatingWhatsApp() {
           target="_blank"
           rel="noopener noreferrer"
           aria-label={`WhatsApp: ${phoneNumber}`}
-          className="relative flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#25D366] hover:bg-[#20bd5a] text-white shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 ring-4 ring-[#25D366]/25 cursor-pointer"
+          style={{ backgroundColor: "#0A0A0A" }}
+          className="hw-fab relative flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-white/25 shadow-[0_10px_30px_rgba(0,0,0,0.5)] transition-transform duration-200 hover:scale-105 hover:border-white/60 active:scale-95 sm:h-14 sm:w-14"
         >
-          {/* Subtle radar pulse glow */}
-          <span className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-25" />
-
           {/* Official WhatsApp Logo Icon */}
-          <WhatsAppBrandIcon className="w-8 h-8 text-white relative z-10" />
+          <WhatsAppBrandIcon className="relative z-10 h-6 w-6 text-[#25D366] sm:h-7 sm:w-7" />
         </a>
       </div>
     </aside>

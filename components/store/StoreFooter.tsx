@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import { PaymentLogosRow } from "@/components/PaymentLogos";
-import { UnifiedLocaleDropdown } from "@/components/UnifiedLocaleDropdown";
+import { StoreLocale } from "@/components/store/StoreLocale";
 import { useCategories, useSupport } from "@/context/StoreDataContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { categoryTitle } from "@/lib/categories";
@@ -73,7 +73,7 @@ export function StoreFooter() {
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-[1600px] flex-col gap-4 px-4 py-6 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-10">
           <div className="flex items-center gap-4">
-            <UnifiedLocaleDropdown variant="dark" direction="up" align="left" />
+            <StoreLocale direction="up" align="left" />
             <span className="text-[11px] uppercase tracking-[0.14em] text-bone-faint">© {new Date().getFullYear()} HORWALLE</span>
           </div>
           <PaymentLogosRow size="sm" />

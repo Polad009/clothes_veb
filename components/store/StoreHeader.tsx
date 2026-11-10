@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, Search, ShoppingBag, User, X } from "lucide-react";
 import Logo from "@/components/Logo";
-import { SearchModal } from "@/components/SearchModal";
-import { UnifiedLocaleDropdown } from "@/components/UnifiedLocaleDropdown";
+import { StoreSearch } from "@/components/store/StoreSearch";
+import { StoreLocale } from "@/components/store/StoreLocale";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
@@ -57,6 +57,7 @@ export function StoreHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   useBodyScrollLock(menuOpen);
+  const closeSearch = useCallback(() => setSearchOpen(false), []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -109,7 +110,7 @@ export function StoreHeader() {
 
           <div className="flex flex-1 items-center justify-end gap-0.5 xl:flex-none">
             <div className="hidden md:block">
-              <UnifiedLocaleDropdown variant="dark" align="right" buttonClassName="!bg-transparent !border-white/20 !shadow-none" />
+              <StoreLocale align="right" />
             </div>
             <button type="button" className={iconBtn} onClick={() => setSearchOpen(true)} aria-label={tr(language, T.search)}>
               <Search size={19} strokeWidth={1.6} />
@@ -176,13 +177,13 @@ export function StoreHeader() {
               )}
             </nav>
             <div className="border-t border-white/10 px-4 py-4">
-              <UnifiedLocaleDropdown variant="dark" direction="up" align="left" />
+              <StoreLocale direction="up" align="left" />
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+      <StoreSearch isOpen={searchOpen} onClose={closeSearch} />
     </>
   );
 }
