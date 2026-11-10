@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
-  verifyAdminCredentials,
   createAdminToken,
   isAdminAuthenticated,
   checkRateLimit,
@@ -9,6 +8,7 @@ import {
 } from '@/lib/adminAuth';
 import { sendOrderStatusUpdate, sendBroadcastCampaign } from '@/lib/email/emailService';
 import { handleAdminUpload } from '@/lib/adminUpload';
+import { verifyAdminLogin } from '@/lib/adminCredentials';
 import { refreshStore } from '@/lib/storeSnapshot';
 import { db } from '@/lib/db/client';
 import { deleteProduct, listProducts, saveProduct } from '@/lib/db/products';
@@ -141,7 +141,7 @@ export async function POST(req: NextRequest, { params }: RouteContext) {
       }
 
       const { username, password } = body;
-      if (!verifyAdminCredentials(username, password)) {
+      if (!(await verifyAdminLogin(username, password))) {
         recordFailedAttempt(ip);
         return json({ error: 'İstifadəçi adı və ya şifrə yanlışdır.' }, 401);
       }

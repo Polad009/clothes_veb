@@ -5,6 +5,17 @@ import {
   generateCampaignHtml,
 } from "./emailTemplates";
 import { supabaseServer } from "@/lib/supabaseServer";
+import { getSettings } from "@/lib/db/site";
+import { whatsappNumber } from "@/lib/contact";
+
+/** Support number for the e-mail footer, as set in the admin panel. */
+async function contact() {
+  try {
+    return { phone: whatsappNumber(await getSettings()) };
+  } catch {
+    return {};
+  }
+}
 
 // Resend client initialization with fallback
 const resendApiKey = process.env.RESEND_API_KEY;
@@ -27,7 +38,7 @@ export async function sendOrderConfirmation(order: any): Promise<boolean> {
     return false;
   }
 
-  const html = generateOrderConfirmationHtml(order);
+  const html = generateOrderConfirmationHtml(order, await contact());
 
   if (!resend) {
     console.log(`[EmailService:SIMULATED] Order confirmation to ${customerEmail} for order #${order.id}`);
@@ -38,7 +49,7 @@ export async function sendOrderConfirmation(order: any): Promise<boolean> {
     const { data, error } = await resend.emails.send({
       from: SENDER_EMAIL,
       to: [customerEmail],
-      subject: `HORVVALLE — Sifarişiniz Qəbul Edildi #${order.id}`,
+      subject: `HORWALLE — Sifarişiniz Qəbul Edildi #${order.id}`,
       html,
     });
 
@@ -65,7 +76,7 @@ export async function sendOrderStatusUpdate(order: any, newStatus: string): Prom
     return false;
   }
 
-  const html = generateStatusUpdateHtml(order, newStatus);
+  const html = generateStatusUpdateHtml(order, newStatus, await contact());
 
   if (!resend) {
     console.log(`[EmailService:SIMULATED] Status update to ${customerEmail} for #${order.id}: ${newStatus}`);
@@ -76,7 +87,7 @@ export async function sendOrderStatusUpdate(order: any, newStatus: string): Prom
     const { data, error } = await resend.emails.send({
       from: SENDER_EMAIL,
       to: [customerEmail],
-      subject: `HORVVALLE — Sifarişinizin Statusu: ${newStatus} (#${order.id})`,
+      subject: `HORWALLE — Sifarişinizin Statusu: ${newStatus} (#${order.id})`,
       html,
     });
 
@@ -109,7 +120,7 @@ export async function sendBroadcastCampaign({
   promoCode?: string;
   ctaLink?: string;
 }): Promise<{ total: number; sent: number; failed: number }> {
-  const html = generateCampaignHtml({ headline, message, promoCode, ctaLink });
+  const html = generateCampaignHtml({ headline, message, promoCode, ctaLink }, await contact());
 
   // Recipients are the registered accounts (e-mail lives on the auth user, not the profile)
   let recipients: string[] = [];

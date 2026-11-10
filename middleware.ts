@@ -46,6 +46,38 @@ async function verifyTokenAtEdge(token: string | undefined | null): Promise<bool
   }
 }
 
+// ─── Admin link code ─────────────────────────────────────────────────────────
+// A code saved in the admin panel (site_settings.admin_access) replaces ADMIN_ACCESS_KEY.
+// Cached per edge instance for 30 seconds, so a change applies within half a minute.
+let accessKeyCache: { key: string; at: number } | null = null;
+
+async function expectedAccessKey(): Promise<string> {
+  const envKey = (process.env.ADMIN_ACCESS_KEY || '').trim();
+  if (accessKeyCache && Date.now() - accessKeyCache.at < 30_000) return accessKeyCache.key || envKey;
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  let stored = '';
+  if (url && serviceKey) {
+    try {
+      const res = await fetch(`${url}/rest/v1/site_settings?key=eq.admin_access&select=value`, {
+        headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` },
+        cache: 'no-store',
+      });
+      if (res.ok) {
+        const rows = await res.json();
+        stored = String(rows?.[0]?.value?.key || '').trim();
+      } else if (accessKeyCache) {
+        stored = accessKeyCache.key; // keep the last known code if the database blips
+      }
+    } catch {
+      if (accessKeyCache) stored = accessKeyCache.key;
+    }
+  }
+  accessKeyCache = { key: stored, at: Date.now() };
+  return stored || envKey;
+}
+
 // ─── Edge DDoS & Rate Limiting Protection ────────────────────────────────────
 const ipHitCounter = new Map<string, { count: number; resetAt: number }>();
 
@@ -108,7 +140,7 @@ export async function middleware(request: NextRequest) {
   if (isAdminPage || isAdminHtml) {
     // Check for the secret access key in query string
     const accessKey = request.nextUrl.searchParams.get('access')?.trim();
-    const expectedKey = (process.env.ADMIN_ACCESS_KEY || '').trim();
+    const expectedKey = accessKey ? await expectedAccessKey() : '';
     const hasValidAccessKey = Boolean(expectedKey && accessKey && accessKey === expectedKey);
 
     const isLoginPage = pathname === '/admin/login';
