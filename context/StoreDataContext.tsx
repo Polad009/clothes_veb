@@ -62,6 +62,7 @@ export function normalizeProduct(p: any): Product {
     colors: finalColors,
     trackStock: Boolean(p.trackStock),
     stock: p.stock && typeof p.stock === "object" ? p.stock : {},
+    campaign: p.campaign || undefined,
   };
 }
 

@@ -5,7 +5,8 @@ import { verifyTurnstileToken } from "@/lib/turnstile";
 import { checkRateLimit } from "@/lib/rateLimiter";
 import { validateShippingRate, isDomesticDestination } from "@/lib/shipping";
 import { getCountryByCode } from "@/lib/countries";
-import { listProducts, resolveUnitPrice } from "@/lib/db/products";
+import { resolveUnitPrice } from "@/lib/db/products";
+import { listCatalog } from "@/lib/db/catalog";
 import { checkPromo, getSettings, incrementPromoUses } from "@/lib/db/site";
 import { customPrintPrice } from "@/lib/studio/catalog";
 
@@ -107,7 +108,7 @@ export async function POST(req: NextRequest) {
 
     // 3. Server-side Recalculation: prices always come from the live catalogue (anti-tampering)
     const orderCurrency: "AZN" | "USD" = currency === "USD" ? "USD" : "AZN";
-    const catalogue = await listProducts();
+    const catalogue = await listCatalog();
     let serverSubtotal = 0;
     const validatedItems: OrderItem[] = [];
 

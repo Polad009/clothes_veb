@@ -11,7 +11,8 @@ import {
   OutOfStockError,
   updateOrder,
 } from '@/lib/db/orders';
-import { listProducts, resolveUnitPrice } from '@/lib/db/products';
+import { resolveUnitPrice } from '@/lib/db/products';
+import { listCatalog } from '@/lib/db/catalog';
 import { checkPromo, getSettings, incrementPromoUses } from '@/lib/db/site';
 import { customPrintPrice } from '@/lib/studio/catalog';
 import { notifyNewOrder } from '@/lib/notifications/orderNotifier';
@@ -71,7 +72,7 @@ export async function POST(req: NextRequest) {
     const orderCurrency: 'AZN' | 'USD' = requestedCurrency === 'USD' ? 'USD' : 'AZN';
 
     // 1. Server-side Recalculation: prices always come from the live catalogue
-    const catalogue = await listProducts();
+    const catalogue = await listCatalog();
     let serverSubtotal = 0;
     const validatedItems: any[] = [];
 

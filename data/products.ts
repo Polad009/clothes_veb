@@ -31,6 +31,8 @@ export interface Product {
   /** When true, `stock` holds units per colour/size (see lib/stock.ts). */
   trackStock?: boolean;
   stock?: Record<string, number>;
+  /** Running discount, if any (prices already include it). */
+  campaign?: { id: string; name: string; percent: number; endsAt: string | null; showCountdown: boolean };
   image?: string;
   hoverImage?: string;
   gallery?: string[];

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { deleteProduct, listProducts, saveProduct } from '@/lib/db/products';
+import { deleteProduct, saveProduct } from '@/lib/db/products';
+import { listCatalog } from '@/lib/db/catalog';
 import { isAdminAuthenticated } from '@/lib/adminAuth';
 import { refreshStore } from '@/lib/storeSnapshot';
 
@@ -17,7 +18,7 @@ export async function GET(req: NextRequest) {
     const search = searchParams.get('q')?.toLowerCase();
     const limit = parseInt(searchParams.get('limit') || '', 10);
 
-    let products = await listProducts();
+    let products = await listCatalog();
 
     if (gender && gender !== 'all') {
       products = products.filter((p) =>

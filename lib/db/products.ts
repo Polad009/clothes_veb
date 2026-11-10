@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { db, isUuid, unwrap } from './client';
 import { stockKey } from '@/lib/stock';
+import type { AppliedCampaign } from '@/lib/campaigns';
 
 const DEFAULT_IMAGE = '/images/hero/black-tee.jpg';
 const DEFAULT_SIZES = ['S', 'M', 'L', 'XL'];
@@ -46,6 +47,8 @@ export interface CatalogProduct {
   trackStock: boolean;
   /** Units per colour/size, keyed by stockKey(color, size). */
   stock: Record<string, number>;
+  /** Set on storefront copies while a discount runs (see lib/db/catalog.ts). */
+  campaign?: AppliedCampaign;
 }
 
 function num(value: unknown): number | undefined {

@@ -7,6 +7,7 @@ import { useParams, notFound } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Product } from "@/data/products";
 import { availableQty, LOW_STOCK } from "@/lib/stock";
+import { CampaignCountdown } from "@/components/CampaignCountdown";
 import { useStoreData, normalizeProduct, useSupport } from "@/context/StoreDataContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useLanguage } from "@/context/LanguageContext";
@@ -416,6 +417,9 @@ export default function ProductDetailPage() {
                   </span>
                 )}
               </div>
+              {product.campaign?.showCountdown && product.campaign.endsAt && (
+                <CampaignCountdown endsAt={product.campaign.endsAt} percent={product.campaign.percent} language={language} />
+              )}
             </motion.div>
 
             {/* Color Selector */}

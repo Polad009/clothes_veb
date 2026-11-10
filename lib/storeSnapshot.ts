@@ -1,7 +1,8 @@
 import { revalidateTag } from 'next/cache';
 import defaults from '@/data/storeData.json';
 import { createCachedReadClient } from '@/lib/supabaseServer';
-import { listProducts, type CatalogProduct } from '@/lib/db/products';
+import type { CatalogProduct } from '@/lib/db/products';
+import { listCatalog } from '@/lib/db/catalog';
 import { getContent, getSettings } from '@/lib/db/site';
 
 export const STORE_TAG = 'store';
@@ -27,7 +28,7 @@ export async function getStoreSnapshot(): Promise<StoreSnapshot> {
   try {
     if (!readClient) throw new Error('Supabase konfiqurasiya olunmayıb.');
     const [products, content, settings] = await Promise.all([
-      listProducts(readClient),
+      listCatalog(readClient),
       getContent(readClient),
       getSettings(readClient),
     ]);
