@@ -17,7 +17,7 @@ import { checkPromo, getSettings, incrementPromoUses } from '@/lib/db/site';
 import { customPrintPrice } from '@/lib/studio/catalog';
 import { notifyNewOrder } from '@/lib/notifications/orderNotifier';
 import { isAdminAuthenticated } from '@/lib/adminAuth';
-import { sendOrderConfirmation, sendOrderStatusUpdate } from '@/lib/email/emailService';
+import { sendNewOrderAlert, sendOrderConfirmation, sendOrderStatusUpdate } from '@/lib/email/emailService';
 import { getActivePaymentProvider, PaymentMethod, PaymentRequest } from '@/lib/payments';
 import { verifyTurnstileToken } from '@/lib/turnstile';
 import { checkRateLimit } from '@/lib/rateLimiter';
@@ -340,10 +340,12 @@ export async function POST(req: NextRequest) {
       console.warn('Notification failed:', e);
     }
 
-    // Send customer order confirmation email asynchronously
-    sendOrderConfirmation(order).catch((e) => {
-      console.warn('Order confirmation email warning:', e);
-    });
+    // Customer confirmation + shop alert. Awaited: on Vercel the function may be frozen
+    // as soon as the response is sent, which would drop e-mails still in flight.
+    await Promise.allSettled([
+      sendOrderConfirmation(order).catch((e) => console.warn('Order confirmation email warning:', e)),
+      sendNewOrderAlert(order).catch((e) => console.warn('New order alert warning:', e)),
+    ]);
 
     return NextResponse.json({ success: true, order, paymentResponse });
   } catch (error: any) {
@@ -366,9 +368,7 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: 'Sifariş tapılmadı.' }, { status: 404 });
     }
     if (orderStatus) {
-      sendOrderStatusUpdate(order, orderStatus).catch((e) => {
-        console.warn('Status update email warning:', e);
-      });
+      await sendOrderStatusUpdate(order, orderStatus).catch((e) => console.warn('Status update email warning:', e));
     }
     return NextResponse.json({ success: true, order });
   } catch (error: any) {

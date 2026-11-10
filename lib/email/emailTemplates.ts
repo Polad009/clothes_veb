@@ -261,3 +261,46 @@ export function generateCampaignHtml(
 
   return getEmailBaseWrapper(content, contact);
 }
+
+/** Sent to the shop when an order comes in. */
+export function generateNewOrderAlertHtml(order: any, contact: EmailContact = {}): string {
+  const cust = order.customer || {};
+  const price = (val: number) => (order.currency === "USD" ? `$${Number(val || 0).toFixed(2)}` : `${Number(val || 0).toFixed(2)} ₼`);
+  const rows = (order.items || [])
+    .map(
+      (item: any) => `
+    <tr>
+      <td><strong>${esc(item.name)}</strong>${item.isCustom ? " (fərdi çap)" : ""}<br><span style="font-size: 11px; color: #7A7269;">${[item.size && `Ölçü: ${esc(item.size)}`, item.color && `Rəng: ${esc(item.color)}`].filter(Boolean).join(" · ")}</span></td>
+      <td style="text-align: center;">${Number(item.quantity) || 1}</td>
+      <td style="text-align: right;">${price((Number(item.price) || 0) * (Number(item.quantity) || 1))}</td>
+    </tr>`
+    )
+    .join("");
+  const address = [cust.address, cust.addressLine2, cust.city, cust.stateOrRegion, cust.postalCode, cust.country].filter(Boolean).map(esc).join(", ");
+
+  const content = `
+    <h2 style="font-size: 22px; margin: 0 0 6px 0; font-weight: 600; color: #111011;">Yeni sifariş: ${esc(order.id)}</h2>
+    <p style="font-size: 13px; color: #5C5247; margin: 0 0 20px 0;">${bakuDate(order.date)} · <strong>${price(order.total)}</strong>${order.isTest ? ' · <span class="badge">TEST ÖDƏNİŞ</span>' : ""}</p>
+
+    <div style="background-color: #FAF7F2; padding: 16px 20px; border-radius: 16px; border: 1px solid #EBE4DA; font-size: 13px; line-height: 1.7;">
+      <strong>${esc(cust.fullName || "Müştəri")}</strong><br>
+      ${esc(cust.phone || "")}${cust.email ? ` · ${esc(cust.email)}` : ""}<br>
+      ${address || "-"}<br>
+      Çatdırılma: ${esc(order.shippingMethodLabel || order.shippingMethod || "-")} · Ödəniş: ${esc(order.paymentMethod || "-")}
+    </div>
+
+    <table class="table">
+      <thead><tr><th>Məhsul</th><th style="text-align: center;">Say</th><th style="text-align: right;">Məbləğ</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <p style="text-align: right; font-size: 13px; margin: 12px 0 0 0;">
+      Ara cəm ${price(order.subtotal)}${Number(order.discount || 0) > 0 ? ` · Endirim −${price(order.discount)}${order.promoCode ? ` (${esc(order.promoCode)})` : ""}` : ""} · Çatdırılma ${Number(order.shipping || 0) > 0 ? price(order.shipping) : "pulsuz"}<br>
+      <strong style="font-size: 16px;">Yekun ${price(order.total)}</strong>
+    </p>
+
+    <div style="text-align: center; margin-top: 28px;">
+      <a href="${SITE_URL}/admin/orders/${encodeURIComponent(order.id)}" class="btn">Admin paneldə aç</a>
+    </div>
+  `;
+  return getEmailBaseWrapper(content, contact);
+}

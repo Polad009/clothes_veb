@@ -3,6 +3,7 @@ import {
   generateOrderConfirmationHtml,
   generateStatusUpdateHtml,
   generateCampaignHtml,
+  generateNewOrderAlertHtml,
 } from "./emailTemplates";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { getSettings } from "@/lib/db/site";
@@ -27,6 +28,34 @@ export function isEmailConfigured(): boolean {
 }
 
 export const SENDER_EMAIL = process.env.EMAIL_FROM || "HORWALLE <orders@horwalle.com>";
+
+/**
+ * Tells the shop about a new order, at the address set in Admin → Tənzimləmələr → E-poçt.
+ */
+export async function sendNewOrderAlert(order: any): Promise<boolean> {
+  let to = "";
+  try {
+    to = String((await getSettings() as any).orderNotifyEmail || "").trim();
+  } catch {}
+  if (!to || !to.includes("@") || !resend) return false;
+  try {
+    const { error } = await resend.emails.send({
+      from: SENDER_EMAIL,
+      to: [to],
+      subject: `Yeni sifariş ${order.id} — ${Number(order.total || 0).toFixed(2)} ${order.currency === "USD" ? "$" : "₼"}${order.isTest ? " (test)" : ""}`,
+      html: generateNewOrderAlertHtml(order, await contact()),
+      ...(order?.customer?.email ? { replyTo: order.customer.email } : {}),
+    });
+    if (error) {
+      console.error("[EmailService] New order alert failed:", error);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error("[EmailService] Exception in sendNewOrderAlert:", err);
+    return false;
+  }
+}
 
 /**
  * Sends order confirmation email to the customer.

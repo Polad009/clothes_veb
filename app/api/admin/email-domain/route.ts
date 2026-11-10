@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { isAdminAuthenticated } from '@/lib/adminAuth';
 import { createEmailDomain, getEmailDomainStatus, sendTestEmail, verifyEmailDomain } from '@/lib/email/domain';
 import { SENDER_EMAIL } from '@/lib/email/emailService';
+import { getSettings } from '@/lib/db/site';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,7 +16,8 @@ function unauthorized() {
 export async function GET(req: NextRequest) {
   if (!isAdminAuthenticated(req)) return unauthorized();
   try {
-    return NextResponse.json({ ...(await getEmailDomainStatus()), sender: SENDER_EMAIL }, { headers: NO_STORE });
+    const [status, settings] = await Promise.all([getEmailDomainStatus(), getSettings()]);
+    return NextResponse.json({ ...status, sender: SENDER_EMAIL, orderNotifyEmail: (settings as any).orderNotifyEmail || '' }, { headers: NO_STORE });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }

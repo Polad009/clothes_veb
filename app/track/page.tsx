@@ -9,7 +9,6 @@ import {
   Package,
   CheckCircle2,
   Clock,
-  Printer,
   Truck,
   AlertCircle,
   Phone,
@@ -110,15 +109,13 @@ function OrderTrackerContent() {
       return { step: 0, isCancelled: true, label: "Ləğv edildi", color: "rose" };
     }
     if (s.includes("çatdırıldı") || s.includes("catdirildi") || s.includes("tamam") || s.includes("delivered")) {
-      return { step: 5, isCancelled: false, label: "Çatdırıldı", color: "emerald" };
+      return { step: 4, isCancelled: false, label: "Çatdırıldı", color: "emerald" };
     }
     if (s.includes("kuryer") || s.includes("yoldadır") || s.includes("yoldadir") || s.includes("courier") || s.includes("shipped")) {
-      return { step: 4, isCancelled: false, label: "Kuryerdədir (Yoldadır)", color: "teal" };
+      return { step: 3, isCancelled: false, label: "Kuryerdədir (Yoldadır)", color: "teal" };
     }
-    if (s.includes("çap") || s.includes("cap") || s.includes("dərzi") || s.includes("derzi")) {
-      return { step: 3, isCancelled: false, label: "Çapda / Dərzidə", color: "amber" };
-    }
-    if (s.includes("təsdiq") || s.includes("tesdiq") || s.includes("confirmed")) {
+    // Older orders may still carry the retired "Çapda / Dərzidə" status: shown as confirmed
+    if (s.includes("təsdiq") || s.includes("tesdiq") || s.includes("confirmed") || s.includes("çap") || s.includes("dərzi")) {
       return { step: 2, isCancelled: false, label: "Təsdiqləndi", color: "indigo" };
     }
     return { step: 1, isCancelled: false, label: "Yeni Sifariş (Qəbul edildi)", color: "sky" };
@@ -369,10 +366,9 @@ function OrderTrackerContent() {
 
   const steps = [
     { num: 1, label: t.track.statusNew || "Qəbul edildi", icon: CheckCircle2, desc: "Sifariş qeydə alındı" },
-    { num: 2, label: t.track.statusConfirmed || "Təsdiqləndi", icon: ShieldCheck, desc: "Menecer təsdiqlədi" },
-    { num: 3, label: t.track.statusTailoring || "Çapda / Dərzidə", icon: Printer, desc: "DTF çap və atelye" },
-    { num: 4, label: t.track.statusCourier || "Kuryerdədir", icon: Truck, desc: "Ünvana çatdırılır" },
-    { num: 5, label: t.track.statusDelivered || "Çatdırıldı", icon: Package, desc: "Təhvil verildi" },
+    { num: 2, label: t.track.statusConfirmed || "Təsdiqləndi", icon: ShieldCheck, desc: "Hazırlanır" },
+    { num: 3, label: t.track.statusCourier || "Kuryerdədir", icon: Truck, desc: "Ünvana çatdırılır" },
+    { num: 4, label: t.track.statusDelivered || "Çatdırıldı", icon: Package, desc: "Təhvil verildi" },
   ];
 
   const currentStep = order?.statusMeta?.step || 1;
@@ -768,7 +764,7 @@ function OrderTrackerContent() {
                   Çatdırılma Mərhələləri:
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {steps.map((s) => {
                     const isPassed = currentStep >= s.num;
                     const isCurrent = currentStep === s.num;

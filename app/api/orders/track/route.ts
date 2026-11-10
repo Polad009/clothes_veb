@@ -76,7 +76,7 @@ function maskAddress(addr: string): string {
   return addr.slice(0, Math.min(6, addr.length)) + " ***";
 }
 
-// Map textual order status to numerical stepper index (1 to 5)
+// Map textual order status to numerical stepper index (1 to 4)
 function getStepIndex(status: string): { step: number; isCancelled: boolean; label: string; color: string } {
   const s = (status || "").toLowerCase();
 
@@ -84,15 +84,13 @@ function getStepIndex(status: string): { step: number; isCancelled: boolean; lab
     return { step: 0, isCancelled: true, label: "Ləğv edildi", color: "rose" };
   }
   if (s.includes("çatdırıldı") || s.includes("catdirildi") || s.includes("tamam") || s.includes("delivered")) {
-    return { step: 5, isCancelled: false, label: "Çatdırıldı", color: "emerald" };
+    return { step: 4, isCancelled: false, label: "Çatdırıldı", color: "emerald" };
   }
   if (s.includes("kuryer") || s.includes("yoldadır") || s.includes("yoldadir") || s.includes("courier") || s.includes("shipped")) {
-    return { step: 4, isCancelled: false, label: "Kuryerdədir (Yoldadır)", color: "teal" };
+    return { step: 3, isCancelled: false, label: "Kuryerdədir (Yoldadır)", color: "teal" };
   }
-  if (s.includes("çap") || s.includes("cap") || s.includes("dərzi") || s.includes("derzi")) {
-    return { step: 3, isCancelled: false, label: "Çapda / Dərzidə", color: "amber" };
-  }
-  if (s.includes("təsdiq") || s.includes("tesdiq") || s.includes("confirmed")) {
+  // Older orders may still carry the retired "Çapda / Dərzidə" status: shown as confirmed
+  if (s.includes("təsdiq") || s.includes("tesdiq") || s.includes("confirmed") || s.includes("çap") || s.includes("dərzi")) {
     return { step: 2, isCancelled: false, label: "Təsdiqləndi", color: "indigo" };
   }
   // Default: Yeni Sifariş / Qəbul edildi (STEP 1)

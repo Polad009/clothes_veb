@@ -42,7 +42,7 @@ export function formatDate(iso: string | undefined | null, withTime = true): str
   return withTime ? `${date} ${pad(d.getHours())}:${pad(d.getMinutes())}` : date;
 }
 
-export const ORDER_STATUSES = ['Yeni Sifariş', 'Təsdiqləndi', 'Çapda / Dərzidə', 'Kuryerdədir', 'Çatdırıldı', 'Ləğv edildi'] as const;
+export const ORDER_STATUSES = ['Yeni Sifariş', 'Təsdiqləndi', 'Kuryerdədir', 'Çatdırıldı', 'Ləğv edildi'] as const;
 
 export const POD_STATUSES: Array<{ value: string; label: string }> = [
   { value: 'Pending Print', label: 'Gözləmədə' },

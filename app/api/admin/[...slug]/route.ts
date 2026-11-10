@@ -238,9 +238,8 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
       if (!order) return json({ error: 'Sifariş tapılmadı' }, 404);
 
       if (orderStatus) {
-        sendOrderStatusUpdate(order, orderStatus).catch((e) => {
-          console.warn('Status update email warning:', e);
-        });
+        // awaited so the e-mail is not dropped when the function is frozen after responding
+        await sendOrderStatusUpdate(order, orderStatus).catch((e) => console.warn('Status update email warning:', e));
       }
       return json({ success: true, order });
     }

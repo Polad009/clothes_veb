@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Badge, Button, Card, Field, Input, useToast } from "@/components/admin/ui";
 import type { EmailDomainStatus } from "@/lib/email/domain";
 
-type Status = EmailDomainStatus & { sender?: string };
+type Status = EmailDomainStatus & { sender?: string; orderNotifyEmail?: string };
 
 const STATUS_LABEL: Record<string, { label: string; tone: "green" | "amber" | "red" | "neutral" }> = {
   verified: { label: "Təsdiqlənib", tone: "green" },
@@ -19,6 +19,8 @@ export function EmailDomainCard() {
   const [status, setStatus] = useState<Status | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [to, setTo] = useState("");
+  const [notifyEmail, setNotifyEmail] = useState("");
+  const [savedNotify, setSavedNotify] = useState("");
 
   const call = useCallback(async (init?: RequestInit) => {
     const res = await fetch("/api/admin/email-domain", { cache: "no-store", ...init });
@@ -29,7 +31,10 @@ export function EmailDomainCard() {
 
   const load = useCallback(async () => {
     try {
-      setStatus(await call());
+      const data = await call();
+      setStatus(data);
+      setNotifyEmail(data.orderNotifyEmail || "");
+      setSavedNotify(data.orderNotifyEmail || "");
     } catch (e: any) {
       setStatus({ configured: true, domain: null, error: e.message });
     }
@@ -50,6 +55,30 @@ export function EmailDomainCard() {
       if (action === "test") toast.success(`Test e-poçtu ${to} ünvanına göndərildi.`);
       else setStatus(data);
       if (data.error) toast.error(data.error);
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const saveNotify = async () => {
+    const value = notifyEmail.trim();
+    if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      toast.error("Düzgün e-poçt ünvanı yazın.");
+      return;
+    }
+    setBusy("notify");
+    try {
+      const res = await fetch("/api/admin/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ settings: { orderNotifyEmail: value } }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Yadda saxlanılmadı");
+      setSavedNotify(value);
+      toast.success(value ? `Yeni sifarişlər ${value} ünvanına bildiriləcək.` : "Sifariş e-poçt bildirişi söndürüldü.");
     } catch (e: any) {
       toast.error(e.message);
     } finally {
@@ -105,6 +134,14 @@ export function EmailDomainCard() {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Button loading={busy === "verify"} onClick={() => act("verify")}>DNS-i yenidən yoxla</Button>
+                </div>
+                <div className="flex flex-wrap items-end gap-2 border-t border-stone-200 pt-4">
+                  <Field label="Yeni sifariş bildirişi bu ünvana gəlsin" hint="Hər yeni sifarişdə müştəri, məhsullar və məbləğlə məktub gedir. Boş = göndərilmir." className="min-w-[220px] flex-1">
+                    <Input type="email" value={notifyEmail} onChange={(e) => setNotifyEmail(e.target.value)} placeholder="magaza@gmail.com" />
+                  </Field>
+                  <Button loading={busy === "notify"} disabled={notifyEmail.trim() === savedNotify} onClick={saveNotify}>
+                    Yadda saxla
+                  </Button>
                 </div>
                 <div className="flex flex-wrap items-end gap-2 border-t border-stone-200 pt-4">
                   <Field label="Test e-poçtu göndər" className="min-w-[220px] flex-1">
