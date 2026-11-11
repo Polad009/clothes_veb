@@ -32,7 +32,7 @@ export function ProductTile({ product, priority = false }: { product: Product; p
     : undefined;
 
   return (
-    <Link href={`/products/${product.slug}`} prefetch className="group block text-bone">
+    <Link href={`/products/${product.slug}`} className="group block text-bone">
       <div className="relative aspect-[4/5] overflow-hidden bg-tile">
         <Image
           src={front}

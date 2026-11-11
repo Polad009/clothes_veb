@@ -1,5 +1,5 @@
+import { requestAdminRole } from '@/lib/adminSession';
 import { NextRequest, NextResponse } from 'next/server';
-import { isAdminAuthenticated } from '@/lib/adminAuth';
 import { deleteThread, listThreads, SESSION_RE } from '@/lib/db/chat';
 
 export const dynamic = 'force-dynamic';
@@ -8,7 +8,7 @@ const NO_STORE = { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-ag
 
 /** GET /api/chat/threads — conversations for the admin chat page (also marks the shop as online). */
 export async function GET(req: NextRequest) {
-  if (!isAdminAuthenticated(req)) {
+  if (!(await requestAdminRole(req))) {
     return NextResponse.json({ success: false, error: 'Unauthorized: Admin icazəsi tələb olunur' }, { status: 401 });
   }
   try {
@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
 
 /** DELETE /api/chat/threads?sessionId=… — removes one conversation and its messages. */
 export async function DELETE(req: NextRequest) {
-  if (!isAdminAuthenticated(req)) {
+  if (!(await requestAdminRole(req))) {
     return NextResponse.json({ success: false, error: 'Unauthorized: Admin icazəsi tələb olunur' }, { status: 401 });
   }
   try {

@@ -45,6 +45,7 @@ function EditorialBlock({
           alt={alt}
           fill
           priority={priority}
+          quality={70}
           sizes="(max-width: 640px) 100vw, 62vw"
           className="object-cover object-center transition duration-[1200ms] ease-out group-hover:scale-[1.03]"
         />

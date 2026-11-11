@@ -8,8 +8,9 @@ import {
 } from '@/lib/adminAuth';
 import { sendOrderStatusUpdate, sendBroadcastCampaign } from '@/lib/email/emailService';
 import { handleAdminUpload } from '@/lib/adminUpload';
-import { verifyAdminLogin } from '@/lib/adminCredentials';
+import { verifyAnyAdminLogin } from '@/lib/adminCredentials';
 import { refreshStore } from '@/lib/storeSnapshot';
+import { requestAdminRole } from '@/lib/adminSession';
 import { db } from '@/lib/db/client';
 import { deleteProduct, listProducts, saveProduct } from '@/lib/db/products';
 import {
@@ -48,6 +49,10 @@ function json(data: any, status = 200) {
   return NextResponse.json(data, { status, headers: NO_STORE });
 }
 
+function ownerOnly() {
+  return json({ error: 'Bu əməliyyat yalnız mağaza sahibinə açıqdır.' }, 403);
+}
+
 function unauthorized() {
   return json({ error: 'Unauthorized: Admin icazəsi tələb olunur' }, 401);
 }
@@ -83,7 +88,7 @@ export async function GET(req: NextRequest, { params }: RouteContext) {
         : json({ success: false, authenticated: false }, 401);
     }
 
-    if (!isAdminAuthenticated(req)) return unauthorized();
+    if (!(await requestAdminRole(req))) return unauthorized();
 
     if (route === 'data') {
       return json(await loadAdminData());
@@ -142,13 +147,14 @@ export async function POST(req: NextRequest, { params }: RouteContext) {
       }
 
       const { username, password } = body;
-      if (!(await verifyAdminLogin(username, password))) {
+      const role = await verifyAnyAdminLogin(username, password);
+      if (!role) {
         recordFailedAttempt(ip);
         return json({ error: 'İstifadəçi adı və ya şifrə yanlışdır.' }, 401);
       }
 
       recordSuccessfulLogin(ip);
-      const token = createAdminToken(username || 'admin');
+      const token = createAdminToken(String(username || 'admin').trim().toLowerCase(), role);
       const response = json({ success: true, token });
       response.cookies.set({
         name: 'horvvalle_admin_token',
@@ -157,7 +163,7 @@ export async function POST(req: NextRequest, { params }: RouteContext) {
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         path: '/',
-        maxAge: 7 * 24 * 60 * 60,
+        maxAge: role === 'staff' ? 12 * 60 * 60 : 7 * 24 * 60 * 60,
       });
       return response;
     }
@@ -168,7 +174,8 @@ export async function POST(req: NextRequest, { params }: RouteContext) {
       return response;
     }
 
-    if (!isAdminAuthenticated(req)) return unauthorized();
+    const role = await requestAdminRole(req);
+    if (!role) return unauthorized();
 
     if (route === 'products') {
       const product = await saveProduct(body);
@@ -179,6 +186,9 @@ export async function POST(req: NextRequest, { params }: RouteContext) {
     if (route === 'upload' || route === 'upload-image') {
       return handleAdminUpload(formData, body);
     }
+
+    // everything below changes shop-wide settings or deletes data: owner only
+    if (role !== 'owner') return ownerOnly();
 
     if (route === 'content') {
       const settings = body.settings ? await saveSettings(body.settings) : await getSettings();
@@ -226,7 +236,7 @@ export async function POST(req: NextRequest, { params }: RouteContext) {
 
 export async function PATCH(req: NextRequest, { params }: RouteContext) {
   try {
-    if (!isAdminAuthenticated(req)) return unauthorized();
+    if (!(await requestAdminRole(req))) return unauthorized();
 
     const [route, rawId] = params.slug || [];
     const id = rawId ? decodeURIComponent(rawId) : '';
@@ -260,7 +270,9 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
 
 export async function DELETE(req: NextRequest, { params }: RouteContext) {
   try {
-    if (!isAdminAuthenticated(req)) return unauthorized();
+    const role = await requestAdminRole(req);
+    if (!role) return unauthorized();
+    if (role !== 'owner') return ownerOnly();
 
     const [route, rawId] = params.slug || [];
     const id = rawId ? decodeURIComponent(rawId) : '';

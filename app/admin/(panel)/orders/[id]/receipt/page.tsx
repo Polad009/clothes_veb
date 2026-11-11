@@ -13,7 +13,7 @@ import { PrintButton } from "@/components/admin/PrintButton";
 export const dynamic = "force-dynamic";
 
 export default async function ReceiptPage({ params }: { params: { id: string } }) {
-  requireAdmin();
+  await requireAdmin();
   const order = await findOrder(decodeURIComponent(params.id));
   if (!order) notFound();
   const { settings } = await getStoreSnapshot();

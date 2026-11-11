@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { requireAdmin } from "@/lib/adminSession";
+import { requireOwner } from "@/lib/adminSession";
 import { getDashboard } from "@/lib/db/stats";
 import { formatDate, formatMoney, orderStatusTone, paymentLabel } from "@/lib/adminClient";
 import { AdminPage } from "@/components/admin/AdminShell";
@@ -20,7 +20,7 @@ function Stat({ label, value, sub, href }: { label: string; value: string; sub?:
 }
 
 export default async function DashboardPage() {
-  requireAdmin();
+  await requireOwner();
   const d = await getDashboard();
   const peak = Math.max(1, ...d.daily.map((x) => x.revenue));
 

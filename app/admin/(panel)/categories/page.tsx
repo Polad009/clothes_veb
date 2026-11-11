@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/lib/adminSession";
+import { requireOwner } from "@/lib/adminSession";
 import { countProductsByCategory, listCategories } from "@/lib/db/site";
 import { AdminPage } from "@/components/admin/AdminShell";
 import { CategoriesManager } from "@/components/admin/CategoriesManager";
@@ -7,7 +7,7 @@ import type { Category } from "@/lib/categories";
 export const dynamic = "force-dynamic";
 
 export default async function CategoriesPage() {
-  requireAdmin();
+  await requireOwner();
   const [categories, counts] = await Promise.all([listCategories(), countProductsByCategory()]);
   return (
     <AdminPage narrow>

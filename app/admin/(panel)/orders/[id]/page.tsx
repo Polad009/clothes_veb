@@ -20,7 +20,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 }
 
 export default async function OrderDetailPage({ params }: { params: { id: string } }) {
-  requireAdmin();
+  await requireAdmin();
   const order = await findOrder(decodeURIComponent(params.id));
   if (!order) notFound();
 

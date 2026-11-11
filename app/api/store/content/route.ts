@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getContent, getSettings, saveContent, saveSettings } from '@/lib/db/site';
-import { isAdminAuthenticated } from '@/lib/adminAuth';
+import { isAdminOwner } from '@/lib/adminAuth';
 import { refreshStore } from '@/lib/storeSnapshot';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
-  if (!isAdminAuthenticated(req)) {
+  if (!isAdminOwner(req)) {
     return NextResponse.json({ success: false, error: 'Unauthorized: Admin icazəsi tələb olunur' }, { status: 401 });
   }
 

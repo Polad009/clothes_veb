@@ -11,6 +11,7 @@ import {
   STUDIO_PRODUCTS,
   printTypes,
   resolveStudio,
+  studioName,
   studioPrice,
   type ExtraSpot,
   type GroupKey,
@@ -224,7 +225,7 @@ export default function StudioPage() {
     addItem({
       id: `pod_${Date.now()}_${product.id}_${size}`,
       productId: product.id,
-      name: `Öz dizayn: ${product.name}`,
+      name: `${L({ az: "Öz dizayn", en: "Custom design", ru: "Свой дизайн", tr: "Kendi tasarımın" })}: ${studioName(product, language)}`,
       price,
       size,
       color: COLOR_LABEL[colorKey]?.az || colorKey,
@@ -441,7 +442,7 @@ export default function StudioPage() {
 
           {/* configurator */}
           <div className="lg:col-span-5">
-            <Step n={1} title={L({ az: "Məhsul", en: "Product", ru: "Изделие", tr: "Ürün" })} aside={<span className="text-right text-[12px] text-bone-dim">{product.name}</span>}>
+            <Step n={1} title={L({ az: "Məhsul", en: "Product", ru: "Изделие", tr: "Ürün" })} aside={<span className="text-right text-[12px] text-bone-dim">{studioName(product, language)}</span>}>
               <div className="space-y-5">
                 {groups.map(([g, list]) => (
                   <div key={g}>
@@ -452,7 +453,7 @@ export default function StudioPage() {
                         const from = studioPrice(p, printTypes(p)[0], [], studio) ?? 0;
                         return (
                           <button key={p.id} type="button" onClick={() => chooseProduct(p)} className={`${chip(on)} flex items-center justify-between gap-3`}>
-                            <span className="text-[13px] font-semibold leading-snug">{p.name}</span>
+                            <span className="text-[13px] font-semibold leading-snug">{studioName(p, language)}</span>
                             <span className={`shrink-0 text-[12px] font-bold tabular-nums ${on ? "text-ink/70" : "text-bone-dim"}`}>
                               {L({ az: "", en: "from ", ru: "от ", tr: "" })}
                               {formatPrice(from)}
@@ -585,7 +586,7 @@ export default function StudioPage() {
 
             <div className="hidden border-t border-white/10 pt-7 lg:block">
               <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-bone-faint">
-                {product.name} · {L(TYPE_LABEL[type].title)}
+                {studioName(product, language)} · {L(TYPE_LABEL[type].title)}
                 {extras.length ? ` + ${extras.length}` : ""}
               </p>
               <p className="mt-1 text-3xl font-black tabular-nums">{formatPrice(price)}</p>
@@ -606,7 +607,7 @@ export default function StudioPage() {
         <div className="mx-auto flex max-w-[1600px] items-center gap-4">
           <div className="min-w-0 flex-1">
             <p className="truncate text-[11px] text-bone-dim">
-              {product.name} · {L(TYPE_LABEL[type].title)}
+              {studioName(product, language)} · {L(TYPE_LABEL[type].title)}
             </p>
             <p className="text-lg font-black tabular-nums">{formatPrice(price)}</p>
           </div>

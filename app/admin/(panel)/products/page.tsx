@@ -8,7 +8,7 @@ import { ProductsTable } from "@/components/admin/ProductsTable";
 export const dynamic = "force-dynamic";
 
 export default async function ProductsPage() {
-  requireAdmin();
+  await requireAdmin();
   const [products, categories] = await Promise.all([listProducts(), listCategories()]);
   return (
     <AdminPage>

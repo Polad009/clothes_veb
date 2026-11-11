@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/lib/adminSession";
+import { requireOwner } from "@/lib/adminSession";
 import { listCampaigns } from "@/lib/db/campaigns";
 import { listProducts } from "@/lib/db/products";
 import { listCategories } from "@/lib/db/site";
@@ -8,7 +8,7 @@ import { DiscountsManager } from "@/components/admin/DiscountsManager";
 export const dynamic = "force-dynamic";
 
 export default async function DiscountsPage() {
-  requireAdmin();
+  await requireOwner();
   const [campaigns, products, categories] = await Promise.all([listCampaigns(), listProducts(), listCategories()]);
   return (
     <AdminPage narrow>

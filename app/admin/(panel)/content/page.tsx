@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/lib/adminSession";
+import { requireOwner } from "@/lib/adminSession";
 import { getContent, getSettings } from "@/lib/db/site";
 import { AdminPage } from "@/components/admin/AdminShell";
 import { ContentEditor } from "@/components/admin/ContentEditor";
@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 const str = (v: unknown) => (typeof v === "string" ? v : "");
 
 export default async function ContentPage() {
-  requireAdmin();
+  await requireOwner();
   const [content, settings]: [any, any] = await Promise.all([getContent(), getSettings()]);
   const hero = content.hero || {};
   const studio = content.podBanner || {};

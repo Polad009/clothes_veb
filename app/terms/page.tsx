@@ -1,118 +1,188 @@
-import { getStoreSnapshot } from "@/lib/storeSnapshot";
-import { LegalText } from "@/components/LegalText";
-import React from "react";
-import Link from "next/link";
 import { Metadata } from "next";
-import { Scale, ArrowLeft, RefreshCw, Truck, CreditCard, ShieldCheck } from "lucide-react";
+import { getStoreSnapshot } from "@/lib/storeSnapshot";
+import { resolveShippingRates } from "@/lib/shipping";
+import { LegalCustom, LegalPage, legalLang, type LegalDoc } from "@/components/store/LegalPage";
 
 export const metadata: Metadata = {
-  title: "İstifadə Şərtləri & Qaydalar | Horwalle",
-  description: "Horwalle onlayn mağazasının istifadə şərtləri, qaytarılma və çatdırılma qaydaları.",
+  title: "İstifadə şərtləri · Terms of Sale",
+  description: "Horwalle sifariş, ödəniş, çatdırılma (Azərbaycan və beynəlxalq), gömrük və qaytarma qaydaları.",
   alternates: {
     canonical: "https://www.horwalle.com/terms",
+    languages: { az: "https://www.horwalle.com/terms?lang=az", en: "https://www.horwalle.com/terms?lang=en" },
   },
 };
 
-export default async function TermsPage() {
-  const custom = String((await getStoreSnapshot()).content?.policies?.terms || "").trim();
-  if (custom) return <LegalText title="İstifadə Şərtləri" text={custom} />;
+function doc(lang: "az" | "en", r: ReturnType<typeof resolveShippingRates>): LegalDoc {
+  if (lang === "en") {
+    return {
+      title: "Terms of Sale",
+      updated: "11 November 2026",
+      intro: "These terms apply to every order placed on www.horwalle.com. By placing an order you accept them.",
+      sections: [
+        {
+          title: "Who we are",
+          body: ["Horwalle is a clothing brand based in Baku, Azerbaijan. We sell ready-made garments and garments made to your own design in our 3D Design Studio, and ship them within Azerbaijan and worldwide."],
+        },
+        {
+          title: "Prices and payment",
+          body: [
+            [
+              "Prices are set in Azerbaijani manat (AZN). Amounts shown in other currencies are converted at the current rate and are for guidance; your card is charged in the currency shown at checkout.",
+              "Prices include Azerbaijani VAT where it applies. They do not include import duties or taxes in your country (see Customs below).",
+              "You can pay by bank card online. Within Azerbaijan, payment on delivery may also be offered.",
+              "Each order gets an order number. Keep it to track your order on the Track order page.",
+            ],
+          ],
+        },
+        {
+          title: "Delivery in Azerbaijan",
+          body: [
+            [
+              "Baku and Sumgayit: 1–2 business days, free of charge.",
+              `Other regions: 2–4 business days. Delivery costs ${r.regionAZN} ₼, free for orders from ${r.regionFreeFromAZN} ₼.`,
+            ],
+          ],
+        },
+        {
+          title: "International delivery",
+          body: [
+            [
+              `Standard: 7–14 business days, from ${r.intlStandardAZN} ₼ ($${r.intlStandardUSD}).`,
+              `Express: 2–5 business days, from ${r.intlExpressAZN} ₼ ($${r.intlExpressUSD}).`,
+              "Delivery times start when the parcel leaves Baku. Made-to-design items need 2–4 extra business days to produce.",
+              "Every international parcel is sent with a tracking number, which we e-mail to you.",
+              "Delays caused by customs, the destination postal service or a wrong address are outside our control.",
+            ],
+          ],
+        },
+        {
+          title: "Customs, duties and taxes",
+          body: [
+            "International orders are shipped DDU (Delivered Duty Unpaid). Import duties, VAT and handling fees charged by your country are paid by the recipient when the parcel arrives.",
+            "These charges depend on your country's rules and the order value; we cannot calculate them in advance. If you refuse to pay them and the parcel is returned to us, we refund the goods minus the shipping cost both ways.",
+          ],
+        },
+        {
+          title: "Returns and exchanges",
+          body: [
+            [
+              "Ready-made items can be returned or exchanged within 14 days of delivery, unworn, unwashed and with their tags.",
+              "Within Azerbaijan we can arrange a courier pick-up. From abroad, you send the item back to us; return shipping and any customs on the return are paid by the buyer.",
+              "Write to us before sending a return, with your order number, so we can confirm the address.",
+              "Refunds are made to the original payment method within 10 business days after we receive the item. The original shipping cost is not refunded, unless the item was faulty or wrong.",
+            ],
+          ],
+        },
+        {
+          title: "Items made to your design",
+          body: [
+            "Garments made in the 3D Design Studio are produced for you alone, so they cannot be returned for change of mind. If one arrives with a production fault or differs from the design you approved, we remake it or refund it at our cost.",
+            "You confirm that you own, or have the right to use, every image, logo or text you upload. We may refuse a design that infringes others' rights or is offensive.",
+          ],
+        },
+        {
+          title: "Faulty or wrong items",
+          body: ["If an item arrives damaged, faulty or not as ordered, write to us within 7 days of delivery with photos. We replace it or refund it, including shipping, wherever you are."],
+        },
+        {
+          title: "Cancelling an order",
+          body: ["You can cancel a ready-made order free of charge until it is shipped. A made-to-design order can be cancelled only before production starts."],
+        },
+        {
+          title: "Governing law",
+          body: ["These terms are governed by the laws of the Republic of Azerbaijan. This does not take away any rights you have under the consumer laws of your own country."],
+        },
+      ],
+    };
+  }
 
-  return (
-    <div className="min-h-screen bg-[#090707] text-stone-200 pt-28 pb-20 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        {/* Back navigation */}
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-[#E6C280] hover:text-white transition-colors mb-8"
-        >
-          <ArrowLeft size={14} />
-          Ana Səhifəyə Qayıt
-        </Link>
-
-        {/* Header */}
-        <div className="border-b border-white/10 pb-8 mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E6C280]/10 text-[#E6C280] text-xs font-semibold mb-4 border border-[#E6C280]/20">
-            <Scale size={14} />
-            Hüquqi Qaydalar & Müqavilə
-          </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-white tracking-tight mb-4">
-            İstifadə Şərtləri
-          </h1>
-          <p className="text-stone-400 text-sm sm:text-base leading-relaxed">
-            Horwalle veb-saytından istifadə etməklə və ya sifariş verməklə aşağıdakı rəsmi şərtləri qəbul etmiş sayılırsınız.
-          </p>
-        </div>
-
-        {/* Content */}
-        <div className="space-y-10 text-sm sm:text-base leading-relaxed text-stone-300">
-          {/* Section 1 */}
-          <section className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 sm:p-8">
-            <div className="flex items-center gap-3 mb-4 text-white">
-              <ShieldCheck className="text-[#E6C280]" size={20} />
-              <h2 className="text-xl font-serif font-bold">1. Ümumi Müddəalar</h2>
-            </div>
-            <p className="mb-3 text-stone-400">
-              Bu müqavilə Horwalle ilə alıcı arasında bağlanmış rəsmi elektron təklif (oferta) xarakteri daşıyır.
-            </p>
-            <p className="text-stone-400">
-              Alıcı sayt üzərindən hazır kolleksiyadan geyim sifariş edə və ya 3D Dizayn Studiyasından istifadə edərək fərdi dizaynlı məhsul hazırlada bilər.
-            </p>
-          </section>
-
-          {/* Section 2 */}
-          <section className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 sm:p-8">
-            <div className="flex items-center gap-3 mb-4 text-white">
-              <CreditCard className="text-[#E6C280]" size={20} />
-              <h2 className="text-xl font-serif font-bold">2. Qiymətlər və Ödəniş Üsulları</h2>
-            </div>
-            <ul className="list-disc list-inside space-y-2 text-stone-300">
-              <li>Bütün qiymətlər rəsmi olaraq Azərbaycan Manatı (AZN) ilə göstərilir, xarici müştərilər üçün USD, EUR və digər valyutalarda ekvivalent əks olunur.</li>
-              <li>Ödənişlər Visa, Mastercard, Apple Pay, Google Pay və ya kuryerlə çatdırılma zamanı qapıda nağd/POS-terminal vasitəsilə həyata keçirilir.</li>
-              <li>Sifariş təsdiq edildikdən sonra müştəriyə unikal izləmə kodu (məs: <span className="text-[#E6C280] font-mono">HV-XXXX</span>) təqdim olunur.</li>
-            </ul>
-          </section>
-
-          {/* Section 3 */}
-          <section className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 sm:p-8">
-            <div className="flex items-center gap-3 mb-4 text-white">
-              <Truck className="text-[#E6C280]" size={20} />
-              <h2 className="text-xl font-serif font-bold">3. Çatdırılma Şərtləri</h2>
-            </div>
-            <p className="mb-3 text-stone-400">
-              Bakı şəhəri daxilində çatdırılma <strong className="text-white">PULSUZDUR</strong> və 24 saat ərzində yerinə yetirilir.
-            </p>
-            <p className="text-stone-400">
-              Azərbaycanın bütün bölgələrinə çatdırılma poçt və ya xüsusi kuryer xidməti ilə 2-3 iş günü ərzində təmin edilir.
-            </p>
-          </section>
-
-          {/* Section 4 */}
-          <section className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 sm:p-8">
-            <div className="flex items-center gap-3 mb-4 text-white">
-              <RefreshCw className="text-[#E6C280]" size={20} />
-              <h2 className="text-xl font-serif font-bold">4. Qaytarılma və Dəyişdirilmə Qaydaları (14 Gün Zəmanət)</h2>
-            </div>
-            <p className="mb-3 text-stone-400">
-              Müştəri məmnuniyyəti bizim prioritetimizdir. "İstehlakçıların hüquqlarının müdafiəsi haqqında" qanuna uyğun olaraq:
-            </p>
-            <ul className="list-disc list-inside space-y-2 text-stone-300">
-              <li>Hazır kolleksiya məhsulları alındığı tarixdən etibarən <strong className="text-white">14 gün ərzində</strong> istifadə edilmədən, etiketləri zədələnmədən asanlıqla dəyişdirilə və ya qaytarıla bilər.</li>
-              <li>Müştərinin sifarişi əsasında 3D studiyada fərdi ad/loqo ilə hazırlanmış eksklüziv məhsullarda yalnız istehsal qüsuru (defekt) aşkarlandıqda ödənişsiz yenidən hazırlanır və ya qaytarılır.</li>
-            </ul>
-          </section>
-
-          {/* Support button */}
-          <div className="pt-4 flex justify-end">
-            <Link
-              href="/collections"
-              className="px-6 py-3 rounded-xl bg-[#E6C280] text-black font-semibold text-xs uppercase tracking-wider hover:bg-white transition-colors"
-            >
-              Kolleksiyaya Keç
-            </Link>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  return {
+    title: "İstifadə şərtləri",
+    updated: "11 noyabr 2026",
+    intro: "Bu şərtlər www.horwalle.com saytında verilən bütün sifarişlərə aiddir. Sifariş verməklə onları qəbul etmiş olursunuz.",
+    sections: [
+      {
+        title: "Biz kimik",
+        body: ["Horwalle Bakıda yerləşən geyim brendidir. Hazır geyimlər və 3D Dizayn Studiyasında sizin dizaynınızla hazırlanan geyimlər satırıq; Azərbaycan daxilinə və bütün dünyaya göndəririk."],
+      },
+      {
+        title: "Qiymət və ödəniş",
+        body: [
+          [
+            "Qiymətlər Azərbaycan manatı (AZN) ilə müəyyən edilir. Digər valyutalarda göstərilən məbləğ cari məzənnə ilə hesablanır və məlumat xarakteri daşıyır; kartdan ödəniş səhifəsində göstərilən valyutada çıxılır.",
+            "Qiymətlərə, tətbiq olunduğu halda, ƏDV daxildir. Başqa ölkənin idxal rüsumu və vergiləri daxil deyil (aşağıda «Gömrük» bölməsinə baxın).",
+            "Ödənişi onlayn bank kartı ilə edə bilərsiniz. Azərbaycan daxilində çatdırılma zamanı ödəniş də mümkün ola bilər.",
+            "Hər sifarişə nömrə verilir. Sifarişi «Sifarişi izlə» səhifəsində bu nömrə ilə izləyə bilərsiniz.",
+          ],
+        ],
+      },
+      {
+        title: "Azərbaycan daxilində çatdırılma",
+        body: [
+          [
+            "Bakı və Sumqayıt: 1–2 iş günü, pulsuz.",
+            `Rayonlar: 2–4 iş günü. Çatdırılma ${r.regionAZN} ₼, ${r.regionFreeFromAZN} ₼-dan yuxarı sifarişlərdə pulsuzdur.`,
+          ],
+        ],
+      },
+      {
+        title: "Beynəlxalq çatdırılma",
+        body: [
+          [
+            `Standart: 7–14 iş günü, ${r.intlStandardAZN} ₼-dan ($${r.intlStandardUSD}).`,
+            `Ekspress: 2–5 iş günü, ${r.intlExpressAZN} ₼-dan ($${r.intlExpressUSD}).`,
+            "Müddət bağlama Bakıdan çıxdığı gündən hesablanır. Sizin dizaynınızla hazırlanan məhsullara əlavə 2–4 iş günü lazımdır.",
+            "Hər beynəlxalq bağlama izləmə nömrəsi ilə göndərilir və nömrə sizə e-poçtla gəlir.",
+            "Gömrük, təyinat ölkəsinin poçtu və ya səhv ünvan səbəbindən yaranan gecikmələr bizdən asılı deyil.",
+          ],
+        ],
+      },
+      {
+        title: "Gömrük, rüsum və vergilər",
+        body: [
+          "Beynəlxalq sifarişlər DDU (rüsumu ödənilməmiş) şərti ilə göndərilir. Ölkənizin tələb etdiyi idxal rüsumu, ƏDV və xidmət haqları bağlama çatanda alıcı tərəfindən ödənilir.",
+          "Bu məbləğlər ölkənin qaydalarından və sifarişin dəyərindən asılıdır, onları əvvəlcədən hesablaya bilmirik. Ödənişdən imtina edilsə və bağlama bizə qayıtsa, məhsulun dəyərini iki tərəfli göndərmə xərci çıxılmaqla qaytarırıq.",
+        ],
+      },
+      {
+        title: "Qaytarma və dəyişmə",
+        body: [
+          [
+            "Hazır məhsullar çatdırılmadan sonra 14 gün ərzində, geyinilməmiş, yuyulmamış və etiketləri üzərində olmaqla qaytarıla və ya dəyişdirilə bilər.",
+            "Azərbaycan daxilində məhsulu kuryerlə götürə bilərik. Xaricdən məhsulu siz göndərirsiniz; qaytarma göndərişi və onun gömrük xərci alıcıya aiddir.",
+            "Göndərməzdən əvvəl sifariş nömrəsi ilə bizə yazın, ünvanı təsdiqləyək.",
+            "Pul məhsul bizə çatdıqdan sonra 10 iş günü ərzində ödəniş etdiyiniz üsulla qaytarılır. İlkin çatdırılma haqqı qaytarılmır, məhsul qüsurlu və ya səhv olmadığı halda.",
+          ],
+        ],
+      },
+      {
+        title: "Sizin dizaynınızla hazırlanan məhsullar",
+        body: [
+          "3D Dizayn Studiyasında hazırlanan geyimlər yalnız sizin üçün istehsal olunur, ona görə fikir dəyişikliyi səbəbilə qaytarılmır. Məhsulda istehsal qüsuru olarsa və ya təsdiqlədiyiniz dizayndan fərqlənərsə, öz hesabımıza yenidən hazırlayır və ya pulu qaytarırıq.",
+          "Yüklədiyiniz hər şəkil, loqo və mətnin sizə məxsus olduğunu və ya istifadə hüququnuz olduğunu təsdiq edirsiniz. Başqasının hüququnu pozan və ya təhqiramiz dizaynı qəbul etməyə bilərik.",
+        ],
+      },
+      {
+        title: "Qüsurlu və ya səhv məhsul",
+        body: ["Məhsul zədəli, qüsurlu və ya sifarişdən fərqli gələrsə, çatdırılmadan sonra 7 gün ərzində şəkillə bizə yazın. Harada olmağınızdan asılı olmayaraq dəyişirik və ya çatdırılma daxil pulu qaytarırıq."],
+      },
+      {
+        title: "Sifarişin ləğvi",
+        body: ["Hazır məhsul sifarişini göndərilənə qədər pulsuz ləğv edə bilərsiniz. Dizaynla hazırlanan sifariş yalnız istehsal başlamazdan əvvəl ləğv edilə bilər."],
+      },
+      {
+        title: "Tətbiq olunan qanun",
+        body: ["Bu şərtlər Azərbaycan Respublikasının qanunvericiliyi ilə tənzimlənir. Bu, öz ölkənizin istehlakçı qanunlarından irəli gələn hüquqlarınızı məhdudlaşdırmır."],
+      },
+    ],
+  };
 }
 
+export default async function TermsPage({ searchParams }: { searchParams: { lang?: string } }) {
+  const snap = await getStoreSnapshot();
+  const custom = String(snap.content?.policies?.terms || "").trim();
+  if (custom) return <LegalCustom title="İstifadə şərtləri" text={custom} />;
+  const lang = legalLang(searchParams?.lang);
+  const rates = resolveShippingRates((snap.settings as any)?.shipping);
+  return <LegalPage doc={doc(lang, rates)} lang={lang} path="/terms" email={(snap.settings as any)?.contactEmail} />;
+}

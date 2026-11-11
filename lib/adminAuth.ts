@@ -76,13 +76,18 @@ export function verifyAdminCredentials(user: string, pass: string): boolean {
   return crypto.timingSafeEqual(cleanPassHash, targetHash);
 }
 
-export function createAdminToken(username: string): string {
+/** owner = the shop owner (everything); staff = orders, print jobs, chat and products only. */
+export type AdminRole = 'owner' | 'staff';
+
+export function createAdminToken(username: string, role: AdminRole = 'owner'): string {
   if (!SECRET) throw new Error('ADMIN_JWT_SECRET konfiqurasiya olunmayıb.');
   const header = base64UrlEncode(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
   const payload = base64UrlEncode(
     JSON.stringify({
       u: username,
-      exp: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days expiration
+      r: role,
+      // owner: 7 days; staff: 12 hours, so a removed staff account stops working soon
+      exp: Date.now() + (role === 'staff' ? 12 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000),
     })
   );
 
@@ -95,10 +100,27 @@ export function createAdminToken(username: string): string {
 }
 
 export function verifyAdminToken(token: string | null | undefined): boolean {
-  if (!SECRET || !token || typeof token !== 'string') return false;
+  return adminTokenRole(token) !== null;
+}
+
+/** The role in a valid token, or null. Tokens made before roles existed belong to the owner. */
+export function adminTokenRole(token: string | null | undefined): AdminRole | null {
+  const data = readAdminToken(token);
+  if (!data) return null;
+  return data.r === 'staff' ? 'staff' : 'owner';
+}
+
+/** Username in a valid token, or null. */
+export function adminTokenUser(token: string | null | undefined): string | null {
+  const data = readAdminToken(token);
+  return data ? String(data.u || '') : null;
+}
+
+function readAdminToken(token: string | null | undefined): Record<string, any> | null {
+  if (!SECRET || !token || typeof token !== 'string') return null;
 
   const parts = token.split('.');
-  if (parts.length !== 3) return false;
+  if (parts.length !== 3) return null;
 
   const [header, payload, signature] = parts;
 
@@ -111,18 +133,39 @@ export function verifyAdminToken(token: string | null | undefined): boolean {
     const sigBuf = Buffer.from(signature);
     const expectedBuf = Buffer.from(expectedSignature);
 
-    if (sigBuf.length !== expectedBuf.length) return false;
-    if (!crypto.timingSafeEqual(sigBuf, expectedBuf)) return false;
+    if (sigBuf.length !== expectedBuf.length) return null;
+    if (!crypto.timingSafeEqual(sigBuf, expectedBuf)) return null;
 
     const data = JSON.parse(base64UrlDecode(payload));
     if (!data.exp || data.exp < Date.now()) {
-      return false;
+      return null;
     }
 
-    return true;
+    return data;
   } catch {
-    return false;
+    return null;
   }
+}
+
+/** Token sent with a request (Bearer header, x-admin-token header or the session cookie). */
+function requestToken(req: NextRequest): string | undefined {
+  const authHeader = req.headers.get('authorization') || '';
+  if (authHeader.toLowerCase().startsWith('bearer ')) {
+    const t = authHeader.slice(7).trim();
+    if (verifyAdminToken(t)) return t;
+  }
+  const custom = req.headers.get('x-admin-token') || '';
+  if (custom && verifyAdminToken(custom)) return custom;
+  return req.cookies.get('horvvalle_admin_token')?.value;
+}
+
+export function adminRequestRole(req: NextRequest): AdminRole | null {
+  return adminTokenRole(requestToken(req));
+}
+
+/** Owner-only actions: settings, prices, content, discounts, reports, credentials, deleting. */
+export function isAdminOwner(req: NextRequest): boolean {
+  return adminRequestRole(req) === 'owner';
 }
 
 export function isAdminAuthenticated(req: NextRequest): boolean {

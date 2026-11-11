@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { isAdminAuthenticated } from '@/lib/adminAuth';
+import { isAdminOwner } from '@/lib/adminAuth';
 import { createEmailDomain, getEmailDomainStatus, sendTestEmail, verifyEmailDomain } from '@/lib/email/domain';
 import { SENDER_EMAIL } from '@/lib/email/emailService';
 import { getSettings } from '@/lib/db/site';
@@ -14,7 +14,7 @@ function unauthorized() {
 
 /** GET — sending domain status and the DNS records Resend expects. */
 export async function GET(req: NextRequest) {
-  if (!isAdminAuthenticated(req)) return unauthorized();
+  if (!isAdminOwner(req)) return unauthorized();
   try {
     const [status, settings] = await Promise.all([getEmailDomainStatus(), getSettings()]);
     return NextResponse.json({ ...status, sender: SENDER_EMAIL, orderNotifyEmail: (settings as any).orderNotifyEmail || '' }, { headers: NO_STORE });
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
 
 /** POST { action: 'setup' | 'verify' | 'test', to? } */
 export async function POST(req: NextRequest) {
-  if (!isAdminAuthenticated(req)) return unauthorized();
+  if (!isAdminOwner(req)) return unauthorized();
   try {
     const body = await req.json().catch(() => ({}));
     if (body.action === 'setup') return NextResponse.json({ ...(await createEmailDomain()), sender: SENDER_EMAIL }, { headers: NO_STORE });

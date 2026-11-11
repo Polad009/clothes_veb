@@ -304,3 +304,27 @@ export function generateNewOrderAlertHtml(order: any, contact: EmailContact = {}
   `;
   return getEmailBaseWrapper(content, contact);
 }
+
+/** Shop alert: these colour/size combinations are running out after an order. */
+export function generateLowStockAlertHtml(
+  rows: { name: string; color: string; size: string; left: number; adminUrl: string }[],
+  contact: EmailContact = {}
+): string {
+  const body = rows
+    .map(
+      (r) => `
+    <tr>
+      <td><a href="${esc(r.adminUrl)}" style="color: #111011; font-weight: 600;">${esc(r.name)}</a><br><span style="font-size: 11px; color: #7A7269;">${[r.color && `Rəng: ${esc(r.color)}`, r.size && `Ölçü: ${esc(r.size)}`].filter(Boolean).join(" · ")}</span></td>
+      <td style="text-align: right; font-weight: 700; color: ${r.left === 0 ? "#C0392B" : "#111011"};">${r.left === 0 ? "bitdi" : `${r.left} ədəd`}</td>
+    </tr>`
+    )
+    .join("");
+  const content = `
+    <h2 style="font-size: 22px; margin: 0 0 6px 0; font-weight: 600; color: #111011;">Stok azalır</h2>
+    <p style="font-size: 13px; color: #5C5247; margin: 0 0 20px 0;">Son sifarişdən sonra bu məhsullardan az qalıb. Stoku admin paneldə məhsulun səhifəsindən artırın.</p>
+    <table class="table">
+      <thead><tr><th>Məhsul</th><th style="text-align: right;">Qalıb</th></tr></thead>
+      <tbody>${body}</tbody>
+    </table>`;
+  return getEmailBaseWrapper(content, contact);
+}

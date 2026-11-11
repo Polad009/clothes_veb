@@ -9,11 +9,6 @@ const nextConfig = {
       "framer-motion",
       "clsx",
       "tailwind-merge",
-      "three",
-      "@react-three/fiber",
-      "@react-three/drei",
-      "konva",
-      "react-konva",
     ],
   },
   images: {
@@ -44,13 +39,13 @@ const nextConfig = {
       },
       {
         protocol: "https",
+        hostname: "www.horwalle.com",
+      },
+      {
+        protocol: "https",
         hostname: "*.supabase.co",
       },
     ],
-  },
-  webpack: (config) => {
-    config.externals = [...(config.externals || []), { canvas: "canvas" }];
-    return config;
   },
   async headers() {
     return [

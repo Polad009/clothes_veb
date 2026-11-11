@@ -1,6 +1,6 @@
+import { requestAdminRole } from '@/lib/adminSession';
 import { NextRequest, NextResponse } from 'next/server';
 import { createPodOrder, listPodOrders, updatePodOrderStatus } from '@/lib/db/orders';
-import { isAdminAuthenticated } from '@/lib/adminAuth';
 import { checkRateLimit } from '@/lib/rateLimiter';
 
 export const dynamic = 'force-dynamic';
@@ -18,7 +18,7 @@ function firstString(...values: any[]): string {
 }
 
 export async function GET(req: NextRequest) {
-  if (!isAdminAuthenticated(req)) {
+  if (!(await requestAdminRole(req))) {
     return NextResponse.json(UNAUTHORIZED, { status: 401 });
   }
 
@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
-  if (!isAdminAuthenticated(req)) {
+  if (!(await requestAdminRole(req))) {
     return NextResponse.json(UNAUTHORIZED, { status: 401 });
   }
 

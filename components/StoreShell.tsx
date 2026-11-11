@@ -20,7 +20,7 @@ export function StoreShell({ children }: { children: React.ReactNode }) {
 
   // Pages built for the old light design get the dark colour mapping from globals.css (.hw-dark)
   const p = pathname || "/";
-  const redesigned = p === "/" || p.startsWith("/collections") || p.startsWith("/products/") || p.startsWith("/studio") || p === "/checkout";
+  const redesigned = p === "/" || p.startsWith("/collections") || p.startsWith("/products/") || p.startsWith("/studio") || p === "/checkout" || p === "/terms" || p === "/privacy";
 
   return (
     <>

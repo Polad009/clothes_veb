@@ -1,28 +1,22 @@
 import type { Metadata, Viewport } from "next";
+import React from "react";
+import { Archivo, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
-import { Ticker } from "@/components/Ticker";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
+
+// Self-hosted by Next (no request to Google at page load); exposed as CSS variables
+const archivo = Archivo({ subsets: ["latin", "latin-ext"], axes: ["wdth"], variable: "--font-archivo", display: "swap" });
+const jakarta = Plus_Jakarta_Sans({ subsets: ["latin", "latin-ext", "cyrillic-ext"], variable: "--font-jakarta", display: "swap", preload: false });
 import { CartProvider } from "@/context/CartContext";
 import { CurrencyProvider } from "@/context/CurrencyContext";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { StoreDataProvider } from "@/context/StoreDataContext";
 import { TryOnProvider } from "@/context/TryOnContext";
 import { AuthProvider } from "@/context/AuthContext";
-import dynamic from "next/dynamic";
-import { PageTransition } from "@/components/PageTransition";
-import { Intro } from "@/components/Intro";
-import { SmoothScroll } from "@/components/SmoothScroll";
 
-const CartDrawer = dynamic(
-  () => import("@/components/CartDrawer").then((mod) => mod.CartDrawer),
-  { ssr: false }
-);
 
-import React, { Suspense } from "react";
 
 export const viewport: Viewport = {
-  themeColor: "#090707",
+  themeColor: "#0A0A0A",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
@@ -30,8 +24,9 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.horwalle.com"),
+  applicationName: "Horwalle",
   title: {
-    default: "Horwalle (Horvvalle) — Premium Geyim | Rəsmi Mağaza",
+    default: "Horwalle — Premium Geyim Mağazası",
     template: "%s | Horwalle",
   },
   alternates: {
@@ -59,7 +54,7 @@ export const metadata: Metadata = {
     shortcut: [{ url: "/favicon.ico", type: "image/x-icon" }],
     apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
   },
-  description: "Horwalle (Horvvalle) — premium geyim mağazası. Köynəklər, hudilər, şalvarlar və aksesuarlar; istəsən öz dizaynını 3D studiyada geyimə köçür. Bakıda sürətli çatdırılma.",
+  description: "Horwalle — premium geyim mağazası. Köynəklər, hudilər, şalvarlar və aksesuarlar; öz dizaynını 3D studiyada geyimə köçür. Azərbaycana və dünyanın hər yerinə çatdırılma.",
   keywords: [
     "Horwalle",
     "www.horwalle.com",
@@ -80,11 +75,11 @@ export const metadata: Metadata = {
     locale: "az_AZ",
     url: "https://www.horwalle.com",
     siteName: "Horwalle",
-    title: "Horwalle (Horvvalle) — Premium Geyim Mağazası",
-    description: "Horwalle (Horvvalle) — premium geyim mağazası. Köynəklər, hudilər, şalvarlar və aksesuarlar; istəsən öz dizaynını 3D studiyada geyimə köçür. Bakıda sürətli çatdırılma.",
+    title: "Horwalle — Premium Geyim Mağazası",
+    description: "Horwalle — premium geyim mağazası. Köynəklər, hudilər, şalvarlar və aksesuarlar; öz dizaynını 3D studiyada geyimə köçür. Azərbaycana və dünyanın hər yerinə çatdırılma.",
     images: [
       {
-        url: "https://www.horwalle.com/images/categories/salvar-and-shortik-showcase.webp",
+        url: "https://www.horwalle.com/brand/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "Horwalle Premium Fashion",
@@ -93,9 +88,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Horwalle (Horvvalle) — Premium Geyim Mağazası",
-    description: "Horwalle (Horvvalle) — premium geyim mağazası. Köynəklər, hudilər, şalvarlar və aksesuarlar; istəsən öz dizaynını 3D studiyada geyimə köçür. Bakıda sürətli çatdırılma.",
-    images: ["https://www.horwalle.com/images/categories/salvar-and-shortik-showcase.webp"],
+    title: "Horwalle — Premium Geyim Mağazası",
+    description: "Horwalle — premium geyim mağazası. Köynəklər, hudilər, şalvarlar və aksesuarlar; öz dizaynını 3D studiyada geyimə köçür. Azərbaycana və dünyanın hər yerinə çatdırılma.",
+    images: ["https://www.horwalle.com/brand/og-image.jpg"],
   },
 };
 
@@ -111,22 +106,8 @@ export default async function RootLayout({
   const initialStore = await getStoreSnapshot();
 
   return (
-    <html lang="az">
+    <html lang="az" className={`${archivo.variable} ${jakarta.variable}`}>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="preload"
-          href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=EB+Garamond:ital,wght@0,400..700;1,400..700&family=Fraunces:opsz,wght@9..144,300..900&family=Instrument+Sans:wght@400..700&family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
-          as="style"
-        />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=EB+Garamond:ital,wght@0,400..700;1,400..700&family=Fraunces:opsz,wght@9..144,300..900&family=Instrument+Sans:wght@400..700&family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
-        />
-        <link rel="icon" type="image/png" sizes="32x32" href="/brand/favicon-32x32.png?v=3" />
-        <link rel="icon" type="image/png" sizes="512x512" href="/brand/favicon.png?v=3" />
-        <link rel="apple-touch-icon" href="/brand/favicon.png?v=3" />
         {/* Google Search Rich Snippets & Knowledge Graph Schema */}
         <script
           type="application/ld+json"
@@ -136,10 +117,11 @@ export default async function RootLayout({
               "@graph": [
                 {
                   "@type": "Organization",
-                  "@id": "https://horvvalle.com/#organization",
-                  "name": "Horvvalle",
-                  "url": "https://horvvalle.com",
-                  "logo": "https://horvvalle.com/brand/icon-dark.png",
+                  "@id": "https://www.horwalle.com/#organization",
+                  "name": "Horwalle",
+                  "alternateName": "Horvvalle",
+                  "url": "https://www.horwalle.com",
+                  "logo": "https://www.horwalle.com/icon.png",
                   "description": "Premium geyim mağazası və 3D dizayn studiyası.",
                   "sameAs": [
                     "https://www.instagram.com/horwalle?vrfl=dGJ0anppbmYyeXRy&utm_source=qr",
@@ -148,21 +130,22 @@ export default async function RootLayout({
                 },
                 {
                   "@type": "WebSite",
-                  "@id": "https://horvvalle.com/#website",
-                  "url": "https://horvvalle.com",
-                  "name": "Horvvalle",
-                  "publisher": { "@id": "https://horvvalle.com/#organization" },
+                  "@id": "https://www.horwalle.com/#website",
+                  "url": "https://www.horwalle.com",
+                  "name": "Horwalle",
+                  "alternateName": ["Horvvalle", "horwalle.com"],
+                  "publisher": { "@id": "https://www.horwalle.com/#organization" },
                   "potentialAction": {
                     "@type": "SearchAction",
-                    "target": "https://horvvalle.com/collections?q={search_term_string}",
+                    "target": "https://www.horwalle.com/collections?q={search_term_string}",
                     "query-input": "required name=search_term_string"
                   }
                 },
                 {
                   "@type": "ClothingStore",
-                  "@id": "https://horvvalle.com/#store",
-                  "name": "Horvvalle",
-                  "url": "https://horvvalle.com",
+                  "@id": "https://www.horwalle.com/#store",
+                  "name": "Horwalle",
+                  "url": "https://www.horwalle.com",
                   "priceRange": "₼₼",
                   "currenciesAccepted": "AZN",
                   "paymentAccepted": "Cash, Credit Card, Apple Pay, Google Pay",

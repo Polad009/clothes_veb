@@ -33,6 +33,11 @@ export function CookieConsent() {
     } catch {
       // ignore
     }
+    // tell Google Analytics the visitor's choice (Consent Mode, set up in Analytics.tsx)
+    const w = window as any;
+    if (typeof w.gtag === "function") {
+      w.gtag("consent", "update", { analytics_storage: type === "all" ? "granted" : "denied" });
+    }
     setIsVisible(false);
   };
 

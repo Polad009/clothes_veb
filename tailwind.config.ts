@@ -49,9 +49,9 @@ const config: Config = {
         "card-lg": "20px",
       },
       fontFamily: {
-        grotesk: ['"Archivo"', '"Helvetica Neue"', "Arial", "sans-serif"],
+        grotesk: ["var(--font-archivo)", '"Helvetica Neue"', "Arial", "sans-serif"],
         sans: [
-          '"Plus Jakarta Sans"',
+          "var(--font-jakarta)",
           "-apple-system",
           "BlinkMacSystemFont",
           '"SF Pro Text"',
@@ -71,7 +71,7 @@ const config: Config = {
           "serif",
         ],
         body: [
-          '"Plus Jakarta Sans"',
+          "var(--font-jakarta)",
           "-apple-system",
           "BlinkMacSystemFont",
           '"Inter"',

@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search } from "lucide-react";
+import { Download, Search } from "lucide-react";
 import { adminFetch, formatDate, formatMoney, ORDER_STATUSES, orderStatusTone, paymentLabel } from "@/lib/adminClient";
 import { Badge, Card, ConfirmButton, EmptyState, Input, PageHeader, Select, useToast } from "@/components/admin/ui";
 
@@ -24,7 +24,7 @@ export interface OrderRow {
   trackingCode: string;
 }
 
-export function OrdersTable({ orders, initialStatus }: { orders: OrderRow[]; initialStatus: string }) {
+export function OrdersTable({ orders, initialStatus, isOwner = true }: { orders: OrderRow[]; initialStatus: string; isOwner?: boolean }) {
   const router = useRouter();
   const toast = useToast();
   const [query, setQuery] = useState("");
@@ -74,7 +74,23 @@ export function OrdersTable({ orders, initialStatus }: { orders: OrderRow[]; ini
       <PageHeader
         title="Sifarişlər"
         description={`${orders.length - testCount} real sifariş${testCount ? ` · ${testCount} test` : ""}`}
-        actions={testCount > 0 ? <ConfirmButton size="md" onConfirm={clearTests} confirmLabel={`${testCount} test sifarişini sil`}>Test sifarişlərini təmizlə</ConfirmButton> : undefined}
+        actions={
+          isOwner ? (
+            <>
+              {orders.length > 0 && (
+                <a
+                  href="/api/admin/orders-export"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-stone-300 bg-white px-3.5 text-sm font-medium text-stone-800 hover:bg-stone-50"
+                >
+                  <Download className="h-4 w-4" aria-hidden /> Excel-ə yüklə
+                </a>
+              )}
+              {testCount > 0 && (
+                <ConfirmButton size="md" onConfirm={clearTests} confirmLabel={`${testCount} test sifarişini sil`}>Test sifarişlərini təmizlə</ConfirmButton>
+              )}
+            </>
+          ) : undefined
+        }
       />
 
       <Card>

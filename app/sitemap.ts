@@ -1,10 +1,12 @@
 import { MetadataRoute } from "next";
 import { getStoreSnapshot } from "@/lib/storeSnapshot";
-import { visibleCategories } from "@/lib/categories";
+
+// rebuilt hourly so new products reach Google without a redeploy
+export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.horwalle.com").replace(/\/$/, "");
-  const { products, content } = await getStoreSnapshot();
+  const { products } = await getStoreSnapshot();
 
   // Base static routes
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -46,20 +48,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  const categoryRoutes: MetadataRoute.Sitemap = visibleCategories(content?.categories as any).map((c) => ({
-    url: `${baseUrl}/collections?category=${encodeURIComponent(c.id)}`,
-    lastModified: new Date(),
-    changeFrequency: "daily",
-    priority: 0.85,
-  }));
-
   // Product routes from the live catalogue
-  const productRoutes: MetadataRoute.Sitemap = products.map((p) => ({
-    url: `${baseUrl}/products/${p.slug}`,
+  // only products that are still on sale; the slug is URL-encoded so odd characters stay valid
+  const productRoutes: MetadataRoute.Sitemap = products.filter((p) => p.slug).map((p) => ({
+    url: `${baseUrl}/products/${encodeURIComponent(p.slug)}`,
     lastModified: new Date(),
     changeFrequency: "weekly",
     priority: 0.8,
   }));
 
-  return [...staticRoutes, ...categoryRoutes, ...productRoutes];
+  return [...staticRoutes, ...productRoutes];
 }

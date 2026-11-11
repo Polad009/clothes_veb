@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/lib/adminSession";
+import { requireOwner } from "@/lib/adminSession";
 import { listOrders } from "@/lib/db/orders";
 import { AdminPage } from "@/components/admin/AdminShell";
 import { ReportsView, type ReportRow } from "@/components/admin/ReportsView";
@@ -12,7 +12,7 @@ function isCash(method: string) {
 }
 
 export default async function ReportsPage() {
-  requireAdmin();
+  await requireOwner();
   const orders = await listOrders();
 
   const rows: ReportRow[] = orders.map((o) => ({

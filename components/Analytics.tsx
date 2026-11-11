@@ -19,6 +19,14 @@ export function Analytics() {
             {`
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
+              window.gtag = gtag;
+              // Consent Mode: no analytics cookies until the visitor accepts them in the cookie banner
+              var hwConsent = null;
+              try { hwConsent = localStorage.getItem('horvvalle_cookie_consent'); } catch (e) {}
+              gtag('consent', 'default', {
+                analytics_storage: hwConsent === 'all' ? 'granted' : 'denied',
+                ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied',
+              });
               gtag('js', new Date());
               gtag('config', '${gaId}', {
                 page_path: window.location.pathname,

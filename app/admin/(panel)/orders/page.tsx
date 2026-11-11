@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/lib/adminSession";
+import { currentAdminRole, requireAdmin } from "@/lib/adminSession";
 import { listOrders } from "@/lib/db/orders";
 import { AdminPage } from "@/components/admin/AdminShell";
 import { OrdersTable } from "@/components/admin/OrdersTable";
@@ -6,7 +6,7 @@ import { OrdersTable } from "@/components/admin/OrdersTable";
 export const dynamic = "force-dynamic";
 
 export default async function OrdersPage({ searchParams }: { searchParams: { status?: string } }) {
-  requireAdmin();
+  await requireAdmin();
   const orders = await listOrders();
   // The list only needs light rows: custom design payloads stay on the detail page.
   const rows = orders.map((o) => ({
@@ -28,7 +28,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: { sta
 
   return (
     <AdminPage>
-      <OrdersTable orders={rows} initialStatus={searchParams.status || "all"} />
+      <OrdersTable orders={rows} initialStatus={searchParams.status || "all"} isOwner={(await currentAdminRole()) === "owner"} />
     </AdminPage>
   );
 }

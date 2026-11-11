@@ -8,7 +8,7 @@ import { ProductForm } from "@/components/admin/ProductForm";
 export const dynamic = "force-dynamic";
 
 export default async function ProductEditPage({ params }: { params: { id: string } }) {
-  requireAdmin();
+  await requireAdmin();
   const isNew = params.id === "new";
   const [product, categories] = await Promise.all([
     isNew ? Promise.resolve(null) : findProduct(decodeURIComponent(params.id)),

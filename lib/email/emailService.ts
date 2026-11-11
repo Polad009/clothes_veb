@@ -4,7 +4,9 @@ import {
   generateStatusUpdateHtml,
   generateCampaignHtml,
   generateNewOrderAlertHtml,
+  generateLowStockAlertHtml,
 } from "./emailTemplates";
+import { LOW_STOCK } from "@/lib/stock";
 import { supabaseServer } from "@/lib/supabaseServer";
 import { getSettings } from "@/lib/db/site";
 import { whatsappNumber } from "@/lib/contact";
@@ -53,6 +55,66 @@ export async function sendNewOrderAlert(order: any): Promise<boolean> {
     return true;
   } catch (err) {
     console.error("[EmailService] Exception in sendNewOrderAlert:", err);
+    return false;
+  }
+}
+
+/**
+ * After an order: tells the shop which stock-tracked colour/size combinations it bought
+ * now have LOW_STOCK units or fewer left. Sent to the same address as new-order alerts.
+ */
+export async function sendLowStockAlert(order: any): Promise<boolean> {
+  let to = "";
+  try {
+    to = String((await getSettings() as any).orderNotifyEmail || "").trim();
+  } catch {}
+  if (!to || !to.includes("@") || !resend) return false;
+
+  const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const bought = (order.items || []).filter((i: any) => !i.isCustom && uuid.test(String(i.productId || "")));
+  if (!bought.length || !supabaseServer) return false;
+  const sb = supabaseServer;
+
+  try {
+    const ids = Array.from(new Set(bought.map((i: any) => String(i.productId))));
+    const { data: products } = await sb.from("products").select("id, name, track_stock").in("id", ids);
+    const tracked = new Map((products || []).filter((p: any) => p.track_stock).map((p: any) => [p.id, p.name]));
+    if (!tracked.size) return false;
+    const { data: stock } = await sb
+      .from("product_stock")
+      .select("product_id, color, size, quantity")
+      .in("product_id", Array.from(tracked.keys()));
+
+    const site = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.horwalle.com").replace(/\/$/, "");
+    const seen = new Set<string>();
+    const rows: { name: string; color: string; size: string; left: number; adminUrl: string }[] = [];
+    for (const item of bought) {
+      const pid = String(item.productId);
+      if (!tracked.has(pid)) continue;
+      const key = `${pid}|${item.color || ""}|${item.size || ""}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const row = (stock || []).find((s: any) => s.product_id === pid && (s.color || "") === (item.color || "") && (s.size || "") === (item.size || ""));
+      const left = Math.max(0, Number(row?.quantity) || 0);
+      if (left <= LOW_STOCK) {
+        rows.push({ name: String(tracked.get(pid) || item.name), color: item.color || "", size: item.size || "", left, adminUrl: `${site}/admin/products/${pid}` });
+      }
+    }
+    if (!rows.length) return false;
+
+    const { error } = await resend.emails.send({
+      from: SENDER_EMAIL,
+      to: [to],
+      subject: rows.some((r) => r.left === 0) ? `Stok bitdi: ${rows[0].name}` : `Stok azalır: ${rows[0].name}`,
+      html: generateLowStockAlertHtml(rows, await contact()),
+    });
+    if (error) {
+      console.error("[EmailService] Low stock alert failed:", error);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error("[EmailService] Exception in sendLowStockAlert:", err);
     return false;
   }
 }

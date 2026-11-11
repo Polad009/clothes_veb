@@ -1,7 +1,8 @@
+import { requestAdminRole } from '@/lib/adminSession';
 import { NextRequest, NextResponse } from 'next/server';
 import { deleteProduct, saveProduct } from '@/lib/db/products';
 import { listCatalog } from '@/lib/db/catalog';
-import { isAdminAuthenticated } from '@/lib/adminAuth';
+import { isAdminOwner } from '@/lib/adminAuth';
 import { refreshStore } from '@/lib/storeSnapshot';
 
 export const dynamic = 'force-dynamic';
@@ -59,7 +60,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  if (!isAdminAuthenticated(req)) {
+  if (!(await requestAdminRole(req))) {
     return NextResponse.json(UNAUTHORIZED, { status: 401 });
   }
 
@@ -77,7 +78,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  if (!isAdminAuthenticated(req)) {
+  if (!isAdminOwner(req)) {
     return NextResponse.json(UNAUTHORIZED, { status: 401 });
   }
 

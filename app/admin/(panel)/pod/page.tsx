@@ -6,7 +6,7 @@ import { PodBoard } from "@/components/admin/PodBoard";
 export const dynamic = "force-dynamic";
 
 export default async function PodOrdersPage() {
-  requireAdmin();
+  await requireAdmin();
   const pods = await listPodOrders();
   const jobs = pods.map((p) => {
     const custom = p.customData || {};

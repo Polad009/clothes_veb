@@ -78,6 +78,37 @@ async function expectedAccessKey(): Promise<string> {
   return stored || envKey;
 }
 
+// ─── Product existence (for real 404s) ──────────────────────────────────────
+// true / false from the database, or null when it cannot be checked (then the page decides).
+// Cached per edge instance for 60 seconds.
+const productCache = new Map<string, { exists: boolean; at: number }>();
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+async function productExists(slug: string): Promise<boolean | null> {
+  const hit = productCache.get(slug);
+  if (hit && Date.now() - hit.at < 60_000) return hit.exists;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key || slug.length > 200) return null;
+  const filter = UUID_RE.test(slug)
+    ? `or=(slug.eq.${slug},id.eq.${slug})`
+    : `slug=eq.${encodeURIComponent(slug)}`;
+  try {
+    const res = await fetch(`${url}/rest/v1/products?select=id&limit=1&${filter}`, {
+      headers: { apikey: key, Authorization: `Bearer ${key}` },
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    const rows = await res.json();
+    const exists = Array.isArray(rows) && rows.length > 0;
+    if (productCache.size > 500) productCache.clear();
+    productCache.set(slug, { exists, at: Date.now() });
+    return exists;
+  } catch {
+    return null;
+  }
+}
+
 // ─── Edge DDoS & Rate Limiting Protection ────────────────────────────────────
 const ipHitCounter = new Map<string, { count: number; resetAt: number }>();
 
@@ -100,6 +131,21 @@ const GENERIC_404_HTML = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // The production site lives only on www.horwalle.com: the *.vercel.app address
+  // (and any other stray host) is sent there permanently. API calls stay put, so
+  // payment callbacks to the old address keep working.
+  const host = (request.headers.get('host') || '').toLowerCase();
+  if (
+    process.env.VERCEL_ENV === 'production' &&
+    host &&
+    host !== 'www.horwalle.com' &&
+    !pathname.startsWith('/api/') &&
+    (request.method === 'GET' || request.method === 'HEAD')
+  ) {
+    const target = new URL(`https://www.horwalle.com${pathname}${request.nextUrl.search}`);
+    return NextResponse.redirect(target, 308);
+  }
 
   // ═══════════════════════════════════════════════════════════════════════════
   // GLOBAL EDGE DDOS & FLOOD PROTECTION
@@ -175,6 +221,17 @@ export async function middleware(request: NextRequest) {
         'X-Robots-Tag': 'noindex, nofollow',
       },
     });
+  }
+
+  // Removed or never-existing products answer a real 404, so Google drops old product pages.
+  // (The page itself streams with status 200 before it can tell, hence the check here.)
+  const productMatch = /^\/products\/([^/]+)\/?$/.exec(pathname);
+  if (productMatch && (request.method === 'GET' || request.method === 'HEAD')) {
+    let slug = productMatch[1];
+    try { slug = decodeURIComponent(slug); } catch {}
+    if ((await productExists(slug)) === false) {
+      return NextResponse.rewrite(new URL('/_product-not-found', request.url), { status: 404 });
+    }
   }
 
   // ═══════════════════════════════════════════════════════════════════════════

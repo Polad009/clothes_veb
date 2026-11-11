@@ -3,7 +3,8 @@ import Link from "next/link";
 import { ArrowLeft, ShieldCheck, FileText } from "lucide-react";
 
 export const metadata = {
-  title: "Üçüncü Tərəf Bildirişləri və Açıq Mənbə Lisenziyaları | Horwalle",
+  title: "Üçüncü Tərəf Bildirişləri",
+  alternates: { canonical: "https://www.horwalle.com/third-party-notices" },
   description: "Horwalle Dizayn Studiyasında istifadə olunan açıq mənbəli qrafik emal və render kitabxanalarının lisenziya məlumatları.",
 };
 

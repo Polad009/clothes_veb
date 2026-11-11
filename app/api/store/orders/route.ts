@@ -1,3 +1,4 @@
+import { requestAdminRole } from '@/lib/adminSession';
 import { NextRequest, NextResponse } from 'next/server';
 import type { StoreOrder } from '@/lib/db/types';
 import {
@@ -16,8 +17,8 @@ import { listCatalog } from '@/lib/db/catalog';
 import { checkPromo, getSettings, incrementPromoUses } from '@/lib/db/site';
 import { customPrintPrice } from '@/lib/studio/catalog';
 import { notifyNewOrder } from '@/lib/notifications/orderNotifier';
-import { isAdminAuthenticated } from '@/lib/adminAuth';
-import { sendNewOrderAlert, sendOrderConfirmation, sendOrderStatusUpdate } from '@/lib/email/emailService';
+import { isAdminOwner } from '@/lib/adminAuth';
+import { sendLowStockAlert, sendNewOrderAlert, sendOrderConfirmation, sendOrderStatusUpdate } from '@/lib/email/emailService';
 import { getActivePaymentProvider, PaymentMethod, PaymentRequest } from '@/lib/payments';
 import { verifyTurnstileToken } from '@/lib/turnstile';
 import { checkRateLimit } from '@/lib/rateLimiter';
@@ -27,7 +28,7 @@ import { getCountryByCode } from '@/lib/countries';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
-  if (!isAdminAuthenticated(req)) {
+  if (!(await requestAdminRole(req))) {
     return NextResponse.json(
       { error: 'Access denied: Sifariş məlumatları yalnız izləmə kodu və ya admin girişi ilə mümkündür.' },
       { status: 403 }
@@ -347,6 +348,7 @@ export async function POST(req: NextRequest) {
     await Promise.allSettled([
       sendOrderConfirmation(order).catch((e) => console.warn('Order confirmation email warning:', e)),
       sendNewOrderAlert(order).catch((e) => console.warn('New order alert warning:', e)),
+      sendLowStockAlert(order).catch((e) => console.warn('Low stock alert warning:', e)),
     ]);
 
     return NextResponse.json({ success: true, order, paymentResponse });
@@ -360,7 +362,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
-  if (!isAdminAuthenticated(req)) {
+  if (!(await requestAdminRole(req))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   try {
@@ -379,7 +381,7 @@ export async function PATCH(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  if (!isAdminAuthenticated(req)) {
+  if (!isAdminOwner(req)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   try {

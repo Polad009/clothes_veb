@@ -200,3 +200,34 @@ export function customPrintPrice(productId: unknown, custom: unknown, settings?:
   }
   return studioPrice(p, type, extras, studio);
 }
+
+// Product names for visitors who read English, Russian or Turkish (Azerbaijani is `name`).
+const NAME_I18N: Record<string, { en: string; ru: string; tr: string }> = {
+  "tshirt-regular-suprem": { en: "Regular T-shirt (single jersey)", ru: "Футболка Regular (кулирка)", tr: "Regular Tişört (Süprem)" },
+  "tshirt-regular-2iplik": { en: "Regular T-shirt (2-thread)", ru: "Футболка Regular (двунитка)", tr: "Regular Tişört (2 iplik)" },
+  "tshirt-oversize-suprem-2iplik": { en: "Oversize T-shirt", ru: "Оверсайз футболка", tr: "Oversize Tişört" },
+  "polo-qisaqol": { en: "Polo, short sleeve", ru: "Поло, короткий рукав", tr: "Polo, kısa kollu" },
+  "polo-uzunqol": { en: "Polo, long sleeve", ru: "Поло, длинный рукав", tr: "Polo, uzun kollu" },
+  "sviter-nazik-2iplik": { en: "Sweatshirt, light (2-thread fleece)", ru: "Свитшот, тонкий (футер 2-нитка)", tr: "Sweatshirt, ince (2 iplik)" },
+  "sviter-qalin-3iplik": { en: "Sweatshirt, heavy (3-thread fleece)", ru: "Свитшот, плотный (футер 3-нитка)", tr: "Sweatshirt, kalın (3 iplik)" },
+  "hody-nazik-2iplik": { en: "Hoodie, light (2-thread fleece)", ru: "Худи, тонкое (футер 2-нитка)", tr: "Kapüşonlu, ince (2 iplik)" },
+  "hody-qalin-3iplik": { en: "Hoodie, heavy (3-thread fleece)", ru: "Худи, плотное (футер 3-нитка)", tr: "Kapüşonlu, kalın (3 iplik)" },
+  "hody-zamoklu-3iplik": { en: "Zip hoodie (3-thread fleece)", ru: "Худи на молнии (футер 3-нитка)", tr: "Fermuarlı kapüşonlu (3 iplik)" },
+  "godekce-2iplik": { en: "Jacket (2-thread fleece)", ru: "Куртка (футер 2-нитка)", tr: "Ceket (2 iplik)" },
+  "godekce-3iplik": { en: "Jacket (3-thread fleece)", ru: "Куртка (футер 3-нитка)", tr: "Ceket (3 iplik)" },
+  "yarimzamok-nazik-2iplik": { en: "Half-zip, light (2-thread fleece)", ru: "Полузамок, тонкий (футер 2-нитка)", tr: "Yarım fermuarlı, ince (2 iplik)" },
+  "yarimzamok-qalin-3iplik": { en: "Half-zip, heavy (3-thread fleece)", ru: "Полузамок, плотный (футер 3-нитка)", tr: "Yarım fermuarlı, kalın (3 iplik)" },
+  "balonka": { en: "Track jacket", ru: "Ветровка", tr: "Eşofman ceketi" },
+  "salvar-nazik-2iplik": { en: "Joggers, light (2-thread fleece)", ru: "Брюки, тонкие (футер 2-нитка)", tr: "Eşofman altı, ince (2 iplik)" },
+  "salvar-qalin-3iplik": { en: "Joggers, heavy (3-thread fleece)", ru: "Брюки, плотные (футер 3-нитка)", tr: "Eşofman altı, kalın (3 iplik)" },
+  "sortik": { en: "Shorts", ru: "Шорты", tr: "Şort" },
+  "kepka-nazik": { en: "Cap, light", ru: "Кепка, тонкая", tr: "Şapka, ince" },
+  "kepka-qalin": { en: "Cap, heavy", ru: "Кепка, плотная", tr: "Şapka, kalın" },
+};
+
+/** The product's name in the visitor's language (falls back to Azerbaijani). */
+export function studioName(p: Pick<StudioProduct, "id" | "name">, language: string): string {
+  const t = NAME_I18N[p.id];
+  if (!t || language === "az") return p.name;
+  return (t as Record<string, string>)[language] || t.en || p.name;
+}

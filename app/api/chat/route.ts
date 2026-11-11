@@ -1,5 +1,5 @@
+import { requestAdminRole } from '@/lib/adminSession';
 import { NextRequest, NextResponse } from 'next/server';
-import { isAdminAuthenticated } from '@/lib/adminAuth';
 import { checkRateLimit } from '@/lib/rateLimiter';
 import {
   ChatClosedError,
@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
     if (!SESSION_RE.test(sessionId)) return json({ error: 'sessionId yanlışdır' }, 400);
 
     const wantsAdmin = searchParams.get('role') === 'admin';
-    if (wantsAdmin && !isAdminAuthenticated(req)) return json({ error: 'Unauthorized' }, 401);
+    if (wantsAdmin && !(await requestAdminRole(req))) return json({ error: 'Unauthorized' }, 401);
     const role: ChatRole = wantsAdmin ? 'admin' : 'customer';
 
     // Older widgets sent typing updates through GET
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
     const sessionId = String(body.sessionId || '');
     if (!SESSION_RE.test(sessionId)) return json({ error: 'sessionId yanlışdır' }, 400);
 
-    const isAdmin = isAdminAuthenticated(req);
+    const isAdmin = Boolean(await requestAdminRole(req));
     const action = body.action;
 
     if (action === 'typing') {

@@ -85,3 +85,58 @@ export async function changeAccessKey(input: { currentPassword: string; accessKe
   if (!ACCESS_KEY_RE.test(key)) throw new Error('Link kodu 8–64 simvol olmalıdır: latın hərfləri, rəqəm, tire, alt xətt.');
   await writeSetting(ACCESS_SETTING_KEY, { key });
 }
+
+// ─── Staff accounts ──────────────────────────────────────────────────────────
+// site_settings.admin_staff { users: [{ username, name, passwordHash, createdAt }] }
+// Staff see orders, print jobs, live chat and products; everything else is owner-only.
+
+const STAFF_KEY = 'admin_staff';
+const USERNAME_RE = /^[a-z0-9._-]{3,32}$/;
+
+export interface StaffUser { username: string; name: string; createdAt: string }
+
+async function readStaff(): Promise<(StaffUser & { passwordHash: string })[]> {
+  const stored = await readSetting(STAFF_KEY);
+  return Array.isArray(stored?.users) ? stored!.users : [];
+}
+
+export async function listStaff(): Promise<StaffUser[]> {
+  return (await readStaff()).map(({ username, name, createdAt }) => ({ username, name, createdAt }));
+}
+
+export async function staffExists(username: string): Promise<boolean> {
+  const u = String(username || '').trim().toLowerCase();
+  return (await readStaff()).some((s) => s.username === u);
+}
+
+/** Owner or staff login. Returns the role, or null when the details are wrong. */
+export async function verifyAnyAdminLogin(username: string, password: string): Promise<'owner' | 'staff' | null> {
+  if (await verifyAdminLogin(username, password)) return 'owner';
+  const u = String(username || '').trim().toLowerCase();
+  const staff = (await readStaff()).find((s) => s.username === u);
+  if (staff && checkPassword(String(password || ''), staff.passwordHash)) return 'staff';
+  return null;
+}
+
+export async function addStaff(input: { currentPassword: string; username: string; name: string; password: string }) {
+  const owner = await currentAdminUsername();
+  if (!(await verifyAdminLogin(owner, input.currentPassword))) throw new Error('Hazırkı şifrə yanlışdır.');
+  const username = String(input.username || '').trim().toLowerCase();
+  if (!USERNAME_RE.test(username)) throw new Error('İstifadəçi adı 3–32 simvol: latın hərfləri, rəqəm, nöqtə, tire.');
+  if (username === owner) throw new Error('Bu ad sahibin hesabındadır.');
+  const problem = passwordProblem(String(input.password || ''));
+  if (problem) throw new Error(problem);
+  const users = await readStaff();
+  if (users.some((s) => s.username === username)) throw new Error('Bu istifadəçi adı artıq var.');
+  if (users.length >= 20) throw new Error('Ən çox 20 işçi hesabı ola bilər.');
+  users.push({ username, name: String(input.name || '').trim().slice(0, 60) || username, passwordHash: hashPassword(input.password), createdAt: new Date().toISOString() });
+  await writeSetting(STAFF_KEY, { users });
+}
+
+export async function removeStaff(input: { currentPassword: string; username: string }) {
+  const owner = await currentAdminUsername();
+  if (!(await verifyAdminLogin(owner, input.currentPassword))) throw new Error('Hazırkı şifrə yanlışdır.');
+  const username = String(input.username || '').trim().toLowerCase();
+  const users = await readStaff();
+  await writeSetting(STAFF_KEY, { users: users.filter((s) => s.username !== username) });
+}

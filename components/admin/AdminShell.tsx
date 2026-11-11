@@ -64,7 +64,10 @@ function isActive(pathname: string, href: string) {
   return href === "/admin" ? pathname === "/admin" : pathname === href || pathname.startsWith(href + "/");
 }
 
-export function AdminShell({ counts: initialCounts, children }: { counts: Counts; children: React.ReactNode }) {
+// pages a staff account can open (everything else is the owner's)
+const STAFF_PAGES = ["/admin/orders", "/admin/pod", "/admin/products", "/admin/live-chat"];
+
+export function AdminShell({ counts: initialCounts, role = "owner", children }: { counts: Counts; role?: "owner" | "staff"; children: React.ReactNode }) {
   const pathname = usePathname() || "/admin";
   const [menuOpen, setMenuOpen] = useState(false);
   const [counts, setCounts] = useState<Counts>(initialCounts);
@@ -102,11 +105,11 @@ export function AdminShell({ counts: initialCounts, children }: { counts: Counts
       </div>
 
       <div className="flex-1 overflow-y-auto px-3 pb-4">
-        {NAV.map((group) => (
+        {NAV.filter((group) => role === "owner" || group.items.some((item) => STAFF_PAGES.includes(item.href))).map((group) => (
           <div key={group.heading} className="mt-5 first:mt-2">
             <p className="px-2 pb-1.5 text-[11px] font-medium uppercase tracking-wider text-stone-500">{group.heading}</p>
             <ul className="space-y-0.5">
-              {group.items.map((item) => {
+              {group.items.filter((item) => role === "owner" || STAFF_PAGES.includes(item.href)).map((item) => {
                 const active = isActive(pathname, item.href);
                 const count = item.badgeKey ? counts[item.badgeKey] : 0;
                 return (

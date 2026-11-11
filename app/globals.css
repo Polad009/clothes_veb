@@ -9,10 +9,10 @@
     
     /* Luxury Font Family Bindings (Free Faces Integration) */
     --font-serif-display: 'Instrument Serif', 'EB Garamond', Georgia, serif;
-    --font-sans-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    --font-sans-body: var(--font-jakarta), -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
     --font-eb-garamond: 'Instrument Serif', 'EB Garamond', Garamond, Georgia, serif;
     --font-fraunces: 'Instrument Serif', 'Fraunces', Georgia, serif;
-    --font-instrument: 'Plus Jakarta Sans', 'Instrument Sans', sans-serif;
+    --font-instrument: var(--font-jakarta), 'Instrument Sans', sans-serif;
     
     /* Horvvalle Dark Atelier Theme Tokens */
     --atelier-bg: #2A1406;
@@ -67,7 +67,7 @@
   body {
     background-color: #FAF7F2;
     color: #1A1517;
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
+    font-family: var(--font-jakarta), -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: clip !important;
@@ -738,10 +738,10 @@ div[class*="vton-btn"],
 
 /* ── Dark theme for pages that still use the old light classes (checkout, tracking, studio, account, legal).
       Remaps the light palette onto the new dark one without touching the pages' logic. ── */
-.hw-dark { background-color: #0A0A0A; color: #EDEAE3; font-family: "Archivo", "Helvetica Neue", Arial, sans-serif; }
+.hw-dark { background-color: #0A0A0A; color: #EDEAE3; font-family: var(--font-archivo), "Helvetica Neue", Arial, sans-serif; }
 .hw-dark h1, .hw-dark h2, .hw-dark h3,
 .hw-dark .font-serif-luxury, .hw-dark .font-eb-garamond, .hw-dark .font-editorial, .hw-dark .font-serif, .hw-dark .font-display, .hw-dark .font-fraunces {
-  font-family: "Archivo", "Helvetica Neue", Arial, sans-serif !important;
+  font-family: var(--font-archivo), "Helvetica Neue", Arial, sans-serif !important;
   font-weight: 800; letter-spacing: -0.01em; font-stretch: 108%;
 }
 .hw-dark input, .hw-dark textarea, .hw-dark select { color: #EDEAE3; }
