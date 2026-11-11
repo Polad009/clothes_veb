@@ -36,6 +36,9 @@ export function IntroVideo() {
   const [isPhone, setIsPhone] = useState<boolean | null>(null);
   const [still, setStill] = useState(false);
   const [paused, setPaused] = useState(false);
+  // the video is created only after the page has loaded, so it never slows the first paint
+  const [ready, setReady] = useState(false);
+  const [showing, setShowing] = useState(false);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 767px)");
@@ -45,7 +48,19 @@ export function IntroVideo() {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const saveData = Boolean((navigator as any).connection?.saveData);
     setStill(reduce || saveData);
-    return () => mq.removeEventListener?.("change", update);
+
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const start = () => {
+      const idle = (window as any).requestIdleCallback as ((cb: () => void, o?: { timeout: number }) => number) | undefined;
+      timer = setTimeout(() => (idle ? idle(() => setReady(true), { timeout: 1500 }) : setReady(true)), 300);
+    };
+    if (document.readyState === "complete") start();
+    else window.addEventListener("load", start, { once: true });
+    return () => {
+      mq.removeEventListener?.("change", update);
+      window.removeEventListener("load", start);
+      if (timer) clearTimeout(timer);
+    };
   }, []);
 
   // stop decoding while the section is off screen
@@ -61,11 +76,10 @@ export function IntroVideo() {
     );
     io.observe(v);
     return () => io.disconnect();
-  }, [isPhone, still, paused]);
+  }, [isPhone, still, paused, ready]);
 
   if (!enabled) return null;
 
-  const poster = custom ? undefined : isPhone ? DEFAULT_INTRO_VIDEO.posterMobile : DEFAULT_INTRO_VIDEO.posterDesktop;
   const src = isPhone ? mobile : desktop;
 
   const toggle = () => {
@@ -82,25 +96,35 @@ export function IntroVideo() {
 
   return (
     <section className="relative h-[88svh] min-h-[520px] w-full overflow-hidden bg-ink" aria-label="Horwalle">
-      {isPhone !== null &&
-        (still ? (
-          poster && <img src={poster} alt="" className="absolute inset-0 h-full w-full object-cover" />
-        ) : (
-          <video
-            ref={videoRef}
-            key={src}
+      {/* cover image, sent with the page (the browser picks phone or computer without JavaScript) */}
+      {!custom && (
+        <picture>
+          <source media="(max-width: 767px)" srcSet={DEFAULT_INTRO_VIDEO.posterMobile} />
+          <img
+            src={DEFAULT_INTRO_VIDEO.posterDesktop}
+            alt=""
+            fetchPriority="high"
+            decoding="async"
             className="absolute inset-0 h-full w-full object-cover"
-            src={src}
-            poster={poster}
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            aria-hidden="true"
-            disablePictureInPicture
           />
-        ))}
+        </picture>
+      )}
+      {ready && !still && isPhone !== null && (
+        <video
+          ref={videoRef}
+          key={src}
+          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${showing ? "opacity-100" : "opacity-0"}`}
+          src={src}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          aria-hidden="true"
+          disablePictureInPicture
+          onPlaying={() => setShowing(true)}
+        />
+      )}
       {/* fade into the page below */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-ink to-transparent" />
 
