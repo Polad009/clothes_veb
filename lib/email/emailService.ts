@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import {
+  orderLang,
   generateOrderConfirmationHtml,
   generateStatusUpdateHtml,
   generateCampaignHtml,
@@ -140,7 +141,7 @@ export async function sendOrderConfirmation(order: any): Promise<boolean> {
     const { data, error } = await resend.emails.send({
       from: SENDER_EMAIL,
       to: [customerEmail],
-      subject: `HORWALLE — Sifarişiniz Qəbul Edildi #${order.id}`,
+      subject: orderLang(order) === "en" ? `HORWALLE — Order received #${order.id}` : `HORWALLE — Sifarişiniz Qəbul Edildi #${order.id}`,
       html,
     });
 
@@ -178,7 +179,7 @@ export async function sendOrderStatusUpdate(order: any, newStatus: string): Prom
     const { data, error } = await resend.emails.send({
       from: SENDER_EMAIL,
       to: [customerEmail],
-      subject: `HORWALLE — Sifarişinizin Statusu: ${newStatus} (#${order.id})`,
+      subject: orderLang(order) === "en" ? `HORWALLE — Order update (#${order.id})` : `HORWALLE — Sifarişinizin Statusu: ${newStatus} (#${order.id})`,
       html,
     });
 

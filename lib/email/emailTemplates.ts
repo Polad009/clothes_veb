@@ -35,12 +35,18 @@ export interface EmailContact {
   phone?: string;
 }
 
-export function getEmailBaseWrapper(contentHtml: string, contact: EmailContact = {}): string {
+/** Customers outside Azerbaijan get their e-mails in English. */
+export function orderLang(order: any): "az" | "en" {
+  const code = String(order?.customer?.countryCode || "").trim().toUpperCase();
+  return code && code !== "AZ" ? "en" : "az";
+}
+
+export function getEmailBaseWrapper(contentHtml: string, contact: EmailContact = {}, lang: "az" | "en" = "az"): string {
   const phone = contact.phone || DEFAULT_WHATSAPP;
   const waDigits = phone.replace(/\D/g, "");
   return `
 <!DOCTYPE html>
-<html lang="az">
+<html lang="${lang}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -64,13 +70,13 @@ export function getEmailBaseWrapper(contentHtml: string, contact: EmailContact =
   <div class="container">
     <div class="header">
       <div class="logo">${BRAND}</div>
-      <div class="tagline">Premium Geyim Mağazası</div>
+      <div class="tagline">${lang === "en" ? "Premium Clothing Store" : "Premium Geyim Mağazası"}</div>
     </div>
     <div class="body-content">
       ${contentHtml}
     </div>
     <div class="footer">
-      <p style="margin: 0 0 6px 0;">Sualınız var? WhatsApp: <a href="https://wa.me/${waDigits}" style="color: #111011; text-decoration: underline;">${esc(phone)}</a></p>
+      <p style="margin: 0 0 6px 0;">${lang === "en" ? "Questions? WhatsApp" : "Sualınız var? WhatsApp"}: <a href="https://wa.me/${waDigits}" style="color: #111011; text-decoration: underline;">${esc(phone)}</a></p>
       <p style="margin: 0;"><a href="${SITE_URL}" style="color: #111011; text-decoration: underline;">horwalle.com</a></p>
     </div>
   </div>
@@ -82,21 +88,38 @@ export function getEmailBaseWrapper(contentHtml: string, contact: EmailContact =
 export function generateOrderConfirmationHtml(order: any, contact: EmailContact = {}): string {
   const cust = order.customer || {};
   const items = order.items || [];
+  const en = orderLang(order) === "en";
   const trackingUrl = `${SITE_URL}/track?orderId=${encodeURIComponent(order.id)}`;
 
   const destination =
-    [cust.address, cust.addressLine2, cust.city, cust.stateOrRegion, cust.postalCode, cust.country || "Azərbaycan"]
+    [cust.address, cust.addressLine2, cust.city, cust.stateOrRegion, cust.postalCode, cust.country || (en ? "Azerbaijan" : "Azərbaycan")]
       .filter(Boolean)
       .map(esc)
       .join(", ") || "-";
-  const carrierLabel = esc(order.shippingMethodLabel || order.shippingMethod || "Kuryer");
+  const carrierLabel = esc(order.shippingMethodLabel || order.shippingMethod || (en ? "Courier" : "Kuryer"));
   const shippingInfo = order.estimatedDelivery ? `${carrierLabel} (${esc(order.estimatedDelivery)})` : carrierLabel;
   const price = (val: number) => {
     const num = Number(val || 0).toFixed(2);
     if (order.currency === "USD") return `$${num}`;
     return `${num} ₼`;
   };
-  const shippingCost = Number(order.shipping || 0) === 0 ? "Pulsuz" : price(order.shipping);
+  const shippingCost = Number(order.shipping || 0) === 0 ? (en ? "Free" : "Pulsuz") : price(order.shipping);
+
+  const L = en
+    ? {
+        greeting: `Thank you, ${esc(cust.fullName || "valued customer")}!`,
+        intro: "Your order has been received. You can follow its preparation and delivery with the button below.",
+        orderNo: "Order number:", date: "Date:", address: "Delivery address:", shipping: "Delivery:", status: "Status:", received: "Received",
+        product: "Product", qty: "Qty", amount: "Amount", subtotalRow: "Items:", discount: "Discount", shippingRow: "Delivery:", total: "Total", track: "Track order",
+      }
+    : {
+        greeting: `Təşəkkür edirik, ${esc(cust.fullName || "dəyərli müştəri")}!`,
+        intro: "Sifarişiniz qəbul edildi. Hazırlıq və çatdırılma mərhələlərini aşağıdakı düymə ilə izləyə bilərsiniz.",
+        orderNo: "Sifariş nömrəsi:", date: "Tarix:", address: "Çatdırılma ünvanı:", shipping: "Çatdırılma:", status: "Status:", received: "Qəbul edildi",
+        product: "Məhsul", qty: "Say", amount: "Məbləğ", subtotalRow: "Məhsullar:", discount: "Endirim", shippingRow: "Çatdırılma:", total: "Yekun", track: "Sifarişi izlə",
+      };
+  const sizeLabel = en ? "Size" : "Ölçü";
+  const colorLabel = en ? "Colour" : "Rəng";
 
   const itemsRows = items
     .map(
@@ -104,7 +127,7 @@ export function generateOrderConfirmationHtml(order: any, contact: EmailContact 
     <tr>
       <td>
         <strong>${esc(item.name)}</strong><br>
-        <span style="font-size: 11px; color: #7A7269;">${[item.size && `Ölçü: ${esc(item.size)}`, item.color && `Rəng: ${esc(item.color)}`].filter(Boolean).join(" · ")}</span>
+        <span style="font-size: 11px; color: #7A7269;">${[item.size && `${sizeLabel}: ${esc(item.size)}`, item.color && `${colorLabel}: ${esc(item.color)}`].filter(Boolean).join(" · ")}</span>
       </td>
       <td style="text-align: center;">${Number(item.quantity) || 1}</td>
       <td style="text-align: right; font-weight: bold;">${price((Number(item.price) || 0) * (Number(item.quantity) || 1))}</td>
@@ -114,32 +137,32 @@ export function generateOrderConfirmationHtml(order: any, contact: EmailContact 
     .join("");
 
   const content = `
-    <h2 style="font-size: 22px; margin: 0 0 10px 0; font-weight: 600; color: #111011;">Təşəkkür edirik, ${esc(cust.fullName || "dəyərli müştəri")}!</h2>
+    <h2 style="font-size: 22px; margin: 0 0 10px 0; font-weight: 600; color: #111011;">${L.greeting}</h2>
     <p style="font-size: 13px; color: #5C5247; line-height: 1.6; margin: 0 0 20px 0;">
-      Sifarişiniz qəbul edildi. Hazırlıq və çatdırılma mərhələlərini aşağıdakı düymə ilə izləyə bilərsiniz.
+      ${L.intro}
     </p>
 
     <div style="background-color: #FAF7F2; padding: 18px 20px; border-radius: 16px; border: 1px solid #EBE4DA; margin-bottom: 24px;">
       <table style="width: 100%; font-size: 12px;">
         <tr>
-          <td style="color: #7A7269; padding-bottom: 6px;">Sifariş nömrəsi:</td>
+          <td style="color: #7A7269; padding-bottom: 6px;">${L.orderNo}</td>
           <td style="text-align: right; font-weight: bold; font-family: monospace; font-size: 13px;">#${esc(order.id)}</td>
         </tr>
         <tr>
-          <td style="color: #7A7269; padding-bottom: 6px;">Tarix:</td>
+          <td style="color: #7A7269; padding-bottom: 6px;">${L.date}</td>
           <td style="text-align: right;">${bakuDate(order.date)}</td>
         </tr>
         <tr>
-          <td style="color: #7A7269; padding-bottom: 6px;">Çatdırılma ünvanı:</td>
+          <td style="color: #7A7269; padding-bottom: 6px;">${L.address}</td>
           <td style="text-align: right;">${destination}</td>
         </tr>
         <tr>
-          <td style="color: #7A7269; padding-bottom: 6px;">Çatdırılma:</td>
+          <td style="color: #7A7269; padding-bottom: 6px;">${L.shipping}</td>
           <td style="text-align: right;">${shippingInfo} (${shippingCost})</td>
         </tr>
         <tr>
-          <td style="color: #7A7269;">Status:</td>
-          <td style="text-align: right;"><span class="badge">Qəbul edildi</span></td>
+          <td style="color: #7A7269;">${L.status}</td>
+          <td style="text-align: right;"><span class="badge">${L.received}</span></td>
         </tr>
       </table>
     </div>
@@ -147,9 +170,9 @@ export function generateOrderConfirmationHtml(order: any, contact: EmailContact 
     <table class="table">
       <thead>
         <tr>
-          <th>Məhsul</th>
-          <th style="text-align: center;">Say</th>
-          <th style="text-align: right;">Məbləğ</th>
+          <th>${L.product}</th>
+          <th style="text-align: center;">${L.qty}</th>
+          <th style="text-align: right;">${L.amount}</th>
         </tr>
       </thead>
       <tbody>
@@ -157,72 +180,90 @@ export function generateOrderConfirmationHtml(order: any, contact: EmailContact 
       </tbody>
       <tfoot>
         <tr>
-          <td colspan="2" style="text-align: right; padding-top: 10px; color: #7A7269; font-size: 12px;">Məhsullar:</td>
+          <td colspan="2" style="text-align: right; padding-top: 10px; color: #7A7269; font-size: 12px;">${L.subtotalRow}</td>
           <td style="text-align: right; padding-top: 10px; font-size: 12px; color: #111011;">${price(order.subtotal)}</td>
         </tr>
         ${Number(order.discount || 0) > 0 ? `
         <tr>
-          <td colspan="2" style="text-align: right; padding-top: 4px; color: #16A34A; font-size: 12px;">Endirim${order.promoCode ? ` (${esc(order.promoCode)})` : ""}:</td>
+          <td colspan="2" style="text-align: right; padding-top: 4px; color: #16A34A; font-size: 12px;">${L.discount}${order.promoCode ? ` (${esc(order.promoCode)})` : ""}:</td>
           <td style="text-align: right; padding-top: 4px; font-size: 12px; color: #16A34A; font-weight: bold;">-${price(order.discount)}</td>
         </tr>` : ""}
         <tr>
-          <td colspan="2" style="text-align: right; padding-top: 4px; color: #7A7269; font-size: 12px;">Çatdırılma:</td>
+          <td colspan="2" style="text-align: right; padding-top: 4px; color: #7A7269; font-size: 12px;">${L.shippingRow}</td>
           <td style="text-align: right; padding-top: 4px; font-size: 12px; color: #111011;">${shippingCost}</td>
         </tr>
         <tr>
-          <td colspan="2" style="text-align: right; padding-top: 14px; font-weight: bold; border-top: 2px solid #EBE4DA;">Yekun:</td>
+          <td colspan="2" style="text-align: right; padding-top: 14px; font-weight: bold; border-top: 2px solid #EBE4DA;">${L.total}:</td>
           <td style="text-align: right; padding-top: 14px; font-weight: bold; font-size: 16px; color: #111011; border-top: 2px solid #EBE4DA;">${price(order.total)}</td>
         </tr>
       </tfoot>
     </table>
 
     <div style="text-align: center; margin-top: 30px;">
-      <a href="${trackingUrl}" class="btn">Sifarişi izlə</a>
+      <a href="${trackingUrl}" class="btn">${L.track}</a>
     </div>
   `;
 
-  return getEmailBaseWrapper(content, contact);
+  return getEmailBaseWrapper(content, contact, en ? "en" : "az");
 }
 
 export function generateStatusUpdateHtml(order: any, newStatus: string, contact: EmailContact = {}): string {
   const cust = order.customer || {};
+  const en = orderLang(order) === "en";
   const trackingUrl = `${SITE_URL}/track?orderId=${encodeURIComponent(order.id)}`;
   const s = String(newStatus || "").toLowerCase();
 
-  let statusDescription = "Sifarişinizin mərhələsi yeniləndi.";
-  if (s.includes("ləğv")) {
-    statusDescription = "Sifarişiniz ləğv edildi. Ödəniş etmisinizsə, məbləğ kartınıza qaytarılacaq. Sualınız olsa, bizə yazın.";
-  } else if (s.includes("təsdiq")) {
-    statusDescription = "Sifarişiniz təsdiqləndi və hazırlanmağa başladı.";
-  } else if (s.includes("çap") || s.includes("dərzi")) {
-    statusDescription = "Sifarişiniz hazırlanır.";
-  } else if (s.includes("kuryer")) {
-    statusDescription = "Sifarişiniz kuryerə təhvil verildi və ünvanınıza yoldadır.";
-  } else if (s.includes("çatdırıldı")) {
-    statusDescription = "Sifarişiniz təhvil verildi. Bizi seçdiyiniz üçün təşəkkür edirik!";
+  // English status label and description for foreign customers (status is stored in Azerbaijani)
+  let label = esc(newStatus);
+  let statusDescription = en ? "Your order status has been updated." : "Sifarişinizin mərhələsi yeniləndi.";
+  if (s.includes("ləğv") || s.includes("legv") || s.includes("cancel")) {
+    label = en ? "Cancelled" : esc(newStatus);
+    statusDescription = en
+      ? "Your order was cancelled. If you have paid, the amount will be refunded to your card. Contact us if you have any questions."
+      : "Sifarişiniz ləğv edildi. Ödəniş etmisinizsə, məbləğ kartınıza qaytarılacaq. Sualınız olsa, bizə yazın.";
+  } else if (s.includes("təsdiq") || s.includes("tesdiq") || s.includes("confirm")) {
+    label = en ? "Confirmed" : esc(newStatus);
+    statusDescription = en ? "Your order has been confirmed and is being prepared." : "Sifarişiniz təsdiqləndi və hazırlanmağa başladı.";
+  } else if (s.includes("çap") || s.includes("dərzi") || s.includes("hazır")) {
+    label = en ? "Being prepared" : esc(newStatus);
+    statusDescription = en ? "Your order is being prepared." : "Sifarişiniz hazırlanır.";
+  } else if (s.includes("kuryer") || s.includes("courier") || s.includes("shipped") || s.includes("göndər")) {
+    label = en ? "Out for delivery" : esc(newStatus);
+    statusDescription = en ? "Your order has been handed to the courier and is on its way." : "Sifarişiniz kuryerə təhvil verildi və ünvanınıza yoldadır.";
+  } else if (s.includes("çatdırıldı") || s.includes("catdirildi") || s.includes("delivered")) {
+    label = en ? "Delivered" : esc(newStatus);
+    statusDescription = en ? "Your order has been delivered. Thank you for choosing us!" : "Sifarişiniz təhvil verildi. Bizi seçdiyiniz üçün təşəkkür edirik!";
   }
 
+  const L = en
+    ? { title: "Your order status has been updated", intro1: "Dear", intro2: "the status of your order", newStatus: "New status:", shippingWord: "Delivery:", track: "Track order", customer: "customer" }
+    : { title: "Sifarişinizin statusu yeniləndi", intro1: "Hörmətli", intro2: "nömrəli sifarişinizin statusu dəyişdi.", newStatus: "Yeni status:", shippingWord: "Çatdırılma:", track: "Sifarişi izlə", customer: "müştəri" };
+
+  const intro = en
+    ? `${L.intro1} ${esc(cust.fullName || L.customer)}, ${L.intro2} <strong>#${esc(order.id)}</strong> has changed.`
+    : `${L.intro1} ${esc(cust.fullName || L.customer)}, <strong>#${esc(order.id)}</strong> ${L.intro2}`;
+
   const content = `
-    <h2 style="font-size: 22px; margin: 0 0 10px 0; font-weight: 600; color: #111011;">Sifarişinizin statusu yeniləndi</h2>
+    <h2 style="font-size: 22px; margin: 0 0 10px 0; font-weight: 600; color: #111011;">${L.title}</h2>
     <p style="font-size: 13px; color: #5C5247; line-height: 1.6; margin: 0 0 20px 0;">
-      Hörmətli ${esc(cust.fullName || "müştəri")}, <strong>#${esc(order.id)}</strong> nömrəli sifarişinizin statusu dəyişdi.
+      ${intro}
     </p>
 
     <div style="text-align: center; background-color: #FAF7F2; padding: 24px 20px; border-radius: 16px; border: 1px solid #EBE4DA; margin: 24px 0;">
-      <span style="font-size: 11px; text-transform: uppercase; color: #7A7269; letter-spacing: 1px; display: block; margin-bottom: 6px;">Yeni status:</span>
+      <span style="font-size: 11px; text-transform: uppercase; color: #7A7269; letter-spacing: 1px; display: block; margin-bottom: 6px;">${L.newStatus}</span>
       <span style="font-size: 18px; font-weight: bold; color: #111011; background-color: #FEF3C7; padding: 6px 18px; border-radius: 30px; display: inline-block;">
-        ${esc(newStatus)}
+        ${label}
       </span>
       <p style="font-size: 13px; color: #5C5247; margin: 12px 0 0 0; line-height: 1.5;">${statusDescription}</p>
-      ${order.shippingMethodLabel ? `<p style="font-size: 11px; color: #7A7269; margin: 10px 0 0 0;">Çatdırılma: <strong>${esc(order.shippingMethodLabel)}</strong>${order.estimatedDelivery ? ` (${esc(order.estimatedDelivery)})` : ""}</p>` : ""}
+      ${order.shippingMethodLabel ? `<p style="font-size: 11px; color: #7A7269; margin: 10px 0 0 0;">${L.shippingWord} <strong>${esc(order.shippingMethodLabel)}</strong>${order.estimatedDelivery ? ` (${esc(order.estimatedDelivery)})` : ""}</p>` : ""}
     </div>
 
     <div style="text-align: center; margin-top: 30px;">
-      <a href="${trackingUrl}" class="btn">Sifarişi izlə</a>
+      <a href="${trackingUrl}" class="btn">${L.track}</a>
     </div>
   `;
 
-  return getEmailBaseWrapper(content, contact);
+  return getEmailBaseWrapper(content, contact, en ? "en" : "az");
 }
 
 export function generateCampaignHtml(
