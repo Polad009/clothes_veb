@@ -9,6 +9,10 @@ import { COLLECTION, type Ink, type Product } from './collection';
 
 const [designs, mockups] = process.argv.slice(2);
 const HIDE_OLD = process.argv.includes('--hide-old');
+// <mockups_dir>/mockups.json comes from compose.py (real garment photos) or make-mockups.ts (drawn flats).
+// A product missing from mockups.json has no image yet: it is kept but hidden from the shop.
+// New folder per image set: the old files are cached for a year under their old names.
+const IMG_DIR = process.env.IMG_DIR || 'products/collection01-photo';
 const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
   auth: { persistSession: false },
 });
@@ -68,14 +72,23 @@ async function printFiles(p: Product) {
     const p = COLLECTION[i];
     const refCode = `HW-${p.key.toUpperCase()}`;
     console.log(`\n${p.name.az}  (${refCode})`);
+    if (!mock[p.key]) {
+      const { data: row } = await sb.from('products').select('id, extra').eq('ref_code', refCode).maybeSingle();
+      if (row) {
+        await sb.from('products').update({ extra: { ...(row.extra || {}), hidden: true } }).eq('id', row.id);
+        created.push(row.id);
+        console.log('  no photo yet: hidden from the shop (not deleted)');
+      }
+      continue;
+    }
     const colors = [];
     for (const c of p.colours) {
       const m = mock[p.key][c.name];
-      const front = await upload(path.join(mockups, m.front), `products/collection01/${m.front}`, 'image/png');
-      const back = m.back ? await upload(path.join(mockups, m.back), `products/collection01/${m.back}`, 'image/png') : null;
-      // the back print is the statement: show it first, the front on hover
-      const main = back || front!;
-      const second = back ? front! : '';
+      const front = await upload(path.join(mockups, m.front), `${IMG_DIR}/${m.front}`, 'image/png');
+      const back = m.back ? await upload(path.join(mockups, m.back), `${IMG_DIR}/${m.back}`, 'image/png') : null;
+      // tees: the back print is the statement, shown first; hoodies: the photo first, the back-print close-up on hover
+      const main = p.shape === 'hoodie' ? front! : back || front!;
+      const second = back ? (main === back ? front! : back) : '';
       colors.push({ name: c.name, hex: c.hex, image: main, hoverImage: second, gallery: [main, second].filter(Boolean) });
     }
     const layers = await printFiles(p);
