@@ -8,6 +8,7 @@ import { CartPanel } from "@/components/store/CartPanel";
 import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
 import { AuthModal } from "@/components/AuthModal";
 import { CookieConsent } from "@/components/CookieConsent";
+import { DocumentTitle } from "@/components/store/DocumentTitle";
 
 export function StoreShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -20,7 +21,7 @@ export function StoreShell({ children }: { children: React.ReactNode }) {
 
   // Pages built for the old light design get the dark colour mapping from globals.css (.hw-dark)
   const p = pathname || "/";
-  const redesigned = p === "/" || p.startsWith("/collections") || p.startsWith("/products/") || p.startsWith("/studio") || p === "/checkout" || p === "/terms" || p === "/privacy";
+  const redesigned = p === "/" || p.startsWith("/collections") || p.startsWith("/products/") || p.startsWith("/studio") || p.startsWith("/checkout") || p === "/terms" || p === "/privacy";
 
   return (
     <>
@@ -38,6 +39,7 @@ export function StoreShell({ children }: { children: React.ReactNode }) {
         <AuthModal />
       </div>
       <CookieConsent />
+      <DocumentTitle />
     </>
   );
 }

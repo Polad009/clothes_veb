@@ -336,10 +336,32 @@ export default function CheckoutPage() {
   const { settings: storeSettings } = useStoreData();
   const router = useRouter();
   const { items, totalPrice, clearCart } = useCart();
-  const { formatPrice, getProductPrice, currency, isAzerbaijan, detectedCountry } = useCurrency();
+  const { formatPrice, getProductPrice, currency, isAzerbaijan, detectedCountry, setDeliveryCountry } = useCurrency();
   const { t, language } = useLanguage();
   const langKey = (language as "az" | "en" | "ru" | "tr") || "az";
   const cT = CHECKOUT_I18N[langKey] || CHECKOUT_I18N.az;
+  const L = (p: { az: string; en: string; ru: string; tr: string }) => (p as Record<string, string>)[langKey] || p.az;
+  // shipping option names come from lib/shipping.ts in one language; show them in the visitor's
+  const SHIP_TEXT: Record<string, { name: { az: string; en: string; ru: string; tr: string }; days: { az: string; en: string; ru: string; tr: string } }> = {
+    domestic_baku_sumgayit: {
+      name: { az: "Bakı və Sumqayıt, kuryer", en: "Baku & Sumgayit courier", ru: "Курьер по Баку и Сумгаиту", tr: "Bakü ve Sumgayıt kuryesi" },
+      days: { az: "1–2 iş günü", en: "1–2 business days", ru: "1–2 рабочих дня", tr: "1–2 iş günü" },
+    },
+    domestic_region: {
+      name: { az: "Rayonlar, Azərpoçt", en: "Regions of Azerbaijan, Azerpost", ru: "Регионы Азербайджана, Азерпочта", tr: "Azerbaycan bölgeleri, Azerpost" },
+      days: { az: "2–4 iş günü", en: "2–4 business days", ru: "2–4 рабочих дня", tr: "2–4 iş günü" },
+    },
+    intl_standard: {
+      name: { az: "Beynəlxalq standart (izlənən)", en: "International standard (tracked)", ru: "Международная стандартная (с трекингом)", tr: "Uluslararası standart (takipli)" },
+      days: { az: "7–14 iş günü", en: "7–14 business days", ru: "7–14 рабочих дней", tr: "7–14 iş günü" },
+    },
+    intl_express: {
+      name: { az: "Ekspress (DHL / FedEx)", en: "Express (DHL / FedEx)", ru: "Экспресс (DHL / FedEx)", tr: "Ekspres (DHL / FedEx)" },
+      days: { az: "2–5 iş günü", en: "2–5 business days", ru: "2–5 рабочих дней", tr: "2–5 iş günü" },
+    },
+  };
+  const shipName = (o?: { id: string; name: string } | null) => (o ? (SHIP_TEXT[o.id] ? L(SHIP_TEXT[o.id].name) : o.name) : "");
+  const shipDays = (o?: { id: string; estimatedDays: string } | null) => (o ? (SHIP_TEXT[o.id] ? L(SHIP_TEXT[o.id].days) : o.estimatedDays) : "");
   const { user, profile, isLoading: isAuthLoading, openAuthModal } = useAuth();
 
   // Country & Destination State
@@ -350,6 +372,13 @@ export default function CheckoutPage() {
 
   const currentCountry: CountryInfo = getCountryByCode(selectedCountryCode) || getCountryByCode("AZ")!;
   const isDomestic = isDomesticDestination(selectedCountryCode);
+
+  // the order is priced by where it is delivered: Azerbaijan price only for deliveries in Azerbaijan
+  useEffect(() => {
+    setDeliveryCountry(selectedCountryCode || null);
+    return () => setDeliveryCountry(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCountryCode]);
 
   // Form State
   const [fullName, setFullName] = useState("");
@@ -611,7 +640,7 @@ export default function CheckoutPage() {
     const clean = promoCode.trim().toUpperCase();
 
     if (!clean) {
-      setPromoError("Zəhmət olmasa promokod daxil edin.");
+      setPromoError(L({"az": "Promokodu yazın.", "en": "Enter a promo code.", "ru": "Введите промокод.", "tr": "Promosyon kodunu girin."}));
       return;
     }
 
@@ -686,17 +715,17 @@ export default function CheckoutPage() {
         setPromoDiscountAmount(val);
         setPromoApplied(true);
         setAppliedPromoCode(found.code);
-        setPromoSuccessMsg(`✓ ${found.code} promokodu tətbiq edildi (-${val} ₼)`);
+        setPromoSuccessMsg(`✓ ${found.code} ${L({ az: "promokodu tətbiq edildi", en: "applied", ru: "применён", tr: "uygulandı" })} (-${val} ₼)`);
       } else {
         const pct = Number(found.value) || 0;
         setDiscountPercent(pct);
         setPromoDiscountAmount((totalPrice * pct) / 100);
         setPromoApplied(true);
         setAppliedPromoCode(found.code);
-        setPromoSuccessMsg(`✓ ${found.code} promokodu tətbiq edildi (-${pct}%)`);
+        setPromoSuccessMsg(`✓ ${found.code} ${L({ az: "promokodu tətbiq edildi", en: "applied", ru: "применён", tr: "uygulandı" })} (-${pct}%)`);
       }
     } catch (err) {
-      setPromoError("Yanlış promokod.");
+      setPromoError(L({"az": "Yanlış promokod.", "en": "Invalid promo code.", "ru": "Неверный промокод.", "tr": "Geçersiz promosyon kodu."}));
     } finally {
       setIsCheckingPromo(false);
     }
@@ -724,7 +753,7 @@ export default function CheckoutPage() {
     }
 
     if (items.length === 0) {
-      setErrorMsg("Səbətiniz boşdur.");
+      setErrorMsg(cT.cartEmpty);
       return;
     }
 
@@ -788,7 +817,7 @@ export default function CheckoutPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Sifariş zamanı xəta baş verdi.");
+        throw new Error(data.error || L({"az": "Sifariş zamanı xəta baş verdi.", "en": "Something went wrong while placing the order.", "ru": "Ошибка при оформлении заказа.", "tr": "Sipariş verilirken bir hata oluştu."}));
       }
 
       if (typeof window !== "undefined" && data?.order?.id) {
@@ -841,9 +870,9 @@ export default function CheckoutPage() {
       }
 
       clearCart();
-      router.push(`/checkout/success?orderId=${data.order.id}&method=${chosenMethod}&total=${finalTotal}`);
+      router.push(`/checkout/success?orderId=${encodeURIComponent(data.order.id)}&method=${chosenMethod}&total=${finalTotal}&currency=${currency}${isTestMode ? "&test=true" : ""}`);
     } catch (err: any) {
-      setErrorMsg(err.message || "Xəta baş verdi");
+      setErrorMsg(err.message || L({"az": "Xəta baş verdi", "en": "Something went wrong", "ru": "Произошла ошибка", "tr": "Bir hata oluştu"}));
       setIsProcessing(false);
       isSubmittingRef.current = false;
     }
@@ -871,7 +900,7 @@ export default function CheckoutPage() {
       }
       setErrorMsg(
         language === "az"
-          ? "Zəhmət olmasa əvvəlcə çatdırılma məlumatlarını qeyd edin."
+          ? cT.fillDeliveryFirst
           : "Please complete delivery information first."
       );
       return;
@@ -1135,7 +1164,6 @@ export default function CheckoutPage() {
   };
 
   // ── view ───────────────────────────────────────────────────────────────────
-  const L = (p: { az: string; en: string; ru: string; tr: string }) => (p as Record<string, string>)[langKey] || p.az;
   const money = (v: number) => (currency === "USD" ? `$${v.toFixed(2)}` : `${v.toFixed(2)} ₼`);
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [cartSettled, setCartSettled] = useState(false);
@@ -1241,7 +1269,7 @@ export default function CheckoutPage() {
         <div className="flex justify-between gap-4">
           <dt className="text-bone-dim">
             {L({ az: "Çatdırılma", en: "Shipping", ru: "Доставка", tr: "Kargo" })}
-            <span className="block text-[12px] text-bone-faint">{activeShippingOption?.name}</span>
+            <span className="block text-[12px] text-bone-faint">{shipName(activeShippingOption)}</span>
           </dt>
           <dd className="text-right tabular-nums">{shippingCost === 0 ? L({ az: "Pulsuz", en: "Free", ru: "Бесплатно", tr: "Ücretsiz" }) : money(shippingCost)}</dd>
         </div>
@@ -1361,8 +1389,8 @@ export default function CheckoutPage() {
                   <span className={labelCls}>{t.checkout.city} *</span>
                   <div className="grid grid-cols-3 gap-2">
                     {[
-                      { key: "Bakı", label: "Bakı", sub: t.checkout.free, id: "domestic_baku_sumgayit" },
-                      { key: "Sumqayıt", label: "Sumqayıt", sub: t.checkout.free, id: "domestic_baku_sumgayit" },
+                      { key: "Bakı", label: L({"az": "Bakı", "en": "Baku", "ru": "Баку", "tr": "Bakü"}), sub: t.checkout.free, id: "domestic_baku_sumgayit" },
+                      { key: "Sumqayıt", label: L({"az": "Sumqayıt", "en": "Sumgayit", "ru": "Сумгаит", "tr": "Sumgayıt"}), sub: t.checkout.free, id: "domestic_baku_sumgayit" },
                       { key: "", label: cT.regionsLabel, sub: "", id: "domestic_region" },
                     ].map((o) => {
                       const on = o.key ? city === o.key : city !== "Bakı" && city !== "Sumqayıt";
@@ -1447,8 +1475,8 @@ export default function CheckoutPage() {
                   >
                     {radio(on)}
                     <span className="min-w-0 flex-1">
-                      <span className="block text-[14px] font-semibold">{opt.name}</span>
-                      <span className="block text-[12px] text-bone-dim">{[opt.carrier, opt.estimatedDays].filter(Boolean).join(" · ")}</span>
+                      <span className="block text-[14px] font-semibold">{shipName(opt)}</span>
+                      <span className="block text-[12px] text-bone-dim">{shipDays(opt)}</span>
                     </span>
                     <span className="shrink-0 text-[14px] font-semibold tabular-nums">{opt.price === 0 ? t.checkout.free : money(opt.price)}</span>
                   </button>

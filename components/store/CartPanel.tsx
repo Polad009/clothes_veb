@@ -76,7 +76,7 @@ export function CartPanel() {
                       <div className="flex min-w-0 flex-1 flex-col">
                         <div className="flex items-start justify-between gap-3">
                           <p className="text-[13px] font-semibold leading-snug">{item.name}</p>
-                          <button type="button" onClick={() => removeItem(item.id)} className="shrink-0 text-bone-faint hover:text-bone" aria-label="Sil">
+                          <button type="button" onClick={() => removeItem(item.id)} className="shrink-0 text-bone-faint hover:text-bone" aria-label={tr(language, { az: "Sil", en: "Remove", ru: "Удалить", tr: "Kaldır" })}>
                             <X size={15} />
                           </button>
                         </div>
@@ -86,11 +86,11 @@ export function CartPanel() {
                         </p>
                         <div className="mt-auto flex items-center justify-between pt-3">
                           <div className="flex items-center border border-white/20">
-                            <button type="button" onClick={() => updateQuantity(item.id, -1)} className="p-2 hover:bg-white/10" aria-label="Azalt">
+                            <button type="button" onClick={() => updateQuantity(item.id, -1)} className="p-2 hover:bg-white/10" aria-label={tr(language, { az: "Azalt", en: "Decrease", ru: "Меньше", tr: "Azalt" })}>
                               <Minus size={12} />
                             </button>
                             <span className="w-8 text-center text-[12px] font-bold tabular-nums">{item.quantity}</span>
-                            <button type="button" onClick={() => updateQuantity(item.id, 1)} className="p-2 hover:bg-white/10" aria-label="Artır">
+                            <button type="button" onClick={() => updateQuantity(item.id, 1)} className="p-2 hover:bg-white/10" aria-label={tr(language, { az: "Artır", en: "Increase", ru: "Больше", tr: "Artır" })}>
                               <Plus size={12} />
                             </button>
                           </div>

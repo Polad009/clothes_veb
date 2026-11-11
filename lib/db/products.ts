@@ -1,11 +1,11 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { unitPriceFor } from '@/lib/pricing';
 import { db, isUuid, unwrap } from './client';
 import { stockKey } from '@/lib/stock';
 import type { AppliedCampaign } from '@/lib/campaigns';
 
 const DEFAULT_IMAGE = '/images/hero/black-tee.jpg';
 const DEFAULT_SIZES = ['S', 'M', 'L', 'XL'];
-const USD_PER_AZN = 1 / 1.7;
 
 /** Product shape used by the storefront and the admin panel. */
 export interface CatalogProduct {
@@ -48,7 +48,7 @@ export interface CatalogProduct {
   /** Units per colour/size, keyed by stockKey(color, size). */
   stock: Record<string, number>;
   /** Name and description in other languages; Azerbaijani is the main field. */
-  translations?: Partial<Record<'en' | 'ru' | 'tr', { name?: string; description?: string }>>;
+  translations?: Partial<Record<'en' | 'ru' | 'tr', { name?: string; description?: string; composition?: string; fit?: string; care?: string }>>;
   /** Set on storefront copies while a discount runs (see lib/db/catalog.ts). */
   campaign?: AppliedCampaign;
 }
@@ -235,12 +235,16 @@ export async function saveProduct(input: any): Promise<CatalogProduct> {
   if (Array.isArray(input.gallery)) extra.gallery = input.gallery;
   if (Array.isArray(input.printLayers)) extra.printLayers = input.printLayers;
   if (input.translations && typeof input.translations === 'object') {
-    const t: Record<string, { name?: string; description?: string }> = {};
+    const t: Record<string, Record<string, string>> = {};
+    const limits: Record<string, number> = { name: 160, description: 5000, composition: 300, fit: 120, care: 300 };
     for (const lang of ['en', 'ru', 'tr']) {
       const src = (input.translations as any)[lang] || {};
-      const name = String(src.name || '').replace(/[<>]/g, '').trim().slice(0, 160);
-      const description = String(src.description || '').replace(/[<>]/g, '').trim().slice(0, 5000);
-      if (name || description) t[lang] = { ...(name && { name }), ...(description && { description }) };
+      const entry: Record<string, string> = {};
+      for (const [field, max] of Object.entries(limits)) {
+        const v = String(src[field] || '').replace(/[<>]/g, '').trim().slice(0, max);
+        if (v) entry[field] = v;
+      }
+      if (Object.keys(entry).length) t[lang] = entry;
     }
     extra.translations = t;
   }
@@ -298,30 +302,14 @@ export async function deleteProduct(idOrSlug: string): Promise<boolean> {
 }
 
 /**
- * Authoritative unit price for a cart line.
- *
- * Mirrors the storefront rule in context/CurrencyContext.tsx: shoppers in
- * Azerbaijan pay the AZN price (converted when they view USD); shoppers abroad
- * pay the international USD price (converted when they view AZN). The price the
- * client sent is only accepted when it equals one of those catalogue prices.
+ * Authoritative unit price for a cart line (same rule as the storefront, lib/pricing.ts).
+ * `foreign` is decided by the delivery country: the Azerbaijan price is only for
+ * deliveries in Azerbaijan. Whatever price the browser sent is ignored.
  */
 export function resolveUnitPrice(
   product: Pick<CatalogProduct, 'price' | 'internationalPrice'>,
   currency: 'AZN' | 'USD',
-  clientPrice: unknown
+  opts: { foreign: boolean; markupPct: number }
 ): number {
-  const azn = Number(product.price) || 0;
-  const intlUsd = product.internationalPrice ?? azn * USD_PER_AZN;
-
-  const domestic = currency === 'USD' ? azn * USD_PER_AZN : azn;
-  const international = currency === 'USD' ? intlUsd : intlUsd * 1.7;
-
-  const claimed = Number(clientPrice);
-  if (Number.isFinite(claimed)) {
-    for (const allowed of [domestic, international]) {
-      if (Math.abs(claimed - allowed) < 0.011) return Math.round(allowed * 100) / 100;
-    }
-  }
-  const fallback = currency === 'USD' ? international : domestic;
-  return Math.round(fallback * 100) / 100;
+  return unitPriceFor(product, { foreign: opts.foreign, currency, markupPct: opts.markupPct });
 }

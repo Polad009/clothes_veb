@@ -89,7 +89,9 @@ function Step({ n, title, aside, children }: { n: number; title: string; aside?:
 
 export default function StudioPage() {
   const { addItem, openCart } = useCart();
-  const { formatPrice } = useCurrency();
+  const { formatProductPrice } = useCurrency();
+  // studio prices are in manat; foreign buyers see the foreign price (lib/pricing.ts)
+  const formatPrice = (azn: number) => formatProductPrice({ price: azn });
   const { language } = useLanguage();
   const L = (p: Phrase) => tr(language, p);
   const { settings } = useStoreData();

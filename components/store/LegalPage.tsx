@@ -2,21 +2,25 @@ import React from "react";
 import Link from "next/link";
 import { cookies } from "next/headers";
 
-export type LegalLang = "az" | "en";
+export type LegalLang = "az" | "en" | "ru" | "tr";
 export type LegalSection = { title: string; body: (string | string[])[] };
 export type LegalDoc = { title: string; intro: string; updated: string; sections: LegalSection[] };
 
-/** Azerbaijani for AZ visitors, English for everyone else; ?lang= overrides. */
+const LANGS: LegalLang[] = ["az", "en", "ru", "tr"];
+
+/** The visitor's site language; ?lang= overrides. */
 export function legalLang(param?: string | string[]): LegalLang {
   const p = Array.isArray(param) ? param[0] : param;
-  if (p === "az" || p === "en") return p;
-  const saved = cookies().get("horvvalle_user_language_v1")?.value;
-  return saved === "az" || !saved ? "az" : "en";
+  if (LANGS.includes(p as LegalLang)) return p as LegalLang;
+  const saved = cookies().get("horvvalle_user_language_v1")?.value as LegalLang | undefined;
+  return saved && LANGS.includes(saved) ? saved : "az";
 }
 
 const UI = {
-  az: { back: "Ana səhifə", updated: "Son yenilənmə", other: "English", contact: "Sualınız var?", write: "Bizə yazın" },
-  en: { back: "Home", updated: "Last updated", other: "Azərbaycanca", contact: "Questions?", write: "Contact us" },
+  az: { back: "Ana səhifə", updated: "Son yenilənmə", contact: "Sualınız var?", write: "Bizə yazın" },
+  en: { back: "Home", updated: "Last updated", contact: "Questions?", write: "Contact us" },
+  ru: { back: "Главная", updated: "Обновлено", contact: "Есть вопросы?", write: "Напишите нам" },
+  tr: { back: "Ana sayfa", updated: "Son güncelleme", contact: "Sorunuz mu var?", write: "Bize yazın" },
 };
 
 /** Shared layout of the terms and privacy pages. Plain text only, nothing is read as HTML. */
@@ -27,9 +31,19 @@ export function LegalPage({ doc, lang, path, email }: { doc: LegalDoc; lang: Leg
       <article className="mx-auto max-w-3xl">
         <div className="mb-10 flex items-center justify-between gap-4 text-xs uppercase tracking-[0.18em] text-bone-dim">
           <Link href="/" className="transition-colors hover:text-bone">← {ui.back}</Link>
-          <Link href={`${path}?lang=${lang === "az" ? "en" : "az"}`} hrefLang={lang === "az" ? "en" : "az"} className="rounded-full border border-white/15 px-3 py-1.5 transition-colors hover:border-bone hover:text-bone">
-            {ui.other}
-          </Link>
+          <nav className="flex gap-1" aria-label="Language">
+            {LANGS.map((l) => (
+              <Link
+                key={l}
+                href={`${path}?lang=${l}`}
+                hrefLang={l}
+                aria-current={l === lang ? "page" : undefined}
+                className={`rounded-full border px-2.5 py-1 transition-colors ${l === lang ? "border-bone text-bone" : "border-white/15 hover:border-bone hover:text-bone"}`}
+              >
+                {l}
+              </Link>
+            ))}
+          </nav>
         </div>
 
         <header className="border-b border-white/10 pb-8">

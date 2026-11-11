@@ -201,8 +201,25 @@ export function StoreDataProvider({ initial, children }: { initial: StoreInitial
   const localizedProducts = useMemo(() => {
     if (language === "az") return products;
     return products.map((p) => {
-      const t = p.translations?.[language as "en" | "ru" | "tr"];
-      return t ? { ...p, name: t.name || p.name, description: t.description || p.description } : p;
+      const lang = language as "en" | "ru" | "tr";
+      // built-in default texts, so untranslated products still read correctly
+      const defaults: Record<string, Record<"en" | "ru" | "tr", string>> = {
+        "100% Pambıq": { en: "100% cotton", ru: "100% хлопок", tr: "%100 pamuk" },
+        "30°C dərəcədə tərsinə çevirərək yuyun.": { en: "Wash inside out at 30°C.", ru: "Стирать наизнанку при 30°C.", tr: "Ters çevirerek 30°C'de yıkayın." },
+      };
+      if (defaults[p.composition]) p = { ...p, composition: defaults[p.composition][lang] };
+      if (defaults[p.care]) p = { ...p, care: defaults[p.care][lang] };
+      const t = p.translations?.[lang];
+      return t
+        ? {
+            ...p,
+            name: t.name || p.name,
+            description: t.description || p.description,
+            composition: (t as any).composition || p.composition,
+            fit: (t as any).fit || p.fit,
+            care: (t as any).care || p.care,
+          }
+        : p;
     });
   }, [products, language]);
 

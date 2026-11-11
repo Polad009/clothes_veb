@@ -1,13 +1,14 @@
 import { Metadata } from "next";
 import { getStoreSnapshot } from "@/lib/storeSnapshot";
 import { LegalCustom, LegalPage, legalLang, type LegalDoc } from "@/components/store/LegalPage";
+import { PRIVACY_RU, PRIVACY_TR } from "./docs-ru-tr";
 
 export const metadata: Metadata = {
   title: "Məxfilik siyasəti · Privacy Policy",
   description: "Horwalle hansı məlumatları toplayır, nə üçün istifadə edir və kimlərlə paylaşır.",
   alternates: {
     canonical: "https://www.horwalle.com/privacy",
-    languages: { az: "https://www.horwalle.com/privacy?lang=az", en: "https://www.horwalle.com/privacy?lang=en" },
+    languages: { az: "https://www.horwalle.com/privacy?lang=az", en: "https://www.horwalle.com/privacy?lang=en", ru: "https://www.horwalle.com/privacy?lang=ru", tr: "https://www.horwalle.com/privacy?lang=tr" },
   },
 };
 
@@ -146,5 +147,5 @@ export default async function PrivacyPage({ searchParams }: { searchParams: { la
   const custom = String(snap.content?.policies?.privacy || "").trim();
   if (custom) return <LegalCustom title="Məxfilik siyasəti" text={custom} />;
   const lang = legalLang(searchParams?.lang);
-  return <LegalPage doc={lang === "en" ? EN : AZ} lang={lang} path="/privacy" email={(snap.settings as any)?.contactEmail} />;
+  return <LegalPage doc={({ az: AZ, en: EN, ru: PRIVACY_RU, tr: PRIVACY_TR } as Record<string, LegalDoc>)[lang]} lang={lang} path="/privacy" email={(snap.settings as any)?.contactEmail} />;
 }

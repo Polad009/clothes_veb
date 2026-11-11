@@ -71,10 +71,10 @@ async function main() {
   check('update: untouched fields kept', updated.description === 'sınaq' && updated.sizes[0] === 'M' && updated.colors.length === 1);
   check('find by slug', (await findProduct(created.slug))?.id === created.id);
 
-  check('price: AZN', resolveUnitPrice({ price: 34, internationalPrice: 25 }, 'AZN', 34) === 34);
-  check('price: USD international', resolveUnitPrice({ price: 34, internationalPrice: 25 }, 'USD', 25) === 25);
-  check('price: USD domestic conversion', resolveUnitPrice({ price: 34, internationalPrice: 25 }, 'USD', 20) === 20);
-  check('price: tampered falls back', resolveUnitPrice({ price: 34, internationalPrice: 25 }, 'AZN', 0.01) === 34);
+  const AZ = { foreign: false, markupPct: 20 }, ABROAD = { foreign: true, markupPct: 20 };
+  check('price: AZ buyer pays AZN price', resolveUnitPrice({ price: 34, internationalPrice: 25 }, 'AZN', AZ) === 34);
+  check('price: abroad uses own foreign price', resolveUnitPrice({ price: 34, internationalPrice: 25 }, 'USD', ABROAD) === 25);
+  check('price: abroad without own price gets markup', resolveUnitPrice({ price: 34 }, 'USD', ABROAD) === 24);
 
   check('delete', (await deleteProduct(created.id)) && (await deleteProduct(twin.slug)));
   check('catalogue restored', (await listProducts()).length === before.length);

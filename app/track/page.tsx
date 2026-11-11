@@ -1,5 +1,6 @@
 "use client";
 
+import { orderStatusText, paymentStatusText, tr, type Phrase } from "@/components/store/i18n";
 import { useSupport } from "@/context/StoreDataContext";
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
@@ -77,6 +78,7 @@ function OrderTrackerContent() {
 
   const { formatPrice, currency } = useCurrency();
   const { t, language } = useLanguage();
+  const L = (p: Phrase) => tr(language, p);
   const { user } = useAuth();
 
   const [query, setQuery] = useState(initialQuery);
@@ -300,14 +302,14 @@ function OrderTrackerContent() {
       setError(
         data.error ||
           (isEmailSearch
-            ? `"${val}" e-poçt (Gmail) ünvanı ilə heç bir aktiv sifariş tapılmadı.`
+            ? L({ az: `"${val}" e-poçt ünvanı ilə sifariş tapılmadı.`, en: `No orders found for "${val}".`, ru: `Заказы для "${val}" не найдены.`, tr: `"${val}" için sipariş bulunamadı.` })
             : isPhoneSearch
-            ? `"${val}" telefon nömrəsi ilə heç bir aktiv sifariş tapılmadı.`
-            : `"${val}" kodlu sifariş tapılmadı və ya sistemdən silinib.`)
+            ? L({ az: `"${val}" telefon nömrəsi ilə sifariş tapılmadı.`, en: `No orders found for the phone number "${val}".`, ru: `Заказы по номеру "${val}" не найдены.`, tr: `"${val}" telefon numarasıyla sipariş bulunamadı.` })
+            : L({ az: `"${val}" kodlu sifariş tapılmadı.`, en: `No order found with the code "${val}".`, ru: `Заказ с кодом "${val}" не найден.`, tr: `"${val}" kodlu sipariş bulunamadı.` }))
       );
     } catch (err: any) {
       setOrder(null);
-      setError("Şəbəkə xətası baş verdi. Zəhmət olmasa yenidən cəhd edin.");
+      setError(L({ "az": "Şəbəkə xətası baş verdi. Yenidən cəhd edin.", "en": "Network error. Please try again.", "ru": "Ошибка сети. Попробуйте ещё раз.", "tr": "Ağ hatası. Lütfen tekrar deneyin." }));
     } finally {
       setLoading(false);
     }
@@ -365,10 +367,10 @@ function OrderTrackerContent() {
   }, [order?.id]);
 
   const steps = [
-    { num: 1, label: t.track.statusNew || "Qəbul edildi", icon: CheckCircle2, desc: "Sifariş qeydə alındı" },
-    { num: 2, label: t.track.statusConfirmed || "Təsdiqləndi", icon: ShieldCheck, desc: "Hazırlanır" },
-    { num: 3, label: t.track.statusCourier || "Kuryerdədir", icon: Truck, desc: "Ünvana çatdırılır" },
-    { num: 4, label: t.track.statusDelivered || "Çatdırıldı", icon: Package, desc: "Təhvil verildi" },
+    { num: 1, label: t.track.statusNew || "Qəbul edildi", icon: CheckCircle2, desc: L({ "az": "Sifariş qeydə alındı", "en": "Order received", "ru": "Заказ принят", "tr": "Sipariş alındı" }) },
+    { num: 2, label: t.track.statusConfirmed || "Təsdiqləndi", icon: ShieldCheck, desc: L({ "az": "Hazırlanır", "en": "Being prepared", "ru": "Готовится", "tr": "Hazırlanıyor" }) },
+    { num: 3, label: t.track.statusCourier || "Kuryerdədir", icon: Truck, desc: L({ "az": "Ünvana çatdırılır", "en": "On the way to you", "ru": "В пути к вам", "tr": "Size doğru yolda" }) },
+    { num: 4, label: t.track.statusDelivered || "Çatdırıldı", icon: Package, desc: L({ "az": "Təhvil verildi", "en": "Handed over", "ru": "Вручён", "tr": "Teslim edildi" }) },
   ];
 
   const currentStep = order?.statusMeta?.step || 1;
@@ -400,7 +402,7 @@ function OrderTrackerContent() {
             <div className="flex items-center justify-between">
               <span className="font-bold flex items-center gap-1.5 text-amber-900">
                 <History size={14} className="text-amber-700" />
-                <span>Bu cihazda aşkar edilən son sifarişləriniz:</span>
+                <span>{L({ "az": "Bu cihazda aşkar edilən son sifarişləriniz:", "en": "Your recent orders on this device:", "ru": "Ваши последние заказы на этом устройстве:", "tr": "Bu cihazdaki son siparişleriniz:" })}</span>
               </span>
               <button
                 type="button"
@@ -413,7 +415,7 @@ function OrderTrackerContent() {
                 }}
                 className="text-[10px] text-amber-800 hover:text-rose-700 font-bold underline transition cursor-pointer"
               >
-                Tarixçəni təmizlə
+                {L({ "az": "Tarixçəni təmizlə", "en": "Clear history", "ru": "Очистить историю", "tr": "Geçmişi temizle" })}
               </button>
             </div>
             <div className="flex flex-wrap gap-2 pt-1">
@@ -437,7 +439,7 @@ function OrderTrackerContent() {
                   </button>
                   <button
                     type="button"
-                    title="Bu sınaq kodunu yaddaşdan sil"
+                    title={L({ "az": "Siyahıdan sil", "en": "Remove from list", "ru": "Удалить из списка", "tr": "Listeden kaldır" })}
                     onClick={(e) => {
                       e.stopPropagation();
                       if (typeof window !== "undefined") {
@@ -516,7 +518,7 @@ function OrderTrackerContent() {
           {user?.email && searchMode === "email" && (
             <div className="flex items-center justify-between p-2.5 rounded-xl bg-amber-50/80 border border-amber-200/80 text-xs">
               <span className="text-amber-900 font-medium truncate">
-                Daxil olunmuş hesab: <strong>{user.email}</strong>
+                {L({ "az": "Hesab:", "en": "Account:", "ru": "Аккаунт:", "tr": "Hesap:" })} <strong>{user.email}</strong>
               </span>
               <button
                 type="button"
@@ -526,7 +528,7 @@ function OrderTrackerContent() {
                 }}
                 className="px-2.5 py-1 rounded-lg bg-amber-800 hover:bg-amber-900 text-white font-bold text-[11px] transition shrink-0 cursor-pointer"
               >
-                Sifarişlərimi göstər
+                {L({ "az": "Sifarişlərimi göstər", "en": "Show my orders", "ru": "Показать мои заказы", "tr": "Siparişlerimi göster" })}
               </button>
             </div>
           )}
@@ -589,17 +591,17 @@ function OrderTrackerContent() {
                 className="text-stone-700 hover:text-black font-semibold flex items-center gap-1.5 transition text-left cursor-pointer"
               >
                 <HelpCircle size={13} className="text-amber-600 shrink-0" />
-                <span>İzləmə kodunuzu unutmusunuz? <strong>E-poçt və ya Telefon ilə tapın →</strong></span>
+                <span>{L({ "az": "İzləmə kodunuzu unutmusunuz?", "en": "Forgot your tracking code?", "ru": "Забыли код отслеживания?", "tr": "Takip kodunuzu mu unuttunuz?" })} <strong>{L({ "az": "E-poçt və ya telefonla tapın →", "en": "Find it by email or phone →", "ru": "Найти по e-mail или телефону →", "tr": "E-posta veya telefonla bulun →" })}</strong></span>
               </button>
             ) : searchMode === "phone" ? (
               <div className="text-emerald-700 flex items-center gap-1.5 font-medium">
                 <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
-                <span>Kodu bilməsəniz belə, sifariş zamanı yazdığınız nömrə ilə dərhal tapılacaq.</span>
+                <span>{L({ "az": "Kodu bilməsəniz belə, sifariş zamanı yazdığınız nömrə ilə dərhal tapılacaq.", "en": "Even without the code, we find your order by the phone number you used.", "ru": "Даже без кода заказ найдётся по номеру телефона, указанному при оформлении.", "tr": "Kod olmadan da sipariş verirken yazdığınız numarayla bulunur." })}</span>
               </div>
             ) : (
               <div className="text-sky-700 flex items-center gap-1.5 font-medium">
                 <CheckCircle2 size={13} className="text-sky-600 shrink-0" />
-                <span>Qeydiyyatdan keçdiyiniz Gmail və ya e-poçt ünvanınızı yazaraq bütün sifarişlərinizi izləyin.</span>
+                <span>{L({ "az": "Qeydiyyatdan keçdiyiniz Gmail və ya e-poçt ünvanınızı yazaraq bütün sifarişlərinizi izləyin.", "en": "Enter the email you used to see all your orders.", "ru": "Введите e-mail, указанный при заказе, чтобы увидеть все заказы.", "tr": "Tüm siparişlerinizi görmek için e-posta adresinizi girin." })}</span>
               </div>
             )}
 
@@ -613,7 +615,7 @@ function OrderTrackerContent() {
               <span className="font-bold text-stone-900">
                 {t.track.allOrders || "Axtarışınıza aid"} ({allMatches.length} sifariş):
               </span>
-              <span className="text-stone-500 text-[11px]">Baxmaq istədiyiniz sifarişi seçin</span>
+              <span className="text-stone-500 text-[11px]">{L({ "az": "Baxmaq istədiyiniz sifarişi seçin", "en": "Choose an order to view", "ru": "Выберите заказ", "tr": "Görüntülemek istediğiniz siparişi seçin" })}</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -643,7 +645,7 @@ function OrderTrackerContent() {
                           : "bg-stone-200 text-stone-800"
                       }`}
                     >
-                      {m.orderStatus}
+                      {orderStatusText(m.orderStatus, language)}
                     </span>
                   </button>
                 );
@@ -658,7 +660,7 @@ function OrderTrackerContent() {
             <div className="flex items-start gap-3">
               <AlertCircle size={20} className="text-rose-600 shrink-0 mt-0.5" />
               <div className="space-y-1">
-                <div className="font-bold text-rose-950">Sifariş tapılmadı</div>
+                <div className="font-bold text-rose-950">{L({ "az": "Sifariş tapılmadı", "en": "Order not found", "ru": "Заказ не найден", "tr": "Sipariş bulunamadı" })}</div>
                 <div className="text-rose-800 leading-relaxed text-[11px]">{error}</div>
               </div>
             </div>
@@ -673,7 +675,7 @@ function OrderTrackerContent() {
                 }}
                 className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-rose-100/70 border border-rose-200 text-rose-900 font-semibold text-[11px] transition"
               >
-                Telefon nömrəsi ilə yenidən axtar
+                {L({ "az": "Telefon nömrəsi ilə yenidən axtar", "en": "Search again by phone number", "ru": "Искать по номеру телефона", "tr": "Telefon numarasıyla tekrar ara" })}
               </button>
               <a
                 href={whatsappHelpUrl}
@@ -682,7 +684,7 @@ function OrderTrackerContent() {
                 className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] flex items-center gap-1.5 transition ml-auto shadow-2xs"
               >
                 <Phone size={12} />
-                <span>WhatsApp Dəstəklə Kodu Tap</span>
+                <span>{L({ "az": "WhatsApp Dəstəklə Kodu Tap", "en": "Find the code via WhatsApp", "ru": "Узнать код в WhatsApp", "tr": "Kodu WhatsApp'tan öğren" })}</span>
               </a>
             </div>
           </div>
@@ -696,14 +698,14 @@ function OrderTrackerContent() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-stone-100">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-stone-500 uppercase tracking-wider">Sifariş Nömrəsi:</span>
+                  <span className="text-xs font-bold text-stone-500 uppercase tracking-wider">{L({ "az": "Sifariş Nömrəsi:", "en": "Order number:", "ru": "Номер заказа:", "tr": "Sipariş numarası:" })}</span>
                   <span className="font-mono text-base font-black text-stone-900">{order.id}</span>
                 </div>
                 <div className="text-xs text-stone-500 flex items-center gap-2">
                   <Calendar size={13} />
-                  <span>Tarix: {order.date ? new Date(order.date).toLocaleDateString("az-AZ") : "Bu gün"}</span>
+                  <span>{L({ "az": "Tarix:", "en": "Date:", "ru": "Дата:", "tr": "Tarih:" })} {order.date ? new Date(order.date).toLocaleDateString(language === "az" ? "az-AZ" : language === "ru" ? "ru-RU" : language === "tr" ? "tr-TR" : "en-GB") : ""}</span>
                   <span>·</span>
-                  <span>İzləmə Kodu: <strong className="font-mono text-stone-700">{order.trackingCode}</strong></span>
+                  <span>{L({ "az": "İzləmə kodu:", "en": "Tracking code:", "ru": "Код отслеживания:", "tr": "Takip kodu:" })} <strong className="font-mono text-stone-700">{order.trackingCode}</strong></span>
                 </div>
               </div>
 
@@ -712,7 +714,7 @@ function OrderTrackerContent() {
                 {isCancelled ? (
                   <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-300 shadow-2xs">
                     <XCircle size={14} className="text-rose-600" />
-                    <span>Ləğv edildi</span>
+                    <span>{L({ "az": "Ləğv edildi", "en": "Cancelled", "ru": "Отменён", "tr": "İptal edildi" })}</span>
                   </span>
                 ) : (
                   <span
@@ -727,7 +729,7 @@ function OrderTrackerContent() {
                     }`}
                   >
                     <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
-                    <span>{order.orderStatus}</span>
+                    <span>{orderStatusText(order.orderStatus, language)}</span>
                   </span>
                 )}
               </div>
@@ -737,7 +739,7 @@ function OrderTrackerContent() {
             {!isCancelled ? (
               <div className="space-y-4">
                 <div className="text-xs font-bold text-stone-600 uppercase tracking-wider">
-                  Çatdırılma Mərhələləri:
+                  {L({ "az": "Çatdırılma Mərhələləri:", "en": "Delivery steps:", "ru": "Этапы доставки:", "tr": "Teslimat aşamaları:" })}
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -779,9 +781,9 @@ function OrderTrackerContent() {
               </div>
             ) : (
               <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs space-y-1">
-                <div className="font-bold">Bu sifariş ləğv edilmişdir.</div>
+                <div className="font-bold">{L({ "az": "Bu sifariş ləğv edilmişdir.", "en": "This order was cancelled.", "ru": "Этот заказ отменён.", "tr": "Bu sipariş iptal edildi." })}</div>
                 <div className="text-[11px] text-rose-600">
-                  Ətraflı məlumat almaq və ya ödənişin geri qaytarılması üçün dəstək xidmətimiz ilə əlaqə saxlaya bilərsiniz.
+                  {L({ "az": "Ətraflı məlumat almaq və ya ödənişin geri qaytarılması üçün dəstək xidmətimiz ilə əlaqə saxlaya bilərsiniz.", "en": "Contact us for details or a refund.", "ru": "Свяжитесь с нами для подробностей или возврата оплаты.", "tr": "Ayrıntılar veya iade için bizimle iletişime geçin." })}
                 </div>
               </div>
             )}
@@ -818,7 +820,7 @@ function OrderTrackerContent() {
                           {item.name}
                         </div>
                         <div className="text-[11px] text-stone-500 mt-0.5">
-                          Ölçü: <strong className="text-stone-800">{item.size || "L"}</strong> · Rəng: <strong className="text-stone-800">{item.color || "Standart"}</strong> · Say: <strong className="text-stone-800">{item.quantity || 1} ədəd</strong>
+                          {L({ "az": "Ölçü", "en": "Size", "ru": "Размер", "tr": "Beden" })}: <strong className="text-stone-800">{item.size || "L"}</strong> · {L({ "az": "Rəng", "en": "Colour", "ru": "Цвет", "tr": "Renk" })}: <strong className="text-stone-800">{item.color || "Standart"}</strong> · Say: <strong className="text-stone-800">{item.quantity || 1} ədəd</strong>
                         </div>
                       </div>
                     </div>
@@ -852,12 +854,12 @@ function OrderTrackerContent() {
                 </div>
                 <div className="space-y-1">
                   <div className="flex justify-between text-stone-600">
-                    <span>Ödəniş Metodu:</span>
-                    <strong className="text-stone-900 uppercase">{order.paymentMethod}</strong>
+                    <span>{L({ "az": "Ödəniş Metodu:", "en": "Payment method:", "ru": "Способ оплаты:", "tr": "Ödeme yöntemi:" })}</span>
+                    <strong className="text-stone-900 uppercase">{paymentStatusText(order.paymentMethod, language)}</strong>
                   </div>
                   <div className="flex justify-between text-stone-600">
-                    <span>Ödəniş Vəziyyəti:</span>
-                    <strong className="text-emerald-700">{order.paymentStatus}</strong>
+                    <span>{L({ "az": "Ödəniş Vəziyyəti:", "en": "Payment status:", "ru": "Статус оплаты:", "tr": "Ödeme durumu:" })}</span>
+                    <strong className="text-emerald-700">{paymentStatusText(order.paymentStatus, language)}</strong>
                   </div>
                   <div className="flex justify-between text-stone-900 font-bold pt-2 border-t border-stone-200 text-sm">
                     <span>{t.track.total || "Cəmi Ödənilən"}:</span>
@@ -869,7 +871,7 @@ function OrderTrackerContent() {
 
             {/* Need Help? Quick Contact Box */}
             <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-stone-500">
-              <div>Sifarişinizlə bağlı hər hansı sualınız var? Bizimlə dərhal əlaqə saxlayın.</div>
+              <div>{L({ "az": "Sifarişinizlə bağlı hər hansı sualınız var? Bizimlə dərhal əlaqə saxlayın.", "en": "Questions about your order? Contact us.", "ru": "Вопросы по заказу? Свяжитесь с нами.", "tr": "Siparişinizle ilgili sorunuz mu var? Bize yazın." })}</div>
               <a
                 href={support.link()}
                 target="_blank"
@@ -877,7 +879,7 @@ function OrderTrackerContent() {
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition shadow-2xs"
               >
                 <Phone size={13} />
-                <span>WhatsApp Dəstək ({support.phone})</span>
+                <span>WhatsApp ({support.phone})</span>
               </a>
             </div>
 

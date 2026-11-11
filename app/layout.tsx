@@ -96,6 +96,7 @@ export const metadata: Metadata = {
 
 import { StoreShell } from "@/components/StoreShell";
 import { getStoreSnapshot } from "@/lib/storeSnapshot";
+import { foreignMarkup } from "@/lib/pricing";
 import { Analytics } from "@/components/Analytics";
 
 export default async function RootLayout({
@@ -163,7 +164,7 @@ export default async function RootLayout({
       <body className="min-h-screen flex flex-col bg-ink text-[#1A1517] font-sans antialiased selection:bg-bone selection:text-ink">
         <Analytics />
         <LanguageProvider>
-          <CurrencyProvider>
+          <CurrencyProvider foreignMarkup={foreignMarkup(initialStore.settings)}>
             <CartProvider>
               <StoreDataProvider initial={initialStore}>
                 <TryOnProvider>

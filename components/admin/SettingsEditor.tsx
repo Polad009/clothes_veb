@@ -17,7 +17,7 @@ const RATE_ROWS: Array<{ title: string; hint: string; azn: RateKey; usd: RateKey
   { title: "Xaricə: DHL Express", hint: "Böyük sifarişlərdə avtomatik endirim qalır (340 ₼ / $200-dən).", azn: "intlExpressAZN", usd: "intlExpressUSD" },
 ];
 
-export function SettingsEditor({ shipping, privacy, terms }: { shipping: ShippingRates; privacy: string; terms: string }) {
+export function SettingsEditor({ shipping, privacy, terms, markup }: { shipping: ShippingRates; privacy: string; terms: string; markup: number }) {
   const router = useRouter();
   const toast = useToast();
   const [rates, setRates] = useState<Record<RateKey, string>>(
@@ -26,6 +26,10 @@ export function SettingsEditor({ shipping, privacy, terms }: { shipping: Shippin
   const [privacyText, setPrivacyText] = useState(privacy);
   const [termsText, setTermsText] = useState(terms);
   const [saving, setSaving] = useState(false);
+  const [markupText, setMarkupText] = useState(String(markup));
+  const markupValue = Number(markupText.replace(",", "."));
+  const example = 40;
+  const exampleForeign = Number.isFinite(markupValue) ? Math.round(example * (1 + markupValue / 100) * 100) / 100 : example;
 
   const save = async () => {
     const parsed: Partial<ShippingRates> = {};
@@ -37,11 +41,15 @@ export function SettingsEditor({ shipping, privacy, terms }: { shipping: Shippin
       }
       parsed[key] = Math.round(value * 100) / 100;
     }
+    if (markupText.trim() === "" || !Number.isFinite(markupValue) || markupValue < 0 || markupValue > 300) {
+      toast.error("Xarici qiymət fərqi 0 ilə 300 arasında faiz olmalıdır.");
+      return;
+    }
     setSaving(true);
     try {
       await adminFetch("/api/admin/content", {
         body: {
-          settings: { shipping: parsed },
+          settings: { shipping: parsed, regionPricing: { foreignMarkupPercent: Math.round(markupValue * 10) / 10 } },
           content: { policies: { privacy: privacyText.trim(), terms: termsText.trim() } },
         },
       });
@@ -58,7 +66,7 @@ export function SettingsEditor({ shipping, privacy, terms }: { shipping: Shippin
     <>
       <PageHeader
         title="Tənzimləmələr"
-        description="Çatdırılma qiymətləri həm ödəniş səhifəsində, həm də serverdəki yoxlamada eyni anda dəyişir."
+        description="Qiymət və çatdırılma dəyişiklikləri həm saytda, həm də serverdəki ödəniş yoxlamasında eyni anda qüvvəyə minir."
         actions={
           <Button variant="primary" loading={saving} onClick={save}>
             Yadda saxla
@@ -67,6 +75,23 @@ export function SettingsEditor({ shipping, privacy, terms }: { shipping: Shippin
       />
 
       <div className="space-y-6">
+        <Card title="Ölkəyə görə qiymət">
+          <div className="space-y-4 p-5">
+            <p className="text-sm text-stone-600">
+              Azərbaycandan girənlər məhsulun manat qiymətini görür. Başqa ölkədən girənlər daha yüksək <strong>xarici qiyməti</strong> görür:
+              məhsulda "Xarici qiymət ($)" yazılıbsa o, yazılmayıbsa manat qiyməti + aşağıdakı faiz. Ödənişdə qiymət çatdırılma ölkəsinə görə hesablanır.
+            </p>
+            <div className="grid gap-4 sm:grid-cols-[12rem_1fr] sm:items-end">
+              <Field label="Xarici qiymət fərqi (%)" hint="0 yazsanız, hamı eyni qiyməti görər.">
+                <Input inputMode="decimal" value={markupText} onChange={(e) => setMarkupText(e.target.value)} />
+              </Field>
+              <p className="rounded-lg bg-stone-50 px-3 py-2.5 text-sm text-stone-700">
+                Nümunə: {example.toFixed(2)} ₼ olan məhsul xaricdə <strong>{exampleForeign.toFixed(2)} ₼</strong> (≈ ${(exampleForeign / 1.7).toFixed(2)}) olur.
+              </p>
+            </div>
+          </div>
+        </Card>
+
         <AdminCredentialsCard />
 
         <EmailDomainCard />

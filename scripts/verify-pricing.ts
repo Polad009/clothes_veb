@@ -2,6 +2,7 @@
 //   npx tsx scripts/verify-pricing.ts
 
 import { resolveUnitPrice } from '@/lib/db/products';
+import { foreignMarkup } from '@/lib/pricing';
 import { customPrintPrice, STUDIO_MARKUP, STUDIO_PRODUCTS, studioProduct } from '@/lib/studio/catalog';
 
 let failed = 0;
@@ -34,9 +35,15 @@ check('other products keep list prices', customPrintPrice('polo-uzunqol', { prin
 check('removed products are gone', customPrintPrice('fincan-sade', { printType: 'one' }) === null);
 
 const base = customPrintPrice(tee.id, { printType: 'two' })!;
-check('custom item: honest AZN price accepted', resolveUnitPrice({ price: base }, 'AZN', base) === base);
-check('custom item: tampered price replaced', resolveUnitPrice({ price: base }, 'AZN', 0.5) === base);
-check('custom item: USD conversion accepted', resolveUnitPrice({ price: base }, 'USD', base / 1.7) === Math.round((base / 1.7) * 100) / 100);
+const AZ = { foreign: false, markupPct: 20 }, ABROAD = { foreign: true, markupPct: 20 };
+check('AZ delivery: manat price', resolveUnitPrice({ price: base }, 'AZN', AZ) === base);
+check('AZ delivery in USD: plain conversion', resolveUnitPrice({ price: base }, 'USD', AZ) === Math.round((base / 1.7) * 100) / 100);
+check('abroad: markup applied (USD)', resolveUnitPrice({ price: base }, 'USD', ABROAD) === Math.round(((base * 1.2) / 1.7) * 100) / 100);
+check('abroad: own foreign price wins', resolveUnitPrice({ price: 34, internationalPrice: 29 }, 'USD', ABROAD) === 29);
+check('abroad shown in AZN', resolveUnitPrice({ price: 34, internationalPrice: 29 }, 'AZN', ABROAD) === 49.3);
+check('abroad costs more than AZ', resolveUnitPrice({ price: 34 }, 'AZN', ABROAD) > resolveUnitPrice({ price: 34 }, 'AZN', AZ));
+check('markup 0 = same price', resolveUnitPrice({ price: 34 }, 'AZN', { foreign: true, markupPct: 0 }) === 34);
+check('markup from settings: default 20', foreignMarkup({}) === 20 && foreignMarkup({ regionPricing: { foreignMarkupPercent: 35 } }) === 35);
 
 console.log(failed === 0 ? '\nALL CHECKS PASSED' : `\n${failed} CHECK(S) FAILED`);
 process.exit(failed === 0 ? 0 : 1);

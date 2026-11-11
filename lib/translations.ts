@@ -1194,7 +1194,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
 
 export function translateColor(colorName: string, lang: LanguageCode): string {
   if (!colorName) return colorName;
-  const lower = colorName.trim().toLowerCase();
+  const lower = colorName.trim().replace(/İ/g, "i").toLowerCase().normalize("NFC");
 
   const map: Record<string, Record<LanguageCode, string>> = {
     "sand beige": { az: "Qum Beji", en: "Sand Beige", ru: "Песочно-бежевый", tr: "Kum Beji" },
@@ -1216,12 +1216,18 @@ export function translateColor(colorName: string, lang: LanguageCode): string {
   if (map[lower]) {
     return map[lower][lang] || map[lower].en;
   }
+  // "Qara (Obsidian Noir)": translate the colour, keep the name in brackets
+  const m = /^([^()]+?)\s*(\(.*\))$/.exec(colorName.trim());
+  if (m) {
+    const base = translateColor(m[1], lang);
+    if (base !== m[1]) return `${base} ${m[2]}`;
+  }
   return colorName;
 }
 
 export function translateBadge(badge: string | undefined, lang: LanguageCode): string | undefined {
   if (!badge) return badge;
-  const lower = badge.trim().toLowerCase();
+  const lower = badge.trim().replace(/İ/g, "i").toLowerCase().normalize("NFC");
 
   const map: Record<string, Record<LanguageCode, string>> = {
     "limited motorsport edition": {

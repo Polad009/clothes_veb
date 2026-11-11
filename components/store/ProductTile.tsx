@@ -18,7 +18,7 @@ function isSoldOut(p: Product): boolean {
 
 /** Product card for dark pages: cut-out image on a graphite panel, second image on hover. */
 export function ProductTile({ product, priority = false }: { product: Product; priority?: boolean }) {
-  const { formatProductPrice, formatPrice } = useCurrency();
+  const { formatProductPrice, formatCompareAt } = useCurrency();
   const { language } = useLanguage();
   const color = product.colors[0];
   const front = color?.image || product.image || "/images/hero/black-tee.jpg";
@@ -74,7 +74,7 @@ export function ProductTile({ product, priority = false }: { product: Product; p
         <h3 className="line-clamp-2 text-[13px] font-medium leading-snug text-bone">{product.name}</h3>
         <div className="shrink-0 text-[13px] font-semibold tabular-nums sm:text-right">
           <span className={onSale ? "text-sale" : "text-bone"}>{formatProductPrice(product)}</span>
-          {onSale && <span className="ml-2 text-[11px] font-normal text-bone-faint line-through sm:ml-0 sm:block">{formatPrice(product.compareAtPrice!)}</span>}
+          {onSale && <span className="ml-2 text-[11px] font-normal text-bone-faint line-through sm:ml-0 sm:block">{formatCompareAt(product)}</span>}
         </div>
       </div>
     </Link>

@@ -140,7 +140,7 @@ export function ProductForm({ product, categories }: { product: CatalogProduct |
   const [colors, setColors] = useState<ColorDraft[]>(
     product?.colors?.length ? product.colors.map(toDraft) : [{ key: newKey(), name: "", hex: "#111111", image: "", hoverImage: "", extra: [] }]
   );
-  const [translations, setTranslations] = useState<Record<"en" | "ru" | "tr", { name?: string; description?: string }>>(
+  const [translations, setTranslations] = useState<Record<"en" | "ru" | "tr", { name?: string; description?: string; composition?: string; fit?: string; care?: string }>>(
     () => ({ en: {}, ru: {}, tr: {}, ...(product?.translations || {}) }) as any
   );
   const [trLang, setTrLang] = useState<"en" | "ru" | "tr">("en");
@@ -322,6 +322,16 @@ export function ProductForm({ product, categories }: { product: CatalogProduct |
                 onChange={(e) => setTranslations({ ...translations, [trLang]: { ...translations[trLang], description: e.target.value } })}
               />
             </Field>
+            <div className="grid gap-4 sm:grid-cols-3">
+              {([["composition", "Tərkib"], ["fit", "Kəsim"], ["care", "Qulluq"]] as const).map(([field, label]) => (
+                <Field key={field} label={label}>
+                  <Input
+                    value={(translations[trLang] as any)?.[field] || ""}
+                    onChange={(e) => setTranslations({ ...translations, [trLang]: { ...translations[trLang], [field]: e.target.value } })}
+                  />
+                </Field>
+              ))}
+            </div>
           </div>
         </Card>
 
@@ -333,7 +343,7 @@ export function ProductForm({ product, categories }: { product: CatalogProduct |
             <Field label="Köhnə qiymət (₼)" hint="Üstündən xətt çəkilmiş göstərilir. Boş qala bilər." error={errors.compareAtPrice}>
               <Input inputMode="decimal" value={compareAtPrice} onChange={(e) => setCompareAtPrice(e.target.value)} placeholder="45.99" />
             </Field>
-            <Field label="Xarici qiymət ($)" hint="Boşdursa, manat qiyməti 1.70-ə bölünür." error={errors.internationalPrice}>
+            <Field label="Xarici qiymət ($)" hint="Başqa ölkədən girənlər üçün. Boşdursa: manat qiyməti + Tənzimləmələrdəki xarici faiz." error={errors.internationalPrice}>
               <Input inputMode="decimal" value={internationalPrice} onChange={(e) => setInternationalPrice(e.target.value)} placeholder="24.99" />
             </Field>
             <div className="flex items-center justify-between gap-4 rounded-lg border border-stone-200 px-4 py-3 sm:col-span-3">

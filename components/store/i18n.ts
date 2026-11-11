@@ -40,3 +40,42 @@ export const T = {
     tr: "Bakü ve Sumgayıt'a ücretsiz teslimat",
   },
 } satisfies Record<string, Phrase>;
+
+const ORDER_STATUS_I18N: Record<string, Phrase> = {
+  "yeni sifariş": { az: "Yeni sifariş", en: "New order", ru: "Новый заказ", tr: "Yeni sipariş" },
+  "qəbul edildi": { az: "Qəbul edildi", en: "Received", ru: "Принят", tr: "Alındı" },
+  "təsdiqləndi": { az: "Təsdiqləndi", en: "Confirmed", ru: "Подтверждён", tr: "Onaylandı" },
+  "hazırlanır": { az: "Hazırlanır", en: "Being prepared", ru: "Готовится", tr: "Hazırlanıyor" },
+  "kuryerdədir": { az: "Kuryerdədir", en: "Out for delivery", ru: "У курьера", tr: "Kuryede" },
+  "göndərildi": { az: "Göndərildi", en: "Shipped", ru: "Отправлен", tr: "Gönderildi" },
+  "çatdırıldı": { az: "Çatdırıldı", en: "Delivered", ru: "Доставлен", tr: "Teslim edildi" },
+  "ləğv edildi": { az: "Ləğv edildi", en: "Cancelled", ru: "Отменён", tr: "İptal edildi" },
+};
+
+/** Order statuses are saved in Azerbaijani; this shows them in the visitor's language. */
+export function orderStatusText(status: string | undefined, lang: string): string {
+  const key = String(status || "Yeni Sifariş").trim().toLocaleLowerCase("az");
+  const p = ORDER_STATUS_I18N[key];
+  return p ? tr(lang, p) : String(status || "");
+}
+
+const PAYMENT_I18N: Record<string, Phrase> = {
+  "ödənilib": { az: "Ödənilib", en: "Paid", ru: "Оплачен", tr: "Ödendi" },
+  "paid": { az: "Ödənilib", en: "Paid", ru: "Оплачен", tr: "Ödendi" },
+  "test_paid": { az: "Sınaq ödənişi", en: "Test payment", ru: "Тестовая оплата", tr: "Test ödemesi" },
+  "pending": { az: "Gözləyir", en: "Pending", ru: "Ожидает", tr: "Bekliyor" },
+  "gözləyir": { az: "Gözləyir", en: "Pending", ru: "Ожидает", tr: "Bekliyor" },
+  "failed": { az: "Alınmadı", en: "Failed", ru: "Не прошла", tr: "Başarısız" },
+  "refunded": { az: "Geri qaytarıldı", en: "Refunded", ru: "Возвращён", tr: "İade edildi" },
+  "bank kartı": { az: "Bank kartı", en: "Bank card", ru: "Банковская карта", tr: "Banka kartı" },
+  "bank kartı (visa/mastercard)": { az: "Bank kartı (Visa/Mastercard)", en: "Bank card (Visa/Mastercard)", ru: "Банковская карта (Visa/Mastercard)", tr: "Banka kartı (Visa/Mastercard)" },
+  "card": { az: "Bank kartı", en: "Bank card", ru: "Банковская карта", tr: "Banka kartı" },
+  "nağd": { az: "Nağd", en: "Cash", ru: "Наличные", tr: "Nakit" },
+};
+
+/** Payment statuses and methods are saved in Azerbaijani or as codes; this shows them in the visitor's language. */
+export function paymentStatusText(value: string | undefined, lang: string): string {
+  const key = String(value || "").trim().toLocaleLowerCase("az");
+  const p = PAYMENT_I18N[key];
+  return p ? tr(lang, p) : String(value || "");
+}

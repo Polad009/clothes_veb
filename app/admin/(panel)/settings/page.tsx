@@ -1,6 +1,7 @@
 import { requireOwner } from "@/lib/adminSession";
 import { getContent, getSettings } from "@/lib/db/site";
 import { resolveShippingRates } from "@/lib/shipping";
+import { foreignMarkup } from "@/lib/pricing";
 import { AdminPage } from "@/components/admin/AdminShell";
 import { SettingsEditor } from "@/components/admin/SettingsEditor";
 
@@ -15,6 +16,7 @@ export default async function SettingsPage() {
         shipping={resolveShippingRates(settings.shipping)}
         privacy={String(content.policies?.privacy || "")}
         terms={String(content.policies?.terms || "")}
+        markup={foreignMarkup(settings)}
       />
     </AdminPage>
   );

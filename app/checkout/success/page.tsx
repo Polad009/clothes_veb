@@ -1,190 +1,127 @@
 "use client";
 
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { CheckCircle2, ArrowRight, Check, AlertCircle } from "lucide-react";
-import { useCurrency } from "@/context/CurrencyContext";
+import { Check, Copy } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
+import { tr, type Phrase } from "@/components/store/i18n";
+import { useRegionCopy } from "@/components/store/region";
 import { playPurchaseSuccessSound } from "@/lib/soundEffects";
 
-function CheckoutSuccessContent() {
-  const searchParams = useSearchParams();
-  const orderId = searchParams.get("order") || searchParams.get("orderId") || "";
-  const method = searchParams.get("method") || "card";
-  const total = Number(searchParams.get("total")) || 0;
-  const isTest = searchParams.get("test") === "true";
-  const { formatPrice } = useCurrency();
-  const [copied, setCopied] = React.useState(false);
+const METHOD: Record<string, Phrase> = {
+  apple_pay: { az: "Apple Pay", en: "Apple Pay", ru: "Apple Pay", tr: "Apple Pay" },
+  google_pay: { az: "Google Pay", en: "Google Pay", ru: "Google Pay", tr: "Google Pay" },
+  cod: { az: "Çatdırılmada ödəniş", en: "Pay on delivery", ru: "Оплата при получении", tr: "Kapıda ödeme" },
+  cash_on_delivery: { az: "Çatdırılmada ödəniş", en: "Pay on delivery", ru: "Оплата при получении", tr: "Kapıda ödeme" },
+  card: { az: "Bank kartı", en: "Bank card", ru: "Банковская карта", tr: "Banka kartı" },
+};
+
+function SuccessContent() {
+  const params = useSearchParams();
+  const { language } = useLanguage();
+  const region = useRegionCopy();
+  const L = (p: Phrase) => tr(language, p);
+  const orderId = params.get("orderId") || params.get("order") || "";
+  const method = params.get("method") || "card";
+  const total = Number(params.get("total")) || 0;
+  const currency = params.get("currency") === "USD" ? "USD" : "AZN";
+  const isTest = params.get("test") === "true";
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     try {
       playPurchaseSuccessSound();
-    } catch (e) {}
-
-    if (typeof window !== "undefined" && orderId) {
-      try {
-        const raw = localStorage.getItem("horvvalle_saved_orders");
-        const list = raw ? JSON.parse(raw) : [];
-        const existingIdx = list.findIndex((item: any) => item.id === orderId);
-        if (existingIdx === -1) {
-          list.unshift({
-            id: orderId,
-            date: new Date().toISOString(),
-            total,
-            method,
-            isTest,
-          });
-          localStorage.setItem("horvvalle_saved_orders", JSON.stringify(list.slice(0, 10)));
-        }
-      } catch (e) {}
-    }
+    } catch {}
+    if (!orderId) return;
+    try {
+      const list = JSON.parse(localStorage.getItem("horvvalle_saved_orders") || "[]");
+      if (!list.some((o: any) => o.id === orderId)) {
+        list.unshift({ id: orderId, date: new Date().toISOString(), total, method, isTest });
+        localStorage.setItem("horvvalle_saved_orders", JSON.stringify(list.slice(0, 10)));
+      }
+    } catch {}
   }, [orderId, total, method, isTest]);
 
-  const handleCopyCode = () => {
-    if (typeof navigator !== "undefined" && navigator.clipboard) {
-      navigator.clipboard.writeText(orderId);
+  const copy = () => {
+    navigator.clipboard?.writeText(orderId).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
-    }
+    });
   };
 
-  const getMethodTitle = (m: string) => {
-    switch (m) {
-      case "apple_pay":
-        return " Apple Pay";
-      case "google_pay":
-        return "Google Pay";
-      case "cash_on_delivery":
-      case "cod":
-        return "Çatdırılmada Ödəniş (Qapıda Nağd/Kart)";
-      default:
-        return "Bank Kartı (Visa/Mastercard)";
-    }
-  };
-
-  const whatsappMessage = encodeURIComponent(
-    `HORWALLE Sifariş İzləmə Məlumatım:\nSifariş Nömrəsi: ${orderId}\nMəbləğ: ${total ? formatPrice(total) : "Ödənilib"}\nİzləmə linki: https://www.horwalle.com/track?orderId=${orderId}`
-  );
+  const amount = total ? (currency === "USD" ? `$${total.toFixed(2)}` : `${total.toFixed(2)} ₼`) : "";
+  const cod = method === "cod" || method === "cash_on_delivery";
 
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-16 sm:py-24 text-center space-y-8 text-stone-900">
-      {/* Animated Success Badge */}
-      <div className="w-20 h-20 rounded-full bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-900 mx-auto shadow-sm">
-        <CheckCircle2 size={40} />
-      </div>
-
-      <div className="space-y-3">
-        {isTest ? (
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-50 text-amber-900 text-xs font-bold uppercase tracking-wider border border-amber-200">
-            <AlertCircle size={14} className="text-amber-700" />
-            <span>TEST REJİMİ — Real Ödəniş Çəkilməyib</span>
-          </div>
-        ) : (
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-stone-100 text-stone-800 text-xs font-semibold uppercase tracking-wider border border-stone-200">
-            <Check size={14} />
-            <span>Sifarişiniz Təsdiqləndi</span>
-          </div>
-        )}
-        <h1 className="font-eb-garamond text-3xl sm:text-5xl font-normal text-stone-900 tracking-wide">
-          Təşəkkür <span className="italic font-normal">edirik!</span>
-        </h1>
-        <p className="text-xs sm:text-sm text-stone-600 max-w-md mx-auto leading-relaxed">
-          {method === "cash_on_delivery" || method === "cod"
-            ? "Sifarişiniz qeydə alındı. Məhsul çatdırılan zaman kuryerə nağd və ya kartla ödəniş edə bilərsiniz."
-            : "Ödəniş uğurla qəbul edildi. Sifarişiniz qablaşdırılmaya göndərildi və kuryerimiz 1-2 iş günü ərzində sizinlə əlaqə saxlayacaq."}
+    <div className="mx-auto w-full max-w-xl px-4 pb-24 pt-14 font-grotesk text-bone sm:pt-20">
+      {isTest && (
+        <p className="mb-6 rounded-xl border border-white/15 bg-ink-850 px-4 py-3 text-center text-[12px] font-bold uppercase tracking-[0.14em] text-bone-dim">
+          {L({ az: "Sınaq rejimi: real ödəniş çəkilməyib", en: "Test mode: no real payment was taken", ru: "Тестовый режим: оплата не списана", tr: "Test modu: gerçek ödeme alınmadı" })}
         </p>
+      )}
+
+      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-bone text-ink">
+        <Check size={30} strokeWidth={3} />
       </div>
+      <h1 className="mt-6 text-center text-4xl font-black uppercase tracking-tight [font-stretch:112%] sm:text-5xl">
+        {L({ az: "Təşəkkür edirik!", en: "Thank you!", ru: "Спасибо!", tr: "Teşekkürler!" })}
+      </h1>
+      <p className="mx-auto mt-3 max-w-md text-center text-[14px] leading-relaxed text-bone-dim">
+        {cod
+          ? L({
+              az: "Sifarişiniz qəbul olundu. Ödənişi məhsulu alanda kuryerə edə bilərsiniz.",
+              en: "Your order is placed. You can pay the courier when it arrives.",
+              ru: "Заказ оформлен. Оплатить можно курьеру при получении.",
+              tr: "Siparişiniz alındı. Ödemeyi teslimatta kuryeye yapabilirsiniz.",
+            })
+          : L({
+              az: "Ödəniş qəbul olundu və sifarişiniz hazırlanır. Göndəriləndə sizə xəbər verəcəyik.",
+              en: "Payment received and your order is being prepared. We will let you know when it ships.",
+              ru: "Оплата получена, заказ готовится. Мы сообщим, когда он будет отправлен.",
+              tr: "Ödeme alındı, siparişiniz hazırlanıyor. Kargoya verildiğinde size haber vereceğiz.",
+            })}
+      </p>
 
-      {/* Order Tracking Progress Bar & Code Card */}
-      <div className="p-6 rounded-3xl bg-white border border-stone-200 text-left space-y-4 max-w-lg mx-auto shadow-sm">
-        <div className="text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
-          SİFARİŞ STATUSU:
-        </div>
-
-        <div className="grid grid-cols-3 gap-2 text-center text-[10px] font-bold uppercase">
-          <div className="space-y-1.5">
-            <div className="w-full h-1.5 bg-stone-900 rounded-full" />
-            <span className="text-stone-900 font-bold">1. Qəbul Edildi</span>
-          </div>
-          <div className="space-y-1.5">
-            <div className="w-full h-1.5 bg-stone-200 rounded-full" />
-            <span className="text-stone-400">2. Qablaşdırma</span>
-          </div>
-          <div className="space-y-1.5">
-            <div className="w-full h-1.5 bg-stone-200 rounded-full" />
-            <span className="text-stone-400">3. Kuryerdə</span>
-          </div>
-        </div>
-
-        <div className="pt-3 border-t border-stone-100 space-y-2.5 text-xs">
-          <div className="flex justify-between items-center py-1 bg-stone-50/80 px-3 rounded-xl border border-stone-100">
-            <div>
-              <span className="text-stone-500 block text-[10px] uppercase font-semibold">Sifariş Nömrəsi (İzləmə Kodu):</span>
-              <span className="font-mono font-bold text-sm text-stone-900">{orderId}</span>
-            </div>
-            <button
-              type="button"
-              onClick={handleCopyCode}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs ${
-                copied
-                  ? "bg-emerald-600 text-white"
-                  : "bg-white text-stone-800 border border-stone-200 hover:bg-stone-100"
-              }`}
-            >
-              {copied ? (
-                <>
-                  <Check size={13} />
-                  <span>Kopyalandı!</span>
-                </>
-              ) : (
-                <span>Kodu Kopyala</span>
-              )}
+      {orderId && (
+        <div className="mt-8 rounded-2xl border border-white/10 bg-ink-850 p-5">
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-bone-faint">
+            {L({ az: "Sifariş nömrəsi", en: "Order number", ru: "Номер заказа", tr: "Sipariş numarası" })}
+          </p>
+          <div className="mt-2 flex items-center justify-between gap-3">
+            <span className="font-mono text-xl font-bold">{orderId}</span>
+            <button type="button" onClick={copy} className="inline-flex items-center gap-1.5 rounded-full border border-white/20 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] hover:border-bone">
+              {copied ? <Check size={13} /> : <Copy size={13} />}
+              {copied ? L({ az: "Kopyalandı", en: "Copied", ru: "Скопировано", tr: "Kopyalandı" }) : L({ az: "Kopyala", en: "Copy", ru: "Копировать", tr: "Kopyala" })}
             </button>
           </div>
-
-          <div className="flex justify-between">
-            <span className="text-stone-500">Ödəniş Metodu:</span>
-            <span className="font-semibold text-stone-800">{getMethodTitle(method)}</span>
-          </div>
-          {total > 0 && (
-            <div className="flex justify-between">
-              <span className="text-stone-500">Məbləğ:</span>
-              <span className="font-bold text-stone-900">{formatPrice(total)}</span>
+          <dl className="mt-5 space-y-2 border-t border-white/10 pt-4 text-[13px]">
+            <div className="flex justify-between gap-3">
+              <dt className="text-bone-dim">{L({ az: "Ödəniş üsulu", en: "Payment method", ru: "Способ оплаты", tr: "Ödeme yöntemi" })}</dt>
+              <dd className="font-semibold">{L(METHOD[method] || METHOD.card)}</dd>
             </div>
-          )}
-          <div className="flex justify-between">
-            <span className="text-stone-500">Təxmini Çatdırılma:</span>
-            <span className="font-semibold text-stone-900">1 - 2 iş günü ərzində</span>
-          </div>
+            {amount && (
+              <div className="flex justify-between gap-3">
+                <dt className="text-bone-dim">{L({ az: "Məbləğ", en: "Total", ru: "Сумма", tr: "Tutar" })}</dt>
+                <dd className="font-semibold tabular-nums">{amount}</dd>
+              </div>
+            )}
+            <div className="flex justify-between gap-3">
+              <dt className="shrink-0 text-bone-dim">{L({ az: "Çatdırılma", en: "Delivery", ru: "Доставка", tr: "Teslimat" })}</dt>
+              <dd className="text-right font-semibold">{region.delivery}</dd>
+            </div>
+          </dl>
         </div>
+      )}
 
-        {/* WhatsApp Bookmark Option */}
-        <div className="pt-2 flex flex-col gap-2">
-          <a
-            href={`https://wa.me/?text=${whatsappMessage}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full py-2.5 px-3 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold text-xs flex items-center justify-center gap-2 hover:bg-emerald-100 transition shadow-2xs"
-          >
-            <span>WhatsApp-da Saxla</span>
-          </a>
-        </div>
-      </div>
-
-      {/* Action buttons */}
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-        <Link
-          href={`/track?orderId=${orderId}`}
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-stone-900 text-white font-bold text-xs uppercase tracking-wider hover:bg-black transition shadow-sm active:scale-98"
-        >
-          <span>Sifarişimi Canlı İzlə</span>
-          <ArrowRight size={14} />
-        </Link>
-        <Link
-          href="/collections"
-          className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 rounded-full bg-white border border-stone-200 text-stone-800 font-semibold text-xs uppercase tracking-wider hover:bg-stone-50 transition active:scale-98"
-        >
-          <span>Alış-verişə Davam Et</span>
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+        {orderId && (
+          <Link href={`/track?orderId=${encodeURIComponent(orderId)}`} className="flex-1 rounded-full bg-bone px-6 py-4 text-center text-[12px] font-extrabold uppercase tracking-[0.16em] text-ink hover:bg-white">
+            {L({ az: "Sifarişi izlə", en: "Track order", ru: "Отследить заказ", tr: "Siparişi takip et" })}
+          </Link>
+        )}
+        <Link href="/collections" className="flex-1 rounded-full border border-white/25 px-6 py-4 text-center text-[12px] font-extrabold uppercase tracking-[0.16em] hover:border-bone">
+          {L({ az: "Alış-verişə davam et", en: "Continue shopping", ru: "Продолжить покупки", tr: "Alışverişe devam et" })}
         </Link>
       </div>
     </div>
@@ -193,8 +130,8 @@ function CheckoutSuccessContent() {
 
 export default function CheckoutSuccessPage() {
   return (
-    <Suspense fallback={<div className="min-h-[50vh] flex items-center justify-center">Yüklənir...</div>}>
-      <CheckoutSuccessContent />
+    <Suspense fallback={<div className="min-h-[50vh]" />}>
+      <SuccessContent />
     </Suspense>
   );
 }

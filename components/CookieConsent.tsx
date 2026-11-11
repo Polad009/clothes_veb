@@ -46,7 +46,7 @@ export function CookieConsent() {
   return (
     <AnimatePresence>
       <motion.aside
-        aria-label="Cookie Bildirişi"
+        aria-label="Cookies"
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 40 }}
@@ -68,7 +68,7 @@ export function CookieConsent() {
                   type="button"
                   onClick={() => handleAccept("essential")}
                   className="p-1 text-bone-faint transition hover:text-bone"
-                  aria-label="Bağla"
+                  aria-label={language === "en" ? "Close" : language === "ru" ? "Закрыть" : language === "tr" ? "Kapat" : "Bağla"}
                 >
                   <X size={16} />
                 </button>

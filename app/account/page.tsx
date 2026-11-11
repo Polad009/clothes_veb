@@ -1,5 +1,6 @@
 "use client";
 
+import { orderStatusText } from "@/components/store/i18n";
 import { useSupport } from "@/context/StoreDataContext";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
@@ -217,7 +218,7 @@ export default function AccountPage() {
                         </div>
                       </div>
                       <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-900 border border-amber-200">
-                        {ord.orderStatus || "Yeni Sifariş"}
+                        {orderStatusText(ord.orderStatus, language)}
                       </span>
                     </div>
 
@@ -268,7 +269,7 @@ export default function AccountPage() {
                 WhatsApp Concierge
               </h4>
               <p className="text-xs text-stone-300 leading-relaxed">
-                24/7 Dəstək Xidməti
+                {({ az: "Hər gün dəstək", en: "Support every day", ru: "Поддержка каждый день", tr: "Her gün destek" } as Record<string, string>)[language] || "Support every day"}
               </p>
               <a
                 href={support.link()}

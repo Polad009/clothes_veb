@@ -1,18 +1,21 @@
 import { Metadata } from "next";
 import { getStoreSnapshot } from "@/lib/storeSnapshot";
 import { resolveShippingRates } from "@/lib/shipping";
-import { LegalCustom, LegalPage, legalLang, type LegalDoc } from "@/components/store/LegalPage";
+import { LegalCustom, LegalPage, legalLang, type LegalDoc, type LegalLang } from "@/components/store/LegalPage";
+import { termsRu, termsTr } from "./docs-ru-tr";
 
 export const metadata: Metadata = {
   title: "İstifadə şərtləri · Terms of Sale",
   description: "Horwalle sifariş, ödəniş, çatdırılma (Azərbaycan və beynəlxalq), gömrük və qaytarma qaydaları.",
   alternates: {
     canonical: "https://www.horwalle.com/terms",
-    languages: { az: "https://www.horwalle.com/terms?lang=az", en: "https://www.horwalle.com/terms?lang=en" },
+    languages: { az: "https://www.horwalle.com/terms?lang=az", en: "https://www.horwalle.com/terms?lang=en", ru: "https://www.horwalle.com/terms?lang=ru", tr: "https://www.horwalle.com/terms?lang=tr" },
   },
 };
 
-function doc(lang: "az" | "en", r: ReturnType<typeof resolveShippingRates>): LegalDoc {
+function doc(lang: LegalLang, r: ReturnType<typeof resolveShippingRates>): LegalDoc {
+  if (lang === "ru") return termsRu(r);
+  if (lang === "tr") return termsTr(r);
   if (lang === "en") {
     return {
       title: "Terms of Sale",
@@ -28,6 +31,7 @@ function doc(lang: "az" | "en", r: ReturnType<typeof resolveShippingRates>): Leg
           body: [
             [
               "Prices are set in Azerbaijani manat (AZN). Amounts shown in other currencies are converted at the current rate and are for guidance; your card is charged in the currency shown at checkout.",
+              "Prices for buyers outside Azerbaijan can differ; the final price is set by the delivery country.",
               "Prices include Azerbaijani VAT where it applies. They do not include import duties or taxes in your country (see Customs below).",
               "You can pay by bank card online. Within Azerbaijan, payment on delivery may also be offered.",
               "Each order gets an order number. Keep it to track your order on the Track order page.",
@@ -110,6 +114,7 @@ function doc(lang: "az" | "en", r: ReturnType<typeof resolveShippingRates>): Leg
         body: [
           [
             "Qiymətlər Azərbaycan manatı (AZN) ilə müəyyən edilir. Digər valyutalarda göstərilən məbləğ cari məzənnə ilə hesablanır və məlumat xarakteri daşıyır; kartdan ödəniş səhifəsində göstərilən valyutada çıxılır.",
+            "Azərbaycandan kənardakı alıcılar üçün qiymətlər fərqli ola bilər; son qiymət çatdırılma ölkəsinə görə müəyyən olunur.",
             "Qiymətlərə, tətbiq olunduğu halda, ƏDV daxildir. Başqa ölkənin idxal rüsumu və vergiləri daxil deyil (aşağıda «Gömrük» bölməsinə baxın).",
             "Ödənişi onlayn bank kartı ilə edə bilərsiniz. Azərbaycan daxilində çatdırılma zamanı ödəniş də mümkün ola bilər.",
             "Hər sifarişə nömrə verilir. Sifarişi «Sifarişi izlə» səhifəsində bu nömrə ilə izləyə bilərsiniz.",

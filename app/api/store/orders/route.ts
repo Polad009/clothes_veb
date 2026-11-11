@@ -13,6 +13,7 @@ import {
   updateOrder,
 } from '@/lib/db/orders';
 import { resolveUnitPrice } from '@/lib/db/products';
+import { foreignMarkup } from '@/lib/pricing';
 import { listCatalog } from '@/lib/db/catalog';
 import { checkPromo, getSettings, incrementPromoUses } from '@/lib/db/site';
 import { customPrintPrice } from '@/lib/studio/catalog';
@@ -76,6 +77,14 @@ export async function POST(req: NextRequest) {
     const [catalogue, storeSettings] = await Promise.all([listCatalog(), getSettings()]);
     // studio prices set in Admin → Studio qiymətləri
     const studioPrices = (storeSettings as any).studioPrices;
+    // Price tier by delivery country: the Azerbaijan price only for deliveries in Azerbaijan
+    const deliveryCode = (() => {
+      const code = String(customer?.countryCode || '').trim().toUpperCase();
+      if (code) return code;
+      const name = String(customer?.country || '').trim();
+      return name ? getCountryByCode(name)?.code || (isDomesticDestination(name) ? 'AZ' : 'XX') : 'AZ';
+    })();
+    const priceOpts = { foreign: deliveryCode !== 'AZ', markupPct: foreignMarkup(storeSettings) };
     let serverSubtotal = 0;
     const validatedItems: any[] = [];
 
@@ -91,7 +100,7 @@ export async function POST(req: NextRequest) {
             { status: 409 }
           );
         }
-        unitPrice = resolveUnitPrice({ price: studioPrice }, orderCurrency, clientItem.price);
+        unitPrice = resolveUnitPrice({ price: studioPrice }, orderCurrency, priceOpts);
       } else {
         const product = catalogue.find((p) => p.id === clientItem.productId || p.slug === clientItem.productId);
         if (!product) {
@@ -101,7 +110,7 @@ export async function POST(req: NextRequest) {
             { status: 409 }
           );
         }
-        unitPrice = resolveUnitPrice(product, orderCurrency, clientItem.price);
+        unitPrice = resolveUnitPrice(product, orderCurrency, priceOpts);
       }
 
       serverSubtotal += unitPrice * qty;

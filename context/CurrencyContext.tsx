@@ -1,6 +1,7 @@
 "use client";
 
 import { getGeo } from "@/lib/geoClient";
+import { compareAtFor, DEFAULT_FOREIGN_MARKUP, unitPriceFor } from "@/lib/pricing";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 
@@ -41,17 +42,27 @@ interface CurrencyContextType {
   symbol: string;
   isAzerbaijan: boolean;
   detectedCountry: string | null;
+  /** true when this buyer pays foreign prices (delivery country, else visitor country) */
+  foreignPricing: boolean;
+  /** checkout tells the prices which country the order is delivered to (null = visitor country) */
+  setDeliveryCountry: (code: string | null) => void;
+  /** crossed-out "was" price for a product on sale, already formatted, or "" */
+  formatCompareAt: (product: { price: number; compareAtPrice?: number; internationalPrice?: number }) => string;
 }
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
 
 const STORAGE_KEY = "atelier_selected_currency_v1";
 
-export function CurrencyProvider({ children }: { children: React.ReactNode }) {
+export function CurrencyProvider({ children, foreignMarkup = DEFAULT_FOREIGN_MARKUP }: { children: React.ReactNode; foreignMarkup?: number }) {
   const [currency, setCurrencyState] = useState<CurrencyCode>("AZN");
   const [detectedCountry, setDetectedCountry] = useState<string | null>("AZ");
   const [isAzerbaijan, setIsAzerbaijan] = useState<boolean>(true);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [deliveryCountry, setDeliveryCountryState] = useState<string | null>(null);
+  const setDeliveryCountry = (code: string | null) => setDeliveryCountryState(code ? code.toUpperCase() : null);
+  const foreignPricing = deliveryCountry ? deliveryCountry !== "AZ" : !isAzerbaijan;
+  const priceOpts = { foreign: foreignPricing, currency, markupPct: foreignMarkup };
 
   useEffect(() => {
     let hasUserChoice = false;
@@ -131,36 +142,16 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     return `${converted.toFixed(2)} ₼`;
   };
 
-  // Dual pricing calculation strictly tied to user GEO-LOCATION:
-  // 1. If detected country is Azerbaijan (isAzerbaijan === true):
-  //    - Base product price is ALWAYS product.price (AZN).
-  //    - If user prefers viewing in USD, convert that AZN price via rate.
-  // 2. If detected country is International (isAzerbaijan === false):
-  //    - User gets the official internationalPrice ($ USD) set in Admin Panel.
-  //    - If user switches to AZN view, convert that USD price to AZN.
+  // Price for this buyer: Azerbaijan price or foreign price (see lib/pricing.ts)
   const getProductPrice = (product: { price: number; internationalPrice?: number }): number => {
     if (!product) return 0;
-    const aznPrice = Number(product.price) || 0;
-    const intlPrice = product.internationalPrice != null && product.internationalPrice !== undefined && !isNaN(Number(product.internationalPrice))
-      ? Number(product.internationalPrice)
-      : null;
+    return unitPriceFor(product, priceOpts);
+  };
 
-    if (isAzerbaijan) {
-      // User is physically in Azerbaijan
-      if (currency === "AZN") {
-        return aznPrice;
-      }
-      // If user in AZ manually chooses USD, convert Azerbaijan price
-      return convertPrice(aznPrice);
-    } else {
-      // User is physically outside Azerbaijan (International)
-      const targetUsdPrice = intlPrice !== null ? intlPrice : convertPrice(aznPrice);
-      if (currency === "USD") {
-        return targetUsdPrice;
-      }
-      // If international user manually chooses AZN view
-      return targetUsdPrice * 1.70;
-    }
+  const formatCompareAt = (product: { price: number; compareAtPrice?: number; internationalPrice?: number }): string => {
+    const was = product ? compareAtFor(product, priceOpts) : null;
+    if (was === null) return "";
+    return currency === "USD" ? `$${was.toFixed(2)}` : `${was.toFixed(2)} ₼`;
   };
 
   const formatProductPrice = (product: { price: number; internationalPrice?: number }): string => {
@@ -185,6 +176,9 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
         symbol: CURRENCY_CONFIG[currency]?.symbol || "₼",
         isAzerbaijan,
         detectedCountry,
+        foreignPricing,
+        setDeliveryCountry,
+        formatCompareAt,
       }}
     >
       {children}
@@ -206,6 +200,9 @@ export function useCurrency() {
       symbol: "₼",
       isAzerbaijan: true,
       detectedCountry: "AZ",
+      foreignPricing: false,
+      setDeliveryCountry: () => {},
+      formatCompareAt: () => "",
     };
   }
   return ctx;

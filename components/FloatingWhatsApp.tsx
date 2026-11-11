@@ -474,7 +474,7 @@ export function FloatingWhatsApp() {
 
   return (
     <aside
-      aria-label="Canlı Dəstək və Əlaqə"
+      aria-label={t.liveChatAria}
       className="hw-fab-stack fixed bottom-5 right-4 z-50 flex flex-col items-end gap-2.5 select-none pointer-events-auto sm:bottom-6 sm:right-6"
     >
       {/* ─── LIVE CHAT POPUP WINDOW ─────────────────────────────────────────── */}
@@ -727,7 +727,7 @@ export function FloatingWhatsApp() {
                   type="submit"
                   disabled={!inputText.trim()}
                   className="w-10 h-10 rounded-full bg-bone hover:bg-white text-ink flex items-center justify-center transition disabled:opacity-40 cursor-pointer shadow-sm shrink-0 active:scale-95"
-                  aria-label="Göndər"
+                  aria-label={({ az: "Göndər", en: "Send", ru: "Отправить", tr: "Gönder" } as Record<string, string>)[language] || "Send"}
                 >
                   <Send size={15} className="ml-0.5" />
                 </button>

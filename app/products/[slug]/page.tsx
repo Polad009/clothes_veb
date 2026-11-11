@@ -54,7 +54,7 @@ function Accordion({ title, children, open = false }: { title: string; children:
 
 function ProductView({ product, related }: { product: Product; related: Product[] }) {
   const { language } = useLanguage();
-  const { formatProductPrice, formatPrice } = useCurrency();
+  const { formatProductPrice, formatCompareAt } = useCurrency();
   const { addItem } = useCart();
   const support = useSupport();
   const region = useRegionCopy();
@@ -161,7 +161,7 @@ function ProductView({ product, related }: { product: Product; related: Product[
 
             <div className="mt-4 flex items-baseline gap-3">
               <span className={`text-2xl font-bold tabular-nums ${onSale ? "text-sale" : ""}`}>{formatProductPrice(product)}</span>
-              {onSale && <span className="text-base text-bone-faint line-through">{formatPrice(product.compareAtPrice!)}</span>}
+              {onSale && <span className="text-base text-bone-faint line-through">{formatCompareAt(product)}</span>}
             </div>
             {product.campaign?.showCountdown && product.campaign.endsAt && (
               <div className="mt-3">
@@ -235,11 +235,11 @@ function ProductView({ product, related }: { product: Product; related: Product[
             {/* add */}
             <div className="mt-8 flex gap-2">
               <div className="flex items-center border border-white/20">
-                <button type="button" onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="h-14 px-3 hover:bg-white/10" aria-label="Azalt">
+                <button type="button" onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="h-14 px-3 hover:bg-white/10" aria-label={tr(language, { az: "Azalt", en: "Decrease", ru: "Меньше", tr: "Azalt" })}>
                   <Minus size={14} />
                 </button>
                 <span className="w-8 text-center text-sm font-bold tabular-nums">{quantity}</span>
-                <button type="button" onClick={() => setQuantity((q) => Math.min(selectedLeft ?? 99, q + 1))} className="h-14 px-3 hover:bg-white/10" aria-label="Artır">
+                <button type="button" onClick={() => setQuantity((q) => Math.min(selectedLeft ?? 99, q + 1))} className="h-14 px-3 hover:bg-white/10" aria-label={tr(language, { az: "Artır", en: "Increase", ru: "Больше", tr: "Artır" })}>
                   <Plus size={14} />
                 </button>
               </div>
