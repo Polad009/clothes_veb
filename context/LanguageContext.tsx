@@ -1,5 +1,7 @@
 "use client";
 
+import { getGeo } from "@/lib/geoClient";
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { LanguageCode, TRANSLATIONS, Translations } from "@/lib/translations";
 
@@ -87,9 +89,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
       try {
         // Fast internal Edge endpoint
-        const geoRes = await fetch("/api/geo", { cache: "no-store" });
-        if (geoRes.ok) {
-          const geoData = await geoRes.json();
+        const geoData = await getGeo();
+        {
           if (geoData && geoData.country) {
             resolvedCountry = String(geoData.country).toUpperCase();
             setDetectedCountry(resolvedCountry);

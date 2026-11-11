@@ -24,7 +24,7 @@ const config: Config = {
         bone: {
           DEFAULT: "#EDEAE3",
           dim: "#A8A49C",
-          faint: "#6E6B66",
+          faint: "#8C8880",
         },
         sale: "#FF4D3D",
         tile: "#E6E3DC",

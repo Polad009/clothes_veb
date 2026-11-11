@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Premium Kolleksiyalar | Horwalle",
+  title: "Premium Kolleksiyalar",
   description: "Horwalle (Horvvalle) lüks kişi köynəkləri, 3-iplik qalın hudilər, Chino və kətan şalvarlar, eksklüziv aksesuarlar.",
   alternates: {
     canonical: "https://www.horwalle.com/collections",

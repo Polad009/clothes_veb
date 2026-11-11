@@ -8,7 +8,7 @@ import {
 } from '@/lib/adminAuth';
 import { sendOrderStatusUpdate, sendBroadcastCampaign } from '@/lib/email/emailService';
 import { handleAdminUpload } from '@/lib/adminUpload';
-import { verifyAnyAdminLogin } from '@/lib/adminCredentials';
+import { currentAccessKey, verifyAnyAdminLogin } from '@/lib/adminCredentials';
 import { refreshStore } from '@/lib/storeSnapshot';
 import { requestAdminRole } from '@/lib/adminSession';
 import { db } from '@/lib/db/client';
@@ -169,7 +169,13 @@ export async function POST(req: NextRequest, { params }: RouteContext) {
     }
 
     if (route === 'logout') {
-      const response = json({ success: true, message: 'Çıxış edildi' });
+      // a signed-in admin is sent back to the login page, which only opens with the link code
+      let redirect = '/';
+      if (await requestAdminRole(req)) {
+        const key = await currentAccessKey().catch(() => '');
+        if (key) redirect = `/admin/login?access=${encodeURIComponent(key)}`;
+      }
+      const response = json({ success: true, message: 'Çıxış edildi', redirect });
       response.cookies.delete('horvvalle_admin_token');
       return response;
     }

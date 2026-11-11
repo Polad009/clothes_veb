@@ -16,7 +16,7 @@ export function AuthModal() {
     signInWithEmail,
     signUpWithEmail,
   } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   useBodyScrollLock(isAuthModalOpen);
 
@@ -143,7 +143,7 @@ export function AuthModal() {
         <div className="flex items-center gap-3">
           <div className="h-px bg-stone-200 flex-1" />
           <span className="text-[10px] uppercase font-bold text-stone-400 tracking-wider">
-            {t.account.status || "EMAIL"}
+            {({ az: "və ya", en: "or", ru: "или", tr: "veya" } as Record<string, string>)[language] || "və ya"}
           </span>
           <div className="h-px bg-stone-200 flex-1" />
         </div>

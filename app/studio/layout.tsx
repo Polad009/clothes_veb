@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "3D Dizayn Studiyası | Horwalle",
+  title: "3D Dizayn Studiyası",
   description: "Öz dizaynını, loqonu və ya istədiyin qrafikanı 3D formatda köynəyə yerləşdir və öz dizaynınla sifariş ver.",
   alternates: {
     canonical: "https://www.horwalle.com/studio",

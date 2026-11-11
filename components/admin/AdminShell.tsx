@@ -89,8 +89,10 @@ export function AdminShell({ counts: initialCounts, role = "owner", children }: 
   };
 
   const logout = async () => {
-    await fetch("/api/admin/logout", { method: "POST" }).catch(() => {});
-    window.location.href = "/";
+    const res = await fetch("/api/admin/logout", { method: "POST" }).catch(() => null);
+    const data = res ? await res.json().catch(() => ({})) : {};
+    const next = typeof data.redirect === "string" && data.redirect.startsWith("/") ? data.redirect : "/";
+    window.location.replace(next);
   };
 
   const sidebar = (

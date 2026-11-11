@@ -42,7 +42,7 @@ export function StoreFooter() {
         </div>
 
         <div>
-          <h4 className={heading}>{tr(language, { az: "Mağaza", en: "Shop", ru: "Магазин", tr: "Mağaza" })}</h4>
+          <h2 className={heading}>{tr(language, { az: "Mağaza", en: "Shop", ru: "Магазин", tr: "Mağaza" })}</h2>
           <Link href="/collections" className={link}>{tr(language, T.allProducts)}</Link>
           {categories.map((c) => (
             <Link key={c.id} href={`/collections?category=${encodeURIComponent(c.id)}`} className={link}>
@@ -53,7 +53,7 @@ export function StoreFooter() {
         </div>
 
         <div>
-          <h4 className={heading}>{tr(language, { az: "Kömək", en: "Help", ru: "Помощь", tr: "Yardım" })}</h4>
+          <h2 className={heading}>{tr(language, { az: "Kömək", en: "Help", ru: "Помощь", tr: "Yardım" })}</h2>
           <Link href="/track" className={link}>{tr(language, T.trackOrder)}</Link>
           <a href={support.link()} target="_blank" rel="noopener noreferrer" className={link}>
             {tr(language, { az: "Bizimlə əlaqə", en: "Contact us", ru: "Связаться с нами", tr: "Bize ulaşın" })}
@@ -63,7 +63,7 @@ export function StoreFooter() {
         </div>
 
         <div>
-          <h4 className={heading}>{tr(language, { az: "Hüquqi", en: "Legal", ru: "Правовое", tr: "Yasal" })}</h4>
+          <h2 className={heading}>{tr(language, { az: "Hüquqi", en: "Legal", ru: "Правовое", tr: "Yasal" })}</h2>
           <Link href="/privacy" className={link}>{tr(language, { az: "Məxfilik siyasəti", en: "Privacy policy", ru: "Политика конфиденциальности", tr: "Gizlilik politikası" })}</Link>
           <Link href="/terms" className={link}>{tr(language, { az: "İstifadə şərtləri", en: "Terms of service", ru: "Условия использования", tr: "Kullanım şartları" })}</Link>
           <Link href="/third-party-notices" className={link}>{tr(language, { az: "Lisenziyalar", en: "Licenses", ru: "Лицензии", tr: "Lisanslar" })}</Link>

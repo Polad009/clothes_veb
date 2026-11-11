@@ -56,7 +56,7 @@ export function ProductTile({ product, priority = false }: { product: Product; p
             <span className="bg-ink px-2 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-bone">{tr(language, T.soldOut)}</span>
           ) : (
             badge && (
-              <span className={`px-2 py-1 text-[10px] font-bold uppercase tracking-[0.14em] ${onSale || product.campaign ? "bg-sale text-white" : "bg-ink text-bone"}`}>
+              <span className={`px-2 py-1 text-[10px] font-bold uppercase tracking-[0.14em] ${onSale || product.campaign ? "bg-sale text-ink" : "bg-ink text-bone"}`}>
                 {badge}
               </span>
             )

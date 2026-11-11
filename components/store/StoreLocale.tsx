@@ -44,7 +44,7 @@ export function StoreLocale({ direction = "down", align = "right" }: { direction
         type="button"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
-        aria-label="Dil və valyuta"
+        aria-label={`${language} / ${currency} — dil və valyuta`}
         className="flex h-9 items-center gap-1.5 rounded-full border border-white/20 px-3.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-bone transition hover:border-bone"
       >
         <span>{language}</span>

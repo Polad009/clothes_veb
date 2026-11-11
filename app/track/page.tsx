@@ -384,10 +384,6 @@ function OrderTrackerContent() {
         
         {/* Header Branding */}
         <div className="text-center space-y-3 pt-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white border border-stone-200 text-stone-800 text-xs font-semibold uppercase tracking-wider shadow-2xs">
-            <Package size={14} className="text-stone-700" />
-            <span>Canlı Sifariş İzləmə Xidməti</span>
-          </div>
 
           <h1 className="font-eb-garamond text-3xl sm:text-5xl font-normal text-stone-900 tracking-wide">
             {t.track.title || "Sifarişinizi izləyin"}
@@ -556,7 +552,7 @@ function OrderTrackerContent() {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={
                   searchMode === "code"
-                    ? t.track.codePlaceholder || "Sifariş № (məs: VTX-ORD-5374)..."
+                    ? t.track.codePlaceholder || "Sifariş №"
                     : searchMode === "phone"
                     ? t.track.phonePlaceholder || "Əlaqə nömrəniz (məs: +994 50 123 45 67)..."
                     : t.track.emailPlaceholder || "məsələn: adiniz@gmail.com"
@@ -607,26 +603,6 @@ function OrderTrackerContent() {
               </div>
             )}
 
-            <div className="flex items-center gap-1 text-stone-400">
-              <span>Nümunə:</span>
-              <button
-                type="button"
-                onClick={() => {
-                  if (searchMode === "email") {
-                    setQuery("musteri@horvvalle.com");
-                    handleSearch("musteri@horvvalle.com", "email");
-                  } else if (searchMode === "phone") {
-                    setQuery("+994 50 123 45 67");
-                  } else {
-                    setQuery("VTX-ORD-5374");
-                    handleSearch("VTX-ORD-5374", "code");
-                  }
-                }}
-                className="underline hover:text-stone-700 font-mono cursor-pointer"
-              >
-                {searchMode === "email" ? "musteri@horvvalle.com" : searchMode === "phone" ? "+994 50 123 45 67" : "#VTX-ORD-5374"}
-              </button>
-            </div>
           </div>
         </div>
 

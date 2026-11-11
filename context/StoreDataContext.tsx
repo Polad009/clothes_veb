@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Product } from "@/data/products";
 import { whatsappLink, whatsappNumber } from "@/lib/contact";
 import { type Category, visibleCategories } from "@/lib/categories";
@@ -124,14 +124,22 @@ export function StoreDataProvider({ initial, children }: { initial: StoreInitial
     }
   }, []);
 
-  useEffect(() => {
+  // The page arrives with fresh data from the server (cached there for 60 s), so the
+  // browser only re-checks when it may have changed: back to the tab after a minute,
+  // every 2 minutes while visible, or right away after an admin save in another tab.
+  const lastFetch = useRef(Date.now());
+  const refreshIfStale = useCallback(() => {
+    if (document.visibilityState !== "visible" || Date.now() - lastFetch.current < 60_000) return;
+    lastFetch.current = Date.now();
     fetchLiveStoreData();
+  }, [fetchLiveStoreData]);
 
-    // Auto-refresh when tab gains focus, becomes visible, or when admin saves across tabs
-    const onRefresh = () => fetchLiveStoreData();
-    const onVisibilityChange = () => {
-      if (document.visibilityState === "visible") fetchLiveStoreData();
+  useEffect(() => {
+    const onRefresh = () => {
+      lastFetch.current = Date.now();
+      fetchLiveStoreData();
     };
+    const onVisibilityChange = () => refreshIfStale();
     const onStorage = (e: StorageEvent) => {
       if (e.key === "hv_store_updated" || e.key === "hv_last_sync") {
         fetchLiveStoreData();
@@ -165,17 +173,16 @@ export function StoreDataProvider({ initial, children }: { initial: StoreInitial
       } catch (e) {}
     }
 
-    window.addEventListener("focus", onRefresh);
+    window.addEventListener("focus", refreshIfStale);
     window.addEventListener("hv-store-refresh", onRefresh);
     window.addEventListener("message", onWindowMessage);
     window.addEventListener("storage", onStorage);
     document.addEventListener("visibilitychange", onVisibilityChange);
 
-    // Periodic live sync every 15 seconds to ensure any admin price updates reflect instantly
-    const interval = setInterval(fetchLiveStoreData, 15000);
+    const interval = setInterval(refreshIfStale, 120_000);
 
     return () => {
-      window.removeEventListener("focus", onRefresh);
+      window.removeEventListener("focus", refreshIfStale);
       window.removeEventListener("hv-store-refresh", onRefresh);
       window.removeEventListener("message", onWindowMessage);
       window.removeEventListener("storage", onStorage);
@@ -187,7 +194,7 @@ export function StoreDataProvider({ initial, children }: { initial: StoreInitial
       }
       clearInterval(interval);
     };
-  }, [fetchLiveStoreData]);
+  }, [fetchLiveStoreData, refreshIfStale]);
 
   // Product names and descriptions in the visitor's language, when the admin has translated them
   const { language } = useLanguage();

@@ -1,5 +1,7 @@
 "use client";
 
+import { getGeo } from "@/lib/geoClient";
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 export type CurrencyCode = "AZN" | "USD";
@@ -82,9 +84,8 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     // 3. If no explicit user choice, verify with fast geo endpoint
     const detectGeo = async () => {
       try {
-        const res = await fetch("/api/geo", { cache: "no-store" });
-        if (res.ok) {
-          const data = await res.json();
+        const data = await getGeo();
+        if (data) {
           const country = String(data.country || "AZ").toUpperCase();
           const isAz = country === "AZ";
           setDetectedCountry(country);
