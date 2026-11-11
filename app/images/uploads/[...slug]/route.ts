@@ -26,9 +26,13 @@ export async function GET(
       return new NextResponse("File path required", { status: 400 });
     }
 
-    // Sanitize each path segment to prevent directory traversal attacks
+    // Sanitize each path segment and confirm the final path stays inside the uploads folder
+    const uploadsDir = path.join(process.cwd(), "public", "images", "uploads");
     const safeSegments = slug.map((segment) => path.basename(segment));
-    const filePath = path.join(process.cwd(), "public", "images", "uploads", ...safeSegments);
+    const filePath = path.resolve(uploadsDir, ...safeSegments);
+    if (filePath !== uploadsDir && !filePath.startsWith(uploadsDir + path.sep)) {
+      return new NextResponse("Not Found", { status: 404 });
+    }
 
     if (!fs.existsSync(filePath)) {
       return new NextResponse("Not Found", { status: 404 });

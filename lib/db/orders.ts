@@ -343,11 +343,22 @@ export async function searchOrders(query: { email?: string; phoneDigits?: string
     if (isUuid(raw)) {
       q = q.eq('id', raw);
     } else {
+      // Exact match only — never a substring — so order tracking cannot be used
+      // to enumerate other customers' orders from a short partial code.
       const code = safeCode(raw);
-      if (!code) return [];
-      q = code.length >= 4
-        ? q.or(`order_number.ilike.%${code}%,tracking_code.ilike.%${code}%`)
-        : q.or(`order_number.eq.${code},tracking_code.eq.${code}`);
+      const digits = code.replace(/[^0-9]/g, '');
+      const candidates = new Set<string>();
+      if (/^[A-Z]{2,}-/.test(code) && code.length >= 7) candidates.add(code); // full code, e.g. HW-123456 / HW-TRK-123456
+      if (digits.length >= 6) {
+        const d = digits.slice(-6);
+        candidates.add(`HW-${d}`);
+        candidates.add(`HW-TRK-${d}`);
+        candidates.add(`VTX-ORD-${d}`); // legacy order numbers
+        candidates.add(`AZ-EXP-${d}`);  // legacy tracking codes
+      }
+      if (candidates.size === 0) return [];
+      const list = Array.from(candidates); // values are already restricted to [A-Z0-9-]
+      q = q.or([...list.map((v) => `order_number.eq.${v}`), ...list.map((v) => `tracking_code.eq.${v}`)].join(','));
     }
   } else {
     return [];
@@ -446,9 +457,10 @@ export async function findPodOrderByOrderId(orderId: string): Promise<PodOrder |
 export async function searchPodOrders(query: { phoneDigits?: string; code?: string }): Promise<PodOrder[]> {
   if (query.code) {
     const code = safeCode(query.code);
-    if (code.length < 4) return [];
+    if (code.length < 6) return [];
     const rows = unwrap(
-      await db().from('pod_orders').select('*').ilike('id', `%${code}%`).order('created_at', { ascending: false }).limit(10),
+      // exact (case-insensitive) id match, never a substring
+      await db().from('pod_orders').select('*').ilike('id', code).order('created_at', { ascending: false }).limit(10),
       'Öz dizayn sifarişi axtarılmadı'
     );
     return (rows || []).map(rowToPodOrder);

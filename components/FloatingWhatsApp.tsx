@@ -178,6 +178,18 @@ export function FloatingWhatsApp() {
   const [isAdminOnline, setIsAdminOnline] = useState(false);
   const [isTypingAdmin, setIsTypingAdmin] = useState(false);
   const [sessionId, setSessionId] = useState<string>("");
+  // Unguessable chat session id, so only the owner of a conversation can read it.
+  const newSessionId = () => {
+    try {
+      const u = (globalThis.crypto as any)?.randomUUID?.();
+      if (u) return `cust_${u}`;
+      const b = new Uint8Array(16);
+      (globalThis.crypto as any).getRandomValues(b);
+      return `cust_${Array.from(b, (x: number) => x.toString(16).padStart(2, "0")).join("")}`;
+    } catch {
+      return `cust_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 12)}`;
+    }
+  };
   const [isChatClosed, setIsChatClosed] = useState(false);
   // True once this visitor has a conversation on the server (they wrote or left their details)
   const [hasThread, setHasThread] = useState(false);
@@ -225,12 +237,12 @@ export function FloatingWhatsApp() {
       setHasCompletedOnboarding(Boolean(autoName || savedName));
 
       if (!sid) {
-        sid = `cust_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+        sid = newSessionId();
         localStorage.setItem("hv_livechat_session_id", sid);
       }
       if (localStorage.getItem("hv_livechat_active") === sid) setHasThread(true);
     } catch {
-      sid = `cust_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+      sid = newSessionId();
     }
     setSessionId(sid);
   }, [profile, user]);
@@ -457,7 +469,7 @@ export function FloatingWhatsApp() {
 
   // Start New Chat (Resets session)
   const handleStartNewChat = () => {
-    const newSid = `cust_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    const newSid = newSessionId();
     try {
       localStorage.setItem("hv_livechat_session_id", newSid);
       localStorage.removeItem("hv_livechat_active");
