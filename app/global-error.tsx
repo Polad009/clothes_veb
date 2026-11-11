@@ -11,7 +11,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("Horvvalle Global Error:", error);
+    console.error("Horwalle Global Error:", error);
   }, [error]);
 
   return (

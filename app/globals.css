@@ -14,7 +14,7 @@
     --font-fraunces: 'Instrument Serif', 'Fraunces', Georgia, serif;
     --font-instrument: var(--font-jakarta), 'Instrument Sans', sans-serif;
     
-    /* Horvvalle Dark Atelier Theme Tokens */
+    /* Horwalle Dark Atelier Theme Tokens */
     --atelier-bg: #2A1406;
     --atelier-bg-gradient: radial-gradient(circle at 50% 36%, #7D4C28 0%, #542E13 48%, #2A1406 100%);
     --current-hero-gradient: radial-gradient(circle at 50% 36%, #7D4C28 0%, #542E13 48%, #2A1406 100%);
@@ -457,7 +457,7 @@ html.lenis, html.lenis body {
 }
 
 /* =========================================================================
-   HORVVALLE GPU-ACCELERATED RUNWAY & PURE COMPOSITOR MARQUEE
+   HORWALLE GPU-ACCELERATED RUNWAY & PURE COMPOSITOR MARQUEE
    ========================================================================= */
 @keyframes runwayTrackLeft {
   0% {
@@ -585,7 +585,7 @@ a:not(.no-tactile):active,
 }
 
 /* =========================================================================
-   HORVVALLE EXACT BINDING DESIGN SYSTEM UTILITIES
+   HORWALLE EXACT BINDING DESIGN SYSTEM UTILITIES
    ========================================================================= */
 .font-fraunces {
   font-family: 'Fraunces', Georgia, serif;

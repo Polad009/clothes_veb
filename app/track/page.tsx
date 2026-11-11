@@ -188,7 +188,7 @@ function OrderTrackerContent() {
           },
           items: matched.items && matched.items.length > 0 ? matched.items : [
             {
-              name: "HORVVALLE Məhsulu",
+              name: "HORWALLE Məhsulu",
               quantity: matched.itemsCount || 1,
               price: matched.total,
             }

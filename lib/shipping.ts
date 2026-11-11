@@ -123,7 +123,7 @@ export function calculateShippingOptions(
       {
         id: 'domestic_baku_sumgayit',
         name: 'Bakı & Sumqayıt Kuryer',
-        carrier: 'HORVVALLE Express Courier',
+        carrier: 'HORWALLE Express Courier',
         estimatedDays: '1-2 iş günü',
         price: 0,
         isFree: true,

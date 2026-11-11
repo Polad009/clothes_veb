@@ -14,7 +14,7 @@ interface LogoProps {
 }
 
 /**
- * Official HORVVALLE Luxury Brand Mark:
+ * Official HORWALLE Luxury Brand Mark:
  * 3D sculpted 'H' monogram emblem with fluid metallic ribbon wave.
  */
 export function LogoMark({
@@ -32,7 +32,7 @@ export function LogoMark({
       {isLightBg ? (
         <Image
           src="/brand/icon-dark.png"
-          alt="HORVVALLE"
+          alt="HORWALLE"
           width={44}
           height={44}
           priority
@@ -41,7 +41,7 @@ export function LogoMark({
       ) : isDarkBg ? (
         <Image
           src="/brand/icon-light.png"
-          alt="HORVVALLE"
+          alt="HORWALLE"
           width={44}
           height={44}
           priority
@@ -51,7 +51,7 @@ export function LogoMark({
         <>
           <Image
             src="/brand/icon-dark.png"
-            alt="HORVVALLE"
+            alt="HORWALLE"
             width={44}
             height={44}
             priority
@@ -59,7 +59,7 @@ export function LogoMark({
           />
           <Image
             src="/brand/icon-light.png"
-            alt="HORVVALLE"
+            alt="HORWALLE"
             width={44}
             height={44}
             priority
@@ -94,7 +94,7 @@ export default function Logo({
   return (
     <Link
       href="/"
-      aria-label="HORVVALLE"
+      aria-label="HORWALLE"
       className={`inline-flex items-center gap-2 sm:gap-2.5 select-none group transition-opacity duration-200 active:scale-[0.99] ${className}`}
     >
       <LogoMark className={markSizeClass} theme={theme} />
@@ -104,7 +104,7 @@ export default function Logo({
         {theme === "light" ? (
           <Image
             src="/brand/wordmark-dark.png"
-            alt="HORVVALLE"
+            alt="HORWALLE"
             width={140}
             height={20}
             priority
@@ -113,7 +113,7 @@ export default function Logo({
         ) : theme === "dark" ? (
           <Image
             src="/brand/wordmark-light.png"
-            alt="HORVVALLE"
+            alt="HORWALLE"
             width={140}
             height={20}
             priority
@@ -123,7 +123,7 @@ export default function Logo({
           <>
             <Image
               src="/brand/wordmark-dark.png"
-              alt="HORVVALLE"
+              alt="HORWALLE"
               width={140}
               height={20}
               priority
@@ -131,7 +131,7 @@ export default function Logo({
             />
             <Image
               src="/brand/wordmark-light.png"
-              alt="HORVVALLE"
+              alt="HORWALLE"
               width={140}
               height={20}
               priority

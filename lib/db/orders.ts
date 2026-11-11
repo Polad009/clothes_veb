@@ -190,7 +190,7 @@ export async function createOrder(order: Omit<StoreOrder, 'id' | 'trackingCode' 
     const digits = randomDigits(6);
     const res = await db()
       .from('orders')
-      .insert({ ...base, order_number: `VTX-ORD-${digits}`, tracking_code: `AZ-EXP-${digits}` })
+      .insert({ ...base, order_number: `HW-${digits}`, tracking_code: `HW-TRK-${digits}` })
       .select('*')
       .single();
 

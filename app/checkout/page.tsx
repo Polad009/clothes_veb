@@ -735,7 +735,7 @@ export default function CheckoutPage() {
     setIsProcessing(true);
 
     try {
-      const clientOrderId = `VTX-ORD-${Math.floor(1000 + Math.random() * 9000)}`;
+      const clientOrderId = `HW-${Math.floor(100000 + Math.random() * 900000)}`; // the server assigns the real number
       const customerEmail = user?.email || email;
 
       const res = await fetch("/api/store/orders", {
@@ -909,7 +909,7 @@ export default function CheckoutPage() {
           supportedNetworks: ["visa", "masterCard"],
           merchantCapabilities: ["supports3DS"],
           total: {
-            label: "HORVVALLE",
+            label: "HORWALLE",
             amount: finalTotal.toFixed(2),
             type: "final",
           },
@@ -997,7 +997,7 @@ export default function CheckoutPage() {
             ],
             merchantInfo: {
               merchantId: "12345678901234567890",
-              merchantName: "HORVVALLE",
+              merchantName: "HORWALLE",
             },
             transactionInfo: {
               totalPriceStatus: "FINAL",
@@ -1055,7 +1055,7 @@ export default function CheckoutPage() {
                   apiVersion: 2,
                   apiVersionMinor: 0,
                   merchantInfo: {
-                    merchantName: "HORVVALLE",
+                    merchantName: "HORWALLE",
                   },
                   allowedPaymentMethods: [
                     {
@@ -1079,7 +1079,7 @@ export default function CheckoutPage() {
 
             const details = {
               total: {
-                label: "HORVVALLE",
+                label: "HORWALLE",
                 amount: { currency: currency || "AZN", value: finalTotal.toFixed(2) },
               },
             };

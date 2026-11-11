@@ -104,7 +104,7 @@ export function PodBoard({ jobs }: { jobs: PodJob[] }) {
                     <div className="flex justify-between gap-3">
                       <dt>Sifariş</dt>
                       <dd>
-                        {job.orderId.startsWith("VTX-ORD-") ? (
+                        {/^(VTX-ORD|HW)-\d+$/.test(job.orderId) ? (
                           <Link href={`/admin/orders/${encodeURIComponent(job.orderId)}`} className="text-stone-900 underline underline-offset-2">{job.orderId}</Link>
                         ) : (
                           <span className="text-stone-900">{job.orderId || "—"}</span>

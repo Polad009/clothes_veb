@@ -69,7 +69,7 @@ export async function notifyNewOrder(order: any) {
     // 1. Send via Telegram Bot (if configured)
     if (telegramToken && telegramChatId) {
       const messageText =
-        `🛍 *YENİ SİFARİŞ GƏLDİ! (HORVVALLE)*\n` +
+        `🛍 *YENİ SİFARİŞ GƏLDİ! (HORWALLE)*\n` +
         `━━━━━━━━━━━━━━━━━━━━\n` +
         `📦 *Sifariş №:* \`${order.id}\`\n` +
         `👤 *Müştəri:* ${order.customer?.fullName || "Müştəri"}\n` +

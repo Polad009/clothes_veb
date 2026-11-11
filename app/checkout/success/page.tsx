@@ -9,7 +9,7 @@ import { playPurchaseSuccessSound } from "@/lib/soundEffects";
 
 function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
-  const orderId = searchParams.get("order") || searchParams.get("orderId") || `VTX-ORD-${Math.floor(1000 + Math.random() * 9000)}`;
+  const orderId = searchParams.get("order") || searchParams.get("orderId") || "";
   const method = searchParams.get("method") || "card";
   const total = Number(searchParams.get("total")) || 0;
   const isTest = searchParams.get("test") === "true";
@@ -63,7 +63,7 @@ function CheckoutSuccessContent() {
   };
 
   const whatsappMessage = encodeURIComponent(
-    `HORVVALLE Sifariş İzləmə Məlumatım:\nSifariş Nömrəsi: ${orderId}\nMəbləğ: ${total ? formatPrice(total) : "Ödənilib"}\nİzləmə linki: https://horvvalle.com/track?orderId=${orderId}`
+    `HORWALLE Sifariş İzləmə Məlumatım:\nSifariş Nömrəsi: ${orderId}\nMəbləğ: ${total ? formatPrice(total) : "Ödənilib"}\nİzləmə linki: https://www.horwalle.com/track?orderId=${orderId}`
   );
 
   return (

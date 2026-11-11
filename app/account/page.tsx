@@ -129,7 +129,7 @@ export default function AccountPage() {
             <div>
               <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-stone-100 border border-stone-200 text-stone-800 text-[10px] font-bold uppercase tracking-wider mb-1">
                 <ShieldCheck size={12} className="text-stone-600" />
-                <span>HORVVALLE</span>
+                <span>HORWALLE</span>
               </div>
               <h1 className="font-eb-garamond text-2xl sm:text-3xl font-normal text-stone-900">
                 {profile?.full_name || user.email?.split('@')[0]}
@@ -262,7 +262,7 @@ export default function AccountPage() {
 
             <div className="bg-gradient-to-br from-stone-900 to-black text-white rounded-3xl p-6 shadow-md space-y-3">
               <span className="text-[10px] uppercase font-bold tracking-wider text-[#E6C280]">
-                HORVVALLE CONCIERGE
+                HORWALLE CONCIERGE
               </span>
               <h4 className="font-eb-garamond text-xl font-normal">
                 WhatsApp Concierge

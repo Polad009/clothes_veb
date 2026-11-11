@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
 
     const custom = body.customData || {};
     const podOrder = await createPodOrder({
-      orderId: sanitizeStr(body.orderId, 50) || 'VTX-CUSTOM-' + Date.now().toString(36).toUpperCase(),
+      orderId: sanitizeStr(body.orderId, 50) || 'HW-CUSTOM-' + Date.now().toString(36).toUpperCase(),
       customerName: sanitizeStr(body.customerName, 100) || 'Müştəri',
       customerPhone: sanitizeStr(body.customerPhone, 30),
       customerEmail: sanitizeStr(body.customerEmail, 100),
