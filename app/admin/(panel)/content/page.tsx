@@ -16,6 +16,11 @@ export default async function ContentPage() {
     <AdminPage narrow>
       <ContentEditor
         initial={{
+          introVideo: {
+            enabled: content.introVideo?.enabled !== false,
+            desktop: str(content.introVideo?.desktop),
+            mobile: str(content.introVideo?.mobile),
+          },
           announcements: Array.isArray(content.announcements) ? content.announcements : [],
           whatsappNumber: settings.whatsappNumber || "",
           hero: { tag: str(hero.tag), title: str(hero.title), text: str(hero.text), photo: str(hero.photo), link: str(hero.link) },

@@ -21,7 +21,14 @@ interface LangTexts {
   podBanner: Texts;
 }
 
+export interface IntroVideoDraft {
+  enabled: boolean;
+  desktop: string;
+  mobile: string;
+}
+
 export interface ContentDraft {
+  introVideo?: IntroVideoDraft;
   announcements: string[];
   whatsappNumber: string;
   hero: Texts; // tag, title, text, photo, link
@@ -45,6 +52,8 @@ export function ContentEditor({ initial }: { initial: ContentDraft }) {
     tr: { ...emptyTexts(), ...(initial.i18n?.tr || {}) } as LangTexts,
   }));
   const [lang, setLang] = useState<Lang>("az");
+  const [video, setVideo] = useState<IntroVideoDraft>(initial.introVideo || { enabled: true, desktop: "", mobile: "" });
+  const okVideo = (v: string) => !v.trim() || /^(\/|https:\/\/).+\.(mp4|webm)(\?.*)?$/i.test(v.trim());
   const [saving, setSaving] = useState(false);
 
   const isAz = lang === "az";
@@ -80,6 +89,10 @@ export function ContentEditor({ initial }: { initial: ContentDraft }) {
       toast.error('Şəkil ünvanı "/" və ya "https://" ilə başlamalıdır.');
       return;
     }
+    if (!okVideo(video.desktop) || !okVideo(video.mobile)) {
+      toast.error('Video ünvanı "/" və ya "https://" ilə başlamalı və .mp4 ya .webm ilə bitməlidir.');
+      return;
+    }
     const phoneDigits = draft.whatsappNumber.replace(/\D/g, "");
     if (phoneDigits.length < 9 || phoneDigits.length > 15) {
       toast.error("WhatsApp nömrəsini ölkə kodu ilə tam yazın. Məs: +994 10 328 31 52");
@@ -107,6 +120,7 @@ export function ContentEditor({ initial }: { initial: ContentDraft }) {
         body: {
           settings: { whatsappNumber: draft.whatsappNumber.trim() },
           content: {
+            introVideo: { enabled: video.enabled, desktop: video.desktop.trim(), mobile: video.mobile.trim() },
             announcements: draft.announcements.map((a) => a.trim()).filter(Boolean),
             hero: trimAll(draft.hero),
             podBanner: trimAll(draft.podBanner),
@@ -217,6 +231,34 @@ export function ContentEditor({ initial }: { initial: ContentDraft }) {
             )}
           </div>
         </Card>
+
+        {isAz && (
+          <Card title="Ana səhifə: giriş videosu">
+            <div className="space-y-4 p-5">
+              <label className="flex items-center gap-3 text-sm font-medium text-stone-900">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 accent-stone-900"
+                  checked={video.enabled}
+                  onChange={(e) => setVideo({ ...video, enabled: e.target.checked })}
+                />
+                Saytın ən yuxarısında videonu göstər
+              </label>
+              <p className="text-xs text-stone-500">
+                Boş saxlasanız, saytın öz videosu göstərilir. Öz videonuzu qoymaq üçün .mp4 faylının linkini yazın (səssiz oynadılır).
+                Telefon üçün şaquli (9:16), kompüter üçün üfüqi (16:9) video ən yaxşı görünür; 5 MB-dan kiçik olsun.
+              </p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Kompüter üçün video (mp4)">
+                  <Input value={video.desktop} onChange={(e) => setVideo({ ...video, desktop: e.target.value })} placeholder="Boş = standart video" />
+                </Field>
+                <Field label="Telefon üçün video (mp4)" hint="Boş = kompüter videosu və ya standart.">
+                  <Input value={video.mobile} onChange={(e) => setVideo({ ...video, mobile: e.target.value })} placeholder="Boş = standart video" />
+                </Field>
+              </div>
+            </div>
+          </Card>
+        )}
 
         <Card title={`Ana səhifə: dizayn studiyası bloku · ${LANG_LABEL[lang]}`}>
           <div className="grid gap-4 p-5 sm:grid-cols-2">

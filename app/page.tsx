@@ -11,6 +11,7 @@ import { ProductTile } from "@/components/store/ProductTile";
 import { T, contentText, tr } from "@/components/store/i18n";
 import { DEFAULT_PHOTOS } from "@/components/store/photos";
 import { useRegionCopy } from "@/components/store/region";
+import { IntroVideo } from "@/components/store/IntroVideo";
 
 const pill =
   "inline-flex items-center gap-2 rounded-full bg-bone px-7 py-3.5 text-[12px] font-extrabold uppercase tracking-[0.16em] text-ink transition hover:bg-white active:scale-[0.98] [font-stretch:108%]";
@@ -26,6 +27,7 @@ function EditorialBlock({
   cta,
   full = false,
   priority = false,
+  id,
 }: {
   photo: string;
   alt: string;
@@ -36,9 +38,10 @@ function EditorialBlock({
   cta: string;
   full?: boolean;
   priority?: boolean;
+  id?: string;
 }) {
   return (
-    <section className={`group relative w-full overflow-hidden border-b border-white/10 bg-ink ${full ? "h-[100svh] min-h-[640px]" : "h-[82svh] min-h-[520px]"}`}>
+    <section id={id} className={`group relative w-full scroll-mt-24 overflow-hidden border-b border-white/10 bg-ink ${full ? "h-[100svh] min-h-[640px]" : "h-[82svh] min-h-[520px]"}`}>
       <div className="absolute inset-0 sm:left-auto sm:w-[62%]">
         <Image
           src={photo}
@@ -78,8 +81,9 @@ function Hero() {
   const region = useRegionCopy();
   return (
     <EditorialBlock
+      id="hero"
       full
-      priority
+      priority={(content as any)?.introVideo?.enabled === false}
       photo={hero.photo || DEFAULT_PHOTOS.hero}
       alt="Horwalle"
       kicker={contentText(content, language, "hero", "kicker", { az: "", en: "", ru: "", tr: "" })}
@@ -181,6 +185,7 @@ export default function Home() {
 
   return (
     <div className="flex w-full flex-col bg-ink text-bone">
+      <IntroVideo />
       <Hero />
       <ShippingStrip />
 
