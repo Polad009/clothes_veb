@@ -6,6 +6,7 @@ import {
   generateCampaignHtml,
   generateNewOrderAlertHtml,
   generateLowStockAlertHtml,
+  generateBackInStockHtml,
 } from "./emailTemplates";
 import { LOW_STOCK } from "@/lib/stock";
 import { supabaseServer } from "@/lib/supabaseServer";
@@ -116,6 +117,47 @@ export async function sendLowStockAlert(order: any): Promise<boolean> {
     return true;
   } catch (err) {
     console.error("[EmailService] Exception in sendLowStockAlert:", err);
+    return false;
+  }
+}
+
+/**
+ * Back-in-stock e-mail to a customer who asked to be notified.
+ * Azerbaijani for visitors who used the site in Azerbaijani, English for everyone else.
+ */
+export async function sendBackInStockEmail(input: {
+  to: string;
+  language: string;
+  product: any;
+  color: string;
+  size: string;
+}): Promise<boolean> {
+  if (!resend || !input.to.includes("@")) return false;
+  const lang: "az" | "en" = input.language === "az" ? "az" : "en";
+  const product = input.product || {};
+  const site = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.horwalle.com").replace(/\/$/, "");
+  const name = lang === "en" ? product.translations?.en?.name || product.name : product.name;
+  const colorObj = (product.colors || []).find((c: any) => c.name === input.color);
+  const rawImage = String(colorObj?.image || product.image || "");
+  const image = rawImage.startsWith("http") ? rawImage : rawImage ? `${site}${rawImage.startsWith("/") ? "" : "/"}${rawImage}` : "";
+  const params = new URLSearchParams();
+  if (input.color) params.set("color", input.color);
+  if (input.size) params.set("size", input.size);
+  const url = `${site}/products/${encodeURIComponent(product.slug || product.id)}${params.toString() ? `?${params}` : ""}`;
+  try {
+    const { error } = await resend.emails.send({
+      from: SENDER_EMAIL,
+      to: [input.to],
+      subject: lang === "en" ? `Back in stock: ${name}` : `Stoka gəldi: ${name}`,
+      html: generateBackInStockHtml({ name, image, url, color: input.color, size: input.size }, lang, await contact()),
+    });
+    if (error) {
+      console.error("[EmailService] Back-in-stock e-mail failed:", error);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error("[EmailService] Exception in sendBackInStockEmail:", err);
     return false;
   }
 }

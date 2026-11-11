@@ -15,6 +15,7 @@ import { useCurrency } from "@/context/CurrencyContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useCart } from "@/context/CartContext";
 import { translateColor } from "@/lib/translations";
+import { BackInStock } from "@/components/store/BackInStock";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import { ProductTile } from "@/components/store/ProductTile";
 import { T, tr } from "@/components/store/i18n";
@@ -75,6 +76,21 @@ function ProductView({ product, related }: { product: Product; related: Product[
   const selectedLeft = left(size);
   const soldOut = product.inStock === false || selectedLeft === 0;
   const onSale = Boolean(product.compareAtPrice && product.compareAtPrice > product.price);
+
+  // links in back-in-stock e-mails carry ?color=&size=
+  useEffect(() => {
+    try {
+      const q = new URLSearchParams(window.location.search);
+      const c = q.get("color");
+      const s = q.get("size");
+      if (c) {
+        const i = product.colors.findIndex((x) => x.name === c);
+        if (i >= 0) setColorIndex(i);
+      }
+      if (s && product.sizes.includes(s)) setSize(s);
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product.id]);
 
   // move off a size that is gone in this colour
   useEffect(() => {
@@ -209,11 +225,13 @@ function ProductView({ product, related }: { product: Product; related: Product[
                       <button
                         key={s}
                         type="button"
-                        disabled={gone}
                         onClick={() => setSize(s)}
+                        aria-label={gone ? `${s} — ${tr(language, T.soldOut)}` : s}
                         className={`h-11 border text-[12px] font-bold uppercase transition ${
                           gone
-                            ? "cursor-not-allowed border-white/10 text-bone-faint line-through"
+                            ? size === s
+                              ? "border-bone text-bone-dim line-through"
+                              : "border-dashed border-white/15 text-bone-faint line-through hover:border-white/40"
                             : size === s
                             ? "border-bone bg-bone text-ink"
                             : "border-white/20 hover:border-bone"
@@ -232,7 +250,10 @@ function ProductView({ product, related }: { product: Product; related: Product[
               </div>
             )}
 
-            {/* add */}
+            {/* add — or, when this colour/size is sold out, ask for a back-in-stock e-mail */}
+            {soldOut ? (
+              <BackInStock productId={product.id} color={color?.name || ""} size={size} />
+            ) : (
             <div className="mt-8 flex gap-2">
               <div className="flex items-center border border-white/20">
                 <button type="button" onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="h-14 px-3 hover:bg-white/10" aria-label={tr(language, { az: "Azalt", en: "Decrease", ru: "Меньше", tr: "Azalt" })}>
@@ -254,6 +275,7 @@ function ProductView({ product, related }: { product: Product; related: Product[
                 {soldOut ? tr(language, T.soldOut) : added ? <><Check size={16} /> {tr(language, { az: "Səbətə əlavə olundu", en: "Added to bag", ru: "Добавлено", tr: "Sepete eklendi" })}</> : tr(language, { az: "Səbətə at", en: "Add to bag", ru: "В корзину", tr: "Sepete ekle" })}
               </button>
             </div>
+            )}
             <a
               href={support.link(`Salam! "${product.name}" (${size}, ${color?.name || ""}) haqqında soruşmaq istəyirəm.`)}
               target="_blank"

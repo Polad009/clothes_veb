@@ -1,4 +1,5 @@
 import { requestAdminRole } from '@/lib/adminSession';
+import { notifyBackInStock } from '@/lib/stockAlerts';
 import { NextRequest, NextResponse } from 'next/server';
 import { deleteProduct, saveProduct } from '@/lib/db/products';
 import { listCatalog } from '@/lib/db/catalog';
@@ -71,6 +72,7 @@ export async function POST(req: NextRequest) {
     }
     const product = await saveProduct(body);
     refreshStore();
+    await notifyBackInStock(product.id); // restocked sizes: e-mail the waiting customers
     return NextResponse.json({ success: true, product });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

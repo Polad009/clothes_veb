@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { notifyBackInStock } from '@/lib/stockAlerts';
 import {
   createAdminToken,
   isAdminAuthenticated,
@@ -186,6 +187,7 @@ export async function POST(req: NextRequest, { params }: RouteContext) {
     if (route === 'products') {
       const product = await saveProduct(body);
       refreshStore();
+      await notifyBackInStock(product.id); // restocked sizes: e-mail the waiting customers
       return json({ success: true, product });
     }
 
@@ -256,6 +258,10 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
       if (orderStatus) {
         // awaited so the e-mail is not dropped when the function is frozen after responding
         await sendOrderStatusUpdate(order, orderStatus).catch((e) => console.warn('Status update email warning:', e));
+      }
+      // a cancelled order puts its units back: tell anyone waiting for them
+      if (/ləğv|legv|cancel/i.test(String(orderStatus || '')) || String(paymentStatus || '').toLowerCase() === 'failed') {
+        await notifyBackInStock();
       }
       return json({ success: true, order });
     }

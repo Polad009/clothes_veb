@@ -369,3 +369,38 @@ export function generateLowStockAlertHtml(
     </table>`;
   return getEmailBaseWrapper(content, contact);
 }
+
+/** Customer e-mail: a product they waited for is back in stock. */
+export function generateBackInStockHtml(
+  p: { name: string; image?: string; url: string; color?: string; size?: string; price?: string },
+  lang: "az" | "en",
+  contact: EmailContact = {}
+): string {
+  const en = lang === "en";
+  const img = p.image && /^https:\/\//.test(p.image) ? esc(p.image) : "";
+  const variant = [p.color && `${en ? "Colour" : "Rəng"}: ${esc(p.color)}`, p.size && `${en ? "Size" : "Ölçü"}: ${esc(p.size)}`]
+    .filter(Boolean)
+    .join(" · ");
+  const content = `
+    <h2 style="font-size: 22px; margin: 0 0 10px 0; font-weight: 600; color: #111011;">${en ? "It's back in stock" : "Gözlədiyiniz məhsul stoka gəldi"}</h2>
+    <p style="font-size: 13px; color: #5C5247; line-height: 1.6; margin: 0 0 22px 0;">
+      ${en
+        ? "You asked us to let you know. Stock is limited, so it may sell out again soon."
+        : "Bizdən xəbər verməyimizi istəmişdiniz. Say məhduddur, tez bitə bilər."}
+    </p>
+    <div style="text-align: center; background-color: #FAF7F2; padding: 22px 20px; border-radius: 16px; border: 1px solid #EBE4DA;">
+      ${img ? `<img src="${img}" alt="" width="220" style="display: block; margin: 0 auto 14px auto; max-width: 220px; height: auto; border-radius: 12px;">` : ""}
+      <p style="font-size: 16px; font-weight: 700; color: #111011; margin: 0;">${esc(p.name)}</p>
+      ${variant ? `<p style="font-size: 12px; color: #7A7269; margin: 6px 0 0 0;">${variant}</p>` : ""}
+      ${p.price ? `<p style="font-size: 15px; font-weight: 700; color: #111011; margin: 10px 0 0 0;">${esc(p.price)}</p>` : ""}
+    </div>
+    <div style="text-align: center; margin-top: 28px;">
+      <a href="${safeUrl(p.url)}" class="btn">${en ? "Buy now" : "İndi al"}</a>
+    </div>
+    <p style="font-size: 11px; color: #A69D94; margin: 26px 0 0 0; text-align: center;">
+      ${en
+        ? "You received this one-time e-mail because you asked to be notified on horwalle.com."
+        : "Bu birdəfəlik məktubu horwalle.com-da xəbər verilməsini istədiyiniz üçün aldınız."}
+    </p>`;
+  return getEmailBaseWrapper(content, contact, lang);
+}

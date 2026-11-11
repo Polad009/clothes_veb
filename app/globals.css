@@ -933,8 +933,9 @@ div[class*="vton-btn"],
 /* headings on remapped pages: a bit more compact on phones */
 @media (max-width: 640px) { .hw-dark h2, .hw-dark h3 { font-stretch: 100%; font-weight: 700; } }
 /* announcement bar on phones */
-@keyframes hw-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-.hw-marquee { animation: hw-marquee 24s linear infinite; }
+@keyframes hw-marquee { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-50%, 0, 0); } }
+/* own GPU layer: the text glides smoothly instead of stepping pixel by pixel on phones */
+.hw-marquee { animation: hw-marquee 24s linear infinite; will-change: transform; backface-visibility: hidden; -webkit-backface-visibility: hidden; transform: translate3d(0, 0, 0); }
 @media (prefers-reduced-motion: reduce) { .hw-marquee { animation: none; } }
 
 /* keep the chat buttons clear of a sticky buy bar on phones */

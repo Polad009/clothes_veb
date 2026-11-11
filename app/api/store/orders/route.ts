@@ -1,4 +1,5 @@
 import { requestAdminRole } from '@/lib/adminSession';
+import { notifyBackInStock } from '@/lib/stockAlerts';
 import { NextRequest, NextResponse } from 'next/server';
 import type { StoreOrder } from '@/lib/db/types';
 import {
@@ -383,6 +384,10 @@ export async function PATCH(req: NextRequest) {
     if (orderStatus) {
       await sendOrderStatusUpdate(order, orderStatus).catch((e) => console.warn('Status update email warning:', e));
     }
+      // a cancelled order puts its units back: tell anyone waiting for them
+      if (/ləğv|legv|cancel/i.test(String(orderStatus || '')) || String(paymentStatus || '').toLowerCase() === 'failed') {
+        await notifyBackInStock();
+      }
     return NextResponse.json({ success: true, order });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

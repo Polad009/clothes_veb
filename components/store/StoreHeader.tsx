@@ -52,7 +52,9 @@ function AnnouncementBar() {
 
   return (
     <div className="relative z-50 h-9 overflow-hidden bg-bone font-grotesk text-[10px] font-extrabold uppercase leading-9 tracking-[0.14em] text-ink [font-stretch:105%] sm:text-[11px] sm:tracking-[0.16em]">
-      <div className="hw-marquee flex w-max sm:hidden" style={{ animationDuration: `${seconds}s` }}>
+      {/* keyed by the text: when the lines change after load (visitor's country, language), the strip
+          starts over cleanly instead of jumping mid-way */}
+      <div key={items.join("|")} className="hw-marquee flex w-max sm:hidden" style={{ animationDuration: `${seconds}s` }}>
         {track(0)}
         {track(1)}
       </div>
