@@ -10,6 +10,10 @@ import { listProducts, type CatalogProduct } from './products';
  */
 export async function listCatalog(client: SupabaseClient = db()): Promise<CatalogProduct[]> {
   const [products, campaigns] = await Promise.all([listProducts(client), listCampaigns(client)]);
-  // hidden products stay in the admin (and in old orders) but are not sold
-  return applyCampaigns(products.filter((p) => !p.hidden), campaigns);
+  // hidden products stay in the admin (and in old orders) but are not sold;
+  // print-ready design files are for the admin only, never in public responses
+  return applyCampaigns(
+    products.filter((p) => !p.hidden).map((p) => ({ ...p, printLayers: [] })),
+    campaigns
+  );
 }
