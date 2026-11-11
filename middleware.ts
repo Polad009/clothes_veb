@@ -94,13 +94,13 @@ async function productExists(slug: string): Promise<boolean | null> {
     ? `or=(slug.eq.${slug},id.eq.${slug})`
     : `slug=eq.${encodeURIComponent(slug)}`;
   try {
-    const res = await fetch(`${url}/rest/v1/products?select=id&limit=1&${filter}`, {
+    const res = await fetch(`${url}/rest/v1/products?select=id,extra&limit=1&${filter}`, {
       headers: { apikey: key, Authorization: `Bearer ${key}` },
       cache: 'no-store',
     });
     if (!res.ok) return null;
     const rows = await res.json();
-    const exists = Array.isArray(rows) && rows.length > 0;
+    const exists = Array.isArray(rows) && rows.length > 0 && rows[0]?.extra?.hidden !== true;
     if (productCache.size > 500) productCache.clear();
     productCache.set(slug, { exists, at: Date.now() });
     return exists;

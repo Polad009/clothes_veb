@@ -122,7 +122,9 @@ export function ProductsTable({ products, categories }: { products: CatalogProdu
                       <td className="px-3 py-3">
                         <div className="flex items-center gap-2">
                           <Toggle checked={onSale} disabled={busy === p.id} onChange={(next) => toggleStock(p, next)} label={`${p.name}: satışda`} />
-                          {!onSale ? (
+                          {p.hidden ? (
+                            <Badge tone="neutral">Saytda gizli</Badge>
+                          ) : !onSale ? (
                             <Badge tone="neutral">Satışdan çıxarılıb</Badge>
                           ) : p.trackStock && units === 0 ? (
                             <Badge tone="red">Stok bitib</Badge>

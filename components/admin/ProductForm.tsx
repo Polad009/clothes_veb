@@ -9,6 +9,7 @@ import { stockKey } from "@/lib/stock";
 import { adminFetch, categoryOptions, GENDERS } from "@/lib/adminClient";
 import { cn } from "@/lib/utils";
 import { Button, Card, ConfirmButton, Field, Input, Select, Textarea, Toggle, useToast } from "@/components/admin/ui";
+import { PrintFiles, type PrintFile } from "@/components/admin/PrintFiles";
 
 const COMMON_SIZES = ["XS", "S", "M", "L", "XL", "XXL", "3XL"];
 const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
@@ -145,6 +146,8 @@ export function ProductForm({ product, categories }: { product: CatalogProduct |
   );
   const [trLang, setTrLang] = useState<"en" | "ru" | "tr">("en");
   const [trackStock, setTrackStock] = useState(product?.trackStock ?? false);
+  const [hidden, setHidden] = useState(product?.hidden ?? false);
+  const [printFiles, setPrintFiles] = useState<PrintFile[]>(() => (product?.printLayers || []).filter((l: any) => l?.url));
   // Counts keyed by colour draft key + size, so renaming a colour keeps its numbers
   const [stockDraft, setStockDraft] = useState<Record<string, string>>(() => {
     const out: Record<string, string> = {};
@@ -226,6 +229,8 @@ export function ProductForm({ product, categories }: { product: CatalogProduct |
           care: care.trim(),
           inStock,
           trackStock,
+          hidden,
+          printLayers: printFiles,
           translations,
           ...(trackStock ? { stock } : {}),
           sizes,
@@ -336,6 +341,13 @@ export function ProductForm({ product, categories }: { product: CatalogProduct |
         </Card>
 
         <Card title="Qiymət və satış">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 px-5 py-3.5">
+            <div>
+              <p className="text-sm font-medium text-stone-900">Saytda gizlət</p>
+              <p className="text-xs text-stone-500">Gizli məhsulu müştərilər görmür və ala bilmir. Admin paneldə və köhnə sifarişlərdə qalır.</p>
+            </div>
+            <Toggle checked={hidden} onChange={setHidden} label="Saytda gizlət" />
+          </div>
           <div className="grid gap-4 p-5 sm:grid-cols-3">
             <Field label="Satış qiyməti (₼)" error={errors.price}>
               <Input inputMode="decimal" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="29.99" />
@@ -520,6 +532,8 @@ export function ProductForm({ product, categories }: { product: CatalogProduct |
             </Field>
           </div>
         </Card>
+
+        <PrintFiles value={printFiles} onChange={setPrintFiles} />
       </div>
 
       <div className="sticky bottom-0 -mx-4 mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-stone-200 bg-stone-50/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">

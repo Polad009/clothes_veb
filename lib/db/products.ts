@@ -42,7 +42,10 @@ export interface CatalogProduct {
   colors: any[];
   sizes: string[];
   features: any[];
+  /** Print-ready design files: [{ name, url, desc }] (downloadable in the admin). */
   printLayers: any[];
+  /** Hidden from the shop (admin only); kept for old orders and links. */
+  hidden: boolean;
   /** When false the product sells without limit and `stock` is empty. */
   trackStock: boolean;
   /** Units per colour/size, keyed by stockKey(color, size). */
@@ -111,6 +114,7 @@ export function rowToProduct(r: any): CatalogProduct {
     sizes,
     features: Array.isArray(r.features) ? r.features : [],
     printLayers: Array.isArray(extra.printLayers) ? extra.printLayers : [],
+    hidden: extra.hidden === true,
     trackStock,
     stock,
     translations: extra.translations && typeof extra.translations === 'object' ? extra.translations : undefined,
@@ -233,7 +237,20 @@ export async function saveProduct(input: any): Promise<CatalogProduct> {
     }
   }
   if (Array.isArray(input.gallery)) extra.gallery = input.gallery;
-  if (Array.isArray(input.printLayers)) extra.printLayers = input.printLayers;
+  if (Array.isArray(input.printLayers)) {
+    extra.printLayers = input.printLayers
+      .filter((l: any) => l && typeof l.url === 'string' && /^(\/|https:\/\/)/.test(l.url))
+      .slice(0, 30)
+      .map((l: any) => ({
+        name: String(l.name || '').replace(/[<>]/g, '').trim().slice(0, 80),
+        url: String(l.url).trim(),
+        desc: String(l.desc || '').replace(/[<>]/g, '').trim().slice(0, 200),
+      }));
+  }
+  if (typeof input.hidden === 'boolean') {
+    if (input.hidden) extra.hidden = true;
+    else delete extra.hidden;
+  }
   if (input.translations && typeof input.translations === 'object') {
     const t: Record<string, Record<string, string>> = {};
     const limits: Record<string, number> = { name: 160, description: 5000, composition: 300, fit: 120, care: 300 };

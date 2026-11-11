@@ -10,5 +10,6 @@ import { listProducts, type CatalogProduct } from './products';
  */
 export async function listCatalog(client: SupabaseClient = db()): Promise<CatalogProduct[]> {
   const [products, campaigns] = await Promise.all([listProducts(client), listCampaigns(client)]);
-  return applyCampaigns(products, campaigns);
+  // hidden products stay in the admin (and in old orders) but are not sold
+  return applyCampaigns(products.filter((p) => !p.hidden), campaigns);
 }

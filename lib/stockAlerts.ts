@@ -15,7 +15,7 @@ const clean = (v: unknown, max: number) => String(v ?? '').replace(/[<>]/g, '').
 
 /** Is this colour/size of the product available right now? */
 function isAvailable(product: any, color: string, size: string): boolean {
-  if (!product || product.inStock === false) return false;
+  if (!product || product.hidden || product.inStock === false) return false;
   const left = availableQty(product, color, size);
   return left === null || left > 0; // null = stock not tracked
 }
