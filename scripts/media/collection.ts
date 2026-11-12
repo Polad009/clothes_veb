@@ -21,6 +21,7 @@ export interface Product {
   composition: string;
   colours: Colour[];
   front?: string;     // design used on the front (chest / leg / cap)
+  frontKind?: 'chest' | 'big' | 'leg' | 'cap'; // print size of the front design (default: from its name)
   back?: string;      // design used on the back
   extraPrints?: Array<[design: string, label: string, kind: string]>; // sets: the other pieces' designs
   badge?: string;

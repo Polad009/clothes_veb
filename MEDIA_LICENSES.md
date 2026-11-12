@@ -68,3 +68,12 @@ The category image `product-images/categories/dest-6310998.jpg` is the unmodifie
 Licence: [Pexels License](https://www.pexels.com/license/) — commercial use and modification
 allowed, no attribution required; the people shown must not be portrayed as endorsing us or
 in a bad light. Replace with photos of the real products on your own models when available.
+
+## "NOX" collection (2026-11-12)
+
+Designs are original artwork drawn by `scripts/media/nox-designs.py` (thorn "sigil" lines, stars,
+chrome lettering are generated shapes; the worn texture comes from `nox-distress.py`). Style
+research looked at current gothic / grunge streetwear trends; no other brand's artwork was copied.
+Fonts, all under the SIL Open Font License (free for commercial printing, text is converted to
+outlines): UnifrakturMaguntia, Grenze Gotisch, Space Mono, Archivo (from github.com/google/fonts).
+Product images reuse the photos listed above (`scripts/media/nox-images.py`).

@@ -5,7 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import { createClient } from '@supabase/supabase-js';
 import { saveProduct } from '@/lib/db/products';
-import { COLLECTION, type Ink, type Product } from './collection';
+import { type Ink, type Product } from './collection';
 
 const [designs, mockups, modelsDir] = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const HIDE_OLD = process.argv.includes('--hide-old');
@@ -13,6 +13,9 @@ const HIDE_OLD = process.argv.includes('--hide-old');
 // A product missing from mockups.json has no image yet: it is kept but hidden from the shop.
 // New folder per image set: the old files are cached for a year under their old names.
 const IMG_DIR = process.env.IMG_DIR || 'products/collection01-photo';
+const PRINT_DIR = process.env.PRINT_DIR || 'prints/collection01';
+// which collection to publish (module exporting COLLECTION), e.g. ./collection-nox
+const COLLECTION_FILE = process.env.COLLECTION_FILE || './collection';
 const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
   auth: { persistSession: false },
 });
@@ -37,6 +40,7 @@ const INK_LABEL: Record<Ink, string> = { bone: 'açıq rəngli çap (qara geyim 
 const WIDTH: Record<string, string> = {
   back: 'tövsiyə olunan eni: köynəkdə 30 sm, hudidə 28 sm',
   chest: 'sol sinə, tövsiyə olunan eni 9 sm',
+  big: 'ön tərəf, böyük çap, tövsiyə olunan eni 28 sm',
   'buta-chest': 'sol sinə, tövsiyə olunan eni 6 sm',
   leg: 'sol ayaq, tövsiyə olunan uzunluğu 28 sm',
   cap: 'kepkanın önü, tövsiyə olunan eni 6 sm (tikmə də olar)',
@@ -54,23 +58,29 @@ async function printFiles(p: Product) {
   const parts: Array<[string, string, string]> = [];
   if (p.back) parts.push([p.back, 'Arxa çap', WIDTH.back]);
   if (p.front) {
-    const kind = p.front === 'leg' ? 'leg' : p.front === 'cap' ? 'cap' : p.front === 'buta-chest' ? 'buta-chest' : 'chest';
-    parts.push([p.front, kind === 'leg' ? 'Ayaq çapı' : kind === 'cap' ? 'Kepka dizaynı' : 'Sinə çapı', WIDTH[kind]]);
+    const kind = p.frontKind || (p.front === 'leg' ? 'leg' : p.front === 'cap' ? 'cap' : p.front === 'buta-chest' ? 'buta-chest' : 'chest');
+    const label = kind === 'leg' ? 'Ayaq çapı' : kind === 'cap' ? 'Kepka dizaynı' : kind === 'big' ? 'Ön çap (böyük)' : 'Sinə çapı';
+    parts.push([p.front, label, WIDTH[kind]]);
   }
   for (const [design, label, kind] of p.extraPrints || []) parts.push([design, label, WIDTH[kind]]);
   for (const [design, label, width] of parts) {
     for (const ink of inks) {
-      const base = `${design}-${ink}`;
-      const png = await upload(path.join(designs, `${base}.png`), `prints/collection01/${base}.png`, 'image/png');
-      if (png) out.push({ name: `${label} — ${INK_LABEL[ink]} (PNG)`, url: png, desc: `Şəffaf fon, 300 dpi · ${width}` });
-      const svg = await upload(path.join(designs, `${base}.svg`), `prints/collection01/${base}.svg`, 'image/svg+xml');
-      if (svg) out.push({ name: `${label} — ${INK_LABEL[ink]} (SVG)`, url: svg, desc: `Vektor, istənilən ölçüdə · ${width}` });
+      // full-colour designs exist once (for black garments): use that file for every ink
+      const base = fs.existsSync(path.join(designs, `${design}-${ink}.png`)) ? `${design}-${ink}` : `${design}-bone`;
+      if (!fs.existsSync(path.join(designs, `${base}.png`))) continue;
+      if (out.some((o) => o.url.endsWith(`/${base}.png`))) continue;
+      const inkLabel = design.startsWith('chrome') ? 'rəngli xrom çap (DTF / DTG)' : INK_LABEL[ink];
+      const png = await upload(path.join(designs, `${base}.png`), `${PRINT_DIR}/${base}.png`, 'image/png');
+      if (png) out.push({ name: `${label} — ${inkLabel} (PNG)`, url: png, desc: `Şəffaf fon, 300 dpi · ${width}` });
+      const svg = await upload(path.join(designs, `${base}.svg`), `${PRINT_DIR}/${base}.svg`, 'image/svg+xml');
+      if (svg) out.push({ name: `${label} — ${inkLabel} (SVG)`, url: svg, desc: `Vektor, istənilən ölçüdə · ${width}` });
     }
   }
   return out;
 }
 
 (async () => {
+  const { COLLECTION } = (await import(COLLECTION_FILE)) as { COLLECTION: Product[] };
   const created: string[] = [];
   for (let i = 0; i < COLLECTION.length; i++) {
     const p = COLLECTION[i];
