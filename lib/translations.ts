@@ -1211,6 +1211,14 @@ export function translateColor(colorName: string, lang: LanguageCode): string {
     "grey": { az: "Boz", en: "Grey", ru: "Серый", tr: "Gri" },
     "off-white": { az: "Süd Ağ", en: "Off-White", ru: "Молочный", tr: "Kırık Beyaz" },
     "standart": { az: "Standart", en: "Standard", ru: "Стандарт", tr: "Standart" },
+    "bordo": { az: "Bordo", en: "Burgundy", ru: "Бордовый", tr: "Bordo" },
+    "açıq mavi": { az: "Açıq mavi", en: "Light Blue", ru: "Голубой", tr: "Açık Mavi" },
+    "bej": { az: "Bej", en: "Beige", ru: "Бежевый", tr: "Bej" },
+    "mint": { az: "Mint", en: "Mint", ru: "Мятный", tr: "Mint" },
+    "çəhrayı": { az: "Çəhrayı", en: "Pink", ru: "Розовый", tr: "Pembe" },
+    "krem": { az: "Krem", en: "Cream", ru: "Кремовый", tr: "Krem" },
+    "antrasit": { az: "Antrasit", en: "Charcoal", ru: "Антрацит", tr: "Antrasit" },
+    "təbii": { az: "Təbii", en: "Natural", ru: "Натуральный", tr: "Doğal" },
   };
 
   if (map[lower]) {
