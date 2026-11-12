@@ -10,6 +10,10 @@ import { translateBadge } from "@/lib/translations";
 import { availableQty } from "@/lib/stock";
 import { T, tr } from "@/components/store/i18n";
 
+/** Photos of people wearing the product fill the frame; cut-outs sit on the tile with a margin. */
+export const isPhoto = (src?: string) => Boolean(src && src.includes("/products/photo/"));
+const fitClass = (src?: string) => (isPhoto(src) ? "object-cover object-top" : "object-contain p-[8%] mix-blend-multiply");
+
 function isSoldOut(p: Product): boolean {
   if (p.inStock === false) return true;
   if (!p.trackStock) return false;
@@ -40,7 +44,7 @@ export function ProductTile({ product, priority = false }: { product: Product; p
           fill
           priority={priority}
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          className={`object-contain p-[8%] mix-blend-multiply transition duration-500 ease-out ${back ? "group-hover:opacity-0" : "group-hover:scale-[1.04]"}`}
+          className={`${fitClass(front)} transition duration-500 ease-out ${back ? "group-hover:opacity-0" : "group-hover:scale-[1.04]"}`}
         />
         {back && (
           <Image
@@ -48,7 +52,7 @@ export function ProductTile({ product, priority = false }: { product: Product; p
             alt=""
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-contain p-[8%] opacity-0 mix-blend-multiply transition duration-500 ease-out group-hover:opacity-100"
+            className={`${fitClass(back)} opacity-0 transition duration-500 ease-out group-hover:opacity-100`}
           />
         )}
         <div className="absolute left-3 top-3 flex flex-col items-start gap-1.5">

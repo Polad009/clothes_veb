@@ -17,7 +17,7 @@ import { useCart } from "@/context/CartContext";
 import { translateColor } from "@/lib/translations";
 import { BackInStock } from "@/components/store/BackInStock";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
-import { ProductTile } from "@/components/store/ProductTile";
+import { ProductTile, isPhoto } from "@/components/store/ProductTile";
 import { T, tr } from "@/components/store/i18n";
 import { useRegionCopy } from "@/components/store/region";
 
@@ -69,8 +69,9 @@ function ProductView({ product, related }: { product: Product; related: Product[
   const [added, setAdded] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
   const [slide, setSlide] = useState(0);
+  const [zoom, setZoom] = useState<string | null>(null);
   const railRef = useRef<HTMLDivElement>(null);
-  useBodyScrollLock(guideOpen);
+  useBodyScrollLock(guideOpen || Boolean(zoom));
 
   const left = (s: string) => availableQty(product, color?.name || "", s);
   const selectedLeft = left(size);
@@ -147,12 +148,15 @@ function ProductView({ product, related }: { product: Product; related: Product[
             className="flex snap-x snap-mandatory overflow-x-auto [scrollbar-width:none] lg:grid lg:grid-cols-2 lg:gap-2 lg:overflow-visible [&::-webkit-scrollbar]:hidden"
           >
             {gallery.map((src, i) => (
-              <div
+              <button
+                type="button"
                 key={src}
-                className={`relative aspect-[4/5] w-full shrink-0 snap-center bg-tile ${i === 0 && gallery.length % 2 === 1 ? "lg:col-span-2 lg:aspect-[5/4]" : ""}`}
+                onClick={() => setZoom(src)}
+                aria-label={tr(language, { az: "Şəkli böyüt", en: "Enlarge image", ru: "Увеличить фото", tr: "Görseli büyüt" })}
+                className={`relative aspect-[4/5] w-full shrink-0 cursor-zoom-in snap-center bg-tile ${i === 0 && gallery.length % 2 === 1 && !isPhoto(src) ? "lg:col-span-2 lg:aspect-[5/4]" : ""}`}
               >
-                <Image src={src} alt={`${product.name} ${i + 1}`} fill priority={i === 0} sizes="(max-width: 1024px) 100vw, 40vw" className="object-contain p-[7%] mix-blend-multiply" />
-              </div>
+                <Image src={src} alt={`${product.name} ${i + 1}`} fill priority={i === 0} sizes="(max-width: 1024px) 100vw, 40vw" className={isPhoto(src) ? "object-cover object-top" : "object-contain p-[7%] mix-blend-multiply"} />
+              </button>
             ))}
           </div>
           {gallery.length > 1 && (
@@ -174,6 +178,15 @@ function ProductView({ product, related }: { product: Product; related: Product[
             </nav>
 
             <h1 lang="en" className="mt-4 text-4xl font-black uppercase leading-[0.92] tracking-[-0.015em] [font-stretch:112%] sm:text-5xl">{product.name}</h1>
+
+            {(product.gender === "unisex" || product.gender === "women" || product.fit) && (
+              <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.16em] text-bone-dim">
+                {[
+                  product.gender === "unisex" ? "Unisex" : product.gender === "women" ? tr(language, { az: "Qadın", en: "Women", ru: "Женское", tr: "Kadın" }) : "",
+                  product.fit,
+                ].filter(Boolean).join(" · ")}
+              </p>
+            )}
 
             <div className="mt-4 flex items-baseline gap-3">
               <span className={`text-2xl font-bold tabular-nums ${onSale ? "text-sale" : ""}`}>{formatProductPrice(product)}</span>
@@ -200,7 +213,7 @@ function ProductView({ product, related }: { product: Product; related: Product[
                       title={translateColor(c.name, language as any)}
                       className={`relative h-14 w-12 overflow-hidden border-2 bg-tile transition ${i === colorIndex ? "border-bone" : "border-transparent opacity-70 hover:opacity-100"}`}
                     >
-                      <Image src={c.image} alt="" fill sizes="48px" className="object-contain p-1 mix-blend-multiply" />
+                      <Image src={c.image} alt="" fill sizes="48px" className={isPhoto(c.image) ? "object-cover object-top" : "object-contain p-1 mix-blend-multiply"} />
                     </button>
                   ))}
                 </div>
@@ -332,6 +345,15 @@ function ProductView({ product, related }: { product: Product; related: Product[
             ))}
           </div>
         </section>
+      )}
+
+      {zoom && (
+        <div data-lenis-prevent className="fixed inset-0 z-[80] flex cursor-zoom-out items-center justify-center bg-black/95" onClick={() => setZoom(null)}>
+          <button type="button" aria-label={tr(language, T.close)} className="absolute right-4 top-4 z-10 text-bone"><X size={26} /></button>
+          <div className="relative h-full w-full">
+            <Image src={zoom} alt={product.name} fill sizes="100vw" className="object-contain" />
+          </div>
+        </div>
       )}
 
       <AnimatePresence>

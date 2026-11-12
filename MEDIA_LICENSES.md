@@ -94,3 +94,38 @@ sold as unaltered copies, which the Pexels License does not allow:
 
 Type: Anton, Space Mono, UnifrakturMaguntia (SIL Open Font License). Bolt icon drawn by the script.
 Product images: `scripts/media/storm-images.py` on the photos listed above.
+
+## "ƏSAS 01" and "ZƏRİF 01" product photos (2026-11-12)
+
+Files in Storage `product-images/products/photo/` and the section photos
+`product-images/categories/don-*.jpg`, `etek-*.jpg`, `ust-geyim-*.jpg` are free Unsplash stock photos
+([Unsplash License](https://unsplash.com/license): commercial use and modification allowed, no
+attribution required), cropped to 4:5 and otherwise unchanged (`scripts/media/esas-zerif.ts`).
+Only photos from the free library were taken (no Unsplash+).
+
+They show stock models wearing plain garments of the same type, colour and cut as the listed
+product. They are NOT photos of Horwalle's own garments: the people are not Horwalle staff or
+customers and are not presented as endorsing the brand, and the photos are not exclusive.
+Replace them with photos of the real samples once those exist.
+
+Source of each file: `https://images.unsplash.com/photo-<id>`
+
+| Product (ref) | Photo ids |
+|---|---|
+| HW-ES-TEE | 1663573689907-23811551910b, 1592994238317-fcf75c5466fd |
+| HW-ES-HOODIE, HW-ES-SET | 1779675789591-5b91f3acc404, 1779675790227-b8e7802db81c, 1779676086744-a83b1f0e00bd, 1779675789882-ff0ab3bb1764, 1779675788296-e268de59beeb |
+| HW-ES-CREW | 1605122897309-17343bb5bfb8, 1646724104632-013a77b033ab |
+| HW-ES-SHIRT | 1674583598960-73827180d519 |
+| HW-ES-RUGBY | 1670003406474-30100ad8536b |
+| HW-ES-TROUSERS | 1715541448068-7a6af59ff4a4, 1715541448446-3369e1cc0ee9 |
+| HW-ES-JOGGER | 1789110854262-ec66f0648ec7, 1789110519766-117eb0e35bea, 1602573991155-21f0143bb45c |
+| HW-ES-TOTE | 1572196284554-4e321b0e7e0b, 1632942480766-9cee148c4ee8 |
+| HW-ZR-SKIRT | 1708363390847-b4af54f45273, 1708363390932-15e8a29c0f56 |
+| HW-ZR-WRAP | 1641840007671-06412f440b65 |
+| HW-ZR-KNIT | 1713425886845-fe080154ec73, 1713425886590-ba01e750b083 |
+| HW-ZR-MIDI | 1741605115361-269851d41f06 |
+| HW-ZR-BLOUSE | 1704775983224-43dae05da876, 1704775983313-756dd3ac2569, 1704775989365-eebfd4659a23 |
+| HW-ZR-BLAZER | 1744691842534-d7a3b0b2489a, 1779406166699-662a041a12a9 |
+| HW-ZR-TROUSERS | 1741605037162-b1f475a4a4d3, 1741605037041-acc44c229698, 1741605037045-516447152dfa |
+| HW-ZR-TRENCH | 1617391258031-f8d80b22fb35 |
+| Section photos: Don, Ətək, Üst geyim | 1713425887001-5c7bb45711f8, 1597253702951-6b83f54bcb37, 1589400445193-c881a4b0b38a |
