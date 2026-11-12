@@ -46,3 +46,25 @@ No people and no third-party logos are shown.
 Both licences allow commercial use and modification without attribution. These are
 stock photos of plain garments, so the blanks are not exclusive to Horwalle; replace them
 with photos of the real printed products when samples exist.
+
+## On-model product photos and the "Dəst" category photo
+
+Files `product-images/products/collection01-photo/*-m1.jpg|*-m2.jpg` are our designs placed on
+Pexels photos of people wearing plain garments (`scripts/media/photo-model.py`). The people
+are stock models, not Horwalle staff or customers, and are not presented as endorsing the brand.
+The category image `product-images/categories/dest-6310998.jpg` is the unmodified photo 6310998.
+
+| Pexels photo | Used for |
+|---|---|
+| https://www.pexels.com/photo/8217461/ | white tee, front |
+| https://www.pexels.com/photo/6311141/ | white tee, back |
+| https://www.pexels.com/photo/4066293/ | black tee, front |
+| https://www.pexels.com/photo/8217415/ | white hoodie, back |
+| https://www.pexels.com/photo/6311619/ | black hoodie / joggers / Essential set, front |
+| https://www.pexels.com/photo/6311506/ | black hoodie / joggers / Essential set, back |
+| https://www.pexels.com/photo/9558786/ | white cap, Baku set |
+| https://www.pexels.com/photo/6310998/ | "Dəst" category photo |
+
+Licence: [Pexels License](https://www.pexels.com/license/) — commercial use and modification
+allowed, no attribution required; the people shown must not be portrayed as endorsing us or
+in a bad light. Replace with photos of the real products on your own models when available.

@@ -1,13 +1,13 @@
 // Uploads the "Bakı Seriyası 01" images + print files to Supabase Storage and creates/updates
 // the products (matched by product code, so it can be re-run safely).
-//   npx tsx --env-file=.env.local scripts/media/publish-collection.ts <designs_dir> <mockups_dir> [--hide-old]
+//   npx tsx --env-file=.env.local scripts/media/publish-collection.ts <designs_dir> <mockups_dir> [<models_dir>] [--hide-old]
 import fs from 'fs';
 import path from 'path';
 import { createClient } from '@supabase/supabase-js';
 import { saveProduct } from '@/lib/db/products';
 import { COLLECTION, type Ink, type Product } from './collection';
 
-const [designs, mockups] = process.argv.slice(2);
+const [designs, mockups, modelsDir] = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const HIDE_OLD = process.argv.includes('--hide-old');
 // <mockups_dir>/mockups.json comes from compose.py (real garment photos) or make-mockups.ts (drawn flats).
 // A product missing from mockups.json has no image yet: it is kept but hidden from the shop.
@@ -20,6 +20,9 @@ const BUCKET = 'product-images';
 const mock: Record<string, Record<string, { front: string; back?: string }>> = JSON.parse(
   fs.readFileSync(path.join(mockups, 'mockups.json'), 'utf8')
 );
+// optional <models_dir>/model.json from model.py: photos of people wearing the product, per colour
+const models: Record<string, Record<string, string[]>> =
+  modelsDir && fs.existsSync(path.join(modelsDir, 'model.json')) ? JSON.parse(fs.readFileSync(path.join(modelsDir, 'model.json'), 'utf8')) : {};
 
 async function upload(local: string, remote: string, type: string): Promise<string | null> {
   const { error } = await sb.storage.from(BUCKET).upload(remote, fs.readFileSync(local), { contentType: type, upsert: true, cacheControl: '31536000' });
@@ -54,6 +57,7 @@ async function printFiles(p: Product) {
     const kind = p.front === 'leg' ? 'leg' : p.front === 'cap' ? 'cap' : p.front === 'buta-chest' ? 'buta-chest' : 'chest';
     parts.push([p.front, kind === 'leg' ? 'Ayaq çapı' : kind === 'cap' ? 'Kepka dizaynı' : 'Sinə çapı', WIDTH[kind]]);
   }
+  for (const [design, label, kind] of p.extraPrints || []) parts.push([design, label, WIDTH[kind]]);
   for (const [design, label, width] of parts) {
     for (const ink of inks) {
       const base = `${design}-${ink}`;
@@ -72,7 +76,7 @@ async function printFiles(p: Product) {
     const p = COLLECTION[i];
     const refCode = `HW-${p.key.toUpperCase()}`;
     console.log(`\n${p.name.az}  (${refCode})`);
-    if (!mock[p.key]) {
+    if (!mock[p.key] && !models[p.key]) {
       const { data: row } = await sb.from('products').select('id, extra').eq('ref_code', refCode).maybeSingle();
       if (row) {
         await sb.from('products').update({ extra: { ...(row.extra || {}), hidden: true } }).eq('id', row.id);
@@ -83,13 +87,26 @@ async function printFiles(p: Product) {
     }
     const colors = [];
     for (const c of p.colours) {
-      const m = mock[p.key][c.name];
-      const front = await upload(path.join(mockups, m.front), `${IMG_DIR}/${m.front}`, 'image/png');
-      const back = m.back ? await upload(path.join(mockups, m.back), `${IMG_DIR}/${m.back}`, 'image/png') : null;
-      // tees: the back print is the statement, shown first; hoodies: the photo first, the back-print close-up on hover
-      const main = p.shape === 'hoodie' ? front! : back || front!;
-      const second = back ? (main === back ? front! : back) : '';
-      colors.push({ name: c.name, hex: c.hex, image: main, hoverImage: second, gallery: [main, second].filter(Boolean) });
+      const m = mock[p.key]?.[c.name];
+      const worn: string[] = [];
+      for (const f of models[p.key]?.[c.name] || []) {
+        const u = await upload(path.join(modelsDir, f), `${IMG_DIR}/${f}`, 'image/jpeg');
+        if (u) worn.push(u);
+      }
+      let main = '';
+      let second = '';
+      if (m) {
+        const front = await upload(path.join(mockups, m.front), `${IMG_DIR}/${m.front}`, 'image/png');
+        const back = m.back ? await upload(path.join(mockups, m.back), `${IMG_DIR}/${m.back}`, 'image/png') : null;
+        // tees: the back print is the statement, shown first; hoodies: the photo first, the back-print close-up after
+        main = p.shape === 'hoodie' ? front! : back || front!;
+        second = back ? (main === back ? front! : back) : '';
+      }
+      if (!main && !worn.length) continue;
+      // plain product photo first, worn on a person on hover; sets have only worn photos
+      const image = main || worn[0];
+      const gallery = Array.from(new Set([image, ...worn, second].filter(Boolean)));
+      colors.push({ name: c.name, hex: c.hex, image, hoverImage: gallery[1] || '', gallery });
     }
     const layers = await printFiles(p);
     const { data: existing } = await sb.from('products').select('id').eq('ref_code', refCode).maybeSingle();
