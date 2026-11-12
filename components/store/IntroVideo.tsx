@@ -140,7 +140,9 @@ export function IntroVideo() {
           <button
             type="button"
             onClick={toggle}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/25 text-bone/90 backdrop-blur-sm transition hover:border-bone"
+            // no backdrop blur here: blurring a playing video costs the phone GPU every frame and made
+            // the announcement strip above stutter while the page sat at the top
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/25 bg-black/35 text-bone/90 transition hover:border-bone"
             aria-label={
               paused
                 ? tr(language, { az: "Videonu oynat", en: "Play video", ru: "Воспроизвести видео", tr: "Videoyu oynat" })

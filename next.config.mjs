@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
+  // do not advertise the framework in every response
+  poweredByHeader: false,
   swcMinify: true,
   compress: true,
   experimental: {
@@ -66,7 +68,7 @@ const nextConfig = {
           },
           {
             key: "Permissions-Policy",
-            value: "camera=*, microphone=(), geolocation=()",
+            value: "camera=(self \"https://tryanywear.ai\" \"https://anywear.decart.ai\"), microphone=(), geolocation=()",
           },
           {
             key: "X-XSS-Protection",

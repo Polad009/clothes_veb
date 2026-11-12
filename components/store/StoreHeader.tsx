@@ -33,6 +33,8 @@ function AnnouncementBar() {
   const [i, setI] = useState(0);
   useEffect(() => {
     if (items.length < 2) return;
+    // phones show the scrolling strip instead: no need to re-render the bar every few seconds there
+    if (window.matchMedia("(max-width: 639px)").matches) return;
     const id = setInterval(() => setI((n) => (n + 1) % items.length), 4500);
     return () => clearInterval(id);
   }, [items.length]);
@@ -51,7 +53,7 @@ function AnnouncementBar() {
   );
 
   return (
-    <div className="relative z-50 h-9 overflow-hidden bg-bone font-grotesk text-[10px] font-extrabold uppercase leading-9 tracking-[0.14em] text-ink [font-stretch:105%] sm:text-[11px] sm:tracking-[0.16em]">
+    <div className="relative z-50 h-9 overflow-hidden bg-bone [contain:paint] font-grotesk text-[10px] font-extrabold uppercase leading-9 tracking-[0.14em] text-ink [font-stretch:105%] sm:text-[11px] sm:tracking-[0.16em]">
       {/* keyed by the text: when the lines change after load (visitor's country, language), the strip
           starts over cleanly instead of jumping mid-way */}
       <div key={items.join("|")} className="hw-marquee flex w-max sm:hidden" style={{ animationDuration: `${seconds}s` }}>
