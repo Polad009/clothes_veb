@@ -1,11 +1,12 @@
 """Horwalle dark graphic prints (money / eye / lightning / statue), for black garments.
+The lightning is drawn by the script, not taken from a photo.
 
 Original compositions built from free Unsplash photos (Unsplash License: commercial use and
 modification allowed) reworked into print art, plus type in OFL fonts (Anton, Space Mono,
 UnifrakturMaguntia). Sources are listed in MEDIA_LICENSES.md.
 
 usage: python dark-designs.py <src_dir> <fonts_dir> <out_dir>
-  src_dir: bill.jpg eye.jpg bolt.jpg bolt2.jpg statue.jpg
+  src_dir: bill.jpg eye.jpg statue.jpg
 writes <name>.png (transparent, 3000 px wide, light ink for dark fabric)
 """
 import os
@@ -150,36 +151,44 @@ def awake():
     save(out, "awake")
 
 
-# ── 3. STRIKE: real lightning across the chest ──────────────────────────────────────────────
+# ── 3. STRIKE: drawn lightning that forks down from the shoulders and the collar ────────────
 def strike():
-    W = 3000
-    parts = []
-    for name, box in (("bolt", (0.30, 0.18, 0.72, 0.86)), ("bolt2", (0.20, 0.14, 0.92, 0.84))):
-        im = photo(name)
-        w, h = im.size
-        im = im.crop((int(box[0] * w), int(box[1] * h), int(box[2] * w), int(box[3] * h)))
-        L = np.asarray(im.convert("L")).astype(np.float32) / 255.0
-        L = L - np.asarray(im.convert("L").filter(ImageFilter.GaussianBlur(22))).astype(np.float32) / 255.0      # drop the sky and cloud glow
-        parts.append(curve(L, 0.035, 0.22, 0.6))
-    hgt = 1900
+    W, H = 3000, 2600
+    core = Image.new("L", (W, H), 0)
+    d = ImageDraw.Draw(core)
+    r = np.random.default_rng(23)
 
-    def fit(a, width):
-        im = Image.fromarray((a * 255).astype(np.uint8))
-        return im.resize((width, hgt), Image.LANCZOS)
+    def bolt(x, y, ang, length, width, depth=0):
+        """A jagged path; it thins as it goes and throws off smaller forks."""
+        steps = max(4, int(length / 46))
+        for i in range(steps):
+            ang += r.normal(0, 0.27)
+            ang = float(np.clip(ang, np.pi * 0.14, np.pi * 0.86)) if depth == 0 else ang
+            seg = 46 * r.uniform(0.7, 1.35)
+            nx, ny = x + np.cos(ang) * seg, y + np.sin(ang) * seg
+            w = max(2.0, width * (1 - 0.72 * i / steps))
+            d.line((x, y, nx, ny), fill=255, width=int(round(w)))
+            d.ellipse((nx - w / 2, ny - w / 2, nx + w / 2, ny + w / 2), fill=255)
+            if depth < 3 and r.random() < (0.30 if depth == 0 else 0.20) and w > 3:
+                side = r.choice([-1, 1])
+                bolt(nx, ny, ang + side * r.uniform(0.45, 1.05), length * r.uniform(0.28, 0.5) * (1 - i / steps * 0.5), w * 0.55, depth + 1)
+            x, y = nx, ny
 
-    canvas = Image.new("L", (W, hgt + 100), 0)
-    left = fit(parts[1], 1650)
-    right = ImageOps.mirror(left)
-    mid = fit(parts[0], 1300)
-    canvas.paste(left, (0, 0))
-    canvas = ImageChops.lighter(canvas, Image.new("L", canvas.size, 0))
-    tmp = Image.new("L", canvas.size, 0); tmp.paste(right, (W - 1650, 0)); canvas = ImageChops.lighter(canvas, tmp)
-    tmp = Image.new("L", canvas.size, 0); tmp.paste(mid, ((W - 1300) // 2, 60)); canvas = ImageChops.lighter(canvas, tmp)
-    a = np.asarray(canvas).astype(np.float32) / 255.0
-    yy, xx = np.mgrid[0:canvas.height, 0:W].astype(np.float32)
-    a *= np.clip(1.25 - np.abs(xx - W / 2) / (W * 0.5), 0, 1) * np.clip((canvas.height - yy) / 260, 0, 1) * np.clip((yy - canvas.height * 0.16) / (canvas.height * 0.2), 0, 1)
-    core = a ** 2.2
-    rgb = np.stack([0.72 + 0.28 * core, 0.80 + 0.20 * core, np.ones_like(a)], axis=2)      # cold white-blue
+    # three main strikes: both shoulders angle inwards, the collar one runs straight down
+    # the left half is drawn and mirrored, so the print sits evenly on the chest
+    for x0, a0, ln, wd in ((330, 0.40 * np.pi, 2500, 30), (900, 0.45 * np.pi, 1500, 17), (1500, 0.5 * np.pi, 1900, 24)):
+        bolt(x0, 40, a0, ln, wd)
+    left = core.crop((0, 0, W // 2 + 60, H))
+    core = Image.new("L", (W, H), 0)
+    core.paste(left, (0, 0))
+    core = ImageChops.lighter(core, ImageOps.mirror(core))
+    c = np.asarray(core.filter(ImageFilter.GaussianBlur(1.2))).astype(np.float32) / 255.0
+    g1 = np.asarray(core.filter(ImageFilter.GaussianBlur(9))).astype(np.float32) / 255.0
+    g2 = np.asarray(core.filter(ImageFilter.GaussianBlur(34))).astype(np.float32) / 255.0
+    a = np.clip(np.maximum(c, np.maximum(g1 * 1.5, g2 * 1.9) * 0.62), 0, 1)
+    yy = np.mgrid[0:H, 0:W][0].astype(np.float32)
+    a *= np.clip((H - yy) / 380, 0, 1)                           # dies out before the pocket
+    rgb = np.stack([0.66 + 0.34 * c, 0.80 + 0.20 * c, np.ones_like(c)], axis=2)      # white core, cold blue halo
     out = Image.fromarray((np.dstack([rgb, a]) * 255).astype(np.uint8), "RGBA")
     save(out, "strike")
 

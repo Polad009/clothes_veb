@@ -152,8 +152,10 @@ Source of each file: `https://images.unsplash.com/photo-<id>`
 | 1568581357391-c71a1675ef93 | Money: banknote texture inside the letters |
 | 1565230698474-2a8a500c35cb | Stay Awake: eye |
 | 1748641179611-d70cdd5e0f2c | Eternal: marble bust |
-| 1598336331578-0fe91c2a0abd, 1598336329498-d9099903946a | Strike: lightning |
 | 1793518808366-9711a4b0b703 | black tee on a model (first photo) |
-| 1666358776237-08ca4183249e | black tee on a model (third photo) |
 | 1610502778270-c5c6f4c7d575 | black tee on a hanger |
-| 1748354304454-815d57b8e331 | black hoodie on a model |
+| 1696091085888-43fa14ab67cd, 1590759483822-b2fee5aa6bd3 | black hoodie on models |
+| 1620799140188-3b2a02fd9a77 | hoodie on its own (white hoodie cut out and turned black) |
+| 1715157067742-f63a790da34e | "Dəst" section photo on the home page (unmodified apart from resizing) |
+
+The Strike lightning is drawn by `dark-designs.py` itself; no photo is used for it.
