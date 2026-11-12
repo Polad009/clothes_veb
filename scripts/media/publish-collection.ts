@@ -72,7 +72,10 @@ async function printFiles(p: Product) {
       const inkLabel = design.startsWith('chrome') ? 'rəngli xrom çap (DTF / DTG)' : INK_LABEL[ink];
       const png = await upload(path.join(designs, `${base}.png`), `${PRINT_DIR}/${base}.png`, 'image/png');
       if (png) out.push({ name: `${label} — ${inkLabel} (PNG)`, url: png, desc: `Şəffaf fon, 300 dpi · ${width}` });
-      const svg = await upload(path.join(designs, `${base}.svg`), `${PRINT_DIR}/${base}.svg`, 'image/svg+xml');
+      // photo-based designs have no vector version
+      const svg = fs.existsSync(path.join(designs, `${base}.svg`))
+        ? await upload(path.join(designs, `${base}.svg`), `${PRINT_DIR}/${base}.svg`, 'image/svg+xml')
+        : null;
       if (svg) out.push({ name: `${label} — ${inkLabel} (SVG)`, url: svg, desc: `Vektor, istənilən ölçüdə · ${width}` });
     }
   }

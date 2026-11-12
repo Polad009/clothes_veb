@@ -77,3 +77,20 @@ research looked at current gothic / grunge streetwear trends; no other brand's a
 Fonts, all under the SIL Open Font License (free for commercial printing, text is converted to
 outlines): UnifrakturMaguntia, Grenze Gotisch, Space Mono, Archivo (from github.com/google/fonts).
 Product images reuse the photos listed above (`scripts/media/nox-images.py`).
+
+## "STORM" collection (horror / lightning / mentality, 2026-11-12)
+
+Print designs (`scripts/media/storm-designs.py`) are built from these Pexels photos, reworked
+(cropped, tone-mapped into screen-print style, faded or framed, combined with type) — never
+sold as unaltered copies, which the Pexels License does not allow:
+
+| Pexels photo | Design |
+|---|---|
+| https://www.pexels.com/photo/15580058/ | Strike (lightning) |
+| https://www.pexels.com/photo/10349161/ | Born in the Storm |
+| https://www.pexels.com/photo/5611491/ | Mentality (skull) |
+| https://www.pexels.com/photo/36218813/ | Half Dead (skull) |
+| https://www.pexels.com/photo/12660640/ | Save Yourself (hands) |
+
+Type: Anton, Space Mono, UnifrakturMaguntia (SIL Open Font License). Bolt icon drawn by the script.
+Product images: `scripts/media/storm-images.py` on the photos listed above.
