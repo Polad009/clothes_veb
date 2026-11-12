@@ -129,3 +129,31 @@ Source of each file: `https://images.unsplash.com/photo-<id>`
 | HW-ZR-TROUSERS | 1741605037162-b1f475a4a4d3, 1741605037041-acc44c229698, 1741605037045-516447152dfa |
 | HW-ZR-TRENCH | 1617391258031-f8d80b22fb35 |
 | Section photos: Don, Ətək, Üst geyim | 1713425887001-5c7bb45711f8, 1597253702951-6b83f54bcb37, 1589400445193-c881a4b0b38a |
+
+## Dark graphic prints: Money, Stay Awake, Eternal, Strike (2026-11-12)
+
+The "ƏSAS 01" / "ZƏRİF 01" products above were deleted the same day; their photos are no longer shown.
+
+Print designs (`scripts/media/dark-designs.py`) are Horwalle's own compositions built from free
+Unsplash photos ([Unsplash License](https://unsplash.com/license)), reworked (cropped, tone-mapped,
+recoloured, combined with type), never used as unaltered copies. The owner's Pinterest references
+set the style only; no artwork from them was copied. Type: Anton, Space Mono, UnifrakturMaguntia
+(SIL Open Font License, from github.com/google/fonts).
+
+Product images (`scripts/media/dark-images.py`, Storage `products/photo/dark-*.jpg`) are the designs
+placed digitally on Unsplash photos of plain black garments. The people are stock models, not
+Horwalle staff or customers, and are not presented as endorsing the brand. Replace with photos
+of the real printed garments when samples exist.
+
+Source of each file: `https://images.unsplash.com/photo-<id>`
+
+| Photo id | Used for |
+|---|---|
+| 1568581357391-c71a1675ef93 | Money: banknote texture inside the letters |
+| 1565230698474-2a8a500c35cb | Stay Awake: eye |
+| 1748641179611-d70cdd5e0f2c | Eternal: marble bust |
+| 1598336331578-0fe91c2a0abd, 1598336329498-d9099903946a | Strike: lightning |
+| 1793518808366-9711a4b0b703 | black tee on a model (first photo) |
+| 1666358776237-08ca4183249e | black tee on a model (third photo) |
+| 1610502778270-c5c6f4c7d575 | black tee on a hanger |
+| 1748354304454-815d57b8e331 | black hoodie on a model |
