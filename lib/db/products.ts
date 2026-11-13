@@ -3,6 +3,7 @@ import { unitPriceFor } from '@/lib/pricing';
 import { db, isUuid, unwrap } from './client';
 import { stockKey } from '@/lib/stock';
 import type { AppliedCampaign } from '@/lib/campaigns';
+import { sanitizePerfume, type PerfumeInfo } from '@/lib/perfume';
 
 const DEFAULT_IMAGE = '/images/hero/black-tee.jpg';
 const DEFAULT_SIZES = ['S', 'M', 'L', 'XL'];
@@ -52,6 +53,8 @@ export interface CatalogProduct {
   stock: Record<string, number>;
   /** Name and description in other languages; Azerbaijani is the main field. */
   translations?: Partial<Record<'en' | 'ru' | 'tr', { name?: string; description?: string; composition?: string; fit?: string; care?: string }>>;
+  /** Perfume details (concentration, scent families, notes); only on perfumes. */
+  perfume?: PerfumeInfo;
   /** Set on storefront copies while a discount runs (see lib/db/catalog.ts). */
   campaign?: AppliedCampaign;
 }
@@ -118,6 +121,7 @@ export function rowToProduct(r: any): CatalogProduct {
     trackStock,
     stock,
     translations: extra.translations && typeof extra.translations === 'object' ? extra.translations : undefined,
+    perfume: sanitizePerfume(extra.perfume) || undefined,
   };
 }
 
@@ -250,6 +254,11 @@ export async function saveProduct(input: any): Promise<CatalogProduct> {
   if (typeof input.hidden === 'boolean') {
     if (input.hidden) extra.hidden = true;
     else delete extra.hidden;
+  }
+  if ('perfume' in input) {
+    const perfume = sanitizePerfume(input.perfume);
+    if (perfume) extra.perfume = perfume;
+    else delete extra.perfume;
   }
   if (input.translations && typeof input.translations === 'object') {
     const t: Record<string, Record<string, string>> = {};

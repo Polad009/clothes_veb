@@ -10,6 +10,7 @@ import { adminFetch, categoryOptions, GENDERS } from "@/lib/adminClient";
 import { cn } from "@/lib/utils";
 import { Button, Card, ConfirmButton, Field, Input, Select, Textarea, Toggle, useToast } from "@/components/admin/ui";
 import { PrintFiles, type PrintFile } from "@/components/admin/PrintFiles";
+import { CONCENTRATIONS, FAMILIES, LONGEVITY, PERFUME_CATEGORY, PERFUME_VOLUMES, type Family, type PerfumeInfo } from "@/lib/perfume";
 
 const COMMON_SIZES = ["XS", "S", "M", "L", "XL", "XXL", "3XL"];
 const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
@@ -157,15 +158,24 @@ export function ProductForm({ product, categories }: { product: CatalogProduct |
     }
     return out;
   });
+  const [perfume, setPerfume] = useState<PerfumeInfo>(
+    () => product?.perfume || { families: [], notes: { top: "", heart: "", base: "" } }
+  );
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
-  const sizeOptions = Array.from(new Set([...COMMON_SIZES, ...sizes]));
+  const isPerfume = category === PERFUME_CATEGORY;
+  const sizeOptions = Array.from(new Set([...(isPerfume ? PERFUME_VOLUMES : COMMON_SIZES), ...sizes]));
+  const setNote = (tier: "top" | "heart" | "base", value: string) => setPerfume({ ...perfume, notes: { ...perfume.notes, [tier]: value } });
+  const toggleFamily = (f: Family) =>
+    setPerfume({ ...perfume, families: perfume.families.includes(f) ? perfume.families.filter((x) => x !== f) : [...perfume.families, f].slice(0, 4) });
   const patchColor = (key: string, patch: Partial<ColorDraft>) =>
     setColors((list) => list.map((c) => (c.key === key ? { ...c, ...patch } : c)));
 
   const addCustomSize = () => {
-    const value = customSize.trim().toUpperCase().slice(0, 12);
+    const raw = customSize.trim().slice(0, 12);
+    // "75" or "75ml" for a perfume becomes "75 ml"
+    const value = isPerfume && /^\d+\s*(ml)?$/i.test(raw) ? `${parseInt(raw, 10)} ml` : raw.toUpperCase();
     if (value && !sizes.includes(value)) setSizes([...sizes, value]);
     setCustomSize("");
   };
@@ -232,6 +242,7 @@ export function ProductForm({ product, categories }: { product: CatalogProduct |
           hidden,
           printLayers: printFiles,
           translations,
+          perfume: isPerfume ? perfume : null,
           ...(trackStock ? { stock } : {}),
           sizes,
           colors: formatted,
@@ -279,7 +290,15 @@ export function ProductForm({ product, categories }: { product: CatalogProduct |
               <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={6} placeholder="Parça, kəsim və dizayn haqqında qısa məlumat" />
             </Field>
             <Field label="Kateqoriya">
-              <Select value={category} onChange={(e) => setCategory(e.target.value)}>
+              <Select
+                value={category}
+                onChange={(e) => {
+                  const next = e.target.value;
+                  // a new perfume starts with a volume instead of clothing sizes
+                  if (next === PERFUME_CATEGORY && isNew && sizes.every((s) => COMMON_SIZES.includes(s))) setSizes(["50 ml"]);
+                  setCategory(next);
+                }}
+              >
                 {categoryOptions(categories, category).map((c) => (
                   <option key={c.value} value={c.value}>{c.label}</option>
                 ))}
@@ -419,7 +438,77 @@ export function ProductForm({ product, categories }: { product: CatalogProduct |
           {errors.colors && <p className="border-t border-stone-100 px-5 py-3 text-xs text-red-600">{errors.colors}</p>}
         </Card>
 
-        <Card title="Ölçülər">
+        {isPerfume && (
+          <Card title="Ətir məlumatları">
+            <div className="space-y-5 p-5">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Konsentrasiya">
+                  <Select value={perfume.concentration || ""} onChange={(e) => setPerfume({ ...perfume, concentration: (e.target.value || undefined) as any })}>
+                    <option value="">—</option>
+                    {Object.entries(CONCENTRATIONS).map(([key, c]) => (
+                      <option key={key} value={key}>{c.label.az} ({c.hint.az})</option>
+                    ))}
+                  </Select>
+                </Field>
+                <Field label="Davamlılıq">
+                  <Select value={perfume.longevity || ""} onChange={(e) => setPerfume({ ...perfume, longevity: (e.target.value || undefined) as any })}>
+                    <option value="">—</option>
+                    {Object.entries(LONGEVITY).map(([key, l]) => (
+                      <option key={key} value={key}>{l.az}</option>
+                    ))}
+                  </Select>
+                </Field>
+              </div>
+              <div>
+                <p className="mb-1.5 text-[13px] font-medium text-stone-700">
+                  Qoxu ailəsi <span className="font-normal text-stone-500">(ən çox 4; ətir bölməsində süzgəc olur)</span>
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {(Object.keys(FAMILIES) as Family[]).map((f) => {
+                    const on = perfume.families.includes(f);
+                    return (
+                      <button
+                        key={f}
+                        type="button"
+                        aria-pressed={on}
+                        onClick={() => toggleFamily(f)}
+                        className={cn(
+                          "h-9 rounded-lg border px-3 text-sm font-medium transition-colors",
+                          on ? "border-stone-900 bg-stone-900 text-white" : "border-stone-300 bg-white text-stone-700 hover:border-stone-900"
+                        )}
+                      >
+                        {FAMILIES[f].az}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <Field label="Üst notlar" hint="İlk dəqiqələr. Vergüllə ayırın.">
+                  <Input value={perfume.notes.top} onChange={(e) => setNote("top", e.target.value)} placeholder="Berqamot, çəhrayı istiot" />
+                </Field>
+                <Field label="Orta notlar" hint="1–3 saat.">
+                  <Input value={perfume.notes.heart} onChange={(e) => setNote("heart", e.target.value)} placeholder="Lavanda, iris" />
+                </Field>
+                <Field label="Baza notlar" hint="Gün boyu qalan iz.">
+                  <Input value={perfume.notes.base} onChange={(e) => setNote("base", e.target.value)} placeholder="Sidr, amber, müşk" />
+                </Field>
+              </div>
+              <Field label="İstifadə qaydası" hint="Məhsul səhifəsində Tərkib və istifadə bölməsində görünür.">
+                <Input
+                  value={perfume.howToUse || ""}
+                  onChange={(e) => setPerfume({ ...perfume, howToUse: e.target.value })}
+                  placeholder="Boyun və biləyə 15–20 sm məsafədən 2–3 dəfə vurun"
+                />
+              </Field>
+              <p className="text-xs text-stone-500">
+                Əlavə detallarda Tərkib sahəsinə inqrediyentləri, Saxlama sahəsinə saxlama qaydasını yazın. Həcm bölməsində həcmi seçin (məs. 50 ml). Ətir yalnız Azərbaycan daxilinə satılır.
+              </p>
+            </div>
+          </Card>
+        )}
+
+        <Card title={isPerfume ? "Həcm" : "Ölçülər"}>
           <div className="p-5">
             <div className="flex flex-wrap gap-2">
               {sizeOptions.map((s) => {
@@ -450,7 +539,7 @@ export function ProductForm({ product, categories }: { product: CatalogProduct |
                     addCustomSize();
                   }
                 }}
-                placeholder="Başqa ölçü (məs: 32, STD)"
+                placeholder={isPerfume ? "Başqa həcm (məs: 75)" : "Başqa ölçü (məs: 32, STD)"}
                 aria-label="Başqa ölçü əlavə et"
               />
               <Button onClick={addCustomSize}>Əlavə et</Button>
@@ -521,19 +610,29 @@ export function ProductForm({ product, categories }: { product: CatalogProduct |
             <Field label="Nişan" hint="Şəklin üstündə kiçik etiket. Məs: YENİ">
               <Input value={badge} onChange={(e) => setBadge(e.target.value)} />
             </Field>
-            <Field label="Kəsim / növ" hint="Kolleksiya səhifəsində süzgəc kimi görünür.">
-              <Input value={fit} onChange={(e) => setFit(e.target.value)} placeholder="Oversize" />
+            {!isPerfume && (
+              <Field label="Kəsim / növ" hint="Kolleksiya səhifəsində süzgəc kimi görünür.">
+                <Input value={fit} onChange={(e) => setFit(e.target.value)} placeholder="Oversize" />
+              </Field>
+            )}
+            <Field label={isPerfume ? "Tərkib (inqrediyentlər)" : "Tərkib"} className={isPerfume ? "sm:col-span-2" : undefined}>
+              <Input
+                value={composition}
+                onChange={(e) => setComposition(e.target.value)}
+                placeholder={isPerfume ? "Alcohol Denat., Parfum, Aqua, Limonene, Linalool…" : "100% pambıq, 450 GSM"}
+              />
             </Field>
-            <Field label="Tərkib">
-              <Input value={composition} onChange={(e) => setComposition(e.target.value)} placeholder="100% pambıq, 450 GSM" />
-            </Field>
-            <Field label="Qulluq" className="sm:col-span-2">
-              <Input value={care} onChange={(e) => setCare(e.target.value)} placeholder="30°C-də tərsinə çevirərək yuyun" />
+            <Field label={isPerfume ? "Saxlama" : "Qulluq"} className="sm:col-span-2">
+              <Input
+                value={care}
+                onChange={(e) => setCare(e.target.value)}
+                placeholder={isPerfume ? "Sərin, quru yerdə, günəşdən uzaq saxlayın" : "30°C-də tərsinə çevirərək yuyun"}
+              />
             </Field>
           </div>
         </Card>
 
-        <PrintFiles value={printFiles} onChange={setPrintFiles} />
+        {!isPerfume && <PrintFiles value={printFiles} onChange={setPrintFiles} />}
       </div>
 
       <div className="sticky bottom-0 -mx-4 mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-stone-200 bg-stone-50/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">

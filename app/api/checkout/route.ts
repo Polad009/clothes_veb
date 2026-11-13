@@ -8,6 +8,7 @@ import { getCountryByCode } from "@/lib/countries";
 import { resolveUnitPrice } from "@/lib/db/products";
 import { foreignMarkup } from "@/lib/pricing";
 import { listCatalog } from "@/lib/db/catalog";
+import { isPerfume } from "@/lib/perfume";
 import { checkPromo, getSettings, incrementPromoUses } from "@/lib/db/site";
 import { customPrintPrice } from "@/lib/studio/catalog";
 
@@ -143,6 +144,16 @@ export async function POST(req: NextRequest) {
         if (!product) {
           return NextResponse.json(
             { success: false, message: "Səbətinizdəki məhsul artıq mövcud deyil. Zəhmət olmasa səbətinizi yeniləyin." },
+            { status: 409 }
+          );
+        }
+        // perfume is a flammable liquid (UN1266): couriers and post do not take it abroad
+        if (isPerfume(product) && deliveryCode !== 'AZ') {
+          return NextResponse.json(
+            {
+              success: false,
+              message: `"${product.name}" ətirdir və yalnız Azərbaycan daxilinə göndərilir. Zəhmət olmasa onu səbətdən çıxarın və ya Azərbaycan ünvanı seçin.`,
+            },
             { status: 409 }
           );
         }

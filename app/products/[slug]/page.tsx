@@ -20,6 +20,8 @@ import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import { ProductTile, isPhoto } from "@/components/store/ProductTile";
 import { T, tr } from "@/components/store/i18n";
 import { useRegionCopy } from "@/components/store/region";
+import { PerfumeProfile } from "@/components/store/PerfumeProfile";
+import { CONCENTRATIONS, isPerfume } from "@/lib/perfume";
 
 const SIZE_ROWS = [
   ["S / 30", "92 – 98", "72 / 100"],
@@ -61,6 +63,8 @@ function ProductView({ product, related }: { product: Product; related: Product[
   const region = useRegionCopy();
   const categories = useCategories();
   const cat = categories.find((c) => c.id === product.category);
+  const perfume = isPerfume(product);
+  const { isAzerbaijan } = useCurrency();
 
   const [colorIndex, setColorIndex] = useState(0);
   const color = product.colors[colorIndex] || product.colors[0];
@@ -179,11 +183,13 @@ function ProductView({ product, related }: { product: Product; related: Product[
 
             <h1 lang="en" className="mt-4 text-4xl font-black uppercase leading-[0.92] tracking-[-0.015em] [font-stretch:112%] sm:text-5xl">{product.name}</h1>
 
-            {(product.gender === "unisex" || product.gender === "women" || product.fit) && (
+            {(product.gender === "unisex" || product.gender === "women" || product.fit || perfume) && (
               <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.16em] text-bone-dim">
                 {[
                   product.gender === "unisex" ? "Unisex" : product.gender === "women" ? tr(language, { az: "Qadın", en: "Women", ru: "Женское", tr: "Kadın" }) : "",
-                  product.fit,
+                  perfume
+                    ? product.perfume?.concentration ? tr(language, CONCENTRATIONS[product.perfume.concentration].label) : ""
+                    : product.fit,
                 ].filter(Boolean).join(" · ")}
               </p>
             )}
@@ -199,7 +205,7 @@ function ProductView({ product, related }: { product: Product; related: Product[
             )}
 
             {/* colour */}
-            {product.colors.length > 0 && (
+            {product.colors.length > (perfume ? 1 : 0) && (
               <div className="mt-8">
                 <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-bone-dim">
                   {tr(language, { az: "Rəng", en: "Colour", ru: "Цвет", tr: "Renk" })}: <span className="text-bone">{translateColor(color.name, language as any)}</span>
@@ -225,11 +231,14 @@ function ProductView({ product, related }: { product: Product; related: Product[
               <div className="mt-7">
                 <div className="flex items-center justify-between">
                   <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-bone-dim">
-                    {tr(language, { az: "Ölçü", en: "Size", ru: "Размер", tr: "Beden" })}: <span className="text-bone">{size}</span>
+                    {perfume
+                      ? tr(language, { az: "Həcm", en: "Volume", ru: "Объём", tr: "Hacim" })
+                      : tr(language, { az: "Ölçü", en: "Size", ru: "Размер", tr: "Beden" })}
+                    : <span className="text-bone">{size}</span>
                   </p>
-                  <button type="button" onClick={() => setGuideOpen(true)} className="text-[11px] font-bold uppercase tracking-[0.14em] text-bone-dim underline underline-offset-4 hover:text-bone">
+                  {!perfume && <button type="button" onClick={() => setGuideOpen(true)} className="text-[11px] font-bold uppercase tracking-[0.14em] text-bone-dim underline underline-offset-4 hover:text-bone">
                     {tr(language, { az: "Ölçü cədvəli", en: "Size guide", ru: "Таблица размеров", tr: "Beden tablosu" })}
-                  </button>
+                  </button>}
                 </div>
                 <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6">
                   {product.sizes.map((s) => {
@@ -298,8 +307,21 @@ function ProductView({ product, related }: { product: Product; related: Product[
               {tr(language, { az: "WhatsApp ilə soruş", en: "Ask on WhatsApp", ru: "Спросить в WhatsApp", tr: "WhatsApp'tan sor" })}
             </a>
 
+            {perfume && product.perfume && <PerfumeProfile info={product.perfume} lang={language} />}
+
             <ul className="mt-6 space-y-1.5 text-[13px] text-bone-dim">
-              <li>— {region.strip}</li>
+              {perfume && !isAzerbaijan ? (
+                <li className="font-semibold text-amber-400">
+                  — {tr(language, {
+                    az: "Ətir yalnız Azərbaycan daxilinə göndərilir",
+                    en: "Perfume ships within Azerbaijan only",
+                    ru: "Парфюм доставляется только по Азербайджану",
+                    tr: "Parfüm yalnızca Azerbaycan içine gönderilir",
+                  })}
+                </li>
+              ) : (
+                <li>— {region.strip}</li>
+              )}
               <li>— {tr(language, { az: "14 gün ərzində qaytarılma", en: "14-day returns", ru: "Возврат в течение 14 дней", tr: "14 gün içinde iade" })}</li>
             </ul>
 
@@ -309,11 +331,33 @@ function ProductView({ product, related }: { product: Product; related: Product[
                   <p className="whitespace-pre-line">{product.description}</p>
                 </Accordion>
               )}
-              <Accordion title={tr(language, { az: "Material və qulluq", en: "Material & care", ru: "Материал и уход", tr: "Materyal ve bakım" })}>
-                <p><strong className="text-bone">{tr(language, { az: "Tərkib", en: "Composition", ru: "Состав", tr: "İçerik" })}:</strong> {product.composition}</p>
-                <p className="mt-1"><strong className="text-bone">{tr(language, { az: "Kəsim", en: "Fit", ru: "Крой", tr: "Kalıp" })}:</strong> {product.fit}</p>
-                <p className="mt-1"><strong className="text-bone">{tr(language, { az: "Qulluq", en: "Care", ru: "Уход", tr: "Bakım" })}:</strong> {product.care}</p>
-              </Accordion>
+              {perfume ? (
+                <Accordion title={tr(language, { az: "Tərkib və istifadə", en: "Ingredients & use", ru: "Состав и применение", tr: "İçerik ve kullanım" })}>
+                  {product.composition && (
+                    <p><strong className="text-bone">{tr(language, { az: "Tərkib", en: "Ingredients", ru: "Состав", tr: "İçerik" })}:</strong> {product.composition}</p>
+                  )}
+                  {product.perfume?.howToUse && (
+                    <p className="mt-1"><strong className="text-bone">{tr(language, { az: "İstifadə", en: "How to use", ru: "Применение", tr: "Kullanım" })}:</strong> {product.perfume.howToUse}</p>
+                  )}
+                  {product.care && (
+                    <p className="mt-1"><strong className="text-bone">{tr(language, { az: "Saxlama", en: "Storage", ru: "Хранение", tr: "Saklama" })}:</strong> {product.care}</p>
+                  )}
+                  <p className="mt-3 text-[12px]">
+                    {tr(language, {
+                      az: "Alışqan maye. Oddan və birbaşa günəş işığından uzaq saxlayın. Gözə təmasdan qaçının. Uşaqların əli çatmayan yerdə saxlayın.",
+                      en: "Flammable. Keep away from fire and direct sunlight. Avoid contact with eyes. Keep out of reach of children.",
+                      ru: "Легковоспламеняющаяся жидкость. Беречь от огня и прямых солнечных лучей. Избегать попадания в глаза. Хранить в недоступном для детей месте.",
+                      tr: "Yanıcıdır. Ateşten ve doğrudan güneş ışığından uzak tutun. Gözle temasından kaçının. Çocukların ulaşamayacağı yerde saklayın.",
+                    })}
+                  </p>
+                </Accordion>
+              ) : (
+                <Accordion title={tr(language, { az: "Material və qulluq", en: "Material & care", ru: "Материал и уход", tr: "Materyal ve bakım" })}>
+                  <p><strong className="text-bone">{tr(language, { az: "Tərkib", en: "Composition", ru: "Состав", tr: "İçerik" })}:</strong> {product.composition}</p>
+                  <p className="mt-1"><strong className="text-bone">{tr(language, { az: "Kəsim", en: "Fit", ru: "Крой", tr: "Kalıp" })}:</strong> {product.fit}</p>
+                  <p className="mt-1"><strong className="text-bone">{tr(language, { az: "Qulluq", en: "Care", ru: "Уход", tr: "Bakım" })}:</strong> {product.care}</p>
+                </Accordion>
+              )}
               <Accordion title={tr(language, { az: "Çatdırılma və qaytarılma", en: "Delivery & returns", ru: "Доставка и возврат", tr: "Teslimat ve iade" })}>
                 <p>
                   {region.delivery}{" "}

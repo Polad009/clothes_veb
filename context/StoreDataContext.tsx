@@ -65,6 +65,7 @@ export function normalizeProduct(p: any): Product {
     stock: p.stock && typeof p.stock === "object" ? p.stock : {},
     campaign: p.campaign || undefined,
     translations: p.translations || undefined,
+    perfume: p.perfume || undefined,
   };
 }
 

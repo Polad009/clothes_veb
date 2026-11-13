@@ -49,6 +49,17 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      // the perfume category has its own section page
+      {
+        source: "/collections",
+        has: [{ type: "query", key: "category", value: "etir" }],
+        destination: "/etirler",
+        permanent: false,
+      },
+    ];
+  },
   async headers() {
     return [
       {

@@ -34,6 +34,8 @@ export interface Product {
   translations?: Partial<Record<'en' | 'ru' | 'tr', { name?: string; description?: string }>>;
   /** Running discount, if any (prices already include it). */
   campaign?: { id: string; name: string; percent: number; endsAt: string | null; showCountdown: boolean };
+  /** Perfume details; see lib/perfume.ts. */
+  perfume?: import('@/lib/perfume').PerfumeInfo;
   image?: string;
   hoverImage?: string;
   gallery?: string[];
