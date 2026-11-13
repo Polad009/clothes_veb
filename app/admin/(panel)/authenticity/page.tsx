@@ -18,6 +18,11 @@ export default async function AuthenticityPage({ searchParams }: { searchParams:
   const options = products.map((p) => ({
     id: p.id,
     name: p.hidden ? `${p.name} (gizli)` : p.name,
+    refCode: p.refCode || "",
+    image: p.image || p.images?.[0] || "",
+    colorImages: Object.fromEntries(
+      (p.colors || []).filter((c: any) => c?.name && c?.image).map((c: any) => [String(c.name), String(c.image)])
+    ),
     colors: (p.colors || []).map((c: any) => String(c?.name || "")).filter(Boolean),
     sizes: p.sizes || [],
   }));
