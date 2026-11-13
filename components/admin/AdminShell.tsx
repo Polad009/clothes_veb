@@ -23,6 +23,7 @@ import {
   Menu,
   Bell,
   X,
+  QrCode,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ToastProvider } from "@/components/admin/ui";
@@ -38,6 +39,7 @@ const NAV: Array<{ heading: string; items: Array<{ href: string; label: string; 
       { href: "/admin/studio-prices", label: "Studio qiymətləri", icon: Calculator },
       { href: "/admin/products", label: "Məhsullar", icon: Shirt },
       { href: "/admin/categories", label: "Kateqoriyalar", icon: Tags },
+      { href: "/admin/authenticity", label: "Orijinallıq kodları", icon: QrCode },
       { href: "/admin/discounts", label: "Endirimlər", icon: Percent },
       { href: "/admin/promos", label: "Promokodlar", icon: TicketPercent },
       { href: "/admin/reports", label: "Hesabatlar", icon: BarChart3 },

@@ -147,6 +147,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(target, 308);
   }
 
+  // Authenticity QR codes are printed in capitals (a smaller QR): /V/CODE → /v/CODE
+  if (pathname === '/V' || pathname.startsWith('/V/')) {
+    const target = request.nextUrl.clone();
+    target.pathname = '/v' + pathname.slice(2);
+    return NextResponse.redirect(target, 308);
+  }
+
   // ═══════════════════════════════════════════════════════════════════════════
   // GLOBAL EDGE DDOS & FLOOD PROTECTION
   // Automatically throttles aggressive bot attacks and HTTP floods before hitting routes

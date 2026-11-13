@@ -37,6 +37,7 @@ import {
   savePromo,
   saveSettings,
 } from '@/lib/db/site';
+import { createUnits, setUnitStatus } from '@/lib/db/authenticity';
 import fs from 'fs';
 import path from 'path';
 
@@ -210,6 +211,16 @@ export async function POST(req: NextRequest, { params }: RouteContext) {
       return json({ success: true, count });
     }
 
+    if (route === 'authenticity') {
+      const { batch, units } = await createUnits({
+        productId: String(body.productId || ''),
+        color: body.color,
+        size: body.size,
+        quantity: Number(body.quantity),
+      });
+      return json({ success: true, batch, count: units.length });
+    }
+
     if (route === 'promos') {
       const promo = await savePromo(body);
       return json({ success: true, promo });
@@ -264,6 +275,14 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
         await notifyBackInStock();
       }
       return json({ success: true, order });
+    }
+
+    if (route === 'authenticity' && id) {
+      if ((await requestAdminRole(req)) !== 'owner') return ownerOnly();
+      const status = body.status === 'void' ? 'void' : 'active';
+      const unit = await setUnitStatus(id, status);
+      if (!unit) return json({ error: 'Kod tapılmadı' }, 404);
+      return json({ success: true, unit });
     }
 
     if (route === 'pod-orders' && id) {
